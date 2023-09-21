@@ -1,5 +1,5 @@
 = spark-k8s-anomaly-detection-taxi-data
-:page-aliases: stackablectl::demos/spark-k8s-anomaly-detection-taxi-data.adoc
+
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu

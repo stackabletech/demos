@@ -1,5 +1,5 @@
 = hbase-hdfs-cycling-data
-:page-aliases: stackablectl::demos/hbase-hdfs-load-cycling-data.adoc
+
 
 :kaggle: https://www.kaggle.com/datasets/timgid/cyclistic-dataset-google-certificate-capstone?select=Divvy_Trips_2020_Q1.csv
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu

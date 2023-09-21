@@ -1,5 +1,5 @@
 = data-lakehouse-iceberg-trino-spark
-:page-aliases: stackablectl::demos/data-lakehouse-iceberg-trino-spark.adoc
+
 
 :demo-code: https://github.com/stackabletech/stackablectl/blob/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
 :iceberg-table-maintenance: https://iceberg.apache.org/docs/latest/spark-procedures/#metadata-management
