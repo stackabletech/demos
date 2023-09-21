@@ -2,4 +2,4 @@
 # Use 'home' here so that the versioning is picked up automatically based
 # on SDP releases
 name: home
-version: "nightly"
+version: "23.7"
