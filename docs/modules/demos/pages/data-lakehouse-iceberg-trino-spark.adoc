@@ -471,7 +471,7 @@ image::data-lakehouse-iceberg-trino-spark/trino_2.png[]
 
 === Connect to Trino
 
-Please have a look at the xref:home:trino:usage_guide/connect_to_trino.adoc[trino-operator documentation on how to
+Please have a look at the xref:home:trino:usage-guide/connect_to_trino.adoc[trino-operator documentation on how to
 connect to Trino]. This demo recommends to use DBeaver, as Trino consists of many schemas and tables you can explore.
 
 image::data-lakehouse-iceberg-trino-spark/dbeaver_1.png[]
