@@ -1,5 +1,4 @@
 = airflow-scheduled-job
-:page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
 
 This demo will
 

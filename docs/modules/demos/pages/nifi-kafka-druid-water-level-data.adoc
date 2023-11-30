@@ -1,5 +1,4 @@
 = nifi-kafka-druid-water-level-data
-:page-aliases: stable@stackablectl::demos/nifi-kafka-druid-water-level-data.adoc
 
 :superset: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
 :druid-tutorial: https://druid.apache.org/docs/latest/tutorials/tutorial-kafka.html#loading-data-with-the-data-loader

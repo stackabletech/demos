@@ -1,5 +1,4 @@
 = jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
-:page-aliases: stable@stackablectl::demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data.adoc
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
