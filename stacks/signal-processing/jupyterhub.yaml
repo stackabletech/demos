@@ -34,8 +34,8 @@ options:
       enabled: false
     initContainers:
       - name: download-notebook
-        image: docker.stackable.tech/stackable/tools:1.0.0-stackable23.4
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
+        image: docker.stackable.tech/stackable/tools:1.0.0-stackable23.11.0
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook

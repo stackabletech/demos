@@ -1,7 +1,7 @@
 stacks:
   monitoring:
     description: Stack containing Prometheus and Grafana
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
      - commons
     labels:
@@ -9,9 +9,9 @@ stacks:
       - prometheus
       - grafana
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/grafana-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/prometheus.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/prometheus-service-monitor.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/monitoring/grafana-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/prometheus.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/prometheus-service-monitor.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 1750m
@@ -23,7 +23,7 @@ stacks:
         default: adminadmin
   logging:
     description: Stack containing OpenSearch, OpenSearch Dashboards (Kibana) and Vector aggregator
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -34,10 +34,10 @@ stacks:
       - opensearch-dashboards
       - vector
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/opensearch.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/opensearch-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/vector-aggregator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/vector-aggregator-discovery.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 5150m
@@ -55,7 +55,7 @@ stacks:
         default: "true"
   airflow:
     description: Stack containing Airflow scheduling platform
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -64,9 +64,9 @@ stacks:
     labels:
       - airflow
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/redis-airflow.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-airflow.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/redis-airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/airflow/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
@@ -81,9 +81,8 @@ stacks:
         default: airflowSecretKey
   data-lakehouse-iceberg-trino-spark:
     description: Data lakehouse using Iceberg lakehouse on S3, Trino as query engine, Spark for streaming ingest and Superset for data visualization
-    stackableRelease: 23.7 # TODO (sbernauer): When upgrading to 23.11, please
-    # 1. Use truststore from secret-op here https://github.com/stackabletech/stackablectl/blob/eda45945cfcf5c6581cf1b88c782d98fada8065f/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml#L128
-    # 2. Use spark.jars dependency resolution instead of having custom Spark image. See https://github.com/stackabletech/spark-k8s-operator/pull/281
+    stackableRelease: 23.11 # TODO (sbernauer): When upgrading to 23.11, please
+    # 1. Use spark.jars dependency resolution instead of having custom Spark image. See https://github.com/stackabletech/spark-k8s-operator/pull/281
     stackableOperators:
       - commons
       - secret
@@ -105,17 +104,17 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio-distributed.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
     supportedNamespaces: []
     resourceRequests:
       cpu: "71"
@@ -139,7 +138,7 @@ stacks:
         default: supersetSecretKey
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -150,9 +149,9 @@ stacks:
       - hbase
       - hdfs
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hbase.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/hdfs-hbase/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/hdfs-hbase/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/hdfs-hbase/hbase.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 4200m
@@ -161,7 +160,7 @@ stacks:
     parameters: []
   nifi-kafka-druid-superset-s3:
     description: Stack containing NiFi, Kafka, Druid, MinIO and Superset for data visualization
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -178,14 +177,14 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/kafka.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/nifi.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-druid.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/nifi.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 8900m
@@ -206,7 +205,7 @@ stacks:
         default: adminadmin
   spark-trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -214,22 +213,22 @@ stacks:
       - trino
       - opa
       - superset
-      - spark-k8s # Some demo does schedule a Spark job
+      - spark-k8s # a demo based on this stack schedules a Spark job
     labels:
       - trino
       - superset
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/spark-trino-superset-s3/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 7100m
@@ -250,7 +249,7 @@ stacks:
         default: supersetSecretKey
   trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -264,13 +263,13 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m
@@ -291,7 +290,7 @@ stacks:
         default: supersetSecretKey
   trino-iceberg:
     description: Stack containing Trino using Apache Iceberg as a S3 data lakehouse
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -305,11 +304,11 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio-distributed-small.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-iceberg/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-iceberg/hive-metastores.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/trino-iceberg/trino.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 8550m
@@ -324,7 +323,7 @@ stacks:
         default: adminadmin
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -336,12 +335,12 @@ stacks:
       - hdfs
       - pyspark
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/jupyterhub.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/jupyterhub.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
       # TODO Use patched JHub that created service for us from customer setup (ask Sebastian)
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3350m
@@ -353,7 +352,7 @@ stacks:
         default: adminadmin
   dual-hive-hdfs-s3:
     description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -368,12 +367,12 @@ stacks:
       - hdfs
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hivehdfs.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hives3.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hive.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/trino.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hivehdfs.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-hives3.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/dual-hive-hdfs-s3/hive.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/dual-hive-hdfs-s3/trino.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 7750m
@@ -389,7 +388,7 @@ stacks:
       The bind user credentials are: ldapadmin:ldapadminpassword.
       No AuthenticationClass is configured, The AuthenticationClass is created manually in the tutorial.
       Use the 'openldap' Stack for an OpenLDAD with an AuthenticationClass already installed.
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -397,7 +396,7 @@ stacks:
       - authentication
       - ldap
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/authentication/openldap-tls.yaml
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 1950m
@@ -411,7 +410,7 @@ stacks:
       The bind user credentials are: ldapadmin:ldapadminpassword.
       The LDAP AuthenticationClass is called 'ldap' and the SecretClass for the bind credentials is called 'ldap-bind-credentials'.
       The stack already creates an appropriate Secret, so referring to the 'ldap' AuthenticationClass in your ProductCluster should be enough.
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -419,8 +418,8 @@ stacks:
       - authentication
       - ldap
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls-authenticationclass.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/authentication/openldap-tls.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/authentication/openldap-tls-authenticationclass.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 1950m
@@ -436,7 +435,7 @@ stacks:
       3 users are created in Keycloak: admin:adminadmin, alice:alicealice, bob:bobbob. admin and alice are admins with
       full authorization in Druid and Trino, bob is not authorized.
       This is a proof-of-concept and the mechanisms used here are subject to change.
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -450,18 +449,18 @@ stacks:
       - authentication
       - sso
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
-      - plainYaml: stacks/keycloak-opa-poc/serviceaccount.yaml
-      - plainYaml: stacks/keycloak-opa-poc/keycloak.yaml
-      - plainYaml: stacks/keycloak-opa-poc/setup-keycloak.yaml
-      - plainYaml: stacks/keycloak-opa-poc/opa.yaml
-      - plainYaml: stacks/keycloak-opa-poc/policies.yaml
-      - plainYaml: stacks/keycloak-opa-poc/zookeeper.yaml
-      - plainYaml: stacks/keycloak-opa-poc/hdfs.yaml
-      - plainYaml: stacks/keycloak-opa-poc/druid.yaml
-      - plainYaml: stacks/keycloak-opa-poc/trino.yaml
-      - plainYaml: stacks/keycloak-opa-poc/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/keycloak.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/setup-keycloak.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/policies.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/keycloak-opa-poc/superset.yaml
     supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
     resourceRequests:
       cpu: 7850m
@@ -498,7 +497,7 @@ stacks:
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
-    stackableRelease: 23.7
+    stackableRelease: 23.11
     stackableOperators:
       - commons
       - secret
@@ -510,15 +509,15 @@ stacks:
       - jupyterhub
       - grafana
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/secrets.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/grafana-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/grafana.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-timescaledb.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/secrets.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/grafana-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/_templates/postgresql-timescaledb.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/nifi.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/stackablectl/main/stacks/signal-processing/jupyterhub.yaml
     parameters:
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
