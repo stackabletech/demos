@@ -27,7 +27,7 @@ spec:
     spec:
       containers:
       - name: setup-keycloak
-        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable23.11.0
+        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev # We need 0.0.0-dev, so we get kubectl
         env:
           - name: KEYCLOAK_ADMIN_PASSWORD
             valueFrom:
