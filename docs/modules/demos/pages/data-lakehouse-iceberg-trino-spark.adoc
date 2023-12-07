@@ -1,7 +1,7 @@
 = data-lakehouse-iceberg-trino-spark
 :page-aliases: stable@stackablectl::demos/data-lakehouse-iceberg-trino-spark.adoc
 
-:demo-code: https://github.com/stackabletech/stackablectl/blob/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
+:demo-code: https://github.com/stackabletech/demos/blob/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
 :iceberg-table-maintenance: https://iceberg.apache.org/docs/latest/spark-procedures/#metadata-management
 :spark-streaming-docs: https://spark.apache.org/docs/latest/structured-streaming-kafka-integration.html
 :iceberg-rewrite: https://iceberg.apache.org/docs/latest/spark-procedures/#rewrite_data_files
