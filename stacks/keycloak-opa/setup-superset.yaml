@@ -84,4 +84,48 @@ data:
     result = session.post(f"{base_url}/api/v1/assets/import", headers=headers, files=files, data=data)
     assert result.status_code == 200, f"{result.status_code}: {result.content}"
 
+
+    # Now we must hit the API to set the DB Connection to `impersonate_user: true`, because the export and import doesn't allow for it
+    # See the incomplete PR: https://github.com/apache/superset/pull/14718
+
+    headers = headers | {"content-type": "application/json"}
+
+    # todo: make this next part iterable so other demos can use the same script
+    db_connection_name = "Trino tpch"
+    query = {
+      "columns": ["id","database_name", "impersonate_user"],
+      "filters": [
+        {
+          "col": "database_name",
+          "opr": "eq",
+          "value": db_connection_name
+        }
+      ],
+      "keys": ["none"]
+    }
+
+    # Lookup the DB Connection to get the ID
+    result = session.get(f"{base_url}/api/v1/database", params={"q": json.dumps(query)}, headers=headers)
+    assert result.status_code == 200, f"{result.status_code}: {result.content}"
+    result = result.json()
+    assert result['count'] == 1, f"there should only be one result returned, but got {result['count']}"
+    result = result['result'][0]
+    assert result['database_name'] == db_connection_name, f"the superset search filter appears to be invalid, expected: db_connection_name, got: result['database_name']" # extra check to ensure we are looking at the right DB, since the API returns all if the filter has an invalid `opr` value.
+    trino_tpch_db_id = result["id"]
+    logging.info(f"Got database connection id for '{db_connection_name}': {trino_tpch_db_id}")
+
+    # lookup result from above, since the search doesn't return `impersonate_user`
+    result = session.get(f"{base_url}/api/v1/database/{trino_tpch_db_id}", headers=headers)
+    assert result.status_code == 200, f"{result.status_code}: {result.content}"
+    result = result.json()
+    impersonate_user = result["result"]["impersonate_user"]
+    logging.info(f"The value of impersonate_user for '{db_connection_name}' was set to {impersonate_user}")
+
+    # Enable impersonation (this is done as the superset admin user)
+    result = session.put(f"{base_url}/api/v1/database/{trino_tpch_db_id}", headers=headers, data=json.dumps({"impersonate_user": True}))
+    assert result.status_code == 200, f"{result.status_code}: {result.content}"
+    result = result.json()
+    impersonate_user = result["result"]["impersonate_user"]
+    logging.info(f"The value of impersonate_user for '{db_connection_name}' is now {impersonate_user}")
+
     logging.info("Finished setup of Superset")
