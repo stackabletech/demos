@@ -5,7 +5,7 @@ metadata:
   name: opa
 spec:
   image:
-    productVersion: "0.57.0"
+    productVersion: "0.51.0" # 0.57.0 not available on 23.7.0
     stackableVersion: "23.7.0"
   clusterConfig:
     userInfo:
