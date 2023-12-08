@@ -428,7 +428,7 @@ stacks:
       pvc: 0Gi
     # TODO: Parameterize
     parameters: []
-  keycloak-opa-poc:
+  keycloak-opa:
     description: >-
       A Superset, Trino, Druid, Keycloak and OPA instance.
       Superset, Trino and Druid have single sign-on with Keycloak enabled.
@@ -451,19 +451,19 @@ stacks:
       - authentication
       - sso
     manifests:
-      - plainYaml: stacks/keycloak-opa-poc/openldap.yaml
-      - plainYaml: stacks/keycloak-opa-poc/keycloak-serviceaccount.yaml
-      - plainYaml: stacks/keycloak-opa-poc/keycloak.yaml
-      - plainYaml: stacks/keycloak-opa-poc/setup-keycloak.yaml
+      - plainYaml: stacks/keycloak-opa/openldap.yaml
+      - plainYaml: stacks/keycloak-opa/keycloak-serviceaccount.yaml
+      - plainYaml: stacks/keycloak-opa/keycloak.yaml
+      - plainYaml: stacks/keycloak-opa/setup-keycloak.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
       # - helmChart: stacks/_templates/postgresql-druid.yaml
-      - plainYaml: stacks/keycloak-opa-poc/opa.yaml
-      - plainYaml: stacks/keycloak-opa-poc/trino.yaml
-      - plainYaml: stacks/keycloak-opa-poc/superset.yaml
-      - plainYaml: stacks/keycloak-opa-poc/setup-superset.yaml
-      # - plainYaml: stacks/keycloak-opa-poc/zookeeper.yaml
-      # - plainYaml: stacks/keycloak-opa-poc/hdfs.yaml
-      # - plainYaml: stacks/keycloak-opa-poc/druid.yaml
+      - plainYaml: stacks/keycloak-opa/opa.yaml
+      - plainYaml: stacks/keycloak-opa/trino.yaml
+      - plainYaml: stacks/keycloak-opa/superset.yaml
+      - plainYaml: stacks/keycloak-opa/setup-superset.yaml
+      # - plainYaml: stacks/keycloak-opa/zookeeper.yaml
+      # - plainYaml: stacks/keycloak-opa/hdfs.yaml
+      # - plainYaml: stacks/keycloak-opa/druid.yaml
     supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
     # FIXME: Re-check
     # resourceRequests:
