@@ -17,13 +17,16 @@ options:
   proxy:
     service:
       type: NodePort
+  rbac:
+    create: true
   prePuller:
     hook:
       enabled: false
     continuous:
       enabled: false
-  rbac:
-    create: true
+  scheduling:
+    userScheduler:
+      enabled: false
   singleuser:
     # `cmd: null` allows the custom CMD of the Jupyter docker-stacks to be used
     # which performs further customization on startup.
