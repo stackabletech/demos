@@ -5,6 +5,7 @@ metadata:
   name: opa-bundle-trino
   labels:
     opa.stackable.tech/bundle: "true"
+    stackable.tech/vendor: Stackable
 data:
   trino.rego: |
     package trino
@@ -27,6 +28,7 @@ metadata:
   name: opa-bundle-druid
   labels:
     opa.stackable.tech/bundle: "true"
+    stackable.tech/vendor: Stackable
 data:
   druid.rego: |
     package druid

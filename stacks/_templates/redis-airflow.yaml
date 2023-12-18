@@ -5,6 +5,8 @@ repo:
   url: https://charts.bitnami.com/bitnami/
 version: 18.1.6
 options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
   auth:
     password: airflow
   replica:

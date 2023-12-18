@@ -3,6 +3,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: stackable-grafana-dashboards
+  labels:
+    stackable.tech/vendor: Stackable
 data:
   trino.json: |
     {

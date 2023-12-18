@@ -3,6 +3,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: start-date-job
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   template:
     spec:

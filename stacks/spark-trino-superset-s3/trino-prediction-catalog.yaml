@@ -4,6 +4,7 @@ kind: TrinoCatalog
 metadata:
   name: prediction
   labels:
+    stackable.tech/vendor: Stackable
     trino: trino
 spec:
   connector:

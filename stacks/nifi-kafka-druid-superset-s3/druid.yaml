@@ -3,6 +3,8 @@ apiVersion: druid.stackable.tech/v1alpha1
 kind: DruidCluster
 metadata:
   name: druid
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 27.0.0
@@ -72,6 +74,8 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
   name: druid-znode
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   clusterRef:
     name: zookeeper
@@ -80,6 +84,8 @@ apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
   name: druid-s3-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   backend:
     k8sSearch:
@@ -92,6 +98,7 @@ metadata:
   name: druid-s3-credentials
   labels:
     secrets.stackable.tech/class: druid-s3-credentials
+    stackable.tech/vendor: Stackable
 stringData:
   accessKey: admin
   secretKey: {{ minioAdminPassword }}

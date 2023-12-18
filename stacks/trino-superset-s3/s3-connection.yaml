@@ -3,6 +3,8 @@ apiVersion: s3.stackable.tech/v1alpha1
 kind: S3Connection
 metadata:
   name: minio
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   host: minio
   port: 9000
@@ -14,6 +16,8 @@ apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
   name: minio-s3-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   backend:
     k8sSearch:
@@ -26,6 +30,7 @@ metadata:
   name: minio-s3-credentials
   labels:
     secrets.stackable.tech/class: minio-s3-credentials
+    stackable.tech/vendor: Stackable
 stringData:
   accessKey: admin
   secretKey: {{ minioAdminPassword }}

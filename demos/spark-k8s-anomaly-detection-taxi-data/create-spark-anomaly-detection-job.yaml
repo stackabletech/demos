@@ -3,6 +3,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: create-spark-anomaly-detection-job
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   template:
     spec:
@@ -28,6 +30,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: create-spark-ad-job-manifest
+  labels:
+    stackable.tech/vendor: Stackable
 data:
   spark-ad-job.yaml: |
     ---
@@ -95,6 +99,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: cm-spark
+  labels:
+    stackable.tech/vendor: Stackable
 data:
   spark-ad.py: |
     from pyspark.sql import SparkSession

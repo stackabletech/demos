@@ -5,6 +5,8 @@ repo:
   url: https://opensearch-project.github.io/helm-charts
 version: 2.14.0
 options:
+  labels:
+    stackable.tech/vendor: Stackable
   service:
     type: NodePort
     port: 5601

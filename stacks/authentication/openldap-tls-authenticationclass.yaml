@@ -3,6 +3,8 @@ apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
 metadata:
   name: openldap
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   provider:
     ldap:
@@ -23,6 +25,8 @@ apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
   name: openldap-bind-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   backend:
     k8sSearch:
@@ -36,6 +40,7 @@ metadata:
   name: openldap-bind-credentials
   labels:
     secrets.stackable.tech/class: openldap-bind-credentials
+    stackable.tech/vendor: Stackable
 stringData:
   # User and password are defined in the OpenLDAP StatefulSet
   user: cn=ldapadmin,dc=example,dc=org

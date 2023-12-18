@@ -3,6 +3,8 @@ apiVersion: hive.stackable.tech/v1alpha1
 kind: HiveCluster
 metadata:
   name: hive
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.1.3
