@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 3.8.3
+    repo: docker.stackable.tech/stackable-experimental
   servers:
     roleGroups:
       default:

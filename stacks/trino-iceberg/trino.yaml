@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: "428"
+    repo: docker.stackable.tech/stackable-experimental
   clusterConfig:
     listenerClass: external-unstable
     catalogLabelSelector:
@@ -101,6 +102,7 @@ metadata:
 spec:
   image:
     productVersion: 0.57.0
+    repo: docker.stackable.tech/stackable-experimental
   servers:
     roleGroups:
       default:

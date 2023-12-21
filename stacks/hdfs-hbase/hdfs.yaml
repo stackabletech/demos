@@ -5,6 +5,7 @@ metadata:
 spec:
   image:
     productVersion: 3.3.6
+    repo: docker.stackable.tech/stackable-experimental
   clusterConfig:
     dfsReplication: 1
     listenerClass: external-unstable
