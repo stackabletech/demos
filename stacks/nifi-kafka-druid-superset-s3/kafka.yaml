@@ -13,6 +13,7 @@ metadata:
   name: kafka
 spec:
   image:
+    custom: docker.stackable.tech/stackable-experimental/kafka:3.5.1-stackable23.11.0
     productVersion: 3.5.1
   clusterConfig:
     zookeeperConfigMapName: kafka-znode

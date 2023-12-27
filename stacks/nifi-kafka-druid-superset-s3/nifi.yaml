@@ -5,6 +5,7 @@ metadata:
   name: nifi
 spec:
   image:
+    custom: docker.stackable.tech/stackable-experimental/nifi:1.23.2-stackable23.11.0
     productVersion: 1.23.2
   clusterConfig:
     authentication:

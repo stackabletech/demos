@@ -5,6 +5,7 @@ metadata:
   name: superset
 spec:
   image:
+    custom: docker.stackable.tech/stackable-experimental/superset:3.0.1-stackable23.11.0
     productVersion: 3.0.1
   clusterConfig:
     listenerClass: external-unstable
