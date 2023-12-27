@@ -5,6 +5,7 @@ metadata:
   name: trino
 spec:
   image:
+    custom: docker.stackable.tech/stackable-experimental/trino:428-stackable23.11.0
     productVersion: "428"
   clusterConfig:
     listenerClass: external-unstable
