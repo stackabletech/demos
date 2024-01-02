@@ -3,6 +3,8 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
   name: kafka-znode
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   clusterRef:
     name: zookeeper
@@ -11,6 +13,8 @@ apiVersion: kafka.stackable.tech/v1alpha1
 kind: KafkaCluster
 metadata:
   name: kafka
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.5.1
@@ -47,6 +51,8 @@ apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
 metadata:
   name: kafka-client-tls
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   provider:
     tls:

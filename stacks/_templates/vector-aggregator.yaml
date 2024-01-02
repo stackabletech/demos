@@ -5,6 +5,10 @@ repo:
   url: https://helm.vector.dev
 version: 0.26.0
 options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
+  podLabels: # Doesn't seem to work?
+    stackable.tech/vendor: Stackable
   role: Aggregator
   customConfig:
     sources:

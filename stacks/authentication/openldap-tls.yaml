@@ -3,6 +3,8 @@ apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
   name: openldap-tls
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   backend:
     autoTls:
@@ -17,6 +19,7 @@ kind: StatefulSet
 metadata:
   name: openldap
   labels:
+    stackable.tech/vendor: Stackable
     app.kubernetes.io/name: openldap
 spec:
   selector:
@@ -82,6 +85,7 @@ kind: Service
 metadata:
   name: openldap
   labels:
+    stackable.tech/vendor: Stackable
     app.kubernetes.io/name: openldap
 spec:
   type: ClusterIP

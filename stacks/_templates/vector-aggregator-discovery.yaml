@@ -2,5 +2,7 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: vector-aggregator-discovery
+  labels:
+    stackable.tech/vendor: Stackable
 data:
   ADDRESS: vector-aggregator:6000

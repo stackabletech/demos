@@ -3,6 +3,8 @@ apiVersion: opa.stackable.tech/v1alpha1
 kind: OpaCluster
 metadata:
   name: opa
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 0.57.0

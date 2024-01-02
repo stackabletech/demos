@@ -3,6 +3,8 @@ apiVersion: superset.stackable.tech/v1alpha1
 kind: SupersetCluster
 metadata:
   name: superset
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.0.1
@@ -19,6 +21,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: superset-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 type: Opaque
 stringData:
   adminUser.username: admin
@@ -33,6 +37,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: superset-mapbox-api-key
+  labels:
+    stackable.tech/vendor: Stackable
 type: Opaque
 stringData:
   connections.mapboxApiKey: "pk.eyJ1IjoibXVlbGxlcmNlbGluZSIsImEiOiJjbDZwM3llMTAwNGpmM2psdHU0Y21wZHJwIn0.kXFJKBbeyhbwf0z460JcTQ"
@@ -41,6 +47,8 @@ apiVersion: superset.stackable.tech/v1alpha1
 kind: DruidConnection
 metadata:
   name: superset-druid-connection
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   superset:
     name: superset

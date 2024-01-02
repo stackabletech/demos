@@ -3,6 +3,8 @@ apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster
 metadata:
   name: trino
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: "428"
@@ -46,6 +48,8 @@ apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
 metadata:
   name: trino-users
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   provider:
     static:
@@ -56,6 +60,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: trino-users
+  labels:
+    stackable.tech/vendor: Stackable
 type: kubernetes.io/opaque
 stringData:
   admin: "{{ trinoAdminPassword }}"
@@ -65,6 +71,7 @@ kind: TrinoCatalog
 metadata:
   name: staging
   labels:
+    stackable.tech/vendor: Stackable
     trino: trino
 spec:
   connector:
@@ -79,6 +86,7 @@ kind: TrinoCatalog
 metadata:
   name: lakehouse
   labels:
+    stackable.tech/vendor: Stackable
     trino: trino
 spec:
   connector:
@@ -93,6 +101,7 @@ kind: TrinoCatalog
 metadata:
   name: tpcds
   labels:
+    stackable.tech/vendor: Stackable
     trino: trino
 spec:
   connector:
@@ -103,6 +112,7 @@ kind: TrinoCatalog
 metadata:
   name: tpch
   labels:
+    stackable.tech/vendor: Stackable
     trino: trino
 spec:
   connector:
@@ -112,6 +122,8 @@ apiVersion: opa.stackable.tech/v1alpha1
 kind: OpaCluster
 metadata:
   name: opa
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 0.57.0
@@ -125,6 +137,7 @@ metadata:
   name: trino-opa-bundle
   labels:
     opa.stackable.tech/bundle: "trino"
+    stackable.tech/vendor: Stackable
 data:
   trino.rego: |
     package trino

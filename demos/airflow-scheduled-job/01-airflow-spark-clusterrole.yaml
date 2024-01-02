@@ -3,6 +3,8 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   name: airflow-spark-clusterrole
+  labels:
+    stackable.tech/vendor: Stackable
 rules:
 - apiGroups:
   - spark.stackable.tech

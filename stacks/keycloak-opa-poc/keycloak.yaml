@@ -4,6 +4,7 @@ kind: Deployment
 metadata:
   name: keycloak
   labels:
+    stackable.tech/vendor: Stackable
     app: keycloak
 spec:
   replicas: 1
@@ -13,6 +14,7 @@ spec:
   template:
     metadata:
       labels:
+        stackable.tech/vendor: Stackable
         app: keycloak
     spec:
       containers:
@@ -43,6 +45,7 @@ kind: Service
 metadata:
   name: keycloak
   labels:
+    stackable.tech/vendor: Stackable
     app: keycloak
 spec:
   type: NodePort
@@ -57,6 +60,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: keycloak-admin-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 stringData:
   admin: "{{ keycloakAdminPassword }}"
 ---
@@ -65,6 +70,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: propagate-keycloak-address
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   template:
     spec:

@@ -3,6 +3,8 @@ apiVersion: nifi.stackable.tech/v1alpha1
 kind: NifiCluster
 metadata:
   name: nifi
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 1.23.2
@@ -41,6 +43,8 @@ apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
 metadata:
   name: nifi-admin-credentials
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   provider:
     static:
@@ -51,6 +55,8 @@ apiVersion: v1
 kind: Secret
 metadata:
   name: nifi-admin-credentials-secret
+  labels:
+    stackable.tech/vendor: Stackable
 stringData:
   admin: {{ nifiAdminPassword }}
 ---
@@ -58,6 +64,8 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
   name: nifi-znode
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   clusterRef:
     name: zookeeper

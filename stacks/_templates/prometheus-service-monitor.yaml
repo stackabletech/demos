@@ -3,6 +3,7 @@ kind: ServiceMonitor
 metadata:
   name: scrape-label
   labels:
+    stackable.tech/vendor: Stackable
     release: prometheus
 spec:
   endpoints:
@@ -19,6 +20,7 @@ kind: ServiceMonitor
 metadata:
   name: scrape-minio
   labels:
+    stackable.tech/vendor: Stackable
     release: prometheus
 spec:
   endpoints:

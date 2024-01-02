@@ -3,6 +3,8 @@ apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster
 metadata:
   name: trino
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: "428"

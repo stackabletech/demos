@@ -3,6 +3,8 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: create-druid-ingestion-job
+  labels:
+    stackable.tech/vendor: Stackable
 spec:
   template:
     spec:
@@ -24,6 +26,8 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: create-druid-ingestion-job-spec
+  labels:
+    stackable.tech/vendor: Stackable
 data:
   ingestion-job-spec.json: |
     {
