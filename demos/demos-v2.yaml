@@ -50,7 +50,7 @@ demos:
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 8700m
-      memory: 27746Mi
+      memory: 29746Mi
       pvc: 75Gi # 30Gi for Kafka
   nifi-kafka-druid-water-level-data:
     description:  Demo ingesting water level data into Kafka using NiFi, streaming it into Druid and creating a Superset dashboard
@@ -71,7 +71,7 @@ demos:
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 8900m
-      memory: 28042Mi
+      memory: 30042Mi
       pvc: 75Gi # 30Gi for Kafka
   spark-k8s-anomaly-detection-taxi-data:
     description: Demo loading New York taxi data into an S3 bucket and carrying out an anomaly detection analysis on it

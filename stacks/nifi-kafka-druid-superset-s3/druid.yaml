@@ -62,7 +62,7 @@ spec:
               min: "1"
               max: "4" # Need enough CPU cores to run multiple ingestion jobs at once
             memory:
-              limit: 2Gi
+              limit: 4Gi
   routers:
     roleGroups:
       default:
