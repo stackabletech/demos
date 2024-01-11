@@ -42,7 +42,7 @@ image::nifi-kafka-druid-earthquake-data/overview.png[]
 To run this demo, your system needs at least:
 
 * 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 28GiB memory
+* 30GiB memory
 * 75GiB disk storage
 
 == Listing Deployed Stacklets
