@@ -70,7 +70,7 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
 ┌───────────────────────┬───────────────────────┬───────────┬──────────────────────────────┐
 │ Product               ┆ Name                  ┆ Namespace ┆ Endpoints                    │
 ╞═══════════════════════╪═══════════════════════╪═══════════╪══════════════════════════════╡
@@ -87,7 +87,7 @@ include::partial$instance-hint.adoc[]
 == Inspect the Log Data
 
 You can have a look at the log data within the OpenSearch Dashboards web interface by running
-`stackablectl stacklets list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
+`stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
 http://172.18.0.5:31319/app/discover?security_tenant=global#/view/logs.
 
 image::logging/login.png[]

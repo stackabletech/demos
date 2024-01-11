@@ -31,7 +31,7 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
 ┌──────────┬───────────────┬───────────┬───────────────────────────────────────────┬─────────────────────────────────┐
 │ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                 ┆ CONDITIONS                      │
 ╞══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════╪═════════════════════════════════╡

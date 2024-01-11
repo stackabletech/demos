@@ -107,7 +107,7 @@ To list the installed installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
  PRODUCT    NAME          NAMESPACE  ENDPOINTS                                          EXTRA INFOS
 
  hive       hive          default    hive                212.227.224.138:31022
@@ -141,7 +141,7 @@ include::partial$instance-hint.adoc[]
 === Listing Buckets
 
 The S3 provided by MinIO is used as persistent storage to store all the data used. Open the `minio` endpoint
-`console-http` retrieved by the `stackablectl stacklets list` command in your browser (http://217.160.222.211:31429 in
+`console-http` retrieved by the `stackablectl stacklet list` command in your browser (http://217.160.222.211:31429 in
 this case).
 
 image::data-lakehouse-iceberg-trino-spark/minio_1.png[]
@@ -190,7 +190,7 @@ sources are statically downloaded (e.g. as CSV), and others are fetched dynamica
 === View Ingestion Jobs
 
 You can have a look at the ingestion job running in NiFi by opening the NiFi endpoint `https` from your
-`stackablectl stacklets list` command output (https://217.160.120.117:31499 in this case).
+`stackablectl stacklet list` command output (https://217.160.120.117:31499 in this case).
 
 [NOTE]
 ====
@@ -460,7 +460,7 @@ Trino is used to enable SQL access to the data.
 
 === Accessing the Web Interface
 
-Open up the the Trino endpoint `coordinator-https` from your `stackablectl stacklets list` command output
+Open up the the Trino endpoint `coordinator-https` from your `stackablectl stacklet list` command output
 (https://212.227.224.138:30876 in this case).
 
 image::data-lakehouse-iceberg-trino-spark/trino_1.png[]

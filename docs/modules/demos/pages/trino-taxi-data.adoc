@@ -45,7 +45,7 @@ To list the installed Stackable services, run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
 ┌─────────┬──────────────┬───────────┬──────────────────────────────────────────────┐
 │ PRODUCT ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                    │
 ╞═════════╪══════════════╪═══════════╪══════════════════════════════════════════════╡
@@ -67,7 +67,7 @@ include::partial$instance-hint.adoc[]
 == Inspect Data in S3
 
 The S3 provided by MinIO is used as a persistent storage to store all the data used. You can look at the test data
-within the MinIO web interface by opening the endpoint `console-http` from your `stackablectl stacklets list` command
+within the MinIO web interface by opening the endpoint `console-http` from your `stackablectl stacklet list` command
 output. You have to use the endpoint from your command output. In this case, it is http://172.18.0.3:30503. Open it with
 your favourite browser.
 

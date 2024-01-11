@@ -35,13 +35,13 @@ To run this demo, your system needs at least:
 
 == Listing Deployed Stacklets
 
-To list the installed Stackable services run the following command: `stackablectl stacklets list`
+To list the installed Stackable services run the following command: `stackablectl stacklet list`
 
 //TODO(Techassi): Update console output
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
 PRODUCT    NAME       NAMESPACE  ENDPOINTS                                               EXTRA INFOS
 
  hbase      hbase      default    regionserver                  172.18.0.5:32282

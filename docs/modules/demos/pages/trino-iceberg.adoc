@@ -36,7 +36,7 @@ To list the installed installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklets list
+$ stackablectl stacklet list
 ┌─────────┬──────────────┬───────────┬──────────────────────────────────────────────┐
 │ PRODUCT ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                    │
 ╞═════════╪══════════════╪═══════════╪══════════════════════════════════════════════╡
@@ -70,7 +70,7 @@ connect with DBeaver. As an alternative, you can use https://trino.io/download.h
 java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
 ----
 
-Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklets list` output. When
+Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output. When
 prompted, enter the password `adminadmin`.
 
 == Create Testdata
