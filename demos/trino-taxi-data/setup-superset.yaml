@@ -3,8 +3,6 @@ apiVersion: batch/v1
 kind: Job
 metadata:
   name: setup-superset
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   template:
     spec:
@@ -36,8 +34,6 @@ apiVersion: v1
 kind: ConfigMap
 metadata:
   name: setup-superset-script
-  labels:
-    stackable.tech/vendor: Stackable
 data:
   script.py: |
     import logging
