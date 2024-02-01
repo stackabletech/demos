@@ -13,7 +13,6 @@ spec:
   template:
     metadata:
       labels:
-        stackable.tech/vendor: Stackable
         app: keycloak
     spec:
       containers:
@@ -70,21 +69,21 @@ spec:
   template:
     spec:
       containers:
-        - name: propagate-keycloak-address
-          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable23.11.0
-          command:
-            - bash
-            - -x
-            - -euo
-            - pipefail
-            - -c
-            - |
-              echo "Determining Keycloak public reachable address"
-              KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "http") | .nodePort | tostring)')
-              echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
+      - name: propagate-keycloak-address
+        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable23.11.0
+        command:
+          - bash
+          - -x
+          - -euo
+          - pipefail
+          - -c
+          - |
+            echo "Determining Keycloak public reachable address"
+            KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "http") | .nodePort | tostring)')
+            echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
 
-              echo "Writing Keycloak address to ConfigMap keycloak"
-              kubectl create configmap keycloak --from-literal="KEYCLOAK=$KEYCLOAK_ADDRESS" --from-literal="KEYCLOAK_DISCOVERY_URL=http://$KEYCLOAK_ADDRESS/realms/master/.well-known/openid-configuration" -o yaml --dry-run | kubectl apply -f -
+            echo "Writing Keycloak address to ConfigMap keycloak"
+            kubectl create configmap keycloak --from-literal="KEYCLOAK=$KEYCLOAK_ADDRESS" --from-literal="KEYCLOAK_DISCOVERY_URL=http://$KEYCLOAK_ADDRESS/realms/master/.well-known/openid-configuration" -o yaml --dry-run | kubectl apply -f -
       serviceAccountName: demo-serviceaccount
       restartPolicy: OnFailure
   backoffLimit: 20 # give some time for the Keycloak to be available

@@ -28,4 +28,4 @@ metadata:
     secrets.stackable.tech/class: minio-s3-credentials
 stringData:
   accessKey: admin
-  secretKey: {? {minioAdminPassword: ''} : ''}
+  secretKey: {{ minioAdminPassword }}

@@ -52,7 +52,7 @@ kind: Secret
 metadata:
   name: nifi-admin-credentials-secret
 stringData:
-  admin: {? {nifiAdminPassword: ''} : ''}
+  admin: {{ nifiAdminPassword }}
 ---
 apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
