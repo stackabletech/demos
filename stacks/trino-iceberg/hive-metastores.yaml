@@ -3,8 +3,6 @@ apiVersion: hive.stackable.tech/v1alpha1
 kind: HiveCluster
 metadata:
   name: hive-iceberg
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.1.3

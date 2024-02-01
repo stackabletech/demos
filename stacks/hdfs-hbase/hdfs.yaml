@@ -2,8 +2,6 @@ apiVersion: hdfs.stackable.tech/v1alpha1
 kind: HdfsCluster
 metadata:
   name: hdfs
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.3.6

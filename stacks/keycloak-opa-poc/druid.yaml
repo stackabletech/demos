@@ -3,8 +3,6 @@ apiVersion: druid.stackable.tech/v1alpha1
 kind: DruidCluster
 metadata:
   name: druid
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 27.0.0
@@ -73,7 +71,7 @@ spec:
         # it seems like the Druid processes cannot handle the OIDC authentication flow.
         druid.auth.authenticator.MyBasicMetadataAuthenticator.type: basic
         druid.auth.authenticator.MyBasicMetadataAuthenticator.initialInternalClientPassword: '${env:DRUID_SYSTEM_USER_PASSWORD}' # Default password for internal 'druid_system' user
-        druid.auth.authenticator.MyBasicMetadataAuthenticator.skipOnFailure: "true"  # for any non system user, skip to the pac4j authenticator
+        druid.auth.authenticator.MyBasicMetadataAuthenticator.skipOnFailure: "true" # for any non system user, skip to the pac4j authenticator
         druid.auth.authenticator.MyBasicMetadataAuthenticator.authorizerName: OpaAuthorizer
 
         # pac4j authenticator
@@ -86,7 +84,7 @@ spec:
         druid.auth.pac4j.oidc.clientSecret: '{"type":"environment","variable":"DRUID_CLIENT_SECRET"}'
         druid.auth.pac4j.oidc.discoveryURI: '${env:KEYCLOAK_DISCOVERY_URL}'
         # druid.auth.pac4j.oidc.oidcClaim: preferred_username  # setting doesn't work, but should?
-        
+
         druid.auth.authenticatorChain: '["MyBasicMetadataAuthenticator","pac4j"]'
 
         druid.escalator.type: basic

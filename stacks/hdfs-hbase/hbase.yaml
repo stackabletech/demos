@@ -3,8 +3,6 @@ apiVersion: hbase.stackable.tech/v1alpha1
 kind: HbaseCluster
 metadata:
   name: hbase
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 2.4.17

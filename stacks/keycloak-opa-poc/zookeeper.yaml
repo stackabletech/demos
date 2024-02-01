@@ -3,8 +3,6 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperCluster
 metadata:
   name: zk
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   image:
     productVersion: 3.8.3
@@ -17,8 +15,6 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
   name: druid-znode
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   clusterRef:
     name: zk
@@ -27,8 +23,6 @@ apiVersion: zookeeper.stackable.tech/v1alpha1
 kind: ZookeeperZnode
 metadata:
   name: hdfs-znode
-  labels:
-    stackable.tech/vendor: Stackable
 spec:
   clusterRef:
     name: zk
