@@ -5,7 +5,7 @@ repo:
   url: https://charts.timescale.com/
 version: 0.33.1
 options:
-  commonLabels:
+  podLabels:
     stackable.tech/vendor: Stackable
   replicaCount: 1
   secrets:
