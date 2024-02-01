@@ -14,6 +14,8 @@ options:
       stackable.tech/logging-view-logs: |-
         /app/discover?security_tenant=global#/view/logs
       stackable.tech/logging-credentials-secret: opensearch-user
+    labels:
+      stackable.tech/vendor: Stackable
   opensearchAccount:
     secret: opensearch-dashboard-user
   extraEnvs:
