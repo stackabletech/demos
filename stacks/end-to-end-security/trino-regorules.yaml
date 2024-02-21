@@ -1,0 +1,28 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-regorules
+  labels:
+    opa.stackable.tech/bundle: "true"
+data:
+  trino.rego: |
+    package trino
+
+    import rego.v1
+
+    # Allow non-batched access
+    default allow = true
+
+    # Allow batched access
+    batch contains i if {
+      some i
+      input.action.filterResources[i]
+    }
+    # Corner case: filtering columns is done with a single table item, and many columns inside
+    batch contains i if {
+      some i
+      input.action.operation == "FilterColumns"
+      count(input.action.filterResources) == 1
+      input.action.filterResources[0].table.columns[i]
+    }
