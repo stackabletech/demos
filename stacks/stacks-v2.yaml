@@ -495,6 +495,47 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  end-to-end-security:
+    description: >-
+      A stack used to demonstrate an end-to-end security concept
+    stackableRelease: end-to-end-security-release
+    stackableOperators:
+      - commons
+      - secret
+      - listener
+      - opa
+      - zookeeper
+      - hdfs
+      - hive
+      - trino
+      - superset
+    labels:
+      - security
+      - hdfs
+      - hive
+      - trino
+      - superset
+      - keycloak
+    manifests:
+      - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
+      - plainYaml: stacks/_templates/keycloak.yaml
+      - helmChart: stacks/_templates/postgresql-hive.yaml
+      - plainYaml: stacks/end-to-end-security/setup-keycloak.yaml
+      - plainYaml: stacks/end-to-end-security/opa.yaml
+      - plainYaml: stacks/end-to-end-security/zookeeper.yaml # TODO: Add authentication
+    parameters:
+      - name: keycloakAdminPassword
+        description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: keycloakUserinfoFetcherClientSecret
+        description: Secret ID of the Keycloak UserinfoFetcher client that is used by the UserinfoFetcher to retrieve user information
+        default: userinfofetcheruserinfofetcher
+      - name: keycloakSupersetClientSecret
+        description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
+        default: supersetsuperset
+      - name: keycloakTrinoClientSecret
+        description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
+        default: trinotrino
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
