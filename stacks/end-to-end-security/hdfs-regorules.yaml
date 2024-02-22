@@ -180,7 +180,7 @@ data:
         "transitionToStandby": "full",
     }
 
-    groups_for_user := {"admin": ["admins"], "alice": ["developers"], "bob": [], "trino": ["admins"], "hive": []}
+    groups_for_user := {"admin": ["admins"], "alice": ["developers"], "bob": [], "trino": ["admins"], "hive": [], "spark": ["admins"]}
 
     acls := [
         {

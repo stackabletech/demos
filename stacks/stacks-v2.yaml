@@ -509,6 +509,7 @@ stacks:
       - hive
       - trino
       - superset
+      - spark-k8s
     labels:
       - security
       - hdfs
