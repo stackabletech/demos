@@ -6,7 +6,7 @@ releases:
       commons:
         operatorVersion: 0.0.0-dev # Needed for OIDC support in AuthClass
       hdfs:
-        operatorVersion: 0.0.0-pr474 # Needed for OPA authorizer in  https://github.com/stackabletech/hdfs-operator/pull/474
+        operatorVersion: 0.0.0-pr474 # Needed for OPA authorizer in https://github.com/stackabletech/hdfs-operator/pull/474
       hive:
         operatorVersion: 0.0.0-dev # Needed for Kerberos support
       listener:

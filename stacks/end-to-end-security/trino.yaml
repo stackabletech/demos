@@ -34,7 +34,7 @@ spec:
               - name: kerberos
                 mountPath: /stackable/kerberos
               # Normally we would use a different location and set `-Djava.security.krb5.conf=/example/path/krb5.conf`,
-              # but we can not influence the JCM arguments.
+              # but we can not influence the JVM arguments.
               - name: kerberos
                 mountPath: /etc/krb5.conf
                 subPath: krb5.conf
