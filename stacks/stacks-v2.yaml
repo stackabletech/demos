@@ -532,3 +532,26 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  spark-kerberos:
+    description: >-
+      Running a Spark application against a kerberized HDFS and Hive cluster.
+    stackableRelease: 24.03
+    stackableOperators:
+      - commons
+      - secret
+      - listener
+      - zookeeper
+      - hdfs
+      - hive
+      - spark-k8s
+    labels:
+      - kerberos
+      - spark
+    manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/krb5.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/kerberos-secretclass.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/hive.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-kerberos/spark.yaml
+    parameters: []

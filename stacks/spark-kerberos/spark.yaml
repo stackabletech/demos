@@ -1,0 +1,77 @@
+# N.B. config-map hdfs-kerberos is identical to the one deployed by the hdfs cluster (hdfs)
+# but with the realm placeholder ${env.KERBEROS_REALM} replaced with CLUSTER.LOCAL. HDFs does this automatically
+# but Spark does not.
+---
+apiVersion: spark.stackable.tech/v1alpha1
+kind: SparkApplication
+metadata:
+  name: spark-teragen
+spec:
+  sparkImage:
+    custom: docker.stackable.tech/stackable/spark-k8s-with-teragen:3.5.0-stackable0.0.0-dev
+    productVersion: 3.5.0
+    pullPolicy: IfNotPresent
+  mode: cluster
+  mainApplicationFile: local:///tmp/spark-terasort-1.2-SNAPSHOT.jar
+  mainClass: com.github.ehiggs.spark.terasort.TeraGen
+  args:
+    - "10M"
+    - "hdfs://hdfs/user/stackable/teragen_output"
+  sparkConf:
+    "spark.driver.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
+    "spark.executor.extraClassPath": "/etc/hadoop/conf/:/stackable/spark/extra-jars/*"
+    "spark.kerberos.keytab": "/stackable/kerberos/keytab"
+    "spark.kerberos.principal": "testuser/spark-teragen.razvan.svc.cluster.local@CLUSTER.LOCAL"
+    "spark.driver.extraJavaOptions": "-Djava.security.krb5.conf=/stackable/kerberos/krb5.conf"
+    "spark.executor.extraJavaOptions": "-Djava.security.krb5.conf=/stackable/kerberos/krb5.conf"
+  job:
+    config:
+      volumeMounts:
+        - name: kerberos
+          mountPath: /stackable/kerberos
+  driver:
+    config:
+      volumeMounts:
+        - name: hdfs-config
+          mountPath: /etc/hadoop/conf
+        - name: kerberos
+          mountPath: /stackable/kerberos
+      resources:
+        cpu:
+          min: "1"
+          max: "2"
+        memory:
+          limit: "1Gi"
+  executor:
+    replicas: 1
+    config:
+      volumeMounts:
+        - name: hdfs-config
+          mountPath: /etc/hadoop/conf
+        - name: kerberos
+          mountPath: /stackable/kerberos
+      resources:
+        cpu:
+          min: "200m"
+          max: "4"
+        memory:
+          limit: "2Gi"
+  volumes:
+    - name: hdfs-config
+      configMap:
+        name: hdfs-kerberos
+    - name: kerberos
+      ephemeral:
+        volumeClaimTemplate:
+          metadata:
+            annotations:
+              secrets.stackable.tech/class: kerberos
+              secrets.stackable.tech/scope: service=spark-teragen
+              secrets.stackable.tech/kerberos.service.names: testuser
+          spec:
+            storageClassName: secrets.stackable.tech
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: "1"
