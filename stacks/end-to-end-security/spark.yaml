@@ -49,12 +49,15 @@ spec:
   driver:
     config:
       volumeMounts: *volumeMounts
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 100m
     envOverrides: *envOverrides
-    # As the envOverrides are not working
-    podOverrides:
+    podOverrides: &podOverrides
       spec:
         containers:
           - name: spark
+            # As the envOverrides are not working
             env:
               - name: KERBEROS_REALM
                 value: KNAB.COM
@@ -62,15 +65,11 @@ spec:
     replicas: 1
     config:
       volumeMounts: *volumeMounts
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 250m
     envOverrides: *envOverrides
-    # As the envOverrides are not working
-    podOverrides:
-      spec:
-        containers:
-          - name: spark
-            env:
-              - name: KERBEROS_REALM
-                value: KNAB.COM
+    podOverrides: *podOverrides
   volumes:
     - name: script
       configMap:
@@ -109,9 +108,4 @@ data:
     spark.sql("show catalogs").show()
     spark.sql("show tables in lakehouse.default").show()
 
-    spark.sql("CREATE SCHEMA IF NOT EXISTS lakehouse.compliance LOCATION 'hdfs:/lakehouse/compliance/'")
-    spark.sql("CREATE SCHEMA IF NOT EXISTS lakehouse.customer_analytics LOCATION 'hdfs:/lakehouse/customer-analytics/'")
-
-    spark.sql(f"CREATE TABLE IF NOT EXISTS lakehouse.compliance.foo (id bigint) USING iceberg")
-    spark.sql(f"INSERT INTO lakehouse.compliance.foo VALUES (1), (2), (3)")
-    spark.sql("SELECT * FROM lakehouse.compliance.foo").show()
+    spark.sql("SELECT * FROM lakehouse.customer_analytics.customers").show()

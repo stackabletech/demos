@@ -54,11 +54,19 @@ spec:
                     requests:
                       storage: "1"
                   storageClassName: secrets.stackable.tech
+    config:
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 100m
     roleGroups:
       default:
         replicas: 1
   workers:
     podOverrides: *podOverrides
+    config:
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 250m
     roleGroups:
       default:
         replicas: 1
