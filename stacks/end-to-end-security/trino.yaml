@@ -91,7 +91,7 @@ spec:
     hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
     hive.hdfs.trino.keytab: /stackable/kerberos/keytab
     hive.hdfs.impersonation.enabled: "false"
-    hive.hdfs.wire-encryption.enabled: "false"
+    hive.hdfs.wire-encryption.enabled: "true"
     # HMS configuration
     hive.metastore.authentication.type: KERBEROS
     hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
