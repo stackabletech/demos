@@ -20,6 +20,6 @@ releases:
       superset:
         operatorVersion: 0.0.0-dev # Needed for OIDC support
       trino:
-        operatorVersion: 0.0.0-pr501 # Needed for OIDC support
+        operatorVersion: 0.0.0-dev # Needed for OIDC support
       zookeeper:
         operatorVersion: 23.11.0
