@@ -1,9 +1,9 @@
 helm install commons-operator stackable-stable/commons-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/commons-operator
+
 # Use upstream images, as they have arm64 support
 helm install secret-operator stackable-stable/secret-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/secret-operator --set csiProvisioner.image.repository=k8s.gcr.io/sig-storage/csi-provisioner --set csiNodeDriverRegistrar.image.repository=k8s.gcr.io/sig-storage/csi-node-driver-registrar
-# Currently not working
-# helm install listener-operator stackable-stable/listener-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/listener-operator
 
+helm install listener-operator stackable-stable/listener-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/listener-operator
 helm install airflow-operator stackable-stable/airflow-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/airflow-operator
 helm install druid-operator stackable-stable/druid-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/druid-operator
 helm install hbase-operator stackable-stable/hbase-operator --namespace stackable-operators --create-namespace --version=23.11.0 --set image.repository=docker.stackable.tech/stackable-experimental/hbase-operator
