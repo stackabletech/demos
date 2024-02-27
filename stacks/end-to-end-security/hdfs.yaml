@@ -11,12 +11,8 @@ spec:
       tlsSecretClass: tls
       kerberos:
         secretClass: kerberos
-    # FIXME: Will probably change (see https://github.com/stackabletech/hdfs-operator/pull/474)
     authorization:
-      opaAuthorization:
-        configMapName: opa
-        package: hdfs
-      opaGroupMapping:
+      opa:
         configMapName: opa
         package: hdfs
   nameNodes:
