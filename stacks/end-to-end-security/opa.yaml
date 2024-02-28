@@ -1,3 +1,4 @@
+---
 apiVersion: opa.stackable.tech/v1alpha1
 kind: OpaCluster
 metadata:
@@ -5,6 +6,17 @@ metadata:
 spec:
   image:
     productVersion: 0.61.0
+  clusterConfig:
+    userInfo:
+      backend:
+        keycloak:
+          clientCredentialsSecret: user-info-fetcher-client-credentials
+          adminRealm: master
+          userRealm: master
+          hostname: keycloak
+          tls:
+            verification:
+              none: {}
   servers:
     roleGroups:
       default:

@@ -1,11 +1,19 @@
+---
 apiVersion: v1
 kind: Secret
 metadata:
   name: keycloak-clients
 stringData:
-  userinfoFetcher: "{{ keycloakUserinfoFetcherClientSecret }}"
   superset: "{{ keycloakSupersetClientSecret }}"
   trino: "{{ keycloakTrinoClientSecret }}"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: user-info-fetcher-client-credentials
+stringData:
+  clientId: user-info-fetcher
+  clientSecret: "{{ keycloakUserinfoFetcherClientSecret }}"
 ---
 apiVersion: batch/v1
 kind: Job
@@ -23,11 +31,16 @@ spec:
               secretKeyRef:
                 name: keycloak-admin-credentials
                 key: admin
+          - name: USERINFO_FETCHER_CLIENT_ID
+            valueFrom:
+              secretKeyRef:
+                name: user-info-fetcher-client-credentials
+                key: clientId
           - name: USERINFO_FETCHER_CLIENT_SECRET
             valueFrom:
               secretKeyRef:
-                name: keycloak-clients
-                key: userinfoFetcher
+                name: user-info-fetcher-client-credentials
+                key: clientSecret
           - name: SUPERSET_CLIENT_SECRET
             valueFrom:
               secretKeyRef:
@@ -62,6 +75,7 @@ spec:
             JUSTIN_UUID=$( kcadm.sh create users $COMMON_FLAGS -s username=justin.martin -s firstName=Justin  -s lastName=Martin   -s email=justin.martin@knab.com -s enabled=true -s emailVerified=true -o | jq -r .id)
             ISLA_UUID=$(   kcadm.sh create users $COMMON_FLAGS -s username=isla.williams -s firstName=Isla    -s lastName=Williams -s email=isla.williams@knab.com -s enabled=true -s emailVerified=true -o | jq -r .id)
             MARK_UUID=$(   kcadm.sh create users $COMMON_FLAGS -s username=mark.ketting  -s firstName=Mark    -s lastName=Ketting  -s email=mark.ketting@knab.com  -s enabled=true -s emailVerified=true -o | jq -r .id)
+            UIFSA_UUID=$(  kcadm.sh create users $COMMON_FLAGS -s username=uif-sa                                                                                  -s enabled=true                       -o | jq -r .id)
 
             echo "Setting user passwords"
             kcadm.sh set-password $COMMON_FLAGS --username william.lewis --new-password "william.lewis"
@@ -89,7 +103,7 @@ spec:
             echo "Creating oauth2 clients"
             kcadm.sh create clients $COMMON_FLAGS -f - << EOF || true
             {
-              "clientId": "userinfo-fetcher",
+              "clientId": "$USERINFO_FETCHER_CLIENT_ID",
               "enabled": true,
               "protocol": "openid-connect",
               "clientAuthenticatorType": "client-secret",
@@ -111,7 +125,7 @@ spec:
               }
             }
             EOF
-            kcadm.sh add-roles --uusername service-account-userinfo-fetcher --rolename admin $COMMON_FLAGS
+            kcadm.sh add-roles --uusername uif-sa --rolename admin $COMMON_FLAGS
 
             kcadm.sh create clients $COMMON_FLAGS -f - << EOF || true
             {
