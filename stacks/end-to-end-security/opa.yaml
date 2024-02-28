@@ -9,6 +9,7 @@ spec:
   clusterConfig:
     userInfo:
       backend:
+        {% if userInfoFetcherBackend == "keycloak" %}
         keycloak:
           clientCredentialsSecret: user-info-fetcher-client-credentials
           adminRealm: master
@@ -17,6 +18,10 @@ spec:
           tls:
             verification:
               none: {}
+        {% elif userInfoFetcherBackend == "aas" %}
+        experimentalXfscAas:
+          hostname: aas
+        {% endif %}
   servers:
     roleGroups:
       default:

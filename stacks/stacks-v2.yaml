@@ -532,6 +532,8 @@ stacks:
       - plainYaml: stacks/end-to-end-security/hive-metastore.yaml
       - plainYaml: stacks/end-to-end-security/trino.yaml
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
+      - plainYaml: stacks/end-to-end-security/aas-mock.yaml
+      - plainYaml: stacks/end-to-end-security/uif-regorules.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
@@ -553,7 +555,10 @@ stacks:
         default: supersetsuperset
       - name: userInfoFetcherBackend
         description: Which backend to use. Either 'keycloak' or 'aas'.
-        default: keycloak
+        default: aas
+      - name: openshift
+        description: Whether to use OpenShift. Defaults to false. Might not work yet (WIP)
+        default: false
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
