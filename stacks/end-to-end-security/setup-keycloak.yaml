@@ -75,7 +75,7 @@ spec:
             JUSTIN_UUID=$( kcadm.sh create users $COMMON_FLAGS -s username=justin.martin -s firstName=Justin  -s lastName=Martin   -s email=justin.martin@knab.com -s enabled=true -s emailVerified=true -o | jq -r .id)
             ISLA_UUID=$(   kcadm.sh create users $COMMON_FLAGS -s username=isla.williams -s firstName=Isla    -s lastName=Williams -s email=isla.williams@knab.com -s enabled=true -s emailVerified=true -o | jq -r .id)
             MARK_UUID=$(   kcadm.sh create users $COMMON_FLAGS -s username=mark.ketting  -s firstName=Mark    -s lastName=Ketting  -s email=mark.ketting@knab.com  -s enabled=true -s emailVerified=true -o | jq -r .id)
-            UIFSA_UUID=$(  kcadm.sh create users $COMMON_FLAGS -s username=uif-sa                                                                                  -s enabled=true                       -o | jq -r .id)
+            UIFSA_UUID=$(  kcadm.sh create users $COMMON_FLAGS -s username=user-info-fetcher-sa                                                                                  -s enabled=true                       -o | jq -r .id)
 
             echo "Setting user passwords"
             kcadm.sh set-password $COMMON_FLAGS --username william.lewis --new-password "william.lewis"
@@ -125,7 +125,7 @@ spec:
               }
             }
             EOF
-            kcadm.sh add-roles --uusername uif-sa --rolename admin $COMMON_FLAGS
+            kcadm.sh add-roles --uusername user-info-fetcher-sa --rolename admin $COMMON_FLAGS
 
             kcadm.sh create clients $COMMON_FLAGS -f - << EOF || true
             {
