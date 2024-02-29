@@ -58,6 +58,9 @@ spec:
       resources: # I would like to run this stack on my Laptop
         cpu:
           min: 100m
+    configOverrides:
+      config.properties:
+        http-server.authentication.oauth2.refresh-tokens: "true"
     roleGroups:
       default:
         replicas: 1
