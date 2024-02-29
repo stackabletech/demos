@@ -17,6 +17,7 @@ spec:
         package: hdfs
   nameNodes:
     config:
+      listenerClass: external-stable
       logging:
         containers:
           hdfs:
