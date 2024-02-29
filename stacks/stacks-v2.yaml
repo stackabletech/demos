@@ -533,6 +533,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/hive-metastore.yaml
       - plainYaml: stacks/end-to-end-security/trino.yaml
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
+      - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/aas-mock.yaml
       - plainYaml: stacks/end-to-end-security/uif-regorules.yaml

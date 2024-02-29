@@ -1,0 +1,78 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-policies
+  labels:
+    opa.stackable.tech/bundle: trino
+data:
+  trino_policies.rego: |
+    package trino_policies
+
+    import rego.v1
+
+    policies := {
+      "catalogs": [
+        {"allow": "all"}, # FIXME
+        {
+          "user": "admin",
+          "allow": "all",
+        },
+        # # Everyone can read from lakehouse
+        # {
+        #   "catalog": "lakehouse",
+        #   "allow": "read-only",
+        # },
+      ],
+      "tables": [
+        {"privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT",]}, # FIXME
+      ],
+      "system_information": [],
+      "queries": [
+        {
+          "allow": ["execute"],
+        },
+        {
+          "user": "admin",
+          "allow": ["kill", "view"],
+        },
+      ],
+      "schemas": [
+        {"owner": true}, # FIXME
+        {
+          "user": "admin",
+          "owner": true,
+        },
+        {
+          "user": "daniel.king",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "owner": true,
+        },
+      ],
+      "tables": [
+        {
+          "user": "admin",
+          "privileges": [
+            "SELECT",
+            "INSERT",
+            "DELETE",
+            "UPDATE",
+            "OWNERSHIP",
+            "GRANT_SELECT",
+          ],
+        },
+        {
+          "schema": "information_schema",
+          "table": "schemata",
+          "privileges": ["SELECT"],
+        },
+      ],
+      "impersonation": [
+        {
+          "original_user": "superset",
+          "new_user": ".*",
+          "allow": true,
+        },
+      ],
+    }
