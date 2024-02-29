@@ -10,21 +10,28 @@ CREATE SCHEMA IF NOT EXISTS lakehouse.customer_analytics WITH (location = 'hdfs:
 
 CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customers AS
 SELECT
-	c_customer_sk,
-	cast(c_customer_id AS VARCHAR) AS c_customer_id,
-	c_current_cdemo_sk,
-	c_current_hdemo_sk,
-	c_current_addr_sk,
-	c_first_shipto_date_sk,
-	c_first_sales_date_sk,
-    cast(c_salutation AS VARCHAR) AS c_salutation,
-    cast(c_first_name AS VARCHAR) AS c_first_name,
-    cast(c_last_name AS VARCHAR) AS c_last_name,
-	coalesce(c_preferred_cust_flag = 'Y', false) AS c_preferred_cust_flag,
-	cast(date_parse(cast(c_birth_year as varchar) || '-' || cast(c_birth_month as varchar) || '-' || cast(c_birth_day as varchar), '%Y-%m-%d') as date) as c_birth_date,
-    cast(c_birth_country AS VARCHAR) AS c_birth_country,
-    cast(c_login AS VARCHAR) AS c_login,
-	cast(c_email_address AS VARCHAR) AS c_email_address,
-	c_last_review_date_sk
-FROM tpcds.sf1.customer;
+    c_customer_sk,
+    CAST(c_customer_id AS VARCHAR) AS customer_id,
+    c_current_cdemo_sk AS customer_demographics_sk,
+    c_current_hdemo_sk AS household_demographics_sk,
+    -- c_current_addr_sk AS address_sk,
+    -- c_first_shipto_date_sk,
+    -- c_first_sales_date_sk,
+    CAST(c_salutation AS VARCHAR) AS salutation,
+    CAST(c_first_name AS VARCHAR) AS given_name,
+    CAST(c_last_name AS VARCHAR) AS family_name,
+    COALESCE(c_preferred_cust_flag = 'Y', false) AS preferred_cust_flag,
+    CAST(date_parse(CAST(c_birth_year AS varchar) || '-' || CAST(c_birth_month AS varchar) || '-' || CAST(c_birth_day AS varchar), '%Y-%m-%d') AS date) AS birth_date,
+    CAST(c_birth_country AS VARCHAR) AS birth_country,
+    -- CAST(c_login AS VARCHAR) AS c_login,
+	CAST(c_email_address AS VARCHAR) AS email_address,
+    --	c_last_review_date_sk
+    ca_city AS city,
+    ca_country AS country
+FROM
+    tpcds.sf1.customer AS c
+LEFT JOIN tpcds.sf1.customer_address AS a ON
+    c.c_current_addr_sk = a.ca_address_sk
+WHERE
+    c_first_name || c_last_name || ca_city || ca_country IS NOT NULL;
 ```
