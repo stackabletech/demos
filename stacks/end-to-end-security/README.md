@@ -29,9 +29,20 @@ SELECT
     ca_city AS city,
     ca_country AS country
 FROM
-    tpcds.sf1.customer AS c
-LEFT JOIN tpcds.sf1.customer_address AS a ON
-    c.c_current_addr_sk = a.ca_address_sk
-WHERE
-    c_first_name || c_last_name || ca_city || ca_country IS NOT NULL;
+    tpcds.sf10.customer AS c
+LEFT JOIN tpcds.sf10.customer_address AS a ON
+    c.c_current_addr_sk = a.ca_address_sk;
+
+CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customer_demographics AS
+SELECT
+	cd_demo_sk AS customer_demographics_sk,
+	CAST(cd_gender AS VARCHAR) AS gender,
+	CAST(cd_marital_status AS VARCHAR) AS marital_status,
+	CAST(cd_education_status AS VARCHAR) AS education_status,
+	cd_purchase_estimate AS purchase_estimate,
+	CASt(cd_credit_rating AS VARCHAR) AS credit_rating,
+	cd_dep_count AS dependent_count,
+	cd_dep_employed_count AS dependent_employed_count,
+	cd_dep_college_count AS dependent_college_count
+FROM tpcds.sf10.customer_demographics;
 ```
