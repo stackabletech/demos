@@ -21,21 +21,12 @@ data:
         action_sufficient_for_operation(acl.action, input.operationName)
     }
 
-    # HDFS group mapper (this returns a list of strings)
-    groups := {group |
-        raw = groups_for_user[input.username][_]
-        # Keycloak groups have trailing slashes
-        group := trim_prefix(raw, "/")
-    }
-
-    # Identity mentions the (long) userName explicitly
+    # Identity mentions the (long) userName or shortUsername explicitly
     matches_identity(identity) if {
-        identity == concat("", ["user:", input.callerUgi.userName])
-    }
-
-    # Identity mentions the shortUserName explicitly
-    matches_identity(identity) if {
-        identity == concat("", ["shortUser:", input.callerUgi.shortUserName])
+        identity in {
+            concat("", ["user:", input.callerUgi.userName]),
+            concat("", ["shortUser:", input.callerUgi.shortUserName])
+        }
     }
 
     # Identity mentions group the user is part of (by looking up using the (long) userName)
