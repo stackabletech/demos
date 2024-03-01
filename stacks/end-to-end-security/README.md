@@ -40,7 +40,7 @@ SELECT
 	CAST(cd_marital_status AS VARCHAR) AS marital_status,
 	CAST(cd_education_status AS VARCHAR) AS education_status,
 	cd_purchase_estimate AS purchase_estimate,
-	CASt(cd_credit_rating AS VARCHAR) AS credit_rating,
+	CAST(cd_credit_rating AS VARCHAR) AS credit_rating,
 	cd_dep_count AS dependent_count,
 	cd_dep_employed_count AS dependent_employed_count,
 	cd_dep_college_count AS dependent_college_count
