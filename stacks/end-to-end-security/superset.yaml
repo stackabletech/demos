@@ -39,7 +39,7 @@ kind: Secret
 metadata:
   name: superset-keycloak-client
 stringData:
-  clientId: trino
+  clientId: superset
   clientSecret: "{{ keycloakSupersetClientSecret }}"
 ---
 apiVersion: v1
