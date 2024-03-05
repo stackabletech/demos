@@ -524,6 +524,7 @@ stacks:
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
       - plainYaml: stacks/end-to-end-security/setup-keycloak.yaml
+      - plainYaml: stacks/end-to-end-security/setup-superset.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
       - plainYaml: stacks/end-to-end-security/kerberos-secretclass.yaml
       - plainYaml: stacks/end-to-end-security/opa.yaml
