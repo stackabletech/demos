@@ -6,9 +6,14 @@ metadata:
 spec:
   image:
     productVersion: 3.8.3
+    repo: docker.stackable.tech/stackable-experimental
   clusterConfig:
     vectorAggregatorConfigMapName: vector-aggregator-discovery
   servers:
+    podOverrides:
+      spec:
+        nodeSelector:
+          kubernetes.io/arch: arm64
     roleGroups:
       default:
         replicas: 3
