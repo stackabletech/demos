@@ -75,4 +75,40 @@ data:
           "allow": true,
         },
       ],
+      "authorization": [{
+        "original_user": "admin",
+        "new_user": ".*",
+        "allow": true,
+      }],
+      "system_session_properties": [
+        {
+          "allow": true,
+        },
+      ],
+      "catalog_session_properties": [
+        {
+          "allow": true,
+        },
+      ],
+      "functions": [{
+        "user": "admin",
+        "catalog": ".*",
+        "schema": ".*",
+        "function": ".*",
+        "privileges": [
+          "EXECUTE",
+          "GRANT_EXECUTE",
+          "OWNERSHIP",
+        ],
+      }],
+      "procedures": [{
+        "user": "admin",
+        "catalog": ".*",
+        "schema": ".*",
+        "procedure": ".*",
+        "privileges": [
+          "EXECUTE",
+          "GRANT_EXECUTE",
+        ],
+      }],
     }
