@@ -11,3 +11,7 @@ spec:
     roleGroups:
       default:
         replicas: 3
+    podOverrides:
+      spec:
+        nodeSelector:
+          kubernetes.io/arch: arm64
