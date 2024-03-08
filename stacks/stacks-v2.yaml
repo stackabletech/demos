@@ -143,6 +143,7 @@ stacks:
     stackableOperators:
       - commons
       - secret
+      - listener
       - zookeeper
       - hdfs
       - hbase
