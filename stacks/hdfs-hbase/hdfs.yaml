@@ -7,10 +7,10 @@ spec:
     productVersion: 3.3.6
   clusterConfig:
     dfsReplication: 1
-    listenerClass: external-unstable
     zookeeperConfigMapName: hdfs-znode
   nameNodes:
     config:
+      listenerClass: external-stable
       resources:
         storage:
           data:
@@ -20,6 +20,7 @@ spec:
         replicas: 2
   dataNodes:
     config:
+      listenerClass: external-unstable
       resources:
         storage:
           data:
