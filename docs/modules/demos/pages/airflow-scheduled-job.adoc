@@ -25,6 +25,13 @@ To run this demo, your system needs at least:
 * 9GiB memory
 * 24GiB disk storage
 
+== Install the demo
+
+[source,console]
+----
+$ stackablectl demo install airflow-scheduled-job
+----
+
 == List deployed Stackable services
 
 To list the installed Stackable services run the following command:
