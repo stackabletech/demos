@@ -35,9 +35,9 @@ To run this demo, your system needs at least:
 
 == Installing the Demo
 
-[source]
+[source,console]
 ----
-stackablectl demo install hbase-hdfs-load-cycling-data
+$ stackablectl demo install hbase-hdfs-load-cycling-data
 ----
 
 == Listing Deployed Stacklets
