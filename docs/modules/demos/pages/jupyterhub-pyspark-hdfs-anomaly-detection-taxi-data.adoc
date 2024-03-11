@@ -55,6 +55,13 @@ To run this demo, your system needs at least:
 * 32GiB memory
 * 22GiB disk storage
 
+== Installing the Demo
+
+[source,bash]
+----
+stackablectl demo install jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
+----
+
 == HDFS
 
 The Stackable Operator for Apache HDFS will spin up an HDFS cluster to store the taxi dataset in
@@ -78,19 +85,15 @@ Have a look at the available Pods before logging in (operator pods are left out 
 [source,bash]
 ----
 $ kubectl get pods
-NAME                                             READY   STATUS      RESTARTS   AGE
-continuous-image-puller-87dzk                    1/1     Running     0          29m
-continuous-image-puller-8qq7m                    1/1     Running     0          29m
-continuous-image-puller-9xbss                    1/1     Running     0          29m
-hdfs-datanode-default-0                          1/1     Running     0          29m
-hdfs-journalnode-default-0                       1/1     Running     0          29m
-hdfs-namenode-default-0                          2/2     Running     0          29m
-hdfs-namenode-default-1                          2/2     Running     0          28m
-hub-66c6798b9c-q877t                             1/1     Running     0          29m
-load-test-data-wsqpk                             0/1     Completed   0          25m
-proxy-65955f56cf-tf4ns                           1/1     Running     0          29m
-user-scheduler-8d888c6d4-jb4mm                   1/1     Running     0          29m
-user-scheduler-8d888c6d4-qbqkq                   1/1     Running     0          29m
+NAME                         READY   STATUS      RESTARTS   AGE
+hdfs-datanode-default-0      1/1     Running     0          5m12s
+hdfs-journalnode-default-0   1/1     Running     0          5m12s
+hdfs-namenode-default-0      2/2     Running     0          5m12s
+hdfs-namenode-default-1      2/2     Running     0          3m44s
+hub-567c994c8c-rbdbd         1/1     Running     0          5m36s
+load-test-data-5sp68         0/1     Completed   0          5m11s
+proxy-7bf49bb844-mhx66       1/1     Running     0          5m36s
+zookeeper-server-default-0   1/1     Running     0          5m12s
 ----
 
 JupyterHub will create a Pod for each active user. In order to reach the JupyterHub web interface, create a port-forward:
@@ -116,28 +119,26 @@ pods are left out for clarity, you will see more Pods):
 [source,bash]
 ----
 $ kubectl get pods
-NAME                                             READY   STATUS      RESTARTS   AGE
-continuous-image-puller-87dzk                    1/1     Running     0          29m
-continuous-image-puller-8qq7m                    1/1     Running     0          29m
-continuous-image-puller-9xbss                    1/1     Running     0          29m
-hdfs-datanode-default-0                          1/1     Running     0          29m
-hdfs-journalnode-default-0                       1/1     Running     0          29m
-hdfs-namenode-default-0                          2/2     Running     0          29m
-hdfs-namenode-default-1                          2/2     Running     0          28m
-hub-66c6798b9c-q877t                             1/1     Running     0          29m
-jupyter-admin                                    1/1     Running     0          20m
-load-test-data-wsqpk                             0/1     Completed   0          25m
-proxy-65955f56cf-tf4ns                           1/1     Running     0          29m
-user-scheduler-8d888c6d4-jb4mm                   1/1     Running     0          29m
-user-scheduler-8d888c6d4-qbqkq                   1/1     Running     0          29m
+NAME                         READY   STATUS      RESTARTS   AGE
+hdfs-datanode-default-0      1/1     Running     0          6m12s
+hdfs-journalnode-default-0   1/1     Running     0          6m12s
+hdfs-namenode-default-0      2/2     Running     0          6m12s
+hdfs-namenode-default-1      2/2     Running     0          4m44s
+hub-567c994c8c-rbdbd         1/1     Running     0          6m36s
+jupyter-admin                1/1     Running     0          77s
+load-test-data-5sp68         0/1     Completed   0          6m11s
+proxy-7bf49bb844-mhx66       1/1     Running     0          6m36s
+zookeeper-server-default-0   1/1     Running     0          6m12s
 ----
 
 You should arrive at your workspace:
 
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_workspace.png[]
 
-Now you can click on the `notebooks` folder on the left, open and run the contained file. Click on the double arrow to
-execute the Python scripts. You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from
+Now you can click on the `notebooks` folder on the left, open and run the contained file. Click on the double arrow (⏩️) to
+execute the Python scripts.
+
+You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from
 the discovery `ConfigMap` of the HDFS cluster are located.
 
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
