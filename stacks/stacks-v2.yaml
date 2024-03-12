@@ -498,7 +498,7 @@ stacks:
   gaia-x-security:
     description: >-
       This demo showcases using Gaia-X SSI to log into superset and trino, together with OPA authorization.
-    stackableRelease: 23.11
+    stackableRelease: gaia-x-security-release
     stackableOperators:
       - commons
       - secret
