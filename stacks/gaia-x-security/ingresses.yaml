@@ -1,0 +1,130 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: keycloak
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    name: keycloak
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: keycloak-gaiax-aas-demo.stackable.tech
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: key-server
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - keycloak-gaiax-aas-demo.stackable.tech
+      secretName: keycloak-gaiax-demo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: superset
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    name: superset
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: superset-gaiax-aas-demo.stackable.tech
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: superset-external
+                port:
+                  number: 8088
+  tls:
+    - hosts:
+        - superset-gaiax-aas-demo.stackable.tech
+      secretName: superset-gaiax-demo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: trino
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  labels:
+    name: trino
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: trino-gaiax-aas-demo.stackable.tech
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: trino-coordinator
+                port:
+                  number: 8443
+  tls:
+    - hosts:
+        - trino-gaiax-aas-demo.stackable.tech
+      secretName: trino-gaiax-demo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: aas
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    name: aas
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: aas-gaiax-aas-demo.stackable.tech
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: auth-server
+                port:
+                  number: 9000
+  tls:
+    - hosts:
+        - aas-gaiax-aas-demo.stackable.tech
+      secretName: aas-gaiax-demo
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tsa
+  annotations:
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+  labels:
+    name: tsa
+spec:
+  ingressClassName: nginx
+  rules:
+    - host: tsa-gaiax-aas-demo.stackable.tech
+      http:
+        paths:
+          - pathType: Prefix
+            path: "/"
+            backend:
+              service:
+                name: tsa
+                port:
+                  number: 5000
+  tls:
+    - hosts:
+        - tsa-gaiax-aas-demo.stackable.tech
+      secretName: tsa-gaiax-demo
