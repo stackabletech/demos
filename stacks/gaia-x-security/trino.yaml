@@ -44,3 +44,13 @@ spec:
     roleGroups:
       default:
         replicas: 1
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpcds
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpcds: {}
