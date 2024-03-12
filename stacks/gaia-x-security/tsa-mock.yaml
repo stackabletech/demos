@@ -21,17 +21,21 @@ data:
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Login</title>
     </head>
-    <body>
-        <h2>Login</h2>
-        <form action="/login" method="post">
-            <label for="username">Select a username:</label>
-            <select name="claims" id="username">
-                {}
-            </select>
-            <input type="hidden" name="requestId" value="{}">
-            <br><br>
-            <input type="submit" value="Login">
-        </form>
+    <body style="height: 100%; margin: 0; display: flex; justify-content: center; align-items: center; font-size: 200%; text-align: center;">
+        <div>
+            <h2>Accept login request</h2>
+            <p>request ID: "{}"</p>
+            <p>This step would usually be done in the PCM/OCM</p>
+            <form action="/login" method="post">
+                <label for="username">Login as:</label>
+                <select name="claims" id="username" style="font-size: 1em;">
+                    {}
+                </select>
+                <input type="hidden" name="requestId" value="{}">
+                <br><br>
+                <input type="submit" value="send" style="font-size: 1em; padding: 0.5em 1em;">
+            </form>
+        </div>
     </body>
     </html>
     """
@@ -80,7 +84,7 @@ data:
                 self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 usernames_options = "\n".join([f"<option value='{json.dumps(v)}'>{k}</option>" for k, v in users.items()])
-                self.wfile.write(login_form.format(usernames_options, request_id).encode())
+                self.wfile.write(login_form.format(request_id, usernames_options, request_id).encode())
                 self.print_request()
             elif parsed_url.path.startswith('/redirect'):
                 request_id = parsed_url.query.split('=')[1]
