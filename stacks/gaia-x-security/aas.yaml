@@ -36,16 +36,16 @@ spec:
         - name: SPRING_DATASOURCE_USERNAME
           value: aas
         - name: SPRING_DATASOURCE_PASSWORD
-          value: aas 
+          value: aas
         - name: AAS_IAM_BASEURI
-          value: http://key-server:8080
+          value: https://keycloak-gaiax-aas-demo.stackable.tech
         - name: AAS_TSA_URL
-          value: http://tsa:5000
+          value: https://tsa-gaiax-aas-demo.stackable.tech
         - name: AAS_OIDC_ISSUER
-          value: http://auth-server:9000
+          value: https://aas-gaiax-aas-demo.stackable.tech
         - name: AAS_CACHE_TTL
           value: 5m
         - name: LOGGING_LEVEL_EU_XFSC_AAS
           value: DEBUG
         - name: AAS_INVITATION_URI
-          value: http://localhost:5000/requests?
+          value: https://tsa-gaiax-aas-demo.stackable.tech/requests?

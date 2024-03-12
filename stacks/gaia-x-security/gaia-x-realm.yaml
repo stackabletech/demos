@@ -913,7 +913,7 @@ data:
           "clientAuthenticatorType": "client-secret",
           "redirectUris": [
             "http://test-server:8990/*",
-            "http://key-server:8080/*"
+            "https://keycloak-gaiax-aas-demo.stackable.tech/*"
           ],
           "webOrigins": [],
           "notBefore": 0,
@@ -1600,14 +1600,14 @@ data:
           "linkOnly": false,
           "firstBrokerLoginFlowAlias": "first broker login",
           "config": {
-            "userInfoUrl": "http://auth-server:9000/userinfo",
+            "userInfoUrl": "https://aas-gaiax-aas-demo.stackable.tech/userinfo",
             "clientId": "aas-app-oidc",
-            "tokenUrl": "http://auth-server:9000/oauth2/token",
+            "tokenUrl": "https://aas-gaiax-aas-demo.stackable.tech/oauth2/token",
             "uiLocales": "false",
-            "issuer": "http://auth-server:9000",
+            "issuer": "https://aas-gaiax-aas-demo.stackable.tech",
             "useJwksUrl": "true",
             "loginHint": "false",
-            "authorizationUrl": "http://auth-server:9000/oauth2/authorize",
+            "authorizationUrl": "https://aas-gaiax-aas-demo.stackable.tech/oauth2/authorize",
             "clientAuthMethod": "client_secret_post",
             "syncMode": "IMPORT",
             "clientSecret": "secret",
@@ -1629,15 +1629,15 @@ data:
           "firstBrokerLoginFlowAlias": "first broker login",
           "config": {
             "loginHint": "false",
-            "userInfoUrl": "http://auth-server:9000/userinfo",
+            "userInfoUrl": "https://aas-gaiax-aas-demo.stackable.tech/userinfo",
             "clientId": "aas-app-siop",
-            "tokenUrl": "http://auth-server:9000/oauth2/token",
-            "authorizationUrl": "http://auth-server:9000/oauth2/authorize",
+            "tokenUrl": "https://aas-gaiax-aas-demo.stackable.tech/oauth2/token",
+            "authorizationUrl": "https://aas-gaiax-aas-demo.stackable.tech/oauth2/authorize",
             "clientAuthMethod": "client_secret_basic",
             "syncMode": "IMPORT",
             "clientSecret": "secret2",
             "defaultScope": "openid profile email",
-            "issuer": "http://auth-server:9000",
+            "issuer": "https://aas-gaiax-aas-demo.stackable.tech",
             "useJwksUrl": "true"
           }
         }

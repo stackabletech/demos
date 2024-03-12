@@ -89,7 +89,7 @@ data:
             elif parsed_url.path.startswith('/redirect'):
                 request_id = parsed_url.query.split('=')[1]
                 self.send_response(302)
-                self.send_header('Location', f"http://localhost:5000/requests?requestId={request_id}")
+                self.send_header('Location', f"https://tsa-gaiax-aas-demo.stackable.tech/requests?requestId={request_id}")
                 self.end_headers()
 
         def do_POST(self):
@@ -102,7 +102,7 @@ data:
                 self.print_request(post_data)
                 request_id = f"request-{uuid.uuid4()}"
                 response_body = json.dumps({
-                    'link': f"http://tsa:5000/redirect?requestId={request_id}",
+                    'link': f"https://tsa-gaiax-aas-demo.stackable.tech/redirect?requestId={request_id}",
                     'requestId': request_id,
                     'status': 'pending',
                 })
