@@ -495,6 +495,65 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  gaia-x-security:
+    description: >-
+      This demo showcases using Gaia-X SSI to log into superset and trino, together with OPA authorization.
+    stackableRelease: 23.11
+    stackableOperators:
+      - commons
+      - secret
+      - trino
+      - superset
+      - opa
+    labels:
+      - authentication
+      - sso
+    manifests:
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
+      - helmChart: stacks/gaia-x-security/postgres-aas.yaml
+      - plainYaml: stacks/gaia-x-security/serviceaccount.yaml
+      - plainYaml: stacks/gaia-x-security/keycloak.yaml
+      - plainYaml: stacks/gaia-x-security/setup-keycloak.yaml
+      - plainYaml: stacks/gaia-x-security/opa.yaml
+      - plainYaml: stacks/gaia-x-security/policies.yaml
+      - plainYaml: stacks/gaia-x-security/trino.yaml
+      - plainYaml: stacks/gaia-x-security/superset.yaml
+      - plainYaml: stacks/gaia-x-security/aas.yaml
+      - plainYaml: stacks/gaia-x-security/gaia-x-realm.yaml
+      - plainYaml: stacks/gaia-x-security/tsa-mock.yaml
+    supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
+    resourceRequests:
+      cpu: 7850m
+      memory: 23142Mi
+      pvc: 34Gi
+    parameters:
+      - name: alicePassword
+        description: Password of the user alice, which can log into Trino and Superset
+        default: alicealice
+      - name: bobPassword
+        description: Password of the user bob, which can log into Trino and Superset
+        default: bobbob
+      - name: keycloakAdminPassword
+        description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: keycloakSupersetClientSecret
+        description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
+        default: supersetsuperset
+      - name: keycloakTrinoClientSecret
+        description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
+        default: trinotrino
+      - name: keycloakDruidClientSecret
+        description: Secret ID of the Keycloak Druid client that is used by Druid to connect to Keycloak to authenticate users
+        default: druiddruid
+      - name: keycloakDruidCookiePassphrase
+        description: Passphrase for encrypting the cookies used to manage authentication session with browser.
+        default: druiddruidcookiepassphrase
+      - name: druidSystemUserPassword
+        description: Password for the Druid user druid_system
+        default: druidsystemuserpassword
+      - name: supersetSecretKey
+        description: Superset's secret key used to generate e.g. user session tokens
+        default: supersetSecretKey
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana

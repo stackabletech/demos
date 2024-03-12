@@ -1,0 +1,203 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: tsa-config
+data:
+  tsa.py: |
+    from http.server import BaseHTTPRequestHandler, HTTPServer
+    from urllib.parse import urlparse
+    import json
+    import uuid
+    import sys
+    import cgi
+    import io
+
+    login_form = """
+    <!DOCTYPE html>
+    <html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Login</title>
+    </head>
+    <body>
+        <h2>Login</h2>
+        <form action="/login" method="post">
+            <label for="username">Select a username:</label>
+            <select name="claims" id="username">
+                {}
+            </select>
+            <input type="hidden" name="requestId" value="{}">
+            <br><br>
+            <input type="submit" value="Login">
+        </form>
+    </body>
+    </html>
+    """
+
+    users = {
+        'Max (Marispace)': {
+            'preferred_username': 'max_from_miele',
+            'name': 'Max',
+            'family_name': 'Mustermann',
+            'sub': 'max123',
+            'email': 'max@miele.com',
+        },
+        'Sam (Stackable)': {
+            'preferred_username': 'stackable_sam',
+            'name': 'Sam',
+            'family_name': 'McStackface',
+            'sub': 'sam123',
+            'email': 'sam@stackable.tech',
+        }
+    }
+
+    REQUESTS = {'a': 'b'}
+
+    def eprint(*args, **kwargs):
+        print(*args, file=sys.stderr, **kwargs)
+
+    def parse_form_data(request_body):
+        form = cgi.FieldStorage(
+            fp=io.BytesIO(request_body),
+            environ={'REQUEST_METHOD': 'POST',
+                    'CONTENT_TYPE': 'application/x-www-form-urlencoded'}
+        )
+
+        parsed_data = {}
+        for field in form.keys():
+            parsed_data[field] = form[field].value
+
+        return parsed_data
+
+    class RequestHandler(BaseHTTPRequestHandler):
+        def do_GET(self):
+            parsed_path = urlparse(self.path)
+            if parsed_path.path.startswith('/requests'):
+                request_id = parsed_path.path.split('/')[2]
+                self.send_response(200)
+                self.send_header('Content-type', 'text/html')
+                self.end_headers()
+                usernames_options = "\n".join([f"<option value='{json.dumps(v)}'>{k}</option>" for k, v in users.items()])
+                self.wfile.write(login_form.format(usernames_options, request_id).encode())
+                self.print_request()
+            elif parsed_path.path.startswith('/redirect'):
+                request_id = parsed_path.path.split('/')[2]
+                self.send_response(302)
+                self.send_header('Location', f"http://localhost:5000/requests?requestId={request_id}")
+                self.end_headers()
+
+        def do_POST(self):
+            if self.path == '/policy/example/GetLoginProofInvitation/1.0/evaluation':
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                self.print_request(post_data)
+                request_id = f"request-{uuid.uuid4()}"
+                response_body = json.dumps({
+                    'link': f"http://tsa:5000/requests/{request_id}",
+                    'requestId': request_id,
+                    'status': 'pending',
+                })
+                self.wfile.write(response_body.encode('utf-8'))
+                REQUESTS[request_id] = {
+                    'requestId': request_id,
+                    'status': 'pending'
+                }
+
+            elif self.path == '/policy/example/GetLoginProofResult/1.0/evaluation':
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                self.print_request(post_data)
+                request_body = json.loads(post_data)
+                request_id = request_body['requestId']
+                if REQUESTS[request_id]['status'] == 'pending':
+                    self.send_response(204)
+                else:
+                    self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                response_body = json.dumps(REQUESTS[request_id])
+                self.wfile.write(response_body.encode('utf-8'))
+
+            elif self.path == '/login':
+                self.send_response(200)
+                self.end_headers()
+                content_length = int(self.headers['Content-Length'])
+                post_data = self.rfile.read(content_length)
+                self.print_request(post_data)
+                form_data = parse_form_data(post_data)
+                request_id = form_data['requestId']
+                REQUESTS[request_id] = json.loads(form_data['claims'])
+                REQUESTS[request_id]['requestId'] = request_id
+                REQUESTS[request_id]['status'] = 'accepted'
+                REQUESTS[request_id]['scopes'] = 'openid profile email'
+                self.wfile.write('OK')
+
+        def print_request(self, post_data=None):
+            eprint(f"Received {self.command} request for {self.path}")
+            if post_data:
+                eprint("Request body:")
+                eprint(post_data.decode('utf-8'))
+            eprint("=" * 40)
+
+    def run_server(host='', port=5000):
+        server_address = (host, port)
+        httpd = HTTPServer(server_address, RequestHandler)
+        eprint(f"Server running on {host}:{port}")
+        httpd.serve_forever()
+
+    if __name__ == "__main__":
+        run_server()
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tsa
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: tsa
+  template:
+    metadata:
+      labels:
+        app: tsa
+    spec:
+      containers:
+      - name: python
+        image: python:3.9
+        command: ["python", "/tsa.py"]
+        ports:
+        - containerPort: 5000
+        resources:
+          limits:
+            cpu: 1
+            memory: 512Mi
+          requests:
+            cpu: 500m
+            memory: 512Mi
+        volumeMounts:
+        - name: app-volume
+          mountPath: /tsa.py
+          subPath: tsa.py
+      volumes:
+      - name: app-volume
+        configMap:
+          name: tsa-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: tsa
+spec:
+  selector:
+    app: tsa
+  ports:
+    - protocol: TCP
+      port: 5000
+      targetPort: 5000
+  type: ClusterIP
