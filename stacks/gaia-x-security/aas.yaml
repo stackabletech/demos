@@ -48,4 +48,4 @@ spec:
         - name: LOGGING_LEVEL_EU_XFSC_AAS
           value: DEBUG
         - name: AAS_INVITATION_URI
-          value: http://localhost:5000/requests
+          value: http://localhost:5000/requests?
