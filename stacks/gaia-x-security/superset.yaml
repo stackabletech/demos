@@ -32,7 +32,7 @@ spec:
       superset_config.py:
         AUTH_TYPE: AUTH_OAUTH
         AUTH_USER_REGISTRATION: "true"
-        AUTH_USER_REGISTRATION_ROLE: Gamma
+        AUTH_USER_REGISTRATION_ROLE: Gamma_extended
         OAUTH_PROVIDERS: |-
           [
             { 'name': 'keycloak',
@@ -66,3 +66,53 @@ spec:
                   secretKeyRef:
                     name: keycloak-client-secrets
                     key: superset
+          - name: create-default-role
+            image: docker.stackable.tech/stackable/superset:3.1.0-stackable0.0.0-dev
+            env:
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: connections.secretKey
+                    name: superset-credentials
+              - name: SQLALCHEMY_DATABASE_URI
+                valueFrom:
+                  secretKeyRef:
+                    key: connections.sqlalchemyDatabaseUri
+                    name: superset-credentials
+            volumeMounts:
+              - mountPath: /stackable/config
+                name: config
+            command:
+              - /bin/bash
+              - -c
+              - |
+                mkdir --parents /stackable/app/pythonpath && cp /stackable/config/* /stackable/app/pythonpath
+                python - << EOF
+                import socket
+                import time
+
+                while not socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost', 8088)) == 0:
+                    print("Superset not up yet, sleeping ...")
+                    time.sleep(1)
+                EOF
+                superset fab export-roles --path data.json
+                python - << EOF
+                import json
+
+                with open('data.json') as f:
+                    data = json.load(f)
+
+                gamma_permissions = [obj['permissions'] for obj in data if obj['name'] == 'Gamma'][0]
+                sql_lab_permissions = [obj['permissions'] for obj in data if obj['name'] == 'sql_lab'][0]
+
+                gamma_extended = [{
+                    'name': 'Gamma_extended',
+                    'permissions': gamma_permissions + sql_lab_permissions
+                }]
+
+                with open('gamma_extended.json', 'w') as f:
+                    json.dump(gamma_extended, f)
+                EOF
+                superset fab import-roles --path gamma_extended.json
+                echo "Role imported!"
+                sleep infinity
