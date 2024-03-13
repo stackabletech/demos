@@ -66,34 +66,3 @@ metadata:
   name: keycloak-admin-credentials
 stringData:
   admin: "{{ keycloakAdminPassword }}"
----
-# This job creates a ConfigMap with connection info for Keycloak
-apiVersion: batch/v1
-kind: Job
-metadata:
-  name: propagate-keycloak-address
-spec:
-  template:
-    spec:
-      containers:
-      - name: propagate-keycloak-address
-        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev # We need 0.0.0-dev, so we get kubectl
-        command:
-          - bash
-          - -x
-          - -euo
-          - pipefail
-          - -c
-          - |
-            echo "Determining Keycloak public reachable address"
-            KEYCLOAK_ADDRESS=$(kubectl get svc key-server -o json | jq -r --argfile endpoints <(kubectl get endpoints key-server -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "http") | .nodePort | tostring)')
-            echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
-
-            echo "Writing Keycloak address to ConfigMap keycloak"
-            kubectl create configmap keycloak --from-literal="KEYCLOAK=key-server:8080" --from-literal="KEYCLOAK_BASE_URI=http://key-server:8080" --from-literal="KEYCLOAK_DISCOVERY_URL=http://key-server:8080/realms/gaia-x/.well-known/openid-configuration" -o yaml --dry-run | kubectl apply -f -
-      serviceAccountName: demo-serviceaccount
-      restartPolicy: OnFailure
-  backoffLimit: 20 # give some time for the Keycloak to be available
-
-
-  # kubectl create configmap keycloak --from-literal="KEYCLOAK=$KEYCLOAK_ADDRESS" --from-literal="KEYCLOAK_BASE_URI=http://$KEYCLOAK_ADDRESS" --from-literal="KEYCLOAK_DISCOVERY_URL=http://$KEYCLOAK_ADDRESS/realms/gaia-x/.well-known/openid-configuration" -o yaml --dry-run | kubectl apply -f -

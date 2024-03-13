@@ -19,53 +19,23 @@ metadata:
   name: superset
 spec:
   image:
-    productVersion: 2.1.0
-    stackableVersion: 23.7.0
+    productVersion: 3.1.0
+    stackableVersion: 0.0.0-dev
   clusterConfig:
     credentialsSecret: superset-credentials
     listenerClass: external-unstable
+    authentication:
+      - authenticationClass: keycloak
+        oidc:
+          clientCredentialsSecret: superset-keycloak-client
+        userRegistrationRole: Gamma_extended
   nodes:
     roleGroups:
       default:
         replicas: 1
-    configOverrides:
-      superset_config.py:
-        AUTH_TYPE: AUTH_OAUTH
-        AUTH_USER_REGISTRATION: "true"
-        AUTH_USER_REGISTRATION_ROLE: Gamma_extended
-        OAUTH_PROVIDERS: |-
-          [
-            { 'name': 'keycloak',
-              'icon': 'fa-key',
-              'token_key': 'access_token',
-              'remote_app': {
-                'client_id': 'superset',
-                'client_secret': f'{os.environ.get("SUPERSET_CLIENT_SECRET")}',
-                'api_base_url': f'http://{os.environ.get("KEYCLOAK_ADDRESS")}/realms/gaia-x/protocol/openid-connect',
-                'client_kwargs': {
-                  'scope': 'email profile openid'
-                },
-                'access_token_url': f'http://{os.environ.get("KEYCLOAK_ADDRESS")}/realms/gaia-x/protocol/openid-connect/token',
-                'authorize_url': f'http://{os.environ.get("KEYCLOAK_ADDRESS")}/realms/gaia-x/protocol/openid-connect/auth',
-                'request_token_url': None,
-              },
-            }
-          ]
     podOverrides:
       spec:
         containers:
-          - name: superset
-            env:
-              - name: KEYCLOAK_ADDRESS
-                valueFrom:
-                  configMapKeyRef:
-                    name: keycloak
-                    key: KEYCLOAK
-              - name: SUPERSET_CLIENT_SECRET
-                valueFrom:
-                  secretKeyRef:
-                    name: keycloak-client-secrets
-                    key: superset
           - name: create-default-role
             image: docker.stackable.tech/stackable/superset:3.1.0-stackable0.0.0-dev
             env:
@@ -116,3 +86,11 @@ spec:
                 superset fab import-roles --path gamma_extended.json
                 echo "Role imported!"
                 sleep infinity
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: superset-keycloak-client
+stringData:
+  clientId: superset
+  clientSecret: "{{ keycloakSupersetClientSecret }}"

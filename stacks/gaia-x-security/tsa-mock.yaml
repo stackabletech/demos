@@ -45,14 +45,14 @@ data:
             'preferred_username': 'max_from_miele',
             'name': 'Max',
             'family_name': 'Mustermann',
-            'sub': 'max123',
+            'sub': 'max_from_miele',
             'email': 'max@miele.com',
         },
         'Sam (Stackable)': {
             'preferred_username': 'stackable_sam',
             'name': 'Sam',
             'family_name': 'McStackface',
-            'sub': 'sam123',
+            'sub': 'stackable_sam',
             'email': 'sam@stackable.tech',
         }
     }

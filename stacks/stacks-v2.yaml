@@ -513,11 +513,15 @@ stacks:
       - helmChart: stacks/gaia-x-security/postgres-aas.yaml
       - plainYaml: stacks/gaia-x-security/serviceaccount.yaml
       - plainYaml: stacks/gaia-x-security/keycloak.yaml
+      - plainYaml: stacks/gaia-x-security/keycloak-authenticationclass.yaml
       - plainYaml: stacks/gaia-x-security/setup-keycloak.yaml
       - plainYaml: stacks/gaia-x-security/opa.yaml
-      - plainYaml: stacks/gaia-x-security/policies.yaml
       - plainYaml: stacks/gaia-x-security/trino.yaml
+      # - plainYaml: stacks/gaia-x-security/trino-policies.yaml
+      - plainYaml: stacks/gaia-x-security/trino-regorules.yaml
+      # - plainYaml: stacks/gaia-x-security/uif-regorules.yaml
       - plainYaml: stacks/gaia-x-security/superset.yaml
+      - plainYaml: stacks/gaia-x-security/setup-superset.yaml
       - plainYaml: stacks/gaia-x-security/aas.yaml
       - plainYaml: stacks/gaia-x-security/gaia-x-realm.yaml
       - plainYaml: stacks/gaia-x-security/tsa-mock.yaml
@@ -554,6 +558,10 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+      - name: trinoSupersetUserPassword
+        description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
+        default: supersetsuperset
+
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
