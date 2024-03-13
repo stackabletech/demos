@@ -7,6 +7,27 @@
 :bulkload: https://hbase.apache.org/book.html#arch.bulk.load
 :importtsv: https://hbase.apache.org/book.html#importtsv
 
+[source,console]
+----
+$ stackablectl demo install hbase-hdfs-load-cycling-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System Requirements
+
+To run this demo, your system needs at least:
+
+* 3 {k8s-cpu}[cpu units] (core/hyperthread)
+* 6GiB memory
+* 16GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -24,23 +45,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::hbase-hdfs-load-cycling-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 3 {k8s-cpu}[cpu units] (core/hyperthread)
-* 6GiB memory
-* 16GiB disk storage
-
-== Installing the Demo
-
-[source,console]
-----
-$ stackablectl demo install hbase-hdfs-load-cycling-data
-----
-
-== Listing Deployed Stacklets
+== Listing the deployed Stackable services
 
 To list the installed Stackable services run the following command: `stackablectl stacklet list`
 
@@ -111,9 +116,9 @@ about the data and thus increases the performance of hbase. When connecting to t
 and executing `list`, you will see the created table. However, it'll contain 0 rows at this point. You can connect to
 the shell via:
 
-[source]
+[source,console]
 ----
-kubectl exec -it hbase-master-default-0 -- bin/hbase shell
+$ kubectl exec -it hbase-master-default-0 -- bin/hbase shell
 ----
 
 NOTE: If you use k9s, you can drill into the `hbase-master-default-0` pod and execute `bin/hbase shell`.
@@ -185,7 +190,7 @@ COLUMN FAMILIES DESCRIPTION
 {NAME => 'started_at', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_ENCODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65536', REPLICATION_SCOPE => '0'}
 ----
 
-== Accessing the Hbase Web Interface
+== Accessing the Hbase web interface
 
 [TIP]
 ====
@@ -201,7 +206,7 @@ From the start page you can check more details, for example a list of created ta
 
 image::hbase-hdfs-load-cycling-data/hbase-table-ui.png[]
 
-== Accessing the HDFS Web Interface
+== Accessing the HDFS web interface
 
 You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of 
 the namenodes. 
