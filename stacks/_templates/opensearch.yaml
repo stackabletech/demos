@@ -3,7 +3,7 @@ name: opensearch
 repo:
   name: opensearch
   url: https://opensearch-project.github.io/helm-charts
-version: 2.16.1
+version: 2.18.0
 options:
   labels:
     stackable.tech/vendor: Stackable
