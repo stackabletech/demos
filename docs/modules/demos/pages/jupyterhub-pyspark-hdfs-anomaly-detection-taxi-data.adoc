@@ -22,6 +22,25 @@ publishing a discovery `ConfigMap` for the HDFS cluster. This `ConfigMap` is the
 a small sample of the {nyc-taxi}[NYC taxi trip dataset], which is analyzed with a notebook that is provisioned
 automatically in the JupyterLab interface.
 
+[source,console]
+----
+$ stackablectl demo install jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System Requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 32GiB memory
+* 22GiB disk storage
+
 == Aim / Context
 
 This demo does not use the Stackable spark-k8s-operator but rather delegates the creation of executor pods to
@@ -46,21 +65,7 @@ This demo will:
 * Train an anomaly detection model using PySpark on the data available in HDFS
 * Perform some predictions and visualize anomalies
 
-[#system-requirements]
-== System Requirements
 
-To run this demo, your system needs at least:
-
-* 8 {k8s-cpu}[cpu units] (core/hyperthread)
-* 32GiB memory
-* 22GiB disk storage
-
-== Installing the Demo
-
-[source,bash]
-----
-stackablectl demo install jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
-----
 
 == HDFS
 
@@ -69,7 +74,7 @@ The Stackable Operator for Apache HDFS will spin up an HDFS cluster to store the
 
 Before trying out the notebook example in Jupyter, check if the taxi data was loaded to HDFS successfully:
 
-[source,bash]
+[source,console]
 ----
 $ kubectl exec -c namenode -it hdfs-namenode-default-0 -- /bin/bash -c "./bin/hdfs dfs -ls /ny-taxi-data/raw"
 Found 1 items
@@ -82,7 +87,7 @@ There should be one parquet file containing taxi trip data from September 2020.
 
 Have a look at the available Pods before logging in (operator pods are left out for clarity, you will see more Pods):
 
-[source,bash]
+[source,console]
 ----
 $ kubectl get pods
 NAME                         READY   STATUS      RESTARTS   AGE
@@ -98,16 +103,12 @@ zookeeper-server-default-0   1/1     Running     0          5m12s
 
 JupyterHub will create a Pod for each active user. In order to reach the JupyterHub web interface, create a port-forward:
 
-[source,bash]
+[source,console]
 ----
 $ kubectl port-forward service/proxy-public 8080:http
 ----
 
-Now access the JupyterHub web interface via:
-
-----
-http://localhost:8080
-----
+Now access the JupyterHub web interface via http://localhost:8080
 
 You should see the JupyterHub login page.
 
@@ -116,7 +117,7 @@ image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_login.png
 Log in with username `admin` and password `adminadmin`. There should appear a new pod called `jupyter-admin` (operator
 pods are left out for clarity, you will see more Pods):
 
-[source,bash]
+[source,console]
 ----
 $ kubectl get pods
 NAME                         READY   STATUS      RESTARTS   AGE
@@ -150,7 +151,7 @@ will mean that Python libraries either need to be baked into the image (this dem
 generate an image containing scikit-learn, pandas and their dependencies) or {spark-pkg}[packaged in some other way].
 ====
 
-== Model Details
+== Model details
 
 The job uses an implementation of the Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn
 {scikit-lib}[library]: the model is trained and then invoked by a user-defined function (see {forest-article}[this

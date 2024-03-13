@@ -3,6 +3,8 @@
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -20,7 +22,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::logging/overview.png[]
 
-== OpenSearch Prerequisites
+== OpenSearch prerequisites
 
 === MacOS and Windows
 
@@ -36,14 +38,14 @@ To check the current value, run this command:
 
 [source,console]
 ----
-sysctl vm.max_map_count
+$ sysctl vm.max_map_count
 ----
 
 The limit can be temporarily increased with:
 
 [source,console]
 ----
-sudo sysctl --write vm.max_map_count=262144
+$ sudo sysctl --write vm.max_map_count=262144
 ----
 
 To permanently increase the value, add the following line to `/etc/sysctl.conf`:
@@ -64,7 +66,14 @@ To run this demo, your system needs at least:
 * 5GiB memory
 * 27GiB disk storage
 
-== List Deployed Stacklets
+== Installing the Demo
+
+[source,console]
+----
+$ stackablectl demo install logging
+----
+
+== List the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 

@@ -1,6 +1,27 @@
 = airflow-scheduled-job
 :page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
 
+[source,console]
+----
+$ stackablectl demo install airflow-scheduled-job
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
+* 9GiB memory
+* 24GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators
@@ -15,22 +36,6 @@ This demo will
 You can see the deployed products and their relationship in the following diagram:
 
 image::airflow-scheduled-job/overview.png[]
-
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
-* 9GiB memory
-* 24GiB disk storage
-
-== Install the demo
-
-[source,console]
-----
-$ stackablectl demo install airflow-scheduled-job
-----
 
 == List deployed Stackable services
 

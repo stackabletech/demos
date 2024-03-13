@@ -2,9 +2,9 @@
 
 This demo can be installed on most cloud managed Kubernetes clusters as well as on premise or on a reasonably provisioned laptop. Install this demo on an existing Kubernetes cluster:
 
-[source,bash]
+[source,console]
 ----
-stackablectl demo install signal-processing
+$ stackablectl demo install signal-processing
 ----
 
 [WARNING]
