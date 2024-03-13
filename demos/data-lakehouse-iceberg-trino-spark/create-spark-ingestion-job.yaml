@@ -44,18 +44,16 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        custom: docker.stackable.tech/demos/pyspark-k8s-with-kafka-and-iceberg:3.3.0-stackable0.2.0
-        productVersion: 3.3.0
+        productVersion: 3.5.0
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
-      # deps:
-      #   packages:
-      #     - org.apache.iceberg:iceberg-spark-runtime-3.3_2.12:1.1.0
-      #     - org.apache.spark:spark-sql-kafka-0-10_2.12:3.3.0
+      deps:
+        packages:
+          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
       s3connection:
         reference: minio
       sparkConf:
-        spark.kubernetes.container.image.pullPolicy: Always
         spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
         spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
         spark.sql.catalog.lakehouse.type: hive
@@ -66,6 +64,10 @@ data:
 
         # As of 2023-10-31 the operator does not set this
         spark.executor.cores: "4"
+
+        # AFAIK This can be removed in 24.3
+        spark.driver.userClassPathFirst: "false"
+        spark.executor.userClassPathFirst: "false"
       volumes:
         - name: script
           configMap:
