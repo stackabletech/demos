@@ -3,32 +3,30 @@
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
-== Overview
+[source,console]
+----
+$ stackablectl demo install logging
+----
 
-This demo will
+CAUTION: See the notes under <<opensearch-prerequisites,OpenSearch Prerequisites>>
 
-* Install the required Stackable operators.
-* Spin up the following data products:
-** *Apache ZooKeeper*: A centralized service for maintaining configuration information, naming, providing distributed
-   synchronization, and providing group services. This demo makes its log data observable in OpenSearch Dashboards.
-** *Vector*: A tool for building observability pipelines. This demo uses Vector as a log agent to gather and transform
-   the logs and as an aggregator to forward the collected logs to OpenSearch.
-** *OpenSearch*: A data store and search engine. This demo uses it to store and index the of the log data.
-** *OpenSearch Dashboards*: A visualization and user interface. This demo uses it to make the log data easily accessible
-   to the user.
-* Create a view in OpenSearch Dashboards for convenient browsing the log data.
+[#system-requirements]
+== System Requirements
 
-You can see the deployed products and their relationship in the following diagram:
+To run this demo, your system needs at least:
 
-image::logging/overview.png[]
+* 6.5 {k8s-cpu}[cpu units] (core/hyperthread)
+* 5GiB memory
+* 27GiB disk storage
 
-== OpenSearch prerequisites
+[#opensearch-prerequisites]
+=== OpenSearch prerequisites
 
-=== MacOS and Windows
+==== MacOS and Windows
 
 If you use MacOS or Windows and use Docker to run Kubernetes, set the RAM to at least 4 GB in _Preferences > Resources_.
 
-=== Linux
+==== Linux
 
 OpenSearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts
 are likely too low - usually 65530, which may result in out-of-memory exceptions. So, the Linux setting
@@ -57,21 +55,25 @@ vm.max_map_count=262144
 
 Then run `sudo sysctl --load` to reload.
 
-[#system-requirements]
-== System Requirements
+== Overview
 
-To run this demo, your system needs at least:
+This demo will
 
-* 6.5 {k8s-cpu}[cpu units] (core/hyperthread)
-* 5GiB memory
-* 27GiB disk storage
+* Install the required Stackable operators.
+* Spin up the following data products:
+** *Apache ZooKeeper*: A centralized service for maintaining configuration information, naming, providing distributed
+   synchronization, and providing group services. This demo makes its log data observable in OpenSearch Dashboards.
+** *Vector*: A tool for building observability pipelines. This demo uses Vector as a log agent to gather and transform
+   the logs and as an aggregator to forward the collected logs to OpenSearch.
+** *OpenSearch*: A data store and search engine. This demo uses it to store and index the of the log data.
+** *OpenSearch Dashboards*: A visualization and user interface. This demo uses it to make the log data easily accessible
+   to the user.
+* Create a view in OpenSearch Dashboards for convenient browsing the log data.
 
-== Installing the Demo
+You can see the deployed products and their relationship in the following diagram:
 
-[source,console]
-----
-$ stackablectl demo install logging
-----
+image::logging/overview.png[]
+
 
 == List the deployed Stackable services
 
@@ -80,15 +82,13 @@ To list the installed Stackable services run the following command:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────────────────┬───────────────────────┬───────────┬──────────────────────────────┐
-│ Product               ┆ Name                  ┆ Namespace ┆ Endpoints                    │
-╞═══════════════════════╪═══════════════════════╪═══════════╪══════════════════════════════╡
-│ opensearch-dashboards ┆ opensearch-dashboards ┆ default   ┆ http http://172.18.0.5:31319 │
-│                       ┆                       ┆           ┆                              │
-│                       ┆                       ┆           ┆                              │
-├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper             ┆ simple-zk             ┆ default   ┆ zk   172.18.0.2:32417        │
-└───────────────────────┴───────────────────────┴───────────┴──────────────────────────────┘
+┌───────────────────────┬───────────────────────┬───────────┬───────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT               ┆ NAME                  ┆ NAMESPACE ┆ ENDPOINTS                     ┆ CONDITIONS                      │
+╞═══════════════════════╪═══════════════════════╪═══════════╪═══════════════════════════════╪═════════════════════════════════╡
+│ zookeeper             ┆ simple-zk             ┆ default   ┆                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opensearch-dashboards ┆ opensearch-dashboards ┆ default   ┆ http  http://172.18.0.2:30595 ┆                                 │
+└───────────────────────┴───────────────────────┴───────────┴───────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -97,12 +97,16 @@ include::partial$instance-hint.adoc[]
 
 You can have a look at the log data within the OpenSearch Dashboards web interface by running
 `stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
-http://172.18.0.5:31319/app/discover?security_tenant=global#/view/logs.
+http://172.18.0.2:30595.
 
 image::logging/login.png[]
 
 Log in with the username `admin` and password `adminadmin`.
 
+NOTE: On first login, you will be presented with some options. Feel free to bypass them to get to the logs.
+
+Click _Discovery_ in the menu to view the recent logs. If you do not see anything, increase the search window to greater than _Last 15 minutes_.
+
 image::logging/logs.png[]
 
-Inspect the logs.
+From here you can inspect the logs. You can select fields on the left side to limit the view to interesting information.
