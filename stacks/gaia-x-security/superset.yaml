@@ -28,7 +28,7 @@ spec:
       - authenticationClass: keycloak
         oidc:
           clientCredentialsSecret: superset-keycloak-client
-        userRegistrationRole: Gamma_extended
+        userRegistrationRole: Alpha_extended
   nodes:
     roleGroups:
       default:
@@ -72,18 +72,18 @@ spec:
                 with open('data.json') as f:
                     data = json.load(f)
 
-                gamma_permissions = [obj['permissions'] for obj in data if obj['name'] == 'Gamma'][0]
+                alpha_permissions = [obj['permissions'] for obj in data if obj['name'] == 'Alpha'][0]
                 sql_lab_permissions = [obj['permissions'] for obj in data if obj['name'] == 'sql_lab'][0]
 
-                gamma_extended = [{
-                    'name': 'Gamma_extended',
-                    'permissions': gamma_permissions + sql_lab_permissions
+                alpha_extended = [{
+                    'name': 'Alpha_extended',
+                    'permissions': alpha_permissions + sql_lab_permissions
                 }]
 
-                with open('gamma_extended.json', 'w') as f:
-                    json.dump(gamma_extended, f)
+                with open('alpha_extended.json', 'w') as f:
+                    json.dump(alpha_extended, f)
                 EOF
-                superset fab import-roles --path gamma_extended.json
+                superset fab import-roles --path alpha_extended.json
                 echo "Role imported!"
                 sleep infinity
 ---

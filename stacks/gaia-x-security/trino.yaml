@@ -19,6 +19,10 @@ spec:
       - authenticationClass: keycloak
         oidc:
           clientCredentialsSecret: trino-keycloak-client
+    authorization:
+      opa:
+        configMapName: opa
+        package: trino
   coordinators:
     roleGroups:
       default:

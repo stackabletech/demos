@@ -8,17 +8,17 @@ metadata:
 data:
 
   verification.rego: |
-    # METADATA
-    # schemas:
-    #   - input: schema.input
-    #   - data.policies: schema.policies
     package trino
 
     import rego.v1
 
-    # METADATA
-    # description: Comparision of requested and actual permissions
-    # entrypoint: true
     default allow := true
+
+    batch contains index if {
+      input.action.operation != "FilterColumns"
+
+      some index, resource in input.action.filterResources
+      allow with input.action.resource as resource
+    }
 
    
