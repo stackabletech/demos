@@ -4,6 +4,7 @@ metadata:
   name: patch-aas-postgres
 spec:
   ttlSecondsAfterFinished: 120
+  backoffLimit: 50
   template:
     spec:
       containers:
@@ -19,5 +20,5 @@ spec:
         - name: PGHOST
           value: postgresql-aas
         image: docker.io/bitnami/postgresql:15.3.0-debian-11-r24
-        command: ["psql",  "-c", "UPDATE oauth2_registered_client SET redirect_uris=replace(redirect_uris,'http://key-server:8080/','https://keycloak-gaiax-aas-demo.stackable.tech/');"]
+        command: ["bash", "-c", "test $(psql --csv -tqc \"SELECT COUNT(*) FROM oauth2_registered_client\") == \"4\" && psql -c \"UPDATE oauth2_registered_client SET redirect_uris=replace(redirect_uris,'http://key-server:8080/','https://keycloak-gaiax-aas-demo.stackable.tech/')\""]
       restartPolicy: Never
