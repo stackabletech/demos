@@ -103,11 +103,11 @@ data:
                     self.wfile.write(json.dumps({'error': 'Both "sub" and "scope" parameters are required.'}).encode('utf-8'))
                     return
 
-                claims = {
-                    'sub': sub,
-                    'e-mail': f"{sub}@example.com",
-                    'company': scope
-                }
+                claims = {}
+                for user in users.values():
+                    if user['sub'] == sub:
+                        claims = user
+                        break
 
                 self.send_response(200)
                 self.send_header('Content-type', 'application/json')
