@@ -1,5 +1,7 @@
 = signal-processing
 
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+
 Install this demo on an existing Kubernetes cluster:
 
 [source,console]
