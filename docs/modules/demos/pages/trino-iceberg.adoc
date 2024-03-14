@@ -483,7 +483,7 @@ select orderpriority_prev, count(*) from orders where custkey in (select custkey
 (5 rows)
 ----
 
-== Scaling up to larger amount of data
+== Scaling up to a larger amount of data
 
 So far, we have executed all the queries against a dataset created from TPC-H with a scale factor of 5. The demo can
 handle much larger data volumes.
