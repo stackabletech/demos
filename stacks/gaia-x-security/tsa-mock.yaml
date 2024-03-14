@@ -41,19 +41,29 @@ data:
     """
 
     users = {
-        'Max (Marispace)': {
-            'preferred_username': 'max_from_miele',
-            'name': 'Max',
-            'family_name': 'Mustermann',
-            'sub': 'max_from_miele',
-            'email': 'max@miele.com',
+        'Dave Dataowner': {
+            'sub': 'dave1',
+            'preferred_username': 'dave1',
+            'name': 'Dave',
+            'family_name': 'Dataowner',
+            'company': 'Onlineshop24',
+            'email': 'dave@onlineshop24.com',
         },
-        'Sam (Stackable)': {
-            'preferred_username': 'stackable_sam',
+        'Alice Customer Analytics': {
+            'sub': 'alice2',
+            'preferred_username': 'alice2',
+            'name': 'Alice',
+            'family_name': 'Analytics',
+            'company': 'AwesomeAnalytics',
+            'email': 'alice@awesome-analytics.com',
+        },
+        'Sam Shipper': {
+            'sub': 'sam3',
+            'preferred_username': 'sam3',
             'name': 'Sam',
-            'family_name': 'McStackface',
-            'sub': 'stackable_sam',
-            'email': 'sam@stackable.tech',
+            'family_name': 'Shipper',
+            'company': 'SwiftShip',
+            'email': 'sam@swiftship.com',
         }
     }
 
