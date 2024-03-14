@@ -8,11 +8,29 @@
 :pegelonline: https://www.pegelonline.wsv.de/webservice/ueberblic
 :kcat: https://github.com/edenhill/kcat
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install nifi-kafka-druid-water-level-data
+----
+
 [CAUTION]
 ====
 This demo only runs in the `default` namespace, as a `ServiceAccount` will be created. Additionally, we have to use the
 FQDN service names (including the namespace), so that the used TLS certificates are valid.
 ====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 9 {k8s-cpu}[cpu units] (core/hyperthread)
+* 30GiB memory
+* 75GiB disk storage
+
+== Overview
 
 This demo will
 
@@ -41,16 +59,7 @@ charts. You can see the deployed products and their relationship in the followin
 
 image::nifi-kafka-druid-water-level-data/overview.png[]
 
-[#system-requirements]
-== System requirements
-
-To run this demo, your system needs at least:
-
-* 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 30GiB memory
-* 75GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 
@@ -87,7 +96,7 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
-== Inspect Data in Kafka
+== Inspect data in Kafka
 
 Kafka is an event streaming platform to stream the data in near real-time. All the messages put in and read from Kafka
 are structured in dedicated queues called topics. The test data will be put into a topic called earthquakes. The records
@@ -100,13 +109,13 @@ wanting to connect to Kafka must present a valid TLS certificate. The easiest wa
 you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
 Kafka Pod.
 
-=== List Available Topics
+=== List the available Topics
 
 You can execute a command on the Kafka broker to list the available topics as follows:
 
 [source,console]
 ----
-kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:31146 (controller)
@@ -139,10 +148,15 @@ partitions each.
 To see some records sent to Kafka, run the following commands. You can change the number of records to
 print via the `-c` parameter.
 
-// Choosing json over console here, because most part is json and it improves syntax highlighting
+[source,console]
+----
+$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t stations -c 2"
+----
+
+Below is an example of the output of two records:
+
 [source,json]
 ----
-kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t stations -c 2"
 {
   "uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87",
   "number": 48900237,
@@ -173,10 +187,15 @@ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kca
 }
 ----
 
-// Choosing json over console here, because most part is json and it improves syntax highlighting
+[source,console]
+----
+$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t measurements -c 3"
+----
+
+Below is an example of the output of three records:
+
 [source,json]
 ----
-kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t measurements -c 3"
 {
   "timestamp": 1658151900000,
   "value": 221,
@@ -256,7 +275,7 @@ NiFi fetches water-level data from the internet and ingests it into Kafka in rea
 ("process group") that fetches the last 30 days of historical measurements and produces the records in Kafka. It also
 keeps streaming near-real-time updates for every available measuring station.
 
-=== View testdata-generation Job
+=== View the testdata-generation Job
 
 You can look at the ingestion job running in NiFi by opening the endpoint `https` from your `stackablectl stacklet list`
 command output. You have to use the endpoint from your command output. In this case, it is https://172.18.0.3:32440.
@@ -350,7 +369,7 @@ Druid is used to ingest the near real-time data from Kafka, store it and enable 
 ingestion jobs - one reading from the topic `stations` and the other from `measurements` - and saving it into Druid's
 deep storage. The Druid deep storage is based on the S3 store provided by MinIO.
 
-=== View Ingestion Job
+=== View the Ingestion job
 
 You can have a look at the ingestion jobs running in Druid by opening the Druid endpoint `router-http` from your
 `stackablectl stacklet list` command output (http://172.18.0.4:30899 in this case).
@@ -425,7 +444,7 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-water-level-data/superset_2.png[]
 
-=== View Dashboard
+=== View the dashboard
 
 The demo has created a Dashboard to visualize the water level data. To open it, click on the tab `Dashboards` at the top.
 
@@ -436,7 +455,7 @@ charts.
 
 image::nifi-kafka-druid-water-level-data/superset_4.png[]
 
-=== View Charts
+=== View the charts
 
 The dashboard `Water level data` consists of multiple charts. To list the charts, click on the tab `Charts` at the top.
 

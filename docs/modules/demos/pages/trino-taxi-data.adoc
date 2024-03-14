@@ -9,6 +9,29 @@
 :trino-client-docs: https://trino.io/docs/current/client.html
 :parquet: https://parquet.apache.org/
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install trino-taxi-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 7 {k8s-cpu}[cpu units] (core/hyperthread)
+* 16GiB memory
+* 28GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -30,16 +53,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::trino-taxi-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 7 {k8s-cpu}[cpu units] (core/hyperthread)
-* 16GiB memory
-* 28GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed Stackable services, run the following command:
 
@@ -64,7 +78,7 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
-== Inspect Data in S3
+== Inspect the data in S3
 
 The S3 provided by MinIO is used as a persistent storage to store all the data used. You can look at the test data
 within the MinIO web interface by opening the endpoint `console-http` from your `stackablectl stacklet list` command
@@ -85,7 +99,7 @@ The demo uploaded 1GB of parquet files, one file per month. The data contains ta
 (and therefore the number of rides) decreased drastically because of the COVID-19 pandemic starting from `2020-03`.
 {parquet}[Parquet] is an open-source, column-oriented data file format for efficient storage and retrieval.
 
-== Use Trino Web Interface
+== Use the Trino web interface
 
 Trino offers SQL access to the data within S3. Open the endpoint `coordinator-https` in your browser
 (`https://172.18.0.3:30141` in this case). If you get a warning regarding the self-signed certificate (e.g.
@@ -100,7 +114,7 @@ image::trino-taxi-data/trino_2.png[]
 
 When you start executing SQL queries, you will see the queries getting processed here.
 
-== Use Superset Web Interface
+== Use the Superset web interface
 
 Superset gives the ability to execute SQL queries and build dashboards. Open the endpoint `external-superset`
 in your browser (`http://172.18.0.4:32295` in this case).
@@ -111,7 +125,7 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::trino-taxi-data/superset_2.png[]
 
-=== View the Dashboard
+=== View the dashboard
 
 On the top, click on the `Dashboards` tab.
 
@@ -123,7 +137,7 @@ image::trino-taxi-data/superset_4.png[]
 
 You can clearly see the impact of COVID-19 on the taxi business.
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL Lab` ->
 `SQL Editor`.
@@ -161,7 +175,7 @@ a web-based frontend to execute SQL statements and build dashboards.
 There are multiple paths to go from here. The following sections can give you some ideas on what to explore next.
 You can find the description of the taxi data {nyc-website}[on the New York City website].
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset you can execute arbitrary SQL statements to explore the taxi data. Can you answer the following
 questions by executing SQL statements? The {trino-language-docs}[Trino documentation on their SQL language] might help
