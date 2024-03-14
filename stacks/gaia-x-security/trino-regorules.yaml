@@ -12,17 +12,57 @@ data:
 
     import rego.v1
 
-
-    userInfoByUsername(username) := http.send({"method": "POST", "url": "http://127.0.0.1:9476/user", "body": {"username": username}, "headers": {"Content-Type": "application/json"}, "raise_error": true}).body
-    userInfoById(id) := http.send({"method": "POST", "url": "http://127.0.0.1:9476/user", "body": {"id": id}, "headers": {"Content-Type": "application/json"}, "raise_error": true}).body
-
     default allow := true
 
-    batch contains index if {
-      input.action.operation != "FilterColumns"
+    userInfoById(id) := http.send({"method": "POST", "url": "http://127.0.0.1:9476/user", "body": {"id": id}, "headers": {"Content-Type": "application/json"}, "raise_error": true}).body
+    userCompany = userInfoById(input.context.identity.user).customAttributes.company
 
+    visibleTables := tables if {
+      userCompany == "SwiftShip"
+
+      tables := [
+        "customer_address",
+        "warehouse",
+        "web_sales",
+        "ship_mode"
+      ]
+    }
+    visibleTables := tables if {
+      userCompany == "AwesomeAnalytics"
+
+      tables := {
+        "household_demographics",
+        "customer_demographics",
+        "promotion",
+        "web_sales",
+        "catalog_sales",
+        "store_sales"
+      }
+    }
+
+    batch contains index if {
+      input.action.operation == "FilterTables"
+
+      some index, resource in input.action.filterResources
+      # for all companies that are external, check the list of visible tables
+      userCompany != "Onlineshop24"
+      resource.table.tableName in visibleTables
+
+      allow with input.action.resource as resource
+    }
+
+    batch contains index if {
+      input.action.operation == "FilterTables"
+
+      userCompany == "Onlineshop24"
       some index, resource in input.action.filterResources
       allow with input.action.resource as resource
     }
 
-   
+    batch contains index if {
+      input.action.operation != "FilterColumns"
+      input.action.operation != "FilterTables"
+
+      some index, resource in input.action.filterResources
+      allow with input.action.resource as resource
+    }

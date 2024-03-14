@@ -41,7 +41,7 @@ data:
     """
 
     users = {
-        'Dave Dataowner': {
+        'Dave Dataowner (Onlineshop24 GmbH)': {
             'sub': 'dave1',
             'preferred_username': 'dave1',
             'name': 'Dave',
@@ -49,7 +49,7 @@ data:
             'company': 'Onlineshop24',
             'email': 'dave@onlineshop24.com',
         },
-        'Alice Customer Analytics': {
+        'Alice Customer Analytics (AwesomeAnalytics Ltd)': {
             'sub': 'alice2',
             'preferred_username': 'alice2',
             'name': 'Alice',
@@ -57,7 +57,7 @@ data:
             'company': 'AwesomeAnalytics',
             'email': 'alice@awesome-analytics.com',
         },
-        'Sam Shipper': {
+        'Sam Shipper (SwiftShip AG)': {
             'sub': 'sam3',
             'preferred_username': 'sam3',
             'name': 'Sam',
