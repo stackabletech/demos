@@ -10,7 +10,8 @@ spec:
     userInfo:
       backend:
         experimentalXfscAas:
-          hostname: aas
+          hostname: tsa
+          port: 5000
   servers:
     roleGroups:
       default: {}

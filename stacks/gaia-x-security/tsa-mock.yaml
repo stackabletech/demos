@@ -6,7 +6,7 @@ metadata:
 data:
   tsa.py: |
     from http.server import BaseHTTPRequestHandler, HTTPServer
-    from urllib.parse import urlparse
+    from urllib.parse import urlparse, parse_qs
     import json
     import uuid
     import sys
@@ -78,6 +78,7 @@ data:
     class RequestHandler(BaseHTTPRequestHandler):
         def do_GET(self):
             parsed_url = urlparse(self.path)
+            query_components = parse_qs(parsed_url.query)
             if parsed_url.path.startswith('/requests'):
                 request_id = parsed_url.query.split('=')[1]
                 self.send_response(200)
@@ -91,6 +92,30 @@ data:
                 self.send_response(302)
                 self.send_header('Location', f"http://localhost:5000/requests?requestId={request_id}")
                 self.end_headers()
+            elif parsed_url.path == '/cip/claims':
+                sub = query_components.get('sub', [''])[0]
+                scope = query_components.get('scope', [''])[0]
+
+                if not sub or not scope:
+                    self.send_response(400)
+                    self.send_header('Content-type', 'application/json')
+                    self.end_headers()
+                    self.wfile.write(json.dumps({'error': 'Both "sub" and "scope" parameters are required.'}).encode('utf-8'))
+                    return
+
+                claims = {
+                    'sub': sub,
+                    'e-mail': f"{sub}@example.com",
+                    'company': scope
+                }
+
+                self.send_response(200)
+                self.send_header('Content-type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps(claims).encode('utf-8'))
+            else:
+                self._set_headers(404)
+                self.wfile.write(json.dumps({'error': 'Endpoint not found'}).encode('utf-8'))
 
         def do_POST(self):
             if self.path == '/policy/example/GetLoginProofInvitation/1.0/evaluation':
