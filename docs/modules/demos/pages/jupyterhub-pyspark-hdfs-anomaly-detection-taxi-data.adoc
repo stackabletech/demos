@@ -22,6 +22,8 @@ publishing a discovery `ConfigMap` for the HDFS cluster. This `ConfigMap` is the
 a small sample of the {nyc-taxi}[NYC taxi trip dataset], which is analyzed with a notebook that is provisioned
 automatically in the JupyterLab interface.
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data

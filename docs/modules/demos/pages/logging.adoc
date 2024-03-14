@@ -3,15 +3,15 @@
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install logging
 ----
 
-CAUTION: See the notes under <<opensearch-prerequisites,OpenSearch Prerequisites>>
-
 [#system-requirements]
-== System Requirements
+== System requirements
 
 To run this demo, your system needs at least:
 
@@ -30,30 +30,11 @@ If you use MacOS or Windows and use Docker to run Kubernetes, set the RAM to at 
 
 OpenSearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts
 are likely too low - usually 65530, which may result in out-of-memory exceptions. So, the Linux setting
-`vm.max_map_count` on the host machine where "kind" is running must be set to at least 262144.
+`vm.max_map_count` on the host machine where the containers are running must be set to at least 262144.
 
-To check the current value, run this command:
+This is automatically set by default in this demo (via the `setSysctlMaxMapCount` Stack parameter).
 
-[source,console]
-----
-$ sysctl vm.max_map_count
-----
-
-The limit can be temporarily increased with:
-
-[source,console]
-----
-$ sudo sysctl --write vm.max_map_count=262144
-----
-
-To permanently increase the value, add the following line to `/etc/sysctl.conf`:
-
-[source,.properties]
-----
-vm.max_map_count=262144
-----
-
-Then run `sudo sysctl --load` to reload.
+OpenSearch has more information about this setting in their https://opensearch.org/docs/2.12/install-and-configure/install-opensearch/index/#important-settings[documentation].
 
 == Overview
 
@@ -93,7 +74,7 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
-== Inspect the Log Data
+== Inspect the log data
 
 You can have a look at the log data within the OpenSearch Dashboards web interface by running
 `stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is

@@ -6,6 +6,8 @@
 :forest-article: https://towardsdatascience.com/isolation-forest-and-spark-b88ade6c63ff
 :forest-algo: https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install spark-k8s-anomaly-detection-taxi-data

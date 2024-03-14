@@ -8,6 +8,8 @@
 :wikipedia: https://en.wikipedia.org/wiki/Earthquake
 :kcat: https://github.com/edenhill/kcat
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install nifi-kafka-druid-earthquake-data

@@ -24,6 +24,8 @@ This demo only runs in the `default` namespace, as a `ServiceAccount` will be cr
 FQDN service names (including the namespace), so that the used TLS certificates are valid.
 ====
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install data-lakehouse-iceberg-trino-spark

@@ -8,6 +8,8 @@
 :pegelonline: https://www.pegelonline.wsv.de/webservice/ueberblic
 :kcat: https://github.com/edenhill/kcat
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install nifi-kafka-druid-water-level-data

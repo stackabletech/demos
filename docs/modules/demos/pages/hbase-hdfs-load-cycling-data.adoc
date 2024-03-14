@@ -7,6 +7,8 @@
 :bulkload: https://hbase.apache.org/book.html#arch.bulk.load
 :importtsv: https://hbase.apache.org/book.html#importtsv
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install hbase-hdfs-load-cycling-data
@@ -123,7 +125,7 @@ $ kubectl exec -it hbase-master-default-0 -- bin/hbase shell
 
 NOTE: If you use k9s, you can drill into the `hbase-master-default-0` pod and execute `bin/hbase shell`.
 
-[source]
+[source,sql]
 ----
 list
 ----
@@ -139,7 +141,7 @@ the Hfiles into the table and ingest rows.
 
 Now we will see how many rows are in the `cycling-tripdata` table:
 
-[source]
+[source,sql]
 ----
 count 'cycling-tripdata'
 ----
@@ -164,7 +166,7 @@ Took 13.4666 seconds
 
 You can now use the table and the data. You can use all available hbase shell commands.
 
-[source]
+[source,sql]
 ----
 describe 'cycling-tripdata'
 ----

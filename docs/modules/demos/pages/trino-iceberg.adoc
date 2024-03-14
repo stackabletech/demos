@@ -4,6 +4,8 @@
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :tcph-spec: https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v3.0.1.pdf
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install trino-iceberg
@@ -15,7 +17,7 @@ This demo should not be run alongside other demos.
 ====
 
 [#system-requirements]
-== System Requirements
+== System requirements
 
 To run this demo, your system needs at least:
 
@@ -77,9 +79,9 @@ xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino
 Have a look at the xref:data-lakehouse-iceberg-trino-spark.adoc#_connect_with_dbeaver[documentation] on how to
 connect with DBeaver. As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
 
-[source,bash]
+[source,console]
 ----
-java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
+$ java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
 ----
 
 Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output. When
@@ -104,7 +106,7 @@ Afterwards, you can set the context to the freshly created schema so that you do
 use lakehouse.tpch;
 ----
 
-=== Create the Tables
+=== Create the tables
 
 You can use the https://www.tpc.org/tpch/[TPC-H dataset] to have some test data to work with. Trino offers a special
 https://trino.io/docs/current/connector/tpch.html[TPCH connector] that generates the test data deterministically on the

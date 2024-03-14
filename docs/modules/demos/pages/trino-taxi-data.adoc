@@ -9,6 +9,8 @@
 :trino-client-docs: https://trino.io/docs/current/client.html
 :parquet: https://parquet.apache.org/
 
+Install this demo on an existing Kubernetes cluster:
+
 [source,console]
 ----
 $ stackablectl demo install trino-taxi-data
@@ -20,7 +22,7 @@ This demo should not be run alongside other demos.
 ====
 
 [#system-requirements]
-== System Requirements
+== System requirements
 
 To run this demo, your system needs at least:
 
