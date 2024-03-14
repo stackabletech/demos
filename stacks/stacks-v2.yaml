@@ -525,6 +525,8 @@ stacks:
       - plainYaml: stacks/gaia-x-security/aas.yaml
       - plainYaml: stacks/gaia-x-security/gaia-x-realm.yaml
       - plainYaml: stacks/gaia-x-security/tsa-mock.yaml
+      - plainYaml: stacks/gaia-x-security/ingresses.yaml
+      - plainYaml: stacks/gaia-x-security/postgres-aas-patch-job.yaml
     supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
     resourceRequests:
       cpu: 7850m

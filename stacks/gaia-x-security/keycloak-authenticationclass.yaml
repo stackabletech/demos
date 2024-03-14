@@ -5,8 +5,12 @@ metadata:
 spec:
   provider:
     oidc:
-      hostname: key-server
-      port: 8080
+      hostname: keycloak-gaiax-aas-demo.stackable.tech
+      tls:
+        verification:
+          server:
+            caCert:
+              webPki: {}
       rootPath: /realms/gaia-x
       scopes: [openid profile email]
       principalClaim: preferred_username
