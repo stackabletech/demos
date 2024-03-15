@@ -20,7 +20,7 @@ This demo should not be run alongside other demos.
 ====
 
 [#system-requirements]
-== System Requirements
+== System requirements
 
 To run this demo, your system needs at least:
 
