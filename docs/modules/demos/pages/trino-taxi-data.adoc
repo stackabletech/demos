@@ -126,6 +126,10 @@ image::trino-taxi-data/superset_2.png[]
 
 === View the dashboard
 
+On the top, click on the `Dashboards` tab.
+
+image::trino-taxi-data/superset_3.png[]
+
 Click on the dashboard called `Taxi data`. It might take some time until the dashboards render all included charts.
 
 image::trino-taxi-data/superset_4.png[]
