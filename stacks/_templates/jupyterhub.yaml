@@ -39,7 +39,7 @@ options:
       # Inspect the Dockerfile at:
       # https://github.com/jupyter/docker-stacks/tree/HEAD/datascience-notebook/Dockerfile
       name: jupyter/pyspark-notebook
-      tag: python-3.11
+      tag: python-3.9
     serviceAccountName: spark
     networkPolicy:
       enabled: false
@@ -50,7 +50,7 @@ options:
     initContainers:
       - name: download-notebook
         image: docker.stackable.tech/stackable/tools:1.0.0-stackable0.0.0-dev
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/wip/release-24.3-nick/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook
