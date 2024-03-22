@@ -523,8 +523,6 @@ stacks:
       - plainYaml: stacks/_templates/keycloak.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
-      - plainYaml: stacks/end-to-end-security/setup-keycloak.yaml
-      - plainYaml: stacks/end-to-end-security/setup-superset.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
       - plainYaml: stacks/end-to-end-security/kerberos-secretclass.yaml
       - plainYaml: stacks/end-to-end-security/opa.yaml
@@ -538,6 +536,9 @@ stacks:
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/aas-mock.yaml
       - plainYaml: stacks/end-to-end-security/uif-regorules.yaml
+      - plainYaml: stacks/end-to-end-security/setup-keycloak.yaml
+      - plainYaml: stacks/end-to-end-security/create-trino-tables.yaml
+      - plainYaml: stacks/end-to-end-security/setup-superset.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
@@ -560,8 +561,11 @@ stacks:
       - name: trinoSupersetUserPassword
         description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
         default: supersetsuperset
+      - name: trinoDataImportUserPassword
+        description: Password of the service user used to load data into Trino
+        default: dataImportdataImport
       - name: userInfoFetcherBackend
-        description: Which backend to use. Either 'keycloak' or 'aas'.
+        description: Which backend to use. Either 'keycloak' or 'aas'
         default: aas
       - name: openshift
         description: Whether to use OpenShift. Defaults to false. Might not work yet (WIP)

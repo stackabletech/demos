@@ -1,25 +1,25 @@
 releases:
   end-to-end-security-release:
     releaseDate: 1970-01-01
-    description: Intermediate release until everything is released in (hopefully) 24.3
+    description: Intermediate release until 24.3 is released
     products:
       commons:
-        operatorVersion: 0.0.0-dev # Needed for OIDC support in AuthClass
+        operatorVersion: 24.3.0
       hdfs:
-        operatorVersion: 0.0.0-dev # Needed for OPA authorizer
+        operatorVersion: 24.3.0
       hive:
-        operatorVersion: 0.0.0-dev # Needed for Kerberos support
+        operatorVersion: 24.3.0
       listener:
-        operatorVersion: 23.11.0
+        operatorVersion: 24.3.0
       opa:
-        operatorVersion: 0.0.0-dev # Needed for UIF and OPA 0.61.0
+        operatorVersion: 24.3.0
       secret:
-        operatorVersion: 23.11.0
+        operatorVersion: 24.3.0
       spark-k8s:
-        operatorVersion: 0.0.0-dev # Needed for job volume fix
+        operatorVersion: 24.3.0
       superset:
-        operatorVersion: 0.0.0-dev # Needed for OIDC support
+        operatorVersion: 24.3.0
       trino:
-        operatorVersion: 0.0.0-dev # Needed for OIDC support
+        operatorVersion: 24.3.0
       zookeeper:
-        operatorVersion: 23.11.0
+        operatorVersion: 24.3.0
