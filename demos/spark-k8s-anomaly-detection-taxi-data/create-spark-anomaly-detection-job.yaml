@@ -8,11 +8,11 @@ spec:
     spec:
       initContainers:
         - name: wait-for-testdata
-          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
           command: ["bash", "-c", "echo 'Waiting for job load-ny-taxi-data to finish' && kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data"]
       containers:
         - name: create-spark-anomaly-detection-job
-          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
           command: ["bash", "-c", "echo 'Submitting Spark job' && kubectl apply -f /tmp/manifest/spark-ad-job.yaml"]
           volumeMounts:
             - name: manifest
