@@ -20,154 +20,184 @@ kind: Secret
 metadata:
   name: keycloak-realm-config
 stringData:
+  # Created by clicking users in Keycloak WebUI and than running `/opt/keycloak/bin/kc.sh export --dir /tmp`
+  # (as well as some manual modifications).
   realm.json: |
     {
       "realm" : "demo",
       "enabled" : true,
       "groups" : [ {
-        "name" : "banned-user",
-        "path" : "/banned-user"
+        "name" : "Compliance and Regulation Analytics",
+        "path" : "/Compliance and Regulation Analytics"
       }, {
-        "name" : "iceberg-all",
-        "path" : "/iceberg-all"
+        "name" : "Customer Service Analytics",
+        "path" : "/Customer Service Analytics"
       }, {
-        "name" : "iceberg-read",
-        "path" : "/iceberg-read"
-      }, {
-        "name" : "lakehouse",
-        "path" : "/lakehouse"
-      }, {
-        "name" : "tpch",
-        "path" : "/tpch"
-      }, {
-        "name" : "trino-admin",
-        "path" : "/trino-admin"
-      }, {
-        "name" : "group-user",
-        "path" : "/group-user"
+        "name" : "Marketing",
+        "path" : "/Marketing"
       } ],
       "users" : [ {
-        "username" : "admin",
+        "id" : "e44a09fa-bce1-40e8-a1da-28902b79dcf0",
+        "createdTimestamp" : 1711375603780,
+        "username" : "daniel.king",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "admin",
-        "lastName" : "admin",
-        "email" : "admin@example.com",
+        "firstName" : "Daniel",
+        "lastName" : "King",
+        "email" : "daniel.king@knab.com",
         "credentials" : [ {
+          "id" : "77343b9c-661e-4f04-8ea3-c4dd7f86abde",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"JxIyEshkBUrhZX1BEN9JO8EM3ue5/SnGHDfuyTqOH6A=\",\"salt\":\"f6iCn2rWqZQaRnCCsKAoQQ==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375610955,
+          "secretData" : "{\"value\":\"jNVzthZCkPipHW1KHZCncU/G/DHc+5QqmGEKernet5E=\",\"salt\":\"7woqv8IPicuA0cpa3U6dEg==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/trino-admin" ]
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation Analytics" ]
       }, {
-        "username" : "banned-user",
+        "id" : "68dc0996-be4a-412e-8d7b-a21cfc5b1e61",
+        "createdTimestamp" : 1711375695303,
+        "username" : "isla.williams",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "banned-user",
-        "lastName" : "banned-user",
-        "email" : "banned-user@example.com",
+        "firstName" : "Isla",
+        "lastName" : "Williams",
+        "email" : "isla.williams@knab.com",
         "credentials" : [ {
+          "id" : "67941518-5494-4b97-af8a-458250cc1bd0",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"xfA/z3WyVGdvfekYBXX5v4TXQ3WKVuv8ezcRwP9CYL0=\",\"salt\":\"eFKOaWmpSo+/qpyg9RaypQ==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375708463,
+          "secretData" : "{\"value\":\"OpKvnLaK7afN4vpaqhjvNg/u1phsMZUAq0y6+28UFK4=\",\"salt\":\"dSfuKvbSyumwCP6Y1JNYEg==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/banned-user" ]
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service Analytics" ]
       }, {
-        "username" : "group-user",
+        "id" : "e434ea2c-1dcc-4b00-aa98-77444d50a945",
+        "createdTimestamp" : 1711375666275,
+        "username" : "justin.martin",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "group-user",
-        "lastName" : "group-user",
-        "email" : "group-user@example.com",
+        "firstName" : "Justin",
+        "lastName" : "Martin",
+        "email" : "justin.martin@knab.com",
         "credentials" : [ {
+          "id" : "7df036b6-1cd4-48fd-920a-5e43cdb69d15",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"bYm3wwtcIMeHud9bRZKZf2+ByzgMGB2ys4ab9udS28Q=\",\"salt\":\"9EPeVvetiYHC2jUw+0OyEQ==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375673501,
+          "secretData" : "{\"value\":\"MYCAP3Hl54rKbMGG16YRnchpkWJQ5EaqYiMfZN/Q3z4=\",\"salt\":\"8PieIPt7mRiJQe3kszgakg==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/group-user" ]
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service Analytics" ]
       }, {
-        "username" : "iceberg",
+        "id" : "14d21868-9f24-45e6-876c-34405ac506c8",
+        "createdTimestamp" : 1711375726932,
+        "username" : "mark.ketting",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "iceberg",
-        "lastName" : "iceberg",
-        "email" : "iceberg@example.com",
+        "firstName" : "Mark",
+        "lastName" : "Ketting",
+        "email" : "mark.ketting@knab.com",
         "credentials" : [ {
+          "id" : "80bc0228-fd73-4011-b8d7-be382429ef80",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"DVBZV6fEBbF78qL4scnp66rbG9AHoTuZ/V4ysJd2zM0=\",\"salt\":\"ADJAkG0J7Ul7r4M2DnqDeA==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375733935,
+          "secretData" : "{\"value\":\"2GQKaid+G8gKIQe4a9J12/d7d4z41kqy3nuNEdEh5YI=\",\"salt\":\"DCX1lj9nYbdPkzU2BnTUjg==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/iceberg-all" ]
-      },
-      {
-        "username" : "iceberg-all",
-        "enabled" : true,
-        "emailVerified" : true,
-        "firstName" : "iceberg-all",
-        "lastName" : "iceberg-all",
-        "email" : "iceberg-all@example.com",
-        "credentials" : [ {
-          "type" : "password",
-          "userLabel" : "My password",
-          "secretData" : "{\"value\":\"LnpXTygWurXwTQCfbOBZCgQXg1LKtAcFDQE/QtzZ1fI=\",\"salt\":\"g0O5p0q5hiahZpHf8sfVXw==\",\"additionalParameters\":{}}",
-          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
-        } ],
-        "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/iceberg-all" ]
+        "notBefore" : 0,
+        "groups" : [ "/Marketing" ]
       }, {
-        "username" : "iceberg-read",
+        "id" : "f695a4a2-b05a-4484-b49b-ea94837490e8",
+        "createdTimestamp" : 1711375638235,
+        "username" : "pamela.scott",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "iceberg-read",
-        "lastName" : "iceberg-read",
-        "email" : "iceberg-read@example.com",
+        "firstName" : "Pamela",
+        "lastName" : "Scott",
+        "email" : "pamela.scott@knab.com",
         "credentials" : [ {
+          "id" : "553b96c7-849c-4655-810f-09e4569f260e",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"kpdpVdQFGHyH/Y9YGLqmMk/UQivYgrUWIb6fOyYC0/k=\",\"salt\":\"ExY4u4qXj8C/diFKs7aGig==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375646251,
+          "secretData" : "{\"value\":\"IsMVP7Fw1bzIoBpjzFHl7Ey9FrfaOuzX5fTnfmw3/iw=\",\"salt\":\"G14/rEl5h6QUPrCR/XoVMw==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/iceberg-read" ]
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service Analytics" ]
       }, {
-        "username" : "lakehouse",
+        "id" : "df53f737-794c-4bc4-ab0d-2cfbdc01cc57",
+        "createdTimestamp" : 1711375573153,
+        "username" : "sophia.clarke",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "lakehouse",
-        "lastName" : "lakehouse",
-        "email" : "lakehouse@example.com",
+        "firstName" : "Sophia",
+        "lastName" : "Clarke",
+        "email" : "sophia.clarke@knab.com",
         "credentials" : [ {
+          "id" : "aac9b727-acfb-45b2-bc52-b89a210adbf8",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"fc0VhnKrlD69f5w37r+DAs3uv9+LU7a1fKPcmMhwIV0=\",\"salt\":\"jIx+IxDblshP2pB0SlhIMQ==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375583194,
+          "secretData" : "{\"value\":\"Q+3UJbt/cpV2G8lRcVFZ5J4BqluRqAlJols+q8NFlUc=\",\"salt\":\"jJUdiUao9UcwEJkGtBzSuw==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/lakehouse" ]
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation Analytics" ]
       }, {
-        "username" : "lakehouse-tpch",
+        "id" : "75b31f7c-aa0a-419b-930c-57969e7b6e67",
+        "createdTimestamp" : 1711375413324,
+        "username" : "william.lewis",
         "enabled" : true,
+        "totp" : false,
         "emailVerified" : true,
-        "firstName" : "lakehouse-tpch",
-        "lastName" : "lakehouse-tpch",
-        "email" : "lakehouse-tpch@example.com",
+        "firstName" : "William",
+        "lastName" : "Lewis",
+        "email" : "william.lewis@knab.com",
         "credentials" : [ {
+          "id" : "4a213d68-b1f9-41e4-971f-6a7335291293",
           "type" : "password",
           "userLabel" : "My password",
-          "secretData" : "{\"value\":\"bCMr0WRWg0LBF8ca+P2iVRo1eBIp7XRJXxhEWA1IrAs=\",\"salt\":\"2Dc83UdVQWgPJ9bc4Cf/rw==\",\"additionalParameters\":{}}",
+          "createdDate" : 1711375448461,
+          "secretData" : "{\"value\":\"oU3A3av49qx+fk2WJlvuZo2m33GygiSi8L0fugOIOq4=\",\"salt\":\"JJHpTTZNTt5k4GY9Eci5OQ==\",\"additionalParameters\":{}}",
           "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
         } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
-        "groups" : [ "/lakehouse", "/tpch" ]
-      }, {
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation Analytics" ]
+      } , {
         "username" : "service-account-user-info-fetcher",
         "enabled" : true,
         "totp" : false,

@@ -520,8 +520,8 @@ stacks:
     supportedNamespaces: ["default"] # SecretClass "kerberos" needs explicit namespace in adminKeytabSecret
     manifests:
       - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
-      - plainYaml: stacks/_templates/keycloak.yaml
       - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
+      - plainYaml: stacks/_templates/keycloak.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
