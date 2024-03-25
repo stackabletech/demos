@@ -1,5 +1,4 @@
 = logging
-:page-aliases: stable@stackablectl::demos/logging.adoc
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
