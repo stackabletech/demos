@@ -1,5 +1,4 @@
 = trino-iceberg
-:page-aliases: stable@stackablectl::demos/trino-iceberg.adoc
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :tcph-spec: https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v3.0.1.pdf

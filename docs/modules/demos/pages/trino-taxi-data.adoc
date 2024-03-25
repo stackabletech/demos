@@ -1,5 +1,4 @@
 = trino-taxi-data
-:page-aliases: stable@stackablectl::demos/trino-taxi-data.adoc
 
 :superset-docs: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
 :nyc-website: https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
