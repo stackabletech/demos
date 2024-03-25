@@ -9,19 +9,17 @@ spec:
   clusterConfig:
     userInfo:
       backend:
-        {% if userInfoFetcherBackend == "keycloak" %}
         keycloak:
-          clientCredentialsSecret: user-info-fetcher-client-credentials
-          adminRealm: master
-          userRealm: master
-          hostname: keycloak
+          hostname: keycloak.default.svc.cluster.local
+          port: 8443
           tls:
             verification:
-              none: {}
-        {% elif userInfoFetcherBackend == "aas" %}
-        experimentalXfscAas:
-          hostname: aas
-        {% endif %}
+              server:
+                caCert:
+                  secretClass: tls
+          clientCredentialsSecret: user-info-fetcher-client-credentials
+          adminRealm: demo
+          userRealm: demo
   servers:
     roleGroups:
       default:

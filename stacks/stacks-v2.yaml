@@ -498,7 +498,7 @@ stacks:
   end-to-end-security:
     description: >-
       A stack used to demonstrate an end-to-end security concept
-    stackableRelease: end-to-end-security-release
+    stackableRelease: 24.3
     stackableOperators:
       - commons
       - secret
@@ -521,6 +521,7 @@ stacks:
     manifests:
       - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
       - plainYaml: stacks/_templates/keycloak.yaml
+      - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
@@ -534,9 +535,6 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
-      - plainYaml: stacks/end-to-end-security/aas-mock.yaml
-      - plainYaml: stacks/end-to-end-security/uif-regorules.yaml
-      - plainYaml: stacks/end-to-end-security/setup-keycloak.yaml
       - plainYaml: stacks/end-to-end-security/create-trino-tables.yaml
       - plainYaml: stacks/end-to-end-security/setup-superset.yaml
     parameters:
@@ -545,7 +543,7 @@ stacks:
         default: adminadmin
       - name: keycloakUserinfoFetcherClientSecret
         description: Secret ID of the Keycloak UserinfoFetcher client that is used by the UserinfoFetcher to retrieve user information
-        default: userinfofetcheruserinfofetcher
+        default: user-info-fetcheruser-info-fetcher
       - name: keycloakSupersetClientSecret
         description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
         default: supersetsuperset
@@ -564,9 +562,6 @@ stacks:
       - name: trinoDataImportUserPassword
         description: Password of the service user used to load data into Trino
         default: dataImportdataImport
-      - name: userInfoFetcherBackend
-        description: Which backend to use. Either 'keycloak' or 'aas'
-        default: aas
       - name: openshift
         description: Whether to use OpenShift. Defaults to false. Might not work yet (WIP)
         default: false

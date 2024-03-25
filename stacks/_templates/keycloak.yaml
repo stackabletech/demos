@@ -23,6 +23,7 @@ spec:
             - --hostname-strict=false
             - --https-key-store-file=/tls/keystore.p12
             - --https-key-store-password=changeit
+            - --import-realm
           env:
             - name: KEYCLOAK_ADMIN
               value: admin
@@ -42,6 +43,8 @@ spec:
           volumeMounts:
             - name: data
               mountPath: /opt/keycloak/data/
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
             - name: tls
               mountPath: /tls/
         - name: create-auth-class
@@ -91,6 +94,9 @@ spec:
         - name: data
           persistentVolumeClaim:
             claimName: keycloak-data
+        - name: realm-config
+          secret:
+            secretName: keycloak-realm-config
         - name: tls
           ephemeral:
             volumeClaimTemplate:

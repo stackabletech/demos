@@ -13,8 +13,8 @@ spec:
           volumeMounts:
             - name: script
               mountPath: /tmp/script
-            - name: trino-superset-user
-              mountPath: /trino-superset-user
+            - name: trino-static-users
+              mountPath: /trino-static-users
             - name: superset-credentials
               mountPath: /superset-credentials
       volumes:
@@ -24,9 +24,9 @@ spec:
         - name: superset-credentials
           secret:
             secretName: superset-credentials
-        - name: trino-superset-user
+        - name: trino-static-users
           secret:
-            secretName: trino-superset-user
+            secretName: trino-static-users
       restartPolicy: OnFailure
   backoffLimit: 50
 ---
@@ -44,7 +44,7 @@ data:
     base_url = "http://superset-external:8088"
     superset_username = open("/superset-credentials/adminUser.username").read()
     superset_password = open("/superset-credentials/adminUser.password").read()
-    trino_connection_password = open("/trino-superset-user/superset").read()
+    trino_connection_password = open("/trino-static-users/superset").read()
 
     logging.basicConfig(level=logging.INFO)
     logging.info("Starting setup of Superset")
