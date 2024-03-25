@@ -27,14 +27,23 @@ stringData:
       "realm" : "demo",
       "enabled" : true,
       "groups" : [ {
-        "name" : "Compliance and Regulation Analytics",
-        "path" : "/Compliance and Regulation Analytics"
+        "name" : "Compliance and Regulation",
+        "path" : "/Compliance and Regulation",
+        "subGroups" : [ {
+          "name" : "Analytics",
+          "path" : "/Compliance and Regulation/Analytics"
+        } ]
       }, {
-        "name" : "Customer Service Analytics",
-        "path" : "/Customer Service Analytics"
+        "name" : "Customer Service",
+        "path" : "/Customer Service",
+        "subGroups" : [ {
+          "name" : "Analytics",
+          "path" : "/Customer Service/Analytics"
+        } ]
       }, {
         "name" : "Marketing",
-        "path" : "/Marketing"
+        "path" : "/Marketing",
+        "subGroups" : [ ]
       } ],
       "users" : [ {
         "id" : "e44a09fa-bce1-40e8-a1da-28902b79dcf0",
@@ -58,7 +67,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Compliance and Regulation Analytics" ]
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
       }, {
         "id" : "68dc0996-be4a-412e-8d7b-a21cfc5b1e61",
         "createdTimestamp" : 1711375695303,
@@ -81,7 +90,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Customer Service Analytics" ]
+        "groups" : [ "/Customer Service/Analytics" ]
       }, {
         "id" : "e434ea2c-1dcc-4b00-aa98-77444d50a945",
         "createdTimestamp" : 1711375666275,
@@ -104,7 +113,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Customer Service Analytics" ]
+        "groups" : [ "/Customer Service/Analytics" ]
       }, {
         "id" : "14d21868-9f24-45e6-876c-34405ac506c8",
         "createdTimestamp" : 1711375726932,
@@ -150,7 +159,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Customer Service Analytics" ]
+        "groups" : [ "/Customer Service/Analytics" ]
       }, {
         "id" : "df53f737-794c-4bc4-ab0d-2cfbdc01cc57",
         "createdTimestamp" : 1711375573153,
@@ -173,7 +182,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Compliance and Regulation Analytics" ]
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
       }, {
         "id" : "75b31f7c-aa0a-419b-930c-57969e7b6e67",
         "createdTimestamp" : 1711375413324,
@@ -196,7 +205,7 @@ stringData:
         "requiredActions" : [ ],
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
-        "groups" : [ "/Compliance and Regulation Analytics" ]
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
       } , {
         "username" : "service-account-user-info-fetcher",
         "enabled" : true,
@@ -222,8 +231,8 @@ stringData:
         "alwaysDisplayInConsole" : false,
         "clientAuthenticatorType" : "client-secret",
         "secret" : "{{ keycloakUserinfoFetcherClientSecret }}",
-        "redirectUris" : [ "/*" ],
-        "webOrigins" : [ "/*" ],
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
         "notBefore" : 0,
         "bearerOnly" : false,
         "serviceAccountsEnabled" : true,
@@ -236,5 +245,23 @@ stringData:
         },
         "authenticationFlowBindingOverrides" : { },
         "fullScopeAllowed" : true
+      }, {
+        "clientId": "trino",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "clientAuthenticatorType": "client-secret",
+        "secret": "{{ keycloakTrinoClientSecret }}",
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
+        "standardFlowEnabled": true
+      }, {
+        "clientId": "superset",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "clientAuthenticatorType": "client-secret",
+        "secret": "{{ keycloakSupersetClientSecret }}",
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
+        "standardFlowEnabled": true
       } ]
     }

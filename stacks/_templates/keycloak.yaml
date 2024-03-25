@@ -73,7 +73,7 @@ spec:
                         oidc:
                           hostname: "$KEYCLOAK_HOSTNAME"
                           port: $KEYCLOAK_PORT
-                          rootPath: /realms/master
+                          rootPath: /realms/demo
                           scopes: [openid]
                           principalClaim: preferred_username
                           tls:
@@ -84,7 +84,7 @@ spec:
               EOF
                 fi
 
-                sleep 60
+                sleep 30
               done
       securityContext:
         fsGroup: 1000
