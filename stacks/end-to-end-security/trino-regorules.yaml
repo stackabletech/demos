@@ -13,14 +13,80 @@ data:
     import data.util
     import rego.v1
 
-    # These rules replicate the file-based access control
-    # (https://trino.io/docs/current/security/file-system-access-control.html).
-    # All rules are implemented but roles are not matched.
+    # This file contains functions to determine the actual permissions
+    # defined in the Trino policies for the given user and requested
+    # resource.
+    #
+    # For every resource, like catalog and table, the rules and functions
+    # are structured as follows:
+    #   * default resource_rules := ...
+    #     Default rules for the resource if not defined in the policies,
+    #     e.g. []
+    #   * resource_rules := policies.resource
+    #     Rules for the resource in the policies if defined
+    #   * first_matching_resource_rule(parameters like table name) := ...
+    #     Returns the first rule from resource_rules which match the
+    #     identity and the given parameters
+    #   * default resource_permission(_) := ...
+    #     Default permission if no matching rule was found, e.g. "none".
+    #   * resource_permission(parameters like table name) := ...
+    #     Permission returned by the first_matching_resource_rule function
 
     identity := input.context.identity
 
+    # METADATA
+    # description: |
+    #   The externally provided policies, see the file-based access control
+    #   (https://trino.io/docs/current/security/file-system-access-control.html)
+    #   for further documentation.
+    #
+    #   Example:
+    #     package trino_policies
+    #     import rego.v1
+    #     policies := {
+    #         "catalogs": [
+    #             {
+    #                 "user": "admin",
+    #                 "allow": "all",
+    #             },
+    #         ],
+    #         "schemas": [
+    #             {
+    #                 "user": "admin",
+    #                 "owner": true,
+    #             },
+    #         ],
+    #         "tables": [
+    #             {
+    #                 "user": "admin",
+    #                 "privileges": [
+    #                     "OWNERSHIP",
+    #                     "GRANT_SELECT",
+    #                 ],
+    #             },
+    #         ],
+    #     }
     policies := data.trino_policies.policies
 
+    # METADATA
+    # description: |
+    #   Externally provided groups; These groups are added to the ones in
+    #   input.context.identity.groups.
+    #
+    #   Example:
+    #     package trino_policies
+    #     import rego.v1
+    #     extra_groups := groups if {
+    #         request := {
+    #             "method": "POST",
+    #             "url": "http://127.0.0.1:9476/user",
+    #             "headers": {"Content-Type": "application/json"},
+    #             "body": {"username": input.context.identity.user},
+    #         }
+    #         response := http.send(request)
+    #         response.status_code == 200
+    #         groups := response.body.groups
+    #     }
     default extra_groups := []
 
     extra_groups := data.trino_policies.extra_groups
@@ -621,6 +687,14 @@ data:
     package trino
 
     import rego.v1
+
+    # This file contains the requested_permissions rule which returns a set
+    # of required permissions for the given operation including the
+    # requested resource. Operations with the same set of required
+    # permissions are grouped together.
+    # The defined permissions should be identical to the ones implemented
+    # for the file-based access control
+    # (https://trino.io/docs/current/security/file-system-access-control.html).
 
     action := input.action
 
@@ -1269,19 +1343,26 @@ data:
         "tableName": action.resource.table.tableName,
       }
     }
-  util.rego: |
-    package util
-
-    import rego.v1
-
-    match_entire(pattern, value) if {
-      # Add the anchors ^ and $
-      pattern_with_anchors := concat("", ["^", pattern, "$"])
-
-      regex.match(pattern_with_anchors, value)
-    }
   verification.rego: |
     # METADATA
+    # description: |
+    #   The file verification.rego contains the entry points which are
+    #   queried from outside. These are:
+    #     - allow
+    #     - batch
+    #     - columnMask
+    #     - rowFilters
+    #   These rules use the rules and functions in requested_permission.rego
+    #   and actual_permissions.rego to calculate the result.
+    #
+    #   The file requested_permissions.rego contains the
+    #   requested_permissions rule which returns a set of required
+    #   permissions for the given operation including the requested
+    #   resource.
+    #
+    #   The file actual_permissions.rego contains functions to determine the
+    #   actual permissions defined in the Trino policies for the given user
+    #   and requested resource.
     # schemas:
     #   - input: schema.input
     #   - data.trino_policies.policies: schema.policies
@@ -1290,7 +1371,42 @@ data:
     import rego.v1
 
     # METADATA
-    # description: Comparison of requested and actual permissions
+    # description: |
+    #   Entry point for OPA policies, configured in the Trino property
+    #   `opa.policy.uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "OperationName",
+    #       "resource": {
+    #         ...
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a boolean value indicating if the operation is allowed
+    #   or not on the given resource by the given user.
+    #
+    #   The allow rule compares the permissions configured in the
+    #   requested_permissions rule for the given operation with the Trino
+    #   policies given in data.trino_policies.policies for the given
+    #   identity.
+    #
+    #   For instance, if the user wants to insert data into a table then the
+    #   requested_permissions rule requires for the "InsertIntoTable"
+    #   operation "all" access to the catalog and the "INSERT" privilege on
+    #   the table. The functions catalog_access and table_privileges defined
+    #   in actual_permissions.rego are called to check if these requirements
+    #   are fulfilled by the policies for the given user.
     # entrypoint: true
     default allow := false
 
@@ -1403,7 +1519,38 @@ data:
     }
 
     # METADATA
-    # description: Comparison of requested and actual permissions
+    # description: |
+    #   Entry point for batch OPA policies, configured in the Trino property
+    #   `opa.policy.batched-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "FilterOperationName",
+    #       "filterResources": [
+    #         {"resource1": ...},
+    #         {"resource2": ...},
+    #         ...
+    #       ],
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a list of indices which are allowed.
+    #
+    #   The batch rule just calls the allow rule for each resource.
+    #
+    #   FilterColumns is different to the other filter operations because
+    #   "filterResources" contains exactly one table with a list of
+    #   columns and the expected result is the list of allowed column
+    #   indices and not of allowed tables.
     # entrypoint: true
     batch contains index if {
       input.action.operation != "FilterColumns"
@@ -1430,7 +1577,39 @@ data:
     }
 
     # METADATA
-    # description: Column mask for a given column
+    # description: |
+    #   Entry point for fetching column masks, configured in the Trino
+    #   property `opa.policy.column-masking-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "GetColumnMask",
+    #       "resource": {
+    #         "column": {
+    #           "catalogName": "catalog",
+    #           "schemaName": "schema",
+    #           "tableName": "table",
+    #           "columnName": "column",
+    #         },
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is an object containing the mask expression and the
+    #   identity for the mask evaluation.
+    #
+    #   The columnMask rule queries the column constraints in the Trino
+    #   policies and returns the expression if any is set. A column mask
+    #   is an SQL expression, e.g. "'XXX-XX-' + substring(credit_card, -4)".
     # entrypoint: true
     columnMask := column_mask if {
       column := column_constraints(
@@ -1464,9 +1643,40 @@ data:
     }
 
     # METADATA
-    # description: Row filters for a given table
+    # description: |
+    #   Entry point for fetching row filters, configured in the Trino
+    #   property `opa.policy.row-filters-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "GetRowFilters",
+    #       "resource": {
+    #         "table": {
+    #           "catalogName": "catalog",
+    #           "schemaName": "schema",
+    #           "tableName": "table",
+    #         },
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a list containing one object which consists of the
+    #   row filter expression and the identity for the filter evaluation.
+    #
+    #   The rowFilters rule queries the column constraints in the Trino
+    #   policies and returns the expression if any is set. A row filter is
+    #   an SQL condition, e.g. "user = current_user".
     # entrypoint: true
-    rowFilters := [row_filter] if {
+    rowFilters contains row_filter if {
       rule := first_matching_table_rule(
         requested_row_filters.catalogName,
         requested_row_filters.schemaName,
@@ -1482,7 +1692,7 @@ data:
       }
     }
 
-    rowFilters := [row_filter] if {
+    rowFilters contains row_filter if {
       rule := first_matching_table_rule(
         requested_row_filters.catalogName,
         requested_row_filters.schemaName,
@@ -1493,5 +1703,27 @@ data:
       is_null(rule.filter_environment.user)
 
       row_filter := {"expression": rule.filter}
+    }
+  util.rego: |
+    # METADATA
+    # description: Utility package which extends the built-in functions
+    package util
+
+    import rego.v1
+
+    # METADATA
+    # description: |
+    #   Matches the entire string against a regular expression.
+    #
+    #   pattern (string)  regular expression
+    #   value (string)    value to match against pattern
+    #
+    #   Returns:
+    #     result (boolean)
+    match_entire(pattern, value) if {
+      # Add the anchors ^ and $
+      pattern_with_anchors := concat("", ["^", pattern, "$"])
+
+      regex.match(pattern_with_anchors, value)
     }
 {% endraw %}
