@@ -42,9 +42,9 @@ data:
         connection = trino.dbapi.connect(
             host="trino-coordinator",
             port=8443,
-            user="dataImport",
+            user="data-import",
             http_scheme='https',
-            auth=trino.auth.BasicAuthentication("dataImport", open("/trino-static-users/dataImport").read()),
+            auth=trino.auth.BasicAuthentication("data-import", open("/trino-static-users/data-import").read()),
         )
         connection._http_session.verify = False
         return connection

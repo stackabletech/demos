@@ -561,7 +561,7 @@ stacks:
         default: supersetsuperset
       - name: trinoDataImportUserPassword
         description: Password of the service user used to load data into Trino
-        default: dataImportdataImport
+        default: data-importdata-import
       - name: openshift
         description: Whether to use OpenShift. Defaults to false. Might not work yet (WIP)
         default: false
