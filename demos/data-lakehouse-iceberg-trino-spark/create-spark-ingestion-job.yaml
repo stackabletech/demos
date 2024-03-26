@@ -42,15 +42,14 @@ data:
       labels:
         stackable.tech/vendor: Stackable
     spec:
-      version: "1.0"
       sparkImage:
-        productVersion: 3.5.0
+        productVersion: 3.5.1
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
           - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
-          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.1
       s3connection:
         reference: minio
       sparkConf:
@@ -64,10 +63,6 @@ data:
 
         # As of 2023-10-31 the operator does not set this
         spark.executor.cores: "4"
-
-        # AFAIK This can be removed in 24.3
-        spark.driver.userClassPathFirst: "false"
-        spark.executor.userClassPathFirst: "false"
       volumes:
         - name: script
           configMap:
