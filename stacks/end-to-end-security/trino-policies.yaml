@@ -13,60 +13,83 @@ data:
 
     policies := {
       "catalogs": [
-        {"allow": "all"}, # FIXME
-        {
-          "user": "admin",
-          "allow": "all",
-        },
-        # # Everyone can read from lakehouse
+        # {"allow": "all"}, # FIXME
+        # Admins can do anything
         # {
-        #   "catalog": "lakehouse",
-        #   "allow": "read-only",
+        #   "user": "admin",
+        #   "allow": "all",
         # },
-      ],
-      "tables": [
-        {"privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT",]}, # FIXME
-      ],
-      "system_information": [],
-      "queries": [
+        # Everyone can read from lakehouse
         {
-          "allow": ["execute"],
+          "catalog": "lakehouse",
+          "allow": "read-only",
         },
+        # Needed for JDBC clients
         {
-          "user": "admin",
-          "allow": ["kill", "view"],
+          "catalog": "system",
+          "allow": "read-only",
         },
       ],
       "schemas": [
-        {"owner": true}, # FIXME
-        {
-          "user": "admin",
-          "owner": true,
-        },
-        {
-          "user": "daniel.king",
-          "catalog": "lakehouse",
-          "schema": "customer_analytics",
-          "owner": true,
-        },
+        # We don't need to grant schema ownership, as users don't need to CRUD schemas.
       ],
       "tables": [
         {
-          "user": "admin",
-          "privileges": [
-            "SELECT",
-            "INSERT",
-            "DELETE",
-            "UPDATE",
-            "OWNERSHIP",
-            "GRANT_SELECT",
-          ],
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "compliance_analytics",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
         },
         {
-          "schema": "information_schema",
-          "table": "schemata",
+          "group": "/Customer Service/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "group": "/Marketing",
+          "catalog": "lakehouse",
+          "schema": "marketing",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "customer",
+          "privileges": ["SELECT"],
+          "columns" : [
+            {
+              "name": "c_customer_id",
+              "mask": "to_hex(sha256(to_utf8(c_customer_id)))",
+            },
+            {
+              "name": "c_email_address",
+              "mask": "substring(split(c_email_address, '@', 2)[1], 1, 2) || 'XXX@' || split(c_email_address, '@', 2)[2]",
+            },
+            {
+              "name": ".*",
+              "allow": false,
+            },
+          ]
+        },
+        # Needed for JDBC clients
+        {
+          "catalog": "system",
+          "schema": "jdbc",
           "privileges": ["SELECT"],
         },
+      ],
+      "system_information": [],
+      "queries": [
+        # Users always have permission to view or kill their own queries.
+        {
+          "allow": ["execute"],
+        },
+        # {
+        #   "user": "admin",
+        #   "allow": ["kill", "view"],
+        # },
       ],
       "impersonation": [
         {
@@ -75,40 +98,27 @@ data:
           "allow": true,
         },
       ],
-      "authorization": [{
-        "original_user": "admin",
-        "new_user": ".*",
-        "allow": true,
-      }],
+      "authorization": [],
       "system_session_properties": [
-        {
-          "allow": true,
-        },
+        {"allow": true},
       ],
       "catalog_session_properties": [
-        {
-          "allow": true,
-        },
+        {"allow": true},
       ],
-      "functions": [{
-        "user": "admin",
-        "catalog": ".*",
-        "schema": ".*",
-        "function": ".*",
-        "privileges": [
-          "EXECUTE",
-          "GRANT_EXECUTE",
-          "OWNERSHIP",
-        ],
-      }],
-      "procedures": [{
-        "user": "admin",
-        "catalog": ".*",
-        "schema": ".*",
-        "procedure": ".*",
-        "privileges": [
-          "EXECUTE",
-          "GRANT_EXECUTE",
-        ],
-      }],
+      "functions": [],
+      "procedures": [],
+    }
+
+    extra_groups := groups if {
+      request := {
+        "method": "POST",
+        "url": "http://127.0.0.1:9476/user",
+        "headers": {"Content-Type": "application/json"},
+        "body": {"username": input.context.identity.user},
+      }
+      response := http.send(request)
+
+      response.status_code == 200
+
+      groups := response.body.groups
     }

@@ -61,8 +61,9 @@ data:
 
     connection = get_connection()
 
-    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.compliance WITH (location = 'hdfs:/lakehouse/compliance/')")
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.compliance_analytics WITH (location = 'hdfs:/lakehouse/compliance-analytics/')")
     run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.customer_analytics WITH (location = 'hdfs:/lakehouse/customer-analytics/')")
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.marketing WITH (location = 'hdfs:/lakehouse/marketing/')")
 
     run_query(connection, """
         CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customer AS
