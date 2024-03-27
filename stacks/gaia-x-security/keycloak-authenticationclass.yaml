@@ -1,0 +1,12 @@
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: keycloak
+spec:
+  provider:
+    oidc:
+      hostname: key-server
+      port: 8080
+      rootPath: /realms/gaia-x
+      scopes: [openid profile email]
+      principalClaim: preferred_username
