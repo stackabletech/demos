@@ -536,7 +536,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/create-trino-tables.yaml
-      - plainYaml: stacks/end-to-end-security/setup-superset.yaml
+      # - plainYaml: stacks/end-to-end-security/setup-superset.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user

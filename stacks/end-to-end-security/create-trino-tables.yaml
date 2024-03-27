@@ -148,7 +148,7 @@ data:
     """)
 
     run_query(connection, """
-        create or replace view lakehouse.customer_analytics.table_information as
+        create or replace view lakehouse.customer_analytics.table_information security invoker as
         with
             table_infos as (
                 select 'customer' as "table", (select count(*) from lakehouse.customer_analytics.customer) as records, (select count(*) from lakehouse.customer_analytics."customer$snapshots") as snapshots
@@ -190,7 +190,7 @@ data:
     """)
 
     run_query(connection, """
-        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_enriched AS
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_enriched security invoker AS
         SELECT
             c_customer_id as customer_id,
             c_current_cdemo_sk as customer_demo_sk,
@@ -216,7 +216,7 @@ data:
     """)
 
     run_query(connection, """
-        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_demographics_enriched AS
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_demographics_enriched security invoker AS
         SELECT
             cd_demo_sk as demo_sk,
             cd_gender as gender,
@@ -226,7 +226,7 @@ data:
     """)
 
     run_query(connection, """
-        CREATE OR REPLACE VIEW lakehouse.customer_analytics.household_demographics_enriched AS
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.household_demographics_enriched security invoker AS
         SELECT
             hd_demo_sk as demo_sk,
             ib_lower_bound as income_lower_bound,
@@ -238,7 +238,22 @@ data:
             LEFT JOIN lakehouse.customer_analytics.income_band as i ON i.ib_income_band_sk = d.hd_income_band_sk
     """)
 
-    # run_query(connection, """
-
-    # """)
-
+    run_query(connection, """
+        CREATE OR REPLACE VIEW lakehouse.compliance_analytics.customer_enriched security invoker AS
+        SELECT
+            c_customer_id as customer_id,
+            c_salutation as salutation,
+            COALESCE(c_preferred_cust_flag = 'Y', false) AS preferred_customer,
+            c_birth_year as birth_year,
+            c_email_address as email_address,
+            ca_country as country,
+            ca_state as state,
+            ca_zip as zip,
+            ca_city as city,
+            ca_gmt_offset as gmt_offset,
+            cd_gender as gender,
+            cd_marital_status as marital_status
+        FROM lakehouse.customer_analytics.customer as c
+            LEFT JOIN lakehouse.customer_analytics.customer_address as a ON a.ca_address_sk = c.c_current_addr_sk
+            LEFT JOIN lakehouse.customer_analytics.customer_demographics as cd ON cd.cd_demo_sk = c.c_current_cdemo_sk
+    """)
