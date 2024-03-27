@@ -124,7 +124,7 @@ data:
         # Needed for JDBC clients
         {
           "catalog": "system",
-          "schema": "jdbc",
+          "schema": "jdbc|metadata", # E.g. system.metadata.table_comments
           "privileges": ["SELECT"],
         },
       ],
