@@ -1,0 +1,26 @@
+
+releases:
+  end-to-end-security-release:
+    releaseDate: 1970-01-01
+    description: Intermediate release, as not all changes have made it into 24.3. This is basically 24.3, but with a nightly trino-operator, as it contains https://github.com/stackabletech/trino-operator/pull/559 - which is needed for row level filtering and column masking.
+    products:
+      commons:
+        operatorVersion: 24.3.0
+      hdfs:
+        operatorVersion: 24.3.0
+      hive:
+        operatorVersion: 24.3.0
+      listener:
+        operatorVersion: 24.3.0
+      opa:
+        operatorVersion: 24.3.0
+      secret:
+        operatorVersion: 24.3.0
+      spark-k8s:
+        operatorVersion: 24.3.0
+      superset:
+        operatorVersion: 24.3.0
+      trino:
+        operatorVersion: 0.0.0-dev
+      zookeeper:
+        operatorVersion: 24.3.0
