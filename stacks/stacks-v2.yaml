@@ -328,6 +328,7 @@ stacks:
     stackableOperators:
       - commons
       - secret
+      - listener
       - zookeeper
       - hdfs
       - spark-k8s
@@ -357,6 +358,7 @@ stacks:
     stackableOperators:
       - commons
       - secret
+      - listener
       - zookeeper
       - hdfs
       - hive
@@ -440,6 +442,7 @@ stacks:
     stackableOperators:
       - commons
       - secret
+      - listener
       - trino
       - superset
       - zookeeper
