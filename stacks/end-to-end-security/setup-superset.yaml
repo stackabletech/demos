@@ -1,3 +1,8 @@
+# Instead of the usual POST superset-assets.zip we dump and restore the underlying Postgres persistence.
+# This is because
+# 1.) Superset has a bug regarding loading Database connections that use impersonation (see https://github.com/apache/superset/issues/14377 and https://github.com/apache/superset/pull/14718)
+# 2.) Users, roles and the memberships don't seem to be included in the assets.zip, and are only stored in Postgres.
+# The job to POST the assets.zip is kept bellow anyway in case we can migrate to a more "elegant" solution.
 ---
 apiVersion: batch/v1
 kind: Job
