@@ -518,6 +518,10 @@ stacks:
       - superset
       - keycloak
     supportedNamespaces: ["default"] # SecretClass "kerberos" needs explicit namespace in adminKeytabSecret
+    resourceRequests:
+      cpu: 6250m
+      memory: 19586Mi
+      pvc: 40Gi
     manifests:
       - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
       - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
