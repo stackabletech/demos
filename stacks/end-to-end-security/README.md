@@ -1,8 +1,8 @@
-```sh
-stackablectl -s stacks/stacks-v2.yaml -r stacks/end-to-end-security/release.yaml stack in end-to-end-security
-stackablectl stacklet list
-java -jar ~/Downloads/trino-cli-434-executable.jar --server https://172.18.0.2:32616 --insecure --user admin --external-authentication
-```
+# Install
+
+Until properly merged to install run (from this feature branch)
+
+`stackablectl -s stacks/stacks-v2.yaml -r stacks/end-to-end-security/release.yaml stack in end-to-end-security`
 
 # How to persist changes in Superset
 
