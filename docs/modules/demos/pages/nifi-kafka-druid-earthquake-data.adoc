@@ -8,11 +8,29 @@
 :wikipedia: https://en.wikipedia.org/wiki/Earthquake
 :kcat: https://github.com/edenhill/kcat
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install nifi-kafka-druid-earthquake-data
+----
+
 [CAUTION]
 ====
 This demo only runs in the `default` namespace, as a `ServiceAccount` will be created. Additionally, we have to use the
 FQDN service names (including the namespace), so that the used TLS certificates are valid.
 ====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 9 {k8s-cpu}[cpu units] (core/hyperthread)
+* 30GiB memory
+* 75GiB disk storage
+
+== Overview
 
 This demo will
 
@@ -36,16 +54,7 @@ charts. You can see the deployed products and their relationship in the followin
 
 image::nifi-kafka-druid-earthquake-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 30GiB memory
-* 75GiB disk storage
-
-== Listing Deployed Stacklets
+== Listing the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 
@@ -82,7 +91,7 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
-== Inspecting Data in Kafka
+== Inspect the data in Kafka
 
 Kafka is an event streaming platform to stream the data in near real-time. All the messages put in and read from Kafka
 are structured in dedicated queues called topics. The test data will be put into a topic called earthquakes. The records
@@ -95,13 +104,13 @@ wanting to connect to Kafka must present a valid TLS certificate. The easiest wa
 you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
 Kafka Pod.
 
-=== Listing Available Topics
+=== List the available Topics
 
 You can execute a command on the Kafka broker to list the available topics as follows:
 
 [source,console]
 ----
-kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:32175 (controller)
@@ -121,10 +130,15 @@ You can see that Kafka consists of one broker, and the topic `earthquakes` with 
 see some records sent to Kafka, run the following command. You can change the number of records to print via the `-c`
 parameter.
 
-// Choosing json over console here, because most part is json and it improves syntax highlighting
+[source,console]
+----
+$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t earthquakes -c 1"
+----
+
+Below is an example of the output of one record:
+
 [source,json]
 ----
-kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t earthquakes -c 1"
 {
   "time": "1950-01-09T13:29:32.340Z",
   "latitude": 35.033,
@@ -178,7 +192,7 @@ NiFi is used to fetch earthquake data from the internet and ingest it into Kafka
 ("process group") that downloads a large CSV file, converts it to individual JSON records and produces the records into
 Kafka.
 
-=== Viewing testdata-generation Job
+=== View the testdata-generation Job
 
 You can have a look at the ingestion job running in NiFi by opening the endpoint `https` from your
 `stackablectl stacklet list` command output. In this case, it is https://172.18.0.3:32558. Open it with your favourite
@@ -219,7 +233,7 @@ Druid is used to ingest the near real-time data from Kafka, store it and enable 
 ingestion job reading earthquake records from the Kafka topic earthquakes and saving them into Druid's deep storage. The
 Druid deep storage is based on the S3 store provided by MinIO.
 
-=== Viewing Ingestion Job
+=== View the Ingestion job
 
 You can have a look at the ingestion job running in Druid by opening the endpoint `router-http` from your
 `stackablectl stacklet list` command output (http://172.18.0.4:30109 in this case).
@@ -240,7 +254,7 @@ The statistics show that Druid is currently ingesting `1251` records/s and has i
 entries have been consumed successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable`
 records.
 
-=== Querying the Data Source
+=== Query the Data Source
 
 The ingestion job has automatically created the Druid data source `earthquakes`. You can see the available data sources
 by clicking on `Datasources` at the top.
@@ -291,7 +305,7 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-earthquake-data/superset_2.png[]
 
-=== Viewing Dashboard
+=== View the dashboard
 
 The demo has created a Dashboard to visualize the earthquake data. To open it, click on the tab `Dashboards` at the top.
 
@@ -301,7 +315,7 @@ Click on the dashboard called `Earthquakes`. It might take some time until the d
 
 image::nifi-kafka-druid-earthquake-data/superset_4.png[]
 
-=== Viewing Charts
+=== View the charts
 
 The dashboard `Earthquakes` consists of multiple charts. To list the charts, click on the tab `Charts` at the top.
 
@@ -312,7 +326,7 @@ see the effect.
 
 image::nifi-kafka-druid-earthquake-data/superset_6.png[]
 
-=== Viewing the Earthquake Distribution on the World Map
+=== View the Earthquake Distribution on the World Map
 
 To look at the geographical distribution of the earthquakes you have to click on the tab `Charts` at the top again.
 Afterwards click on the chart `Earthquake distribution`.
@@ -332,7 +346,7 @@ that magnitude. By only enabling magnitudes greater or equal to 8 you can plot o
 
 image::nifi-kafka-druid-earthquake-data/superset_9.png[]
 
-=== Executing Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset you can not only create dashboards but also run arbitrary SQL statements. On the top click on the tab
 `SQL Lab` -> `SQL Editor`.
@@ -393,16 +407,16 @@ web-based frontend to execute SQL statements and build dashboards.
 There are multiple paths to go from here. The following sections give you some ideas on what to explore next. You can
 find the description of the earthquake data {earthquake}[on the United States Geological Survey website].
 
-=== Executing Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset (or the Druid web interface), you can execute arbitrary SQL statements to explore the earthquake data.
 
-=== Creating Additional Dashboards
+=== Create additional dashboards
 
 You also can create additional charts and bundle them together in a Dashboard. Have a look at
 {superset-docs}[the Superset documentation] on how to do that.
 
-=== Loading Additional Data
+=== Load additional data
 
 You can use the NiFi web interface to collect arbitrary data and write it to Kafka (it's recommended to use new Kafka
 topics for that). Alternatively, you can use a Kafka client like {kcat}[kafkacat] to create new topics and ingest data.

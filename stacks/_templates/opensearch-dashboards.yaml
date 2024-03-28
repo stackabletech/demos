@@ -3,7 +3,7 @@ name: opensearch-dashboards
 repo:
   name: opensearch-dashboards
   url: https://opensearch-project.github.io/helm-charts
-version: 2.14.0
+version: 2.16.0
 options:
   labels:
     stackable.tech/vendor: Stackable

@@ -6,6 +6,29 @@
 :forest-article: https://towardsdatascience.com/isolation-forest-and-spark-b88ade6c63ff
 :forest-algo: https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install spark-k8s-anomaly-detection-taxi-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System Requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 32GiB memory
+* 35GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -32,16 +55,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::spark-k8s-anomaly-detection-taxi-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 8 {k8s-cpu}[cpu units] (core/hyperthread)
-* 32GiB memory
-* 35GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 
@@ -91,7 +105,7 @@ Here, you can see the two buckets the S3 is split into:
 . `prediction`: This bucket is where the model scores persist. The data is stored in the
   https://iceberg.apache.org/[Apache Iceberg] table format.
 
-=== Inspect Raw Data
+=== Inspect raw data
 
 Click on the blue button `Browse` on the bucket `demo`.
 
@@ -124,7 +138,7 @@ You can inspect a running Spark job by forwarding the port used by the Spark-UI:
 
 [source,console]
 ----
-kubectl port-forward spark-ad-driver 4040
+$ kubectl port-forward spark-ad-driver 4040
 ----
 
 and then opening a browser tab to http://localhost:4040:

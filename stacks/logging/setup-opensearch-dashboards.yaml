@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: setup-opensearch-dashboards
-          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable23.11.0
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
           env:
             - name: OPEN_SEARCH_ADMIN_PASSWORD
               valueFrom:

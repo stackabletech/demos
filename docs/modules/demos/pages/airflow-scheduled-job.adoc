@@ -1,6 +1,29 @@
 = airflow-scheduled-job
 :page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install airflow-scheduled-job
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
+* 9GiB memory
+* 24GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators
@@ -15,15 +38,6 @@ This demo will
 You can see the deployed products and their relationship in the following diagram:
 
 image::airflow-scheduled-job/overview.png[]
-
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
-* 9GiB memory
-* 24GiB disk storage
 
 == List deployed Stackable services
 
@@ -86,10 +100,12 @@ image::airflow-scheduled-job/airflow_7.png[]
 
 Click on the `run_every_minute` box in the centre of the page and then select `Log`:
 
-image::airflow-scheduled-job/airflow_8.png[]
+[WARNING]
+====
+In this demo, the logs are not available when the KubernetesExecutor is deployed. See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/executor/kubernetes.html#managing-dags-and-logs[Airflow Documentation] for more details.
 
-This will navigate to the worker where this job was run (with multiple workers the jobs will be queued and distributed
-to the next free worker) and display the log. In this case the output is a simple printout of the timestamp:
+If you are interested in persisting the logs, please take a look at the xref:logging.adoc[] demo.
+====
 
 image::airflow-scheduled-job/airflow_9.png[]
 
@@ -111,17 +127,6 @@ By navigating to the graphical overview of the job we can see that DAG has two s
 asynchronously - and another to poll the running job to report on its status.
 
 image::airflow-scheduled-job/airflow_12.png[]
-
-The logs for the first task - `spark-pi-submit` - indicate that it has been started, at which point the task exits
-without any further information:
-
-image::airflow-scheduled-job/airflow_13.png[]
-
-The second task - `spark-pi-monitor` - polls this job and waits for a final result (in this case: `Success`). In this
-case, the actual result of the job (a value of `pi`) is logged by Spark in its driver pod, but more sophisticated jobs
-would persist this in a sink (e.g. a Kafka topic or HBase row) or use the result to trigger subsequent actions.
-
-image::airflow-scheduled-job/airflow_14.png[]
 
 == Summary
 

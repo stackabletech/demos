@@ -7,6 +7,29 @@
 :bulkload: https://hbase.apache.org/book.html#arch.bulk.load
 :importtsv: https://hbase.apache.org/book.html#importtsv
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install hbase-hdfs-load-cycling-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 3 {k8s-cpu}[cpu units] (core/hyperthread)
+* 6GiB memory
+* 16GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -24,16 +47,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::hbase-hdfs-load-cycling-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 3 {k8s-cpu}[cpu units] (core/hyperthread)
-* 6GiB memory
-* 16GiB disk storage
-
-== Listing Deployed Stacklets
+== Listing the deployed Stackable services
 
 To list the installed Stackable services run the following command: `stackablectl stacklet list`
 
@@ -68,7 +82,11 @@ PRODUCT    NAME       NAMESPACE  ENDPOINTS                                      
 
 include::partial$instance-hint.adoc[]
 
-== Adding the First Job
+== Loading data
+
+This demo will run two jobs to automatically load data.
+
+=== distcp-cycling-data
 
 {distcp}[DistCp] (distributed copy) is used for large inter/intra-cluster copying. It uses MapReduce to effect its
 distribution, error handling, recovery, and reporting. It expands a list of files and directories into input to map
@@ -90,7 +108,7 @@ Copying s3a://public-backup-nyc-tlc/cycling-tripdata/demo-cycling-tripdata.csv.g
 [LocalJobRunner Map Task Executor #0] mapred.LocalJobRunner (LocalJobRunner.java:statusUpdate(634)) - 100.0% Copying s3a://public-backup-nyc-tlc/cycling-tripdata/demo-cycling-tripdata.csv.gz to hdfs://hdfs/data/raw/demo-cycling-tripdata.csv.gz
 ----
 
-== Adding the Second Job
+=== create-hfile-and-import-to-hbase
 
 The second Job consists of 2 steps.
 
@@ -100,12 +118,17 @@ about the data and thus increases the performance of hbase. When connecting to t
 and executing `list`, you will see the created table. However, it'll contain 0 rows at this point. You can connect to
 the shell via:
 
-[source]
+[source,console]
 ----
-kubectl exec -it hbase-master-default-0 -- bin/hbase shell
+$ kubectl exec -it hbase-master-default-0 -- bin/hbase shell
 ----
 
-If you use k9s, you can drill into the `hbase-master-default-0` pod and execute `bin/hbase shell list`.
+NOTE: If you use k9s, you can drill into the `hbase-master-default-0` pod and execute `bin/hbase shell`.
+
+[source,sql]
+----
+list
+----
 
 [source]
 ----
@@ -114,8 +137,16 @@ cycling-tripdata
 ----
 
 Secondly, we'll use `org.apache.hadoop.hbase.tool.LoadIncrementalHFiles` (see {bulkload}[bulk load docs]) to import
-the Hfiles into the table and ingest rows. You can now use the hbase shell again and execute `count 'cycling-tripdata'`.
-Ssee below for a partial result:
+the Hfiles into the table and ingest rows. 
+
+Now we will see how many rows are in the `cycling-tripdata` table:
+
+[source,sql]
+----
+count 'cycling-tripdata'
+----
+
+See below for a partial result:
 
 [source]
 ----
@@ -133,12 +164,17 @@ Took 13.4666 seconds
 
 == Inspecting the Table
 
-You can now use the table and the data. You can use all available hbase shell commands. Below, you'll see the table
-description.
+You can now use the table and the data. You can use all available hbase shell commands.
+
+[source,sql]
+----
+describe 'cycling-tripdata'
+----
+
+Below, you'll see the table description.
 
 [source,console]
 ----
-describe 'cycling-tripdata'
 Table cycling-tripdata is ENABLED
 cycling-tripdata
 COLUMN FAMILIES DESCRIPTION
@@ -156,10 +192,15 @@ COLUMN FAMILIES DESCRIPTION
 {NAME => 'started_at', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_ENCODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65536', REPLICATION_SCOPE => '0'}
 ----
 
-== Accessing the Hbase Web Interface
+== Accessing the Hbase web interface
 
-The Hbase web UI will give you information on the status and metrics of your Hbase cluster. If the UI is unavailable
-please do a port-forward `kubectl port-forward hbase-master-default-0 16010`. See below for the start page.
+[TIP]
+====
+Run `stackablectl stacklet list` to get the address of the _ui-http_ endpoint.
+If the UI is unavailable, please do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
+====
+
+The Hbase web UI will give you information on the status and metrics of your Hbase cluster. See below for the start page.
 
 image::hbase-hdfs-load-cycling-data/hbase-ui-start-page.png[]
 
@@ -167,9 +208,12 @@ From the start page you can check more details, for example a list of created ta
 
 image::hbase-hdfs-load-cycling-data/hbase-table-ui.png[]
 
-== Accessing the HDFS Web Interface
+== Accessing the HDFS web interface
 
-You can also see HDFS details via a UI. Below you will see the overview of your HDFS cluster
+You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of 
+the namenodes. 
+
+Below you will see the overview of your HDFS cluster.
 
 image::hbase-hdfs-load-cycling-data/hdfs-overview.png[]
 
@@ -177,7 +221,7 @@ The UI will give you information on the datanodes via the datanodes tab.
 
 image::hbase-hdfs-load-cycling-data/hdfs-datanode.png[]
 
-You can also browse the directory with the UI.
+You can also browse the filesystem via the Utilities menu.
 
 image::hbase-hdfs-load-cycling-data/hdfs-data.png[]
 

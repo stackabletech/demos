@@ -3,7 +3,7 @@ name: jupyterhub
 repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
-version: 2.0.0
+version: 3.2.1
 options:
   hub:
     config:
@@ -38,7 +38,7 @@ options:
       stackable.tech/vendor: Stackable
     initContainers:
       - name: download-notebook
-        image: docker.stackable.tech/stackable/tools:1.0.0-stackable23.11.0
+        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.3.0
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook

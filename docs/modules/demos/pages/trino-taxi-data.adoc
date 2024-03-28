@@ -9,6 +9,29 @@
 :trino-client-docs: https://trino.io/docs/current/client.html
 :parquet: https://parquet.apache.org/
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install trino-taxi-data
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 7 {k8s-cpu}[cpu units] (core/hyperthread)
+* 16GiB memory
+* 28GiB disk storage
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -30,45 +53,36 @@ You can see the deployed products and their relationship in the following diagra
 
 image::trino-taxi-data/overview.png[]
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 7 {k8s-cpu}[cpu units] (core/hyperthread)
-* 16GiB memory
-* 28GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed Stackable services, run the following command:
 
 [source,console]
 ----
 $ stackablectl stacklet list
-┌─────────┬──────────────┬───────────┬──────────────────────────────────────────────┐
-│ PRODUCT ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                    │
-╞═════════╪══════════════╪═══════════╪══════════════════════════════════════════════╡
-│ hive    ┆ hive-iceberg ┆ default   ┆ hive                172.18.0.4:30637         │
-│         ┆              ┆           ┆ metrics             172.18.0.4:30176         │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa     ┆ opa          ┆ default   ┆ http                http://172.18.0.2:32470  │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino   ┆ trino        ┆ default   ┆ coordinator-metrics 172.18.0.2:32402         │
-│         ┆              ┆           ┆ coordinator-https   https://172.18.0.2:31605 │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio   ┆ minio        ┆ default   ┆ http                http://172.18.0.2:30357  │
-│         ┆              ┆           ┆ console-http        http://172.18.0.2:30310  │
-└─────────┴──────────────┴───────────┴──────────────────────────────────────────────┘
+┌──────────┬───────────────┬───────────┬───────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                     ┆ CONDITIONS                      │
+╞══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive     ┆ hive          ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa      ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset ┆ superset      ┆ default   ┆ external-http        http://172.18.0.2:31312  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino    ┆ trino         ┆ default   ┆ coordinator-metrics  172.18.0.2:30465         ┆ Available, Reconciling, Running │
+│          ┆               ┆           ┆ coordinator-https    https://172.18.0.2:30755 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio    ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32654  ┆                                 │
+└──────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
-== Inspect Data in S3
+== Inspect the data in S3
 
 The S3 provided by MinIO is used as a persistent storage to store all the data used. You can look at the test data
 within the MinIO web interface by opening the endpoint `console-http` from your `stackablectl stacklet list` command
-output. You have to use the endpoint from your command output. In this case, it is http://172.18.0.3:30503. Open it with
+output. You have to use the endpoint from your command output. In this case, it is http://172.18.0.2:32654. Open it with
 your favourite browser.
 
 image::trino-taxi-data/minio_1.png[]
@@ -77,7 +91,7 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::trino-taxi-data/minio_2.png[]
 
-Click on the blue button `Browse` on the bucket `demo` and open the folders `ny-taxi-data` -> `raw`.
+Click on the bucket `demo` and open the folders `ny-taxi-data` -> `raw`.
 
 image::trino-taxi-data/minio_3.png[]
 
@@ -85,12 +99,11 @@ The demo uploaded 1GB of parquet files, one file per month. The data contains ta
 (and therefore the number of rides) decreased drastically because of the COVID-19 pandemic starting from `2020-03`.
 {parquet}[Parquet] is an open-source, column-oriented data file format for efficient storage and retrieval.
 
-== Use Trino Web Interface
+== Use the Trino web interface
 
 Trino offers SQL access to the data within S3. Open the endpoint `coordinator-https` in your browser
-(`https://172.18.0.3:30141` in this case). If you get a warning regarding the self-signed certificate (e.g.
+(`https://172.18.0.2:30755` in this case). If you get a warning regarding the self-signed certificate (e.g.
 `Warning: Potential Security Risk Ahead`), you must tell your browser to trust the website and continue.
-
 
 image::trino-taxi-data/trino_1.png[]
 
@@ -100,10 +113,10 @@ image::trino-taxi-data/trino_2.png[]
 
 When you start executing SQL queries, you will see the queries getting processed here.
 
-== Use Superset Web Interface
+== Use the Superset web interface
 
 Superset gives the ability to execute SQL queries and build dashboards. Open the endpoint `external-superset`
-in your browser (`http://172.18.0.4:32295` in this case).
+in your browser (`http://172.18.0.2:31312` in this case).
 
 image::trino-taxi-data/superset_1.png[]
 
@@ -111,7 +124,7 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::trino-taxi-data/superset_2.png[]
 
-=== View the Dashboard
+=== View the dashboard
 
 On the top, click on the `Dashboards` tab.
 
@@ -123,7 +136,7 @@ image::trino-taxi-data/superset_4.png[]
 
 You can clearly see the impact of COVID-19 on the taxi business.
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL Lab` ->
 `SQL Editor`.
@@ -161,7 +174,7 @@ a web-based frontend to execute SQL statements and build dashboards.
 There are multiple paths to go from here. The following sections can give you some ideas on what to explore next.
 You can find the description of the taxi data {nyc-website}[on the New York City website].
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset you can execute arbitrary SQL statements to explore the taxi data. Can you answer the following
 questions by executing SQL statements? The {trino-language-docs}[Trino documentation on their SQL language] might help
@@ -251,7 +264,7 @@ returns
         2 | 2021-08-03 11:51:58.000 | 2021-08-03 12:09:29.000 |           17 |            96.0 |          1.56 | Credit card  |        11.5 |       2.22 |        17.02
 ----
 
-Pretty cheap for that amount of people! This probably are invalid records.
+Pretty cheap for that amount of people! These are probably invalid records.
 ====
 
 What was the highest tip (measured in percentage of the original fee) ever given?
@@ -311,10 +324,10 @@ produces something like
 
 [source,sql]
 ----
-CREATE TABLE IF NOT EXISTS hive.demo.ny_taxi_data_raw (
+CREATE TABLE hive.demo.ny_taxi_data_raw (
   VendorID BIGINT,
-  tpep_pickup_datetime TIMESTAMP,
-  tpep_dropoff_datetime TIMESTAMP,
+  tpep_pickup_datetime TIMESTAMP(3),
+  tpep_dropoff_datetime TIMESTAMP(3),
   passenger_count DOUBLE,
   trip_distance DOUBLE,
   payment_type BIGINT,
@@ -339,21 +352,21 @@ produces something like
 
 [source,sql]
 ----
-create or replace view hive.demo.ny_taxi_data as
-select
+CREATE VIEW hive.demo.ny_taxi_data SECURITY DEFINER AS
+SELECT
   vendorid,
   tpep_pickup_datetime,
   tpep_dropoff_datetime,
-  date_diff('minute', tpep_pickup_datetime, tpep_dropoff_datetime) as duration_min,
+  date_diff('minute', tpep_pickup_datetime, tpep_dropoff_datetime) duration_min,
   passenger_count,
   trip_distance,
-  case payment_type when 1 then 'Credit card' when 2 then 'Cash' when 3 then 'No charge' when 4 then 'Dispute' when 6 then 'Voided trino' else 'Unknown' end as payment_type,
+  (CASE payment_type WHEN 1 THEN 'Credit card' WHEN 2 THEN 'Cash' WHEN 3 THEN 'No charge' WHEN 4 THEN 'Dispute' WHEN 6 THEN 'Voided trino' ELSE 'Unknown' END) payment_type,
   fare_amount,
   tip_amount,
   total_amount
-from hive.demo.ny_taxi_data_raw
-where tpep_pickup_datetime >= from_iso8601_timestamp('2019-12-01T00:00:00')
-and tpep_pickup_datetime <= from_iso8601_timestamp('2022-05-31T00:00:00')
+FROM hive.demo.ny_taxi_data_raw
+WHERE tpep_pickup_datetime >= from_iso8601_timestamp('2019-12-01T00:00:00')
+AND tpep_pickup_datetime <= from_iso8601_timestamp('2022-05-31T00:00:00')
 ----
 ====
 

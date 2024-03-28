@@ -3,6 +3,41 @@
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install logging
+----
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 6.5 {k8s-cpu}[cpu units] (core/hyperthread)
+* 5GiB memory
+* 27GiB disk storage
+
+[#opensearch-prerequisites]
+=== OpenSearch prerequisites
+
+==== MacOS and Windows
+
+If you use MacOS or Windows and use Docker to run Kubernetes, set the RAM to at least 4 GB in _Preferences > Resources_.
+
+==== Linux
+
+OpenSearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts
+are likely too low - usually 65530, which may result in out-of-memory exceptions. So, the Linux setting
+`vm.max_map_count` on the host machine where the containers are running must be set to at least 262144.
+
+This is automatically set by default in this demo (via the `setSysctlMaxMapCount` Stack parameter).
+
+OpenSearch has more information about this setting in their https://opensearch.org/docs/2.12/install-and-configure/install-opensearch/index/#important-settings[documentation].
+
+== Overview
+
 This demo will
 
 * Install the required Stackable operators.
@@ -20,80 +55,39 @@ You can see the deployed products and their relationship in the following diagra
 
 image::logging/overview.png[]
 
-== OpenSearch Prerequisites
 
-=== MacOS and Windows
-
-If you use MacOS or Windows and use Docker to run Kubernetes, set the RAM to at least 4 GB in _Preferences > Resources_.
-
-=== Linux
-
-OpenSearch uses a mmapfs directory by default to store its indices. The default operating system limits on mmap counts
-are likely too low - usually 65530, which may result in out-of-memory exceptions. So, the Linux setting
-`vm.max_map_count` on the host machine where "kind" is running must be set to at least 262144.
-
-To check the current value, run this command:
-
-[source,console]
-----
-sysctl vm.max_map_count
-----
-
-The limit can be temporarily increased with:
-
-[source,console]
-----
-sudo sysctl --write vm.max_map_count=262144
-----
-
-To permanently increase the value, add the following line to `/etc/sysctl.conf`:
-
-[source,.properties]
-----
-vm.max_map_count=262144
-----
-
-Then run `sudo sysctl --load` to reload.
-
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 6.5 {k8s-cpu}[cpu units] (core/hyperthread)
-* 5GiB memory
-* 27GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────────────────┬───────────────────────┬───────────┬──────────────────────────────┐
-│ Product               ┆ Name                  ┆ Namespace ┆ Endpoints                    │
-╞═══════════════════════╪═══════════════════════╪═══════════╪══════════════════════════════╡
-│ opensearch-dashboards ┆ opensearch-dashboards ┆ default   ┆ http http://172.18.0.5:31319 │
-│                       ┆                       ┆           ┆                              │
-│                       ┆                       ┆           ┆                              │
-├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper             ┆ simple-zk             ┆ default   ┆ zk   172.18.0.2:32417        │
-└───────────────────────┴───────────────────────┴───────────┴──────────────────────────────┘
+┌───────────────────────┬───────────────────────┬───────────┬───────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT               ┆ NAME                  ┆ NAMESPACE ┆ ENDPOINTS                     ┆ CONDITIONS                      │
+╞═══════════════════════╪═══════════════════════╪═══════════╪═══════════════════════════════╪═════════════════════════════════╡
+│ zookeeper             ┆ simple-zk             ┆ default   ┆                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opensearch-dashboards ┆ opensearch-dashboards ┆ default   ┆ http  http://172.18.0.2:30595 ┆                                 │
+└───────────────────────┴───────────────────────┴───────────┴───────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
-== Inspect the Log Data
+== Inspect the log data
 
 You can have a look at the log data within the OpenSearch Dashboards web interface by running
 `stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
-http://172.18.0.5:31319/app/discover?security_tenant=global#/view/logs.
+http://172.18.0.2:30595.
 
 image::logging/login.png[]
 
 Log in with the username `admin` and password `adminadmin`.
 
+NOTE: On first login, you will be presented with some options. Feel free to bypass them to get to the logs.
+
+Click _Discovery_ in the menu to view the recent logs. If you do not see anything, increase the search window to greater than _Last 15 minutes_.
+
 image::logging/logs.png[]
 
-Inspect the logs.
+From here you can inspect the logs. You can select fields on the left side to limit the view to interesting information.

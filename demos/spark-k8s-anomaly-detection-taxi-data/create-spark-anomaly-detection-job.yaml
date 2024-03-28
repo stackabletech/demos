@@ -8,11 +8,11 @@ spec:
     spec:
       initContainers:
         - name: wait-for-testdata
-          image: docker.stackable.tech/stackable/tools:1.0.0-stackable23.11.0
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
           command: ["bash", "-c", "echo 'Waiting for job load-ny-taxi-data to finish' && kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data"]
       containers:
         - name: create-spark-anomaly-detection-job
-          image: docker.stackable.tech/stackable/tools:1.0.0-stackable23.11.0
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
           command: ["bash", "-c", "echo 'Submitting Spark job' && kubectl apply -f /tmp/manifest/spark-ad-job.yaml"]
           volumeMounts:
             - name: manifest
@@ -36,15 +36,16 @@ data:
     metadata:
       name: spark-ad
     spec:
-      version: "1.0"
       sparkImage:
-        custom: docker.stackable.tech/demos/pyspark-k8s-with-kafka-and-iceberg:3.3.0-stackable0.2.0
-        productVersion: 3.3.0
+        productVersion: 3.5.0
       mode: cluster
       mainApplicationFile: local:///spark-scripts/spark-ad.py
       deps:
+        packages:
+          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.0
         requirements:
-          - scikit-learn==0.24.2
+          - scikit-learn==1.4.0
       s3connection:
         reference: minio
       volumes:
@@ -90,6 +91,9 @@ data:
         spark.sql.catalog.prediction: org.apache.iceberg.spark.SparkCatalog
         spark.sql.catalog.prediction.type: hive
         spark.sql.catalog.prediction.uri: thrift://hive-iceberg:9083
+        # AFAIK This can be removed in 24.3
+        #spark.driver.userClassPathFirst: "false"
+        #spark.executor.userClassPathFirst: "false"
 ---
 apiVersion: v1
 kind: ConfigMap

@@ -4,6 +4,27 @@
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :tcph-spec: https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v3.0.1.pdf
 
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install trino-iceberg
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 9 {k8s-cpu}[cpu units] (core/hyperthread)
+* 27GiB memory
+* 110GiB disk storage
+
 [NOTE]
 ====
 This demo is a condensed form of the xref:data-lakehouse-iceberg-trino-spark.adoc[] demo focusing on using the
@@ -11,6 +32,8 @@ lakehouse to store and modify data. It focuses on the Trino and Iceberg integrat
 workstation. If you want a more complex lakehouse setup, please look at the
 xref:data-lakehouse-iceberg-trino-spark.adoc[] demo.
 ====
+
+== Overview
 
 This demo will
 
@@ -21,16 +44,7 @@ This demo will
 * Create multiple data lakehouse tables using Apache Iceberg and data from the https://www.tpc.org/tpch/[TPC-H dataset].
 * Run some queries to show the benefits of Iceberg.
 
-[#system-requirements]
-== System Requirements
-
-To run this demo, your system needs at least:
-
-* 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 27GiB memory
-* 110GiB disk storage
-
-== List Deployed Stacklets
+== List the deployed Stackable services
 
 To list the installed installed Stackable services run the following command:
 
@@ -65,17 +79,17 @@ xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino
 Have a look at the xref:data-lakehouse-iceberg-trino-spark.adoc#_connect_with_dbeaver[documentation] on how to
 connect with DBeaver. As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
 
-[source,bash]
+[source,console]
 ----
-java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
+$ java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
 ----
 
 Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output. When
 prompted, enter the password `adminadmin`.
 
-== Create Testdata
+== Create test data
 
-=== Create Schema
+=== Create the Schema
 
 First, you must create a schema in the lakehouse to store the test data:
 
@@ -92,7 +106,7 @@ Afterwards, you can set the context to the freshly created schema so that you do
 use lakehouse.tpch;
 ----
 
-=== Create Tables
+=== Create the tables
 
 You can use the https://www.tpc.org/tpch/[TPC-H dataset] to have some test data to work with. Trino offers a special
 https://trino.io/docs/current/connector/tpch.html[TPCH connector] that generates the test data deterministically on the
@@ -161,9 +175,9 @@ with `F5`).
 
 image::trino-iceberg/dbeaver_1.png[]
 
-== Explore Data
+== Explore data
 
-=== Basic Table Information
+=== Basic table information
 
 To create a view containing some basic information about the tables, please execute the statement below:
 
@@ -239,7 +253,7 @@ select * from table_information order by records desc;
 (8 rows)
 ----
 
-=== Query the Data
+=== Query the data
 
 You can now use standard SQL to analyze the data. The relation of the tables to each other is explained in the
 {tcph-spec}[TPC-H specification] and looks as follows:
@@ -277,7 +291,7 @@ order by returnflag, linestatus;
 The query is inspired by the first query `Q1` of the {tcph-spec}[TPC-H benchmark]. The only difference is that the
 `where shipdate <= date '1998-12-01' - interval '[DELTA]' day` clause was omitted to produce a full-table scan.
 
-=== Row Level Deletes
+=== Row-level deletes
 
 So far, the tables have been written once and have only been read afterwards. Trino - combined with Iceberg - can read
 data and do row-level deletes (deleting single rows out of a table). They achieve this by writing so-called "delete
@@ -362,7 +376,7 @@ update customer set address='Karlsruhe' where custkey=112501;
 
 Afterwards, the records should look the same as before, with the difference that the `address` is set to `Karlsruhe`.
 
-=== MERGE INTO Statement
+=== The MERGE INTO Statement
 
 Trino also offers a https://trino.io/docs/current/sql/merge.html[MERGE INTO] statement, which gives you great
 flexibility.
@@ -469,7 +483,7 @@ select orderpriority_prev, count(*) from orders where custkey in (select custkey
 (5 rows)
 ----
 
-== Scaling up to larger Amount of Data
+== Scaling up to a larger amount of data
 
 So far, we have executed all the queries against a dataset created from TPC-H with a scale factor of 5. The demo can
 handle much larger data volumes.
@@ -492,7 +506,7 @@ network interconnection.
 You can change the endpoint of the S3 by running `kubectl edit s3connection minio -o yaml` and `kubectl edit secret
 minio-s3-credentials`. Please note that the credentials need to be base64 encoded.
 
-.Example IONOS Configuration
+.Example IONOS configuration
 [%collapsible]
 ====
 [source,sql]

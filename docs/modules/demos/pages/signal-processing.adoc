@@ -1,16 +1,26 @@
 = signal-processing
 
-This demo can be installed on most cloud managed Kubernetes clusters as well as on premise or on a reasonably provisioned laptop. Install this demo on an existing Kubernetes cluster:
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
-[source,bash]
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
 ----
-stackablectl demo install signal-processing
+$ stackablectl demo install signal-processing
 ----
 
 [WARNING]
 ====
-This demo should not be run alongside other demos and requires a minimum of 32 GB RAM and 8 CPUs.
+This demo should not be run alongside other demos.
 ====
+
+[#system-requirements]
+== System Requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 32GiB memory
 
 == Overview
 
@@ -32,22 +42,22 @@ image::signal-processing/overview.png[]
 
 == Data ingestion
 
-The data used in this demo is a set of gas sensor measurements*. The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors. In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table. It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed. The Nifi flow that does this can easily be extended to process other sources of (actually streamed) data.
+The data used in this demo is a set of gas sensor measurements*. 
+The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors. 
+In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table. 
+It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed. 
+The Nifi flow that does this can easily be extended to process other sources of (actually streamed) data.
 
 == JupyterHub
 
 JupyterHub will create a Pod for each active user. In order to reach the JupyterHub web interface, create a port-forward:
 
-[source,bash]
+[source,console]
 ----
 $ kubectl port-forward service/proxy-public 8000:http
 ----
 
-Now access the JupyterHub web interface via:
-
-----
-http://localhost:8000
-----
+Now access the JupyterHub web interface via http://localhost:8000.
 
 You should see the JupyterHub login page where you can login with username `admin` and password `adminadmin`.
 
@@ -69,7 +79,7 @@ The enriched data is calculated using an online, unsupervised https://docs.seldo
 
 Grafana can be reached by first looking up the service endpoint:
 
-[source,bash]
+[source,console]
 ----
 $ stackablectl stacklet list
 ┌───────────┬───────────┬───────────┬──────────────────────────────────┬─────────────────────────────────────────┐
