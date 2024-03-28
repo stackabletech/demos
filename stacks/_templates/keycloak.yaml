@@ -49,10 +49,13 @@ spec:
               mountPath: /tls/
         - name: create-auth-class
           image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev # We need 0.0.0-dev, so we get kubectl
-          command:
-            - bash
-            - -c
+          command: ["/bin/bash", "-c"]
+          args:
             - |
+              pid=
+              trap 'echo SIGINT; [[ $pid ]] && kill $pid; exit' SIGINT
+              trap 'echo SIGTERM; [[ $pid ]] && kill $pid; exit' SIGTERM
+
               while :
               do
                 echo "Determining Keycloak public reachable address"
@@ -84,7 +87,8 @@ spec:
               EOF
                 fi
 
-                sleep 30
+                sleep 30 & pid=$!
+                wait
               done
       securityContext:
         fsGroup: 1000

@@ -38,10 +38,13 @@ spec:
             volumeMounts:
               - mountPath: /stackable/config
                 name: config
-            command:
-              - /bin/bash
-              - -c
+            command: ["/bin/bash", "-c"]
+            args:
               - |
+                pid=
+                trap 'echo SIGINT; [[ $pid ]] && kill $pid; exit' SIGINT
+                trap 'echo SIGTERM; [[ $pid ]] && kill $pid; exit' SIGTERM
+
                 mkdir --parents /stackable/app/pythonpath && cp /stackable/config/* /stackable/app/pythonpath
                 python - << EOF
                 import socket
@@ -71,7 +74,8 @@ spec:
                 EOF
                 superset fab import-roles --path gamma_extended.json
                 echo "Role imported!"
-                sleep infinity
+                sleep infinity & pid=$!
+                wait
 ---
 apiVersion: v1
 kind: Secret
