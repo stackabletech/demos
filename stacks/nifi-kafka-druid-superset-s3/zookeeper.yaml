@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 3.9.2
+    custom: docker.stackable.tech/stackable-experimental/zookeeper:3.9.2-stackable24.3.0
   servers:
     roleGroups:
       default:

@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: "442"
+    custom: docker.stackable.tech/stackable-experimental/trino:442-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     catalogLabelSelector:

@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 2.4.17
+    custom: docker.stackable.tech/stackable-experimental/hbase:2.4.17-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     hdfsConfigMapName: hdfs

@@ -7,6 +7,7 @@ metadata:
 spec:
   image:
     productVersion: 2.8.1
+    custom: docker.stackable.tech/stackable-experimental/airflow:2.8.1-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     loadExamples: false

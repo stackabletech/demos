@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 28.0.1
+    custom: docker.stackable.tech/stackable-experimental/druid:28.0.1-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     zookeeperConfigMapName: druid-znode

@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 1.25.0
+    custom: docker.stackable.tech/stackable-experimental/nifi:1.25.0-stackable24.3.0
   clusterConfig:
     authentication:
       - authenticationClass: nifi-admin-credentials
