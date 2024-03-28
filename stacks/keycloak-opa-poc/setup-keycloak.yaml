@@ -69,7 +69,7 @@ spec:
           - |
             echo "Download keycloak"
             curl -LO https://github.com/keycloak/keycloak/releases/download/23.0.0/keycloak-23.0.0.zip
-            unzip keycloak-23.0.0.zip
+            unzip -o keycloak-23.0.0.zip
             cd keycloak-23.0.0/bin
             ./kcadm.sh config credentials --config kcadm.conf --server http://keycloak:8080/ --realm master --user admin --password "$KEYCLOAK_ADMIN_PASSWORD"
             ./kcadm.sh create users --config kcadm.conf -s username=alice -s enabled=true || true
