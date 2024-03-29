@@ -255,6 +255,7 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  # Done. Changed superset version to 3.0.3
   trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
     stackableRelease: 24.3
@@ -275,9 +276,9 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
+      - plainYaml: stacks/trino-superset-s3/hive-metastore.yaml
+      - plainYaml: stacks/trino-superset-s3/trino.yaml
+      - plainYaml: stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m
@@ -296,6 +297,7 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  # In progress
   trino-iceberg:
     description: Stack containing Trino using Apache Iceberg as a S3 data lakehouse
     stackableRelease: 24.3
