@@ -1,4 +1,5 @@
 stacks:
+  # Multi arch ready by vendor
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: 24.3
@@ -21,6 +22,7 @@ stacks:
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
         default: adminadmin
+  # Multi arch ready by vendor
   logging:
     description: Stack containing OpenSearch, OpenSearch Dashboards (Kibana) and Vector aggregator
     stackableRelease: 24.3
@@ -67,7 +69,7 @@ stacks:
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/redis-airflow.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - plainYaml: ./main/stacks/airflow/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
