@@ -331,7 +331,7 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-  # In progress
+  # Done. No changes needed
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
     stackableRelease: 24.3
@@ -348,8 +348,8 @@ stacks:
       - pyspark
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/jupyterhub.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
+      - plainYaml: stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
+      - plainYaml: stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
       # TODO Use patched JHub that created service for us from customer setup (ask Sebastian)
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
@@ -362,6 +362,7 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  # In progress
   dual-hive-hdfs-s3:
     description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
     stackableRelease: 24.3
