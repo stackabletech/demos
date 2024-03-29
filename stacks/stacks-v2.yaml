@@ -140,6 +140,7 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  # Done. No version changes needed
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
     stackableRelease: 24.3
@@ -154,15 +155,16 @@ stacks:
       - hbase
       - hdfs
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hbase.yaml
+      - plainYaml: stacks/hdfs-hbase/zookeeper.yaml
+      - plainYaml: stacks/hdfs-hbase/hdfs.yaml
+      - plainYaml: stacks/hdfs-hbase/hbase.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 4200m
       memory: 10758Mi
       pvc: 21Gi
     parameters: []
+  # in progress
   nifi-kafka-druid-superset-s3:
     description: Stack containing NiFi, Kafka, Druid, MinIO and Superset for data visualization
     stackableRelease: 24.3

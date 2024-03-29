@@ -5,6 +5,7 @@ metadata:
 spec:
   image:
     productVersion: 3.3.6
+    custom: docker.stackable.tech/stackable-experimental/hadoop:3.3.6-stackable24.3.0
   clusterConfig:
     dfsReplication: 1
     zookeeperConfigMapName: hdfs-znode
