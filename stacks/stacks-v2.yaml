@@ -347,7 +347,7 @@ stacks:
       - hdfs
       - pyspark
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/jupyterhub.yaml
+      - helmChart: stacks/_templates/jupyterhub.yaml
       - plainYaml: stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
       - plainYaml: stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
@@ -534,7 +534,7 @@ stacks:
       - plainYaml: stacks/signal-processing/nifi.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
+      - helmChart: stacks/signal-processing/jupyterhub.yaml
     parameters:
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
