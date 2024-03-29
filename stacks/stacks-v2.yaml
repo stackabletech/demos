@@ -56,6 +56,7 @@ stacks:
       - name: setSysctlMaxMapCount
         description: Wether an init-container should be used to increase 'sysctl -w vm.max_map_count'. This requires to spawn an init-container with runsAsUser 0 privileges, which some clusters prohibit. You can increase 'vm.max_map_count' on all of the kubernetes nodes manually and set this to 'false'.
         default: "true"
+  # Done. Airflow version 2.6.3 and pointing to stackable-experimental
   airflow:
     description: Stack containing Airflow scheduling platform
     stackableRelease: 24.3
@@ -69,7 +70,7 @@ stacks:
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/redis-airflow.yaml
-      - plainYaml: ./main/stacks/airflow/airflow.yaml
+      - plainYaml: stacks/airflow/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
@@ -82,6 +83,7 @@ stacks:
       - name: airflowSecretKey
         description: Airflow's secret key used to generate e.g. user session tokens
         default: airflowSecretKey
+  # Done. Superset version 3.0.3 now
   data-lakehouse-iceberg-trino-spark:
     description: Data lakehouse using Iceberg lakehouse on S3, Trino as query engine, Spark for streaming ingest and Superset for data visualization
     stackableRelease: 24.3
@@ -111,12 +113,12 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
+      - plainYaml: stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
+      - plainYaml: stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
+      - plainYaml: stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
+      - plainYaml: stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
+      - plainYaml: stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
+      - plainYaml: stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
     supportedNamespaces: []
     resourceRequests:
       cpu: "71"

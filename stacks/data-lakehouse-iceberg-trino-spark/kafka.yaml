@@ -14,6 +14,7 @@ metadata:
 spec:
   image:
     productVersion: 3.6.1
+    custom: docker.stackable.tech/stackable-experimental/kafka:3.6.1-stackable24.3.0
   clusterConfig:
     zookeeperConfigMapName: kafka-znode
     authentication:

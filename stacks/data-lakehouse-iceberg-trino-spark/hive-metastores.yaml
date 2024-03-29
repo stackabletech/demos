@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 3.1.3
+    custom: docker.stackable.tech/stackable-experimental/hive:3.1.3-stackable24.3.0
   clusterConfig:
     database:
       connString: jdbc:postgresql://postgresql-hive:5432/hive
@@ -26,6 +27,7 @@ metadata:
 spec:
   image:
     productVersion: 3.1.3
+    custom: docker.stackable.tech/stackable-experimental/hive:3.1.3-stackable24.3.0
   clusterConfig:
     database:
       connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
