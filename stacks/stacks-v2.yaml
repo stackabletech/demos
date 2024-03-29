@@ -362,7 +362,7 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
-  # In progress
+  # Done. No changes needed.
   dual-hive-hdfs-s3:
     description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
     stackableRelease: 24.3
@@ -384,9 +384,9 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hivehdfs.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hives3.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hive.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/trino.yaml
+      - plainYaml: stacks/dual-hive-hdfs-s3/hdfs.yaml
+      - plainYaml: stacks/dual-hive-hdfs-s3/hive.yaml
+      - plainYaml: stacks/dual-hive-hdfs-s3/trino.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 7750m
@@ -441,6 +441,7 @@ stacks:
       pvc: 0Gi
     # TODO: Parameterize
     parameters: []
+  # In progress
   keycloak-opa-poc:
     description: >-
       A Superset, Trino, Druid, Keycloak and OPA instance.

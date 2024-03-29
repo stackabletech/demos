@@ -62,6 +62,7 @@ metadata:
 spec:
   image:
     productVersion: "442"
+    custom: docker.stackable.tech/stackable-experimental/trino:442-stackable24.3.0
   clusterConfig:
     authorization:
       opa:
@@ -87,6 +88,7 @@ metadata:
 spec:
   image:
     productVersion: 0.51.0
+    custom: docker.stackable.tech/stackable-experimental/opa:0.51.0-stackable24.3.0
   servers:
     roleGroups:
       default:

@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 3.8.1
+    custom: docker.stackable.tech/stackable-experimental/zookeeper:3.8.1-stackable24.3.0
   servers:
     roleGroups:
       default:
@@ -26,6 +27,7 @@ metadata:
 spec:
   image:
     productVersion: 3.3.4
+    custom: docker.stackable.tech/stackable-experimental/hadoop:3.3.4-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     dfsReplication: 1
