@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 27.0.0
+    custom: docker.stackable.tech/stackable-experimental/druid:27.0.0-stackable24.3.0
   clusterConfig:
     listenerClass: external-unstable
     deepStorage:
