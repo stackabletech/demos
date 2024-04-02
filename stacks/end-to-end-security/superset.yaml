@@ -21,61 +21,44 @@ spec:
         replicas: 1
     podOverrides:
       spec:
-        containers:
-          - name: create-default-role
-            image: docker.stackable.tech/stackable/superset:3.1.0-stackable0.0.0-dev
-            env:
-              - name: SECRET_KEY
-                valueFrom:
-                  secretKeyRef:
-                    key: connections.secretKey
-                    name: superset-credentials
-              - name: SQLALCHEMY_DATABASE_URI
-                valueFrom:
-                  secretKeyRef:
-                    key: connections.sqlalchemyDatabaseUri
-                    name: superset-credentials
-            volumeMounts:
-              - mountPath: /stackable/config
-                name: config
-            command: ["/bin/bash", "-c"]
-            args:
-              - |
-                pid=
-                trap 'echo SIGINT; [[ $pid ]] && kill $pid; exit' SIGINT
-                trap 'echo SIGTERM; [[ $pid ]] && kill $pid; exit' SIGTERM
+        # We need to restore the postgres state before the superset container itself starts some database migrations
+        initContainers:
+        # The postgres image does not contain curl or wget...
+        - name: download-dump
+          image: docker.stackable.tech/stackable/testing-tools:0.1.0-stackable0.1.0
+          command:
+            - bash
+            - -c
+            - |
+              cd /tmp
+              curl --fail -O https://raw.githubusercontent.com/stackabletech/demos/feat/end-to-end-security-stack/stacks/end-to-end-security/postgres_superset_dump.sql.gz
+              gunzip postgres_superset_dump.sql.gz
 
-                mkdir --parents /stackable/app/pythonpath && cp /stackable/config/* /stackable/app/pythonpath
-                python - << EOF
-                import socket
-                import time
-
-                while not socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost', 8088)) == 0:
-                    print("Superset not up yet, sleeping ...")
-                    time.sleep(1)
-                EOF
-                superset fab export-roles --path data.json
-                python - << EOF
-                import json
-
-                with open('data.json') as f:
-                    data = json.load(f)
-
-                gamma_permissions = [obj['permissions'] for obj in data if obj['name'] == 'Gamma'][0]
-                sql_lab_permissions = [obj['permissions'] for obj in data if obj['name'] == 'sql_lab'][0]
-
-                gamma_extended = [{
-                    'name': 'Gamma_extended',
-                    'permissions': gamma_permissions + sql_lab_permissions
-                }]
-
-                with open('gamma_extended.json', 'w') as f:
-                    json.dump(gamma_extended, f)
-                EOF
-                superset fab import-roles --path gamma_extended.json
-                echo "Role imported!"
-                sleep infinity & pid=$!
-                wait
+              # We need to omit changing the users password, as otherwise the content in the Secrets does not match
+              # the actual password in Postgres.
+              grep -vwE '(CREATE ROLE postgres;|CREATE ROLE superset;|ALTER ROLE postgres|ALTER ROLE superset)' postgres_superset_dump.sql > /dump/postgres_superset_dump.sql
+          volumeMounts:
+            - name: dump
+              mountPath: /dump/
+        - name: restore-postgres
+          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r11 # Same image as the bitnami postgres helm-chart is using
+          command:
+            - bash
+            - -c
+            - |
+              psql --host postgresql-superset --user postgres < /dump/postgres_superset_dump.sql
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-superset
+                  key: postgres-password
+          volumeMounts:
+            - name: dump
+              mountPath: /dump/
+        volumes:
+          - name: dump
+            emptyDir: {}
 ---
 apiVersion: v1
 kind: Secret
