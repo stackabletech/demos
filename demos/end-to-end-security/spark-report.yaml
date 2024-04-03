@@ -2,15 +2,15 @@
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
 metadata:
-  name: access-hdfs
+  name: spark-report
 spec:
   sparkImage:
-    productVersion: 3.5.0
+    productVersion: 3.5.1
   mode: cluster
-  mainApplicationFile: local:///stackable/spark/jobs/access-hdfs.py
+  mainApplicationFile: local:///stackable/spark/jobs/spark-report.py
   deps:
     packages:
-      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.4.3
+      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
   sparkConf:
     spark.driver.extraClassPath: /stackable/config/hdfs
     spark.executor.extraClassPath: /stackable/config/hdfs
@@ -73,7 +73,7 @@ spec:
   volumes:
     - name: script
       configMap:
-        name: access-hdfs-script
+        name: spark-report-script
     - name: hdfs-config
       configMap:
         name: hdfs
@@ -96,16 +96,28 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: access-hdfs-script
+  name: spark-report-script
 data:
-  access-hdfs.py: |
+  spark-report.py: |
     from pyspark.sql import SparkSession
     from pyspark.sql.types import StructType, StructField, StringType, LongType, ShortType, FloatType, DoubleType, BooleanType, TimestampType, MapType, ArrayType
     from pyspark.sql.functions import col, from_json, expr
 
-    spark = SparkSession.builder.appName("access-hdfs").getOrCreate()
+    import time
+
+    spark = SparkSession.builder.appName("spark-report").getOrCreate()
 
     spark.sql("show catalogs").show()
     spark.sql("show tables in lakehouse.default").show()
 
-    spark.sql("SELECT * FROM lakehouse.customer_analytics.customers").show()
+    customer_table = "lakehouse.customer_analytics.customer"
+    while not spark.catalog.tableExists(customer_table):
+        print(f"Table {customer_table} not found, waiting for Trino to create it...")
+        time.sleep(5)
+
+    print(f"Table {customer_table} found, starting report")
+
+    spark.sql(f"SELECT * FROM lakehouse.customer_analytics.customer").show()
+    spark.sql(f"CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.spark_report AS SELECT c_birth_country, count(*) FROM {customer_table} group by c_birth_country order by c_birth_country").show()
+
+    print("Report written")

@@ -110,6 +110,13 @@ data:
             {"name": "cd_purchase_estimate", "allow": false},
           ]
         },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "spark_report",
+          "privileges": ["SELECT"],
+        },
         # Needed to bootstrap schemas and tables
         {
           "user": "data-import",
