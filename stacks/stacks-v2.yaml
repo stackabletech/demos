@@ -497,7 +497,10 @@ stacks:
         default: supersetSecretKey
   end-to-end-security:
     description: >-
-      A stack used to demonstrate an end-to-end security concept
+      A stack used to demonstrate an end-to-end security concept.
+
+      Please note that this stack is tightly coupled with the demo.
+      So if you install the stack you will get demo-specific parts (such as Keycloak users or regorules).
     stackableRelease: end-to-end-security-release
     stackableOperators:
       - commons
@@ -516,6 +519,7 @@ stacks:
       - hive
       - trino
       - superset
+      - opa
       - keycloak
     supportedNamespaces: ["default"] # SecretClass "kerberos" needs explicit namespace in adminKeytabSecret
     resourceRequests:
@@ -539,7 +543,6 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
-      - plainYaml: stacks/end-to-end-security/create-trino-tables.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
@@ -565,9 +568,6 @@ stacks:
       - name: trinoDataImportUserPassword
         description: Password of the service user used to load data into Trino
         default: data-importdata-import
-      - name: openshift
-        description: Whether to use OpenShift. Defaults to false. Might not work yet (WIP)
-        default: false
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana

@@ -2,7 +2,7 @@
 
 Until properly merged to install run (from this feature branch)
 
-`stackablectl -s stacks/stacks-v2.yaml -r stacks/end-to-end-security/release.yaml stack in end-to-end-security`
+`stackablectl -d demos/demos-v2.yaml -s stacks/stacks-v2.yaml -r stacks/end-to-end-security/release.yaml demo in end-to-end-security`
 
 # How to persist changes in Superset
 

@@ -31,6 +31,24 @@ demos:
       cpu: "3"
       memory: 5638Mi
       pvc: 16Gi
+  end-to-end-security:
+    description: A demo used to demonstrate an end-to-end security concept
+    stackableStack: end-to-end-security
+    labels:
+      - security
+      - hdfs
+      - hive
+      - trino
+      - superset
+      - opa
+      - keycloak
+    manifests:
+      - plainYaml: demos/end-to-end-security/create-trino-tables.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 6250m
+      memory: 19586Mi
+      pvc: 40Gi
   nifi-kafka-druid-earthquake-data:
     description: Demo ingesting earthquake data into Kafka using NiFi, streaming it into Druid and creating a Superset dashboard
     documentation: https://docs.stackable.tech/stackablectl/stable/demos/nifi-kafka-druid-earthquake-data.html
