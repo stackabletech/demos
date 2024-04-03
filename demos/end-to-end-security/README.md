@@ -1,9 +1,3 @@
-# Install
-
-Until properly merged to install run (from this feature branch)
-
-`stackablectl -d demos/demos-v2.yaml -s stacks/stacks-v2.yaml -r stacks/end-to-end-security/release.yaml demo in end-to-end-security`
-
 # How to persist changes in Superset
 
 1. Log into Keycloak as the user `admin` (in the master realm) and create a user called `admin` in the demo realm.
