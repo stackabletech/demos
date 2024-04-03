@@ -1,0 +1,69 @@
+apiVersion: opentelemetry.io/v1alpha1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector-grpc
+spec:
+  mode: sidecar
+  # See: https://github.com/open-telemetry/opentelemetry-collector-releases/pkgs/container/opentelemetry-collector-releases%2Fopentelemetry-collector-contrib/versions?filters%5Bversion_type%5D=tagged
+  # Using the contrib image so we get all of the useful plugins
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.97.0
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 64Mi
+  config: |
+    receivers:
+      otlp/insecure:
+        protocols:
+          grpc:
+            endpoint: 127.0.0.1:4317 # we don't want the sidecar accessible from outside the container
+    exporters:
+      debug:
+        verbosity: detailed
+        sampling_initial: 5
+        sampling_thereafter: 200
+      otlp/jaeger-insecure:
+        endpoint: jaeger-collector:4317
+        tls:
+          insecure: true
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 50
+        spike_limit_percentage: 30
+      batch/every-10-seconds:
+        timeout: 10s
+      ## See: https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor/k8sattributesprocessor
+      ## The k8sattributes processor doesn't work proprely as a sidecar. It is instead recommended to use the K8s downward API, and extract attributes through environment variables.
+      ## See the resourcedetection processor further below, which has the "env" detector.
+      # k8sattributes:
+      # extract key=value pairs from OTEL_RESOURCE_ATTRIBUTES
+      resourcedetection/env:
+        detectors: ["env"]
+        timeout: 2s
+        override: false
+      ## extract EKS specific information from the AWS metadata API
+      # resourcedetection/eks:
+      #   detectors: ["eks"]
+      #   timeout: 2s
+      #   override: false
+      # resourcedetection/ec2:
+      #   detectors: ["ec2"]
+      #   ec2:
+      #     # A list of regex's to match tag keys to add as resource attributes can be specified
+      #     tags:
+      #       - ^Name$
+      #       - ^karpenter\.sh\/provisioner-name$
+    service:
+      pipelines:
+        traces:
+          receivers: [otlp/insecure]
+          processors:
+          - memory_limiter
+          - batch/every-10-seconds
+          # - k8sattributes
+          - resourcedetection/env
+          exporters: [debug, otlp/jaeger-insecure]

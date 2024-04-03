@@ -535,3 +535,19 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  observability:
+    description: >-
+      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/metrics via OTLP, and send them to Jaeger.
+    stackableRelease: 24.3
+    stackableOperators: []
+    labels:
+      - jaeger
+      - opentelemetry
+      - observability
+      - tracing
+    manifests:
+      # TODO (@NickLarsenNZ): Prepend paths with: https://raw.githubusercontent.com/stackabletech/demos/main/stacks
+      - helmChart: ./stacks/_templates/jaeger.yaml
+      - helmChart: ./stacks/_templates/opentelemetry-operator.yaml
+      - plainYaml: ./stacks/observability/opentelemetry-collector-sidecar.yaml
+
