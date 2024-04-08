@@ -45,6 +45,18 @@ data:
         },
       ],
       "tables": [
+        # Needed to bootstrap schemas and tables
+        {
+          "user": "data-import",
+          "catalog": "lakehouse",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "user": "data-import",
+          "catalog": "tpcds",
+          "privileges": ["SELECT"],
+        },
+        # Actual rules start here
         {
           "group": "/Compliance and Regulation/Analytics",
           "catalog": "lakehouse",
@@ -117,16 +129,12 @@ data:
           "table": "spark_report",
           "privileges": ["SELECT"],
         },
-        # Needed to bootstrap schemas and tables
         {
-          "user": "data-import",
           "catalog": "lakehouse",
-          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
-        },
-        {
-          "user": "data-import",
-          "catalog": "tpcds",
+          "schema": "employees",
+          "table": "employees",
           "privileges": ["SELECT"],
+          "filter": "username = current_user or supervisor = current_user",
         },
         # Needed for JDBC clients
         {
