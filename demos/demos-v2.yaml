@@ -32,7 +32,7 @@ demos:
       memory: 5638Mi
       pvc: 16Gi
   end-to-end-security:
-    description: A demo used to demonstrate an end-to-end security concept
+    description: Demonstrates end-to-end security across multiple products
     stackableStack: end-to-end-security
     labels:
       - security
