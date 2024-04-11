@@ -537,9 +537,11 @@ stacks:
         default: adminadmin
   observability:
     description: >-
-      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/metrics via OTLP, and send them to Jaeger.
-    stackableRelease: 24.3
-    stackableOperators: []
+      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - secret 
     labels:
       - jaeger
       - opentelemetry
@@ -549,5 +551,12 @@ stacks:
       # TODO (@NickLarsenNZ): Prepend paths with: https://raw.githubusercontent.com/stackabletech/demos/main/stacks
       - helmChart: ./stacks/observability/jaeger.yaml
       - helmChart: ./stacks/observability/opentelemetry-operator.yaml
+      - plainYaml: ./stacks/observability/grafana-admin-credentials.yaml
+      - helmChart: ./stacks/observability/grafana.yaml
+      - helmChart: ./stacks/observability/grafana-tempo.yaml
+      - helmChart: ./stacks/observability/grafana-loki.yaml
       - plainYaml: ./stacks/observability/opentelemetry-collector-sidecar.yaml
-
+    parameters:
+      - name: grafanaAdminPassword
+        description: Password of the Grafana admin user
+        default: adminadmin
