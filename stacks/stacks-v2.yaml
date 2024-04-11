@@ -547,7 +547,7 @@ stacks:
       - tracing
     manifests:
       # TODO (@NickLarsenNZ): Prepend paths with: https://raw.githubusercontent.com/stackabletech/demos/main/stacks
-      - helmChart: ./stacks/_templates/jaeger.yaml
-      - helmChart: ./stacks/_templates/opentelemetry-operator.yaml
+      - helmChart: ./stacks/observability/jaeger.yaml
+      - helmChart: ./stacks/observability/opentelemetry-operator.yaml
       - plainYaml: ./stacks/observability/opentelemetry-collector-sidecar.yaml
 
