@@ -543,6 +543,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
+      - plainYaml: stacks/gaia-x-security/tsa-mock.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
