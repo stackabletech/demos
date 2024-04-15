@@ -16,3 +16,13 @@ Afterwards copy the dump to your local machine using
 ```sh
 kubectl cp postgresql-superset-0:/tmp/dump.sql.gz postgres_superset_dump.sql.gz
 ```
+
+
+# GAIA-X specific
+Enter the following hosts in /etc/hosts
+```
+5.250.181.150 auth-server
+5.250.176.8 key-server
+```
+
+`kubectl port-forward svc/tsa 5000`

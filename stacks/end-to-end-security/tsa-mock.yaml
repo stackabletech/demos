@@ -41,30 +41,14 @@ data:
     """
 
     users = {
-        'Dave Dataowner (Onlineshop24 GmbH)': {
-            'sub': 'dave1',
-            'preferred_username': 'dave1',
-            'name': 'Dave',
-            'family_name': 'Dataowner',
-            'company': 'Onlineshop24',
-            'email': 'dave@onlineshop24.com',
+        'Daniel King': {
+            'sub': 'daniel.king',
+            'preferred_username': 'daniel.king',
+            'name': 'Daniel',
+            'family_name': 'king',
+            'company': 'Knab',
+            'email': 'daniel.king@knab.com',
         },
-        'Alice Customer Analytics (AwesomeAnalytics Ltd)': {
-            'sub': 'alice2',
-            'preferred_username': 'alice2',
-            'name': 'Alice',
-            'family_name': 'Analytics',
-            'company': 'AwesomeAnalytics',
-            'email': 'alice@awesome-analytics.com',
-        },
-        'Sam Shipper (SwiftShip AG)': {
-            'sub': 'sam3',
-            'preferred_username': 'sam3',
-            'name': 'Sam',
-            'family_name': 'Shipper',
-            'company': 'SwiftShip',
-            'email': 'sam@swiftship.com',
-        }
     }
 
     REQUESTS = {'a': 'b'}
@@ -233,10 +217,10 @@ kind: Service
 metadata:
   name: tsa
 spec:
+  type: ClusterIP
   selector:
     app: tsa
   ports:
     - protocol: TCP
       port: 5000
       targetPort: 5000
-  type: ClusterIP

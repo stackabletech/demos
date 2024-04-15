@@ -7,6 +7,11 @@ spec:
   image:
     productVersion: 0.61.0
   clusterConfig:
+    # userInfo:
+    #   backend:
+    #     experimentalXfscAas:
+    #       hostname: tsa
+    #       port: 5000
     userInfo:
       backend:
         keycloak:

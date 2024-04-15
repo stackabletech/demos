@@ -531,7 +531,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
       - plainYaml: stacks/_templates/keycloak.yaml
       - plainYaml: stacks/end-to-end-security/tsa-mock.yaml
-      - plainYaml: stacks/end-to-end-security/postgres-aas.yaml
+      - helmChart: stacks/end-to-end-security/postgres-aas.yaml
       - plainYaml: stacks/end-to-end-security/aas.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml

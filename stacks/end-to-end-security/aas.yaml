@@ -6,13 +6,13 @@ metadata:
   labels:
     app: aas
 spec:
+  type: LoadBalancer
   ports:
     - name: http
       port: 9000
       targetPort: 9000
   selector:
     app: aas
-  type: NodePort
 ---
 apiVersion: v1
 kind: Pod
@@ -36,7 +36,7 @@ spec:
         - name: SPRING_DATASOURCE_USERNAME
           value: aas
         - name: SPRING_DATASOURCE_PASSWORD
-          value: aas 
+          value: aas
         - name: AAS_IAM_BASEURI
           value: http://key-server:8080
         - name: AAS_TSA_URL

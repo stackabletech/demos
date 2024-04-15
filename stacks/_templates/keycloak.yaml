@@ -19,11 +19,15 @@ spec:
         - name: keycloak
           image: quay.io/keycloak/keycloak:22.0.3
           args:
-            - start
-            - --hostname-strict=false
-            - --https-key-store-file=/tls/keystore.p12
-            - --https-key-store-password=changeit
+            - start-dev
             - --import-realm
+            - --hostname-url=http://key-server:8080
+          # args:
+          #   - start
+          #   - --hostname-strict=false
+          #   - --https-key-store-file=/tls/keystore.p12
+          #   - --https-key-store-password=changeit
+          #   - --import-realm
           env:
             - name: KEYCLOAK_ADMIN
               value: admin
@@ -33,13 +37,13 @@ spec:
                   name: keycloak-admin-credentials
                   key: admin
           ports:
-            - name: https
-              containerPort: 8443
+            - name: http
+              containerPort: 8080
           readinessProbe:
             httpGet:
-              scheme: HTTPS
+              scheme: HTTP
               path: /realms/master
-              port: https
+              port: http
           volumeMounts:
             - name: data
               mountPath: /opt/keycloak/data/
@@ -59,7 +63,7 @@ spec:
               while :
               do
                 echo "Determining Keycloak public reachable address"
-                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
+                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "http") | .nodePort | tostring)')
                 echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
 
                 if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
@@ -74,20 +78,21 @@ spec:
                     spec:
                       provider:
                         oidc:
-                          hostname: "$KEYCLOAK_HOSTNAME"
-                          port: $KEYCLOAK_PORT
-                          rootPath: /realms/demo
-                          scopes: [openid]
+                          hostname: key-server # "$KEYCLOAK_HOSTNAME"
+                          port: 8080 # $KEYCLOAK_PORT
+                          rootPath: /realms/gaia-x
+                          scopes: [openid, profile, email]
                           principalClaim: preferred_username
-                          tls:
-                            verification:
-                              server:
-                                caCert:
-                                  secretClass: tls
+                          tls: null
+                            # verification:
+                            #   none: {}
+                              # server:
+                              #   caCert:
+                              #     secretClass: tls
               EOF
                 fi
 
-                sleep 30 & pid=$!
+                sleep 15 & pid=$!
                 wait
               done
       securityContext:
@@ -138,9 +143,24 @@ spec:
   selector:
     app: keycloak
   ports:
-    - name: https
-      port: 8443
-      targetPort: 8443
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: key-server
+  labels:
+    app: key-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
