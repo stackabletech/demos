@@ -23,6 +23,5 @@ Enter the following hosts in /etc/hosts
 ```
 5.250.181.150 auth-server
 5.250.176.8 key-server
+5.250.181.139 tsa
 ```
-
-`kubectl port-forward svc/tsa 5000`

@@ -84,7 +84,7 @@ data:
             elif parsed_url.path.startswith('/redirect'):
                 request_id = parsed_url.query.split('=')[1]
                 self.send_response(302)
-                self.send_header('Location', f"http://localhost:5000/requests?requestId={request_id}")
+                self.send_header('Location', f"http://tsa:5000/requests?requestId={request_id}")
                 self.end_headers()
             elif parsed_url.path == '/cip/claims':
                 sub = query_components.get('sub', [''])[0]
@@ -217,7 +217,7 @@ kind: Service
 metadata:
   name: tsa
 spec:
-  type: ClusterIP
+  type: LoadBalancer
   selector:
     app: tsa
   ports:
