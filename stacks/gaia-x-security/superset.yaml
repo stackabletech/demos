@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: superset-credentials
+type: Opaque
+stringData:
+  adminUser.username: admin
+  adminUser.firstname: Superset
+  adminUser.lastname: Admin
+  adminUser.email: admin@superset.com
+  adminUser.password: will-not-be-used # as we use auth/oidc
+  connections.secretKey: {{ supersetSecretKey }}
+  connections.sqlalchemyDatabaseUri: postgresql://superset:superset@postgresql-superset/superset
+---
+apiVersion: superset.stackable.tech/v1alpha1
+kind: SupersetCluster
+metadata:
+  name: superset
+spec:
+  image:
+    productVersion: 3.1.0
+    stackableVersion: 0.0.0-dev
+  clusterConfig:
+    credentialsSecret: superset-credentials
+    listenerClass: external-unstable
+    authentication:
+      - authenticationClass: keycloak
+        oidc:
+          clientCredentialsSecret: superset-keycloak-client
+        userRegistrationRole: Alpha_extended
+  nodes:
+    roleGroups:
+      default:
+        replicas: 1
+    podOverrides:
+      spec:
+        containers:
+          - name: create-default-role
+            image: docker.stackable.tech/stackable/superset:3.1.0-stackable0.0.0-dev
+            env:
+              - name: SECRET_KEY
+                valueFrom:
+                  secretKeyRef:
+                    key: connections.secretKey
+                    name: superset-credentials
+              - name: SQLALCHEMY_DATABASE_URI
+                valueFrom:
+                  secretKeyRef:
+                    key: connections.sqlalchemyDatabaseUri
+                    name: superset-credentials
+            volumeMounts:
+              - mountPath: /stackable/config
+                name: config
+            command:
+              - /bin/bash
+              - -c
+              - |
+                mkdir --parents /stackable/app/pythonpath && cp /stackable/config/* /stackable/app/pythonpath
+                python - << EOF
+                import socket
+                import time
+
+                while not socket.socket(socket.AF_INET, socket.SOCK_STREAM).connect_ex(('localhost', 8088)) == 0:
+                    print("Superset not up yet, sleeping ...")
+                    time.sleep(1)
+                EOF
+                superset fab export-roles --path data.json
+                python - << EOF
+                import json
+
+                with open('data.json') as f:
+                    data = json.load(f)
+
+                alpha_permissions = [obj['permissions'] for obj in data if obj['name'] == 'Alpha'][0]
+                sql_lab_permissions = [obj['permissions'] for obj in data if obj['name'] == 'sql_lab'][0]
+
+                alpha_extended = [{
+                    'name': 'Alpha_extended',
+                    'permissions': alpha_permissions + sql_lab_permissions
+                }]
+
+                with open('alpha_extended.json', 'w') as f:
+                    json.dump(alpha_extended, f)
+                EOF
+                superset fab import-roles --path alpha_extended.json
+                echo "Role imported!"
+                sleep infinity
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: superset-keycloak-client
+stringData:
+  clientId: superset
+  clientSecret: "{{ keycloakSupersetClientSecret }}"

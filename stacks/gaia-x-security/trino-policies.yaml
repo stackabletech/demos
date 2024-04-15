@@ -1,0 +1,154 @@
+{% raw %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-policies
+  labels:
+    opa.stackable.tech/bundle: true
+data:
+  trino_policies.rego: |
+    package trino_policies
+
+    import rego.v1
+
+    policies := {
+      "catalogs": [
+        {
+          "user": "admin",
+          "allow": "all",
+        },
+        {
+          "group": "Onlineshop24",
+          "allow": "all",
+        },
+        {
+          "group": "AwesomeAnalytics|SwiftShip",
+          "catalog": "tpcds",
+          "allow": "read-only",
+        },
+      ],
+      "queries": [
+        {
+          "user": "admin",
+          "allow": ["execute"],
+        },
+        {
+          "group": "Onlineshop24",
+          "allow": ["execute", "kill", "view"],
+        },
+        {
+          "group": "AwesomeAnalytics|SwiftShip",
+          "allow": ["execute", "view"],
+        },
+      ],
+      "schemas": [
+        {
+          "group": "Onlineshop24",
+          "owner": true,
+        },
+        {
+          "group": "AwesomeAnalytics|SwiftShip",
+          "catalog": "tpcds",
+          "schema": "sf1",
+        },
+      ],
+      "tables": [
+        {
+          "group": "Onlineshop24",
+          "privileges": [
+            "SELECT",
+            "INSERT",
+            "DELETE",
+            "UPDATE",
+            "OWNERSHIP",
+            "GRANT_SELECT",
+          ],
+        },
+        {
+          "group": "AwesomeAnalytics",
+          "catalog": "tpcds",
+          "schema": "sf1",
+          "table": "household_demographics|customer_demographics|promotion|web_sales|catalog_sales|store_sales",
+          "privileges": [
+            "SELECT"
+          ],
+        },
+        {
+          "group": "SwiftShip",
+          "catalog": "tpcds",
+          "schema": "sf1",
+          "table": "customer_address|warehouse|web_sales|ship_mode",
+          "privileges": [
+            "SELECT"
+          ],
+        },
+      ],
+      "system_information": [
+        {
+          "group": "Onlineshop24",
+          "allow": ["read", "write"],
+        },
+      ],
+      "catalog_session_properties": [
+        {
+          "group": "Onlineshop24",
+          "allow": true,
+        },
+      ],
+      "system_session_properties": [
+        {
+          "group": "Onlineshop24",
+          "allow": true,
+        },
+      ],
+      "impersonation": [
+        {
+          "original_user": "superset",
+          "new_user": ".*",
+          "allow": true,
+        },
+      ],
+      "authorization": [{
+        "original_user": "superset",
+        "new_user": ".*",
+        "allow": true,
+      }],
+      "functions": [{
+        "group": "Onlineshop24",
+        "catalog": ".*",
+        "schema": ".*",
+        "function": ".*",
+        "privileges": [
+          "EXECUTE",
+          "GRANT_EXECUTE",
+          "OWNERSHIP",
+        ],
+      }],
+      "procedures": [{
+        "group": "Onlineshop24",
+        "catalog": ".*",
+        "schema": ".*",
+        "procedure": ".*",
+        "privileges": [
+          "EXECUTE",
+          "GRANT_EXECUTE",
+        ],
+      }],
+    }
+
+    # we model company association as an extra group
+    extra_groups := groups if {
+      request := {
+        "method": "POST",
+        "url": "http://127.0.0.1:9476/user",
+        "headers": {"Content-Type": "application/json"},
+        "body": {"id": input.context.identity.user},
+      }
+      response := http.send(request)
+
+      response.status_code == 200
+
+      groups := [response.body.customAttributes.company]
+    }
+{% endraw %}

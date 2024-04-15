@@ -1,0 +1,17 @@
+releases:
+  gaia-x-security-release:
+    releaseDate: 1970-01-01
+    description: Intermediate release until everything is released in (hopefully) 24.3
+    products:
+      commons:
+        operatorVersion: 0.0.0-dev # Needed for OIDC support in AuthClass
+      listener:
+        operatorVersion: 23.11.0
+      opa:
+        operatorVersion: 0.0.0-dev # Needed for UIF and OPA 0.61.0
+      secret:
+        operatorVersion: 23.11.0
+      superset:
+        operatorVersion: 0.0.0-dev # Needed for OIDC support
+      trino:
+        operatorVersion: 0.0.0-dev # Needed for OIDC support
