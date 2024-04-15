@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth-server
+  labels:
+    app: aas
+spec:
+  ports:
+    - name: http
+      port: 9000
+      targetPort: 9000
+  selector:
+    app: aas
+  type: NodePort
+---
+apiVersion: v1
+kind: Pod
+metadata:
+  name: aas
+  labels:
+    app: aas
+spec:
+  containers:
+    - name: aas
+      image: oci.stackable.tech/sandbox/xfsc-aas:latest
+      ports:
+        - name: web
+          containerPort: 9000
+          protocol: TCP
+      env:
+        - name: SPRING_PROFILES_ACTIVE
+          value: prod
+        - name: SPRING_DATASOURCE_URL
+          value: jdbc:postgresql://postgresql-aas:5432/aas
+        - name: SPRING_DATASOURCE_USERNAME
+          value: aas
+        - name: SPRING_DATASOURCE_PASSWORD
+          value: aas 
+        - name: AAS_IAM_BASEURI
+          value: http://key-server:8080
+        - name: AAS_TSA_URL
+          value: http://tsa:5000
+        - name: AAS_OIDC_ISSUER
+          value: http://auth-server:9000
+        - name: AAS_CACHE_TTL
+          value: 5m
+        - name: LOGGING_LEVEL_EU_XFSC_AAS
+          value: DEBUG
+        - name: AAS_INVITATION_URI
+          value: http://localhost:5000/requests?

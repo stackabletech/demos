@@ -530,6 +530,9 @@ stacks:
       - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
       - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
       - plainYaml: stacks/_templates/keycloak.yaml
+      - plainYaml: stacks/end-to-end-security/tsa-mock.yaml
+      - plainYaml: stacks/end-to-end-security/postgres-aas.yaml
+      - plainYaml: stacks/end-to-end-security/aas.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
@@ -543,7 +546,6 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
-      - plainYaml: stacks/gaia-x-security/tsa-mock.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
