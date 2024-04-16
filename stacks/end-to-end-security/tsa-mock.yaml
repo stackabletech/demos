@@ -47,6 +47,7 @@ data:
             'name': 'Daniel',
             'family_name': 'King',
             'company': 'Knab',
+            'departments': ["/Compliance and Regulation/Analytics"],
             'email': 'daniel.king@knab.com',
         },
         'Isla Williams': {
@@ -55,6 +56,7 @@ data:
             'name': 'Isla',
             'family_name': 'Williams',
             'company': 'Knab',
+            'departments': ["/Customer Service/Analytics"],
             'email': 'isla.williams@knab.com',
         },
         'Justin Martin': {
@@ -63,6 +65,7 @@ data:
             'name': 'Justin',
             'family_name': 'Martin',
             'company': 'Knab',
+            'departments': ["/Customer Service/Analytics"],
             'email': 'justin.martin@knab.com',
         },
         'Mark Ketting': {
@@ -71,6 +74,7 @@ data:
             'name': 'Mark',
             'family_name': 'Ketting',
             'company': 'Knab',
+            'departments': ["/Marketing"],
             'email': 'mark.ketting@knab.com',
         },
         'Pamela Scott': {
@@ -79,6 +83,7 @@ data:
             'name': 'Pamela',
             'family_name': 'Scott',
             'company': 'Knab',
+            'departments': ["/Customer Service/Analytics"],
             'email': 'pamela.scott@knab.com',
         },
         'Sophia Clarke': {
@@ -87,6 +92,7 @@ data:
             'name': 'Sophia',
             'family_name': 'Clarke',
             'company': 'Knab',
+            'departments': ["/Compliance and Regulation/Analytics"],
             'email': 'sophia.clarke@knab.com',
         },
         'William Lewis': {
@@ -95,6 +101,7 @@ data:
             'name': 'William',
             'family_name': 'Levis',
             'company': 'Knab',
+            'departments': ["/Compliance and Regulation/Analytics"],
             'email': 'william.lewis@knab.com',
         },
     }
