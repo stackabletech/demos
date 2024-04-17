@@ -97,7 +97,7 @@ spec:
       # basicauth/loki:
       #   client_auth:
       #     username: loki
-      #     password: {{ loki }}
+      #     password: loki
     # Install the extensions, and initialise and connect the receivers, processors, and exporters in a pipeline.
     service:
       # extensions: [basicauth/loki]
@@ -126,8 +126,8 @@ spec:
       # Set the log level of the opentelemetry-collector application.
       # You can also expose the collector metrcics (separate from the metrics receivers/exporters).
       telemetry:
-        logs:
-          level: DEBUG
+        # logs:
+        #   level: DEBUG
         # metrics:
         #   level: detailed
         #   address: 0.0.0.0:8888
