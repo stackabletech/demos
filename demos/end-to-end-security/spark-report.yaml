@@ -1,0 +1,123 @@
+---
+apiVersion: spark.stackable.tech/v1alpha1
+kind: SparkApplication
+metadata:
+  name: spark-report
+spec:
+  sparkImage:
+    productVersion: 3.5.1
+  mode: cluster
+  mainApplicationFile: local:///stackable/spark/jobs/spark-report.py
+  deps:
+    packages:
+      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
+  sparkConf:
+    spark.driver.extraClassPath: /stackable/config/hdfs
+    spark.executor.extraClassPath: /stackable/config/hdfs
+    spark.hadoop.hive.metastore.kerberos.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
+    spark.hadoop.hive.metastore.sasl.enabled: "true"
+    spark.kerberos.keytab: /stackable/kerberos/keytab
+    spark.kerberos.principal: spark/spark.default.svc.cluster.local@KNAB.COM
+    spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
+    spark.sql.catalog.lakehouse.type: hive
+    spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg:9083
+    spark.sql.defaultCatalog: lakehouse
+    spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+  job:
+    config:
+      volumeMounts: &volumeMounts
+        - name: script
+          mountPath: /stackable/spark/jobs
+        - name: hdfs-config
+          mountPath: /stackable/config/hdfs
+        - name: kerberos
+          mountPath: /stackable/kerberos
+        # Yes, I'm too lazy to fiddle around with JVM arguments... (-Djava.security.krb5.conf=/example/path/krb5.conf)
+        - name: kerberos
+          mountPath: /etc/krb5.conf
+          subPath: krb5.conf
+    envOverrides: &envOverrides
+      KERBEROS_REALM: KNAB.COM
+    # As the envOverrides are not working
+    podOverrides:
+      spec:
+        containers:
+          - name: spark-submit
+            env:
+              - name: KERBEROS_REALM
+                value: KNAB.COM
+  driver:
+    config:
+      volumeMounts: *volumeMounts
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 100m
+    envOverrides: *envOverrides
+    podOverrides: &podOverrides
+      spec:
+        containers:
+          - name: spark
+            # As the envOverrides are not working
+            env:
+              - name: KERBEROS_REALM
+                value: KNAB.COM
+  executor:
+    replicas: 1
+    config:
+      volumeMounts: *volumeMounts
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 250m
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
+  volumes:
+    - name: script
+      configMap:
+        name: spark-report-script
+    - name: hdfs-config
+      configMap:
+        name: hdfs
+    - name: kerberos
+      ephemeral:
+        volumeClaimTemplate:
+          metadata:
+            annotations:
+              secrets.stackable.tech/class: kerberos
+              secrets.stackable.tech/kerberos.service.names: spark
+              secrets.stackable.tech/scope: service=spark
+          spec:
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: "1"
+            storageClassName: secrets.stackable.tech
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-report-script
+data:
+  spark-report.py: |
+    from pyspark.sql import SparkSession
+    from pyspark.sql.types import StructType, StructField, StringType, LongType, ShortType, FloatType, DoubleType, BooleanType, TimestampType, MapType, ArrayType
+    from pyspark.sql.functions import col, from_json, expr
+
+    import time
+
+    spark = SparkSession.builder.appName("spark-report").getOrCreate()
+
+    spark.sql("show catalogs").show()
+    spark.sql("show tables in lakehouse.default").show()
+
+    customer_table = "lakehouse.customer_analytics.customer"
+    while not spark.catalog.tableExists(customer_table):
+        print(f"Table {customer_table} not found, waiting for Trino to create it...")
+        time.sleep(5)
+
+    print(f"Table {customer_table} found, starting report")
+
+    spark.sql(f"SELECT * FROM lakehouse.customer_analytics.customer").show()
+    spark.sql(f"CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.spark_report AS SELECT c_birth_country, count(*) FROM {customer_table} group by c_birth_country order by c_birth_country").show()
+
+    print("Report written")

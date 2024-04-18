@@ -1,0 +1,56 @@
+apiVersion: hdfs.stackable.tech/v1alpha1
+kind: HdfsCluster
+metadata:
+  name: hdfs
+spec:
+  image:
+    productVersion: 3.3.6
+  clusterConfig:
+    zookeeperConfigMapName: hdfs-znode
+    authentication:
+      tlsSecretClass: tls
+      kerberos:
+        secretClass: kerberos
+    authorization:
+      opa:
+        configMapName: opa
+        package: hdfs
+  nameNodes:
+    config:
+      logging:
+        containers:
+          hdfs:
+            console:
+              level: DEBUG
+            loggers:
+              ROOT:
+                level: INFO
+              tech.stackable.hadoop:
+                level: DEBUG
+    configOverrides: &configOverrides
+      core-site.xml:
+        # The idea is that the user "hive" can't do anything in hdfs, *but* it can impersonate other users
+        # (such as trino), that have the needed permissions
+        hadoop.proxyuser.hive.users: "*"
+        hadoop.proxyuser.hive.hosts: "*"
+    roleGroups:
+      default:
+        replicas: 2
+  dataNodes:
+    roleGroups:
+      default:
+        replicas: 1
+    configOverrides: *configOverrides
+  journalNodes:
+    roleGroups:
+      default:
+        replicas: 1
+    configOverrides: *configOverrides
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperZnode
+metadata:
+  name: hdfs-znode
+spec:
+  clusterRef:
+    name: zookeeper

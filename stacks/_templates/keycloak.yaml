@@ -1,0 +1,180 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:22.0.3
+          args:
+            - start-dev
+            - --import-realm
+            - --hostname-url=http://key-server:8080
+          # args:
+          #   - start
+          #   - --hostname-strict=false
+          #   - --https-key-store-file=/tls/keystore.p12
+          #   - --https-key-store-password=changeit
+          #   - --import-realm
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-credentials
+                  key: admin
+          ports:
+            - name: http
+              containerPort: 8080
+          readinessProbe:
+            httpGet:
+              scheme: HTTP
+              path: /realms/master
+              port: http
+          volumeMounts:
+            - name: data
+              mountPath: /opt/keycloak/data/
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+            - name: tls
+              mountPath: /tls/
+        - name: create-auth-class
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev # We need 0.0.0-dev, so we get kubectl
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              pid=
+              trap 'echo SIGINT; [[ $pid ]] && kill $pid; exit' SIGINT
+              trap 'echo SIGTERM; [[ $pid ]] && kill $pid; exit' SIGTERM
+
+              while :
+              do
+                echo "Determining Keycloak public reachable address"
+                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "http") | .nodePort | tostring)')
+                echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
+
+                if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
+                  KEYCLOAK_HOSTNAME="$(echo $KEYCLOAK_ADDRESS | grep -oP '^[^:]+')"
+                  KEYCLOAK_PORT="$(echo $KEYCLOAK_ADDRESS | grep -oP '[0-9]+$')"
+
+                  cat << EOF | kubectl apply -f -
+                    apiVersion: authentication.stackable.tech/v1alpha1
+                    kind: AuthenticationClass
+                    metadata:
+                      name: keycloak
+                    spec:
+                      provider:
+                        oidc:
+                          hostname: key-server # "$KEYCLOAK_HOSTNAME"
+                          port: 8080 # $KEYCLOAK_PORT
+                          rootPath: /realms/gaia-x
+                          scopes: [openid, profile, email]
+                          principalClaim: preferred_username
+                          tls: null
+                            # verification:
+                            #   none: {}
+                              # server:
+                              #   caCert:
+                              #     secretClass: tls
+              EOF
+                fi
+
+                sleep 15 & pid=$!
+                wait
+              done
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: keycloak-data
+        - name: realm-config
+          secret:
+            secretName: keycloak-realm-config
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/format: tls-pkcs12
+                  secrets.stackable.tech/format.compatibility.tls-pkcs12.password: changeit
+                  secrets.stackable.tech/scope: service=keycloak,node
+              spec:
+                storageClassName: secrets.stackable.tech
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+      serviceAccountName: keycloak-serviceaccount
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+# We want a stable Keycloak address that does not change when Keycloak reboots.
+# We could simply pick LoadBalancer here, but on-prem clusters often times don't support LBs,
+# so the demo would not run on their environments. Additionally, LB addresses often take a while to allocate
+# (order of minutes on GCP iirc). So there's no way for us to know whether there's no LB address because it's still
+# in progress, or if there's no LB address because it's unsupported.
+#
+# But we can at least make sure to reconcile the AuthClass once Keycloak restarts.
+# We achieve this by letting the keycloak itself propagate it's address instead of a separate Job.
+  type: NodePort
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: key-server
+  labels:
+    app: key-server
+spec:
+  type: LoadBalancer
+  selector:
+    app: keycloak
+  ports:
+    - name: http
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: keycloak-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-admin-credentials
+stringData:
+  admin: "{{ keycloakAdminPassword }}"

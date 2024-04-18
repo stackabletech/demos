@@ -1,0 +1,271 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-tables-in-trino
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-tables-in-trino
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable23.11.0
+          command: ["bash", "-c", "python -u /tmp/script/script.py"]
+          volumeMounts:
+            - name: script
+              mountPath: /tmp/script
+            - name: trino-static-users
+              mountPath: /trino-static-users
+      volumes:
+        - name: script
+          configMap:
+            name: create-tables-in-trino-script
+        - name: trino-static-users
+          secret:
+            secretName: trino-static-users
+      restartPolicy: OnFailure
+  backoffLimit: 50
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-tables-in-trino-script
+data:
+  script.py: |
+    import sys
+    import trino
+
+    if not sys.warnoptions:
+        import warnings
+    warnings.simplefilter("ignore")
+
+    def get_connection():
+        connection = trino.dbapi.connect(
+            host="trino-coordinator",
+            port=8443,
+            user="data-import",
+            http_scheme='https',
+            auth=trino.auth.BasicAuthentication("data-import", open("/trino-static-users/data-import").read()),
+        )
+        connection._http_session.verify = False
+        return connection
+
+    def run_query(connection, query):
+        print(f"[DEBUG] Executing query {query}")
+        cursor = connection.cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    def run_query_and_assert_more_than_one_row(connection, query):
+        rows = run_query(connection, query)[0][0]
+        assert rows > 0
+
+    connection = get_connection()
+
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.compliance_analytics WITH (location = 'hdfs:/lakehouse/compliance-analytics/')")
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.customer_analytics WITH (location = 'hdfs:/lakehouse/customer-analytics/')")
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.marketing WITH (location = 'hdfs:/lakehouse/marketing/')")
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS lakehouse.employees WITH (location = 'hdfs:/lakehouse/employees/')")
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customer AS
+        SELECT
+            -- char(N) not supported by Iceberg
+            c_customer_sk,
+            cast(c_customer_id as varchar) as c_customer_id,
+            c_current_cdemo_sk,
+            c_current_hdemo_sk,
+            c_current_addr_sk,
+            c_first_shipto_date_sk,
+            c_first_sales_date_sk,
+            cast(c_salutation as varchar) as c_salutation,
+            cast(c_first_name as varchar) as c_first_name,
+            cast(c_last_name as varchar) as c_last_name,
+            cast(c_preferred_cust_flag as varchar) as c_preferred_cust_flag,
+            c_birth_day,
+            c_birth_month,
+            c_birth_year,
+            cast(c_birth_country as varchar) as c_birth_country,
+            cast(c_login as varchar) as c_login,
+            cast(c_email_address as varchar) as c_email_address,
+            c_last_review_date_sk
+        FROM tpcds.sf1.customer
+    """)
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customer_address AS
+        SELECT
+            -- char(N) not supported by Iceberg
+            ca_address_sk,
+            cast(ca_address_id as varchar) as ca_address_id,
+            cast(ca_street_number as varchar) as ca_street_number,
+            cast(ca_street_name as varchar) as ca_street_name,
+            cast(ca_street_type as varchar) as ca_street_type,
+            cast(ca_suite_number as varchar) as ca_suite_number,
+            cast(ca_city as varchar) as ca_city,
+            cast(ca_county as varchar) as ca_county,
+            cast(ca_state as varchar) as ca_state,
+            cast(ca_zip as varchar) as ca_zip,
+            cast(ca_country as varchar) as ca_country,
+            ca_gmt_offset,
+            cast(ca_location_type as varchar) as ca_location_type
+        FROM tpcds.sf1.customer_address
+    """)
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.customer_demographics AS
+        SELECT
+            -- char(N) not supported by Iceberg
+            cd_demo_sk,
+            cast(cd_gender as varchar) as cd_gender,
+            cast(cd_marital_status as varchar) as cd_marital_status,
+            cast(cd_education_status as varchar) as cd_education_status,
+            cd_purchase_estimate,
+            cast(cd_credit_rating as varchar) as cd_credit_rating,
+            cd_dep_count,
+            cd_dep_employed_count,
+            cd_dep_college_count
+        FROM tpcds.sf1.customer_demographics
+    """)
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.income_band AS
+        SELECT
+            ib_income_band_sk,
+            ib_lower_bound,
+            ib_upper_bound
+        FROM tpcds.sf1.income_band
+    """)
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.household_demographics AS
+        SELECT
+            -- char(N) not supported by Iceberg
+            hd_demo_sk,
+            hd_income_band_sk,
+            cast(hd_buy_potential as varchar) as hd_buy_potential,
+            hd_dep_count,
+            hd_vehicle_count
+        FROM tpcds.sf1.household_demographics
+    """)
+
+    run_query(connection, """
+        create or replace view lakehouse.customer_analytics.table_information security invoker as
+        with
+            table_infos as (
+                select 'customer' as "table", (select count(*) from lakehouse.customer_analytics.customer) as records, (select count(*) from lakehouse.customer_analytics."customer$snapshots") as snapshots
+                union all select 'customer_address' as "table", (select count(*) from lakehouse.customer_analytics.customer_address) as records, (select count(*) from lakehouse.customer_analytics."customer_address$snapshots") as snapshots
+                union all select 'customer_demographics' as "table", (select count(*) from lakehouse.customer_analytics.customer_demographics) as records, (select count(*) from lakehouse.customer_analytics."customer_demographics$snapshots") as snapshots
+                union all select 'income_band' as "table", (select count(*) from lakehouse.customer_analytics.income_band) as records, (select count(*) from lakehouse.customer_analytics."income_band$snapshots") as snapshots
+                union all select 'household_demographics' as "table", (select count(*) from lakehouse.customer_analytics.household_demographics) as records, (select count(*) from lakehouse.customer_analytics."household_demographics$snapshots") as snapshots
+            ),
+            table_file_infos as (
+                select
+                    "table",
+                    sum(file_size_in_bytes) as size_in_bytes,
+                    count(*) as num_files,
+                    sum(file_size_in_bytes) / count(*) as avg_file_size,
+                    min(file_size_in_bytes) as min_file_size,
+                    max(file_size_in_bytes) as max_file_size
+                from (
+                    select 'customer' as "table", * from lakehouse.customer_analytics."customer$files"
+                    union all select 'customer_address' as "table", * from lakehouse.customer_analytics."customer_address$files"
+                    union all select 'customer_demographics' as "table", * from lakehouse.customer_analytics."customer_demographics$files"
+                    union all select 'income_band' as "table", * from lakehouse.customer_analytics."income_band$files"
+                    union all select 'household_demographics' as "table", * from lakehouse.customer_analytics."household_demographics$files"
+                )
+                group by 1
+            )
+        select
+            i."table",
+            i.records,
+            format_number(f.size_in_bytes) as size_in_bytes,
+            f.num_files,
+            format_number(f.avg_file_size) as avg_file_size,
+            format_number(f.min_file_size) as min_file_size,
+            format_number(f.max_file_size) as max_file_size,
+            i.snapshots,
+            f.size_in_bytes / i.records as avg_record_size
+        from table_infos as i
+        left join table_file_infos as f
+        on i."table" = f."table"
+    """)
+
+    run_query(connection, """
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_enriched security invoker AS
+        SELECT
+            c_customer_id as customer_id,
+            c_current_cdemo_sk as customer_demo_sk,
+            c_current_hdemo_sk as household_demo_sk,
+            c_salutation as salutation,
+            c_first_name AS given_name,
+            c_last_name AS family_name,
+            COALESCE(c_preferred_cust_flag = 'Y', false) AS preferred_customer,
+            CAST(date_parse(CAST(c_birth_year AS varchar) || '-' || CAST(c_birth_month AS varchar) || '-' || CAST(c_birth_day AS varchar), '%Y-%m-%d') AS date) AS birth_date,
+            c_email_address as email_address,
+            ca_country as country,
+            ca_state as state,
+            ca_zip as zip,
+            ca_city as city,
+            ca_county as county,
+            ca_street_name as ca_street_name,
+            ca_street_number as ca_street_number,
+            ca_suite_number as suite_number,
+            ca_location_type as location_type,
+            ca_gmt_offset as gmt_offset
+        FROM lakehouse.customer_analytics.customer as c
+            LEFT JOIN lakehouse.customer_analytics.customer_address as a ON a.ca_address_sk = c.c_current_addr_sk
+    """)
+
+    run_query(connection, """
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.customer_demographics_enriched security invoker AS
+        SELECT
+            cd_demo_sk as demo_sk,
+            cd_gender as gender,
+            cd_marital_status as marital_status,
+            cd_education_status as education_status
+        FROM lakehouse.customer_analytics.customer_demographics as d
+    """)
+
+    run_query(connection, """
+        CREATE OR REPLACE VIEW lakehouse.customer_analytics.household_demographics_enriched security invoker AS
+        SELECT
+            hd_demo_sk as demo_sk,
+            ib_lower_bound as income_lower_bound,
+            ib_upper_bound as income_upper_bound,
+            hd_buy_potential as buy_potential,
+            hd_dep_count as dependant_count,
+            hd_vehicle_count as vehicle_count
+        FROM lakehouse.customer_analytics.household_demographics as d
+            LEFT JOIN lakehouse.customer_analytics.income_band as i ON i.ib_income_band_sk = d.hd_income_band_sk
+    """)
+
+    run_query(connection, """
+        CREATE OR REPLACE VIEW lakehouse.compliance_analytics.customer_enriched security invoker AS
+        SELECT
+            c_customer_id as customer_id,
+            c_salutation as salutation,
+            COALESCE(c_preferred_cust_flag = 'Y', false) AS preferred_customer,
+            c_birth_year as birth_year,
+            c_email_address as email_address,
+            ca_country as country,
+            ca_state as state,
+            ca_zip as zip,
+            ca_city as city,
+            ca_gmt_offset as gmt_offset,
+            cd_gender as gender,
+            cd_marital_status as marital_status
+        FROM lakehouse.customer_analytics.customer as c
+            LEFT JOIN lakehouse.customer_analytics.customer_address as a ON a.ca_address_sk = c.c_current_addr_sk
+            LEFT JOIN lakehouse.customer_analytics.customer_demographics as cd ON cd.cd_demo_sk = c.c_current_cdemo_sk
+    """)
+
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS lakehouse.employees.employees AS
+        SELECT 'william.lewis' as username, 'William' as given_name, 'Lewis' as family_name, 'william.lewis@knab.com' as email, NULL as supervisor, 65000 as salary
+        UNION ALL SELECT 'sophia.clarke', 'Sophia', 'Clarke', 'sophia.clarke@knab.com', 'william.lewis', 60000
+        UNION ALL SELECT 'daniel.king', 'Daniel', 'King', 'daniel.king@knab.com', 'william.lewis', 60000
+        UNION ALL SELECT 'pamela.scott', 'Pamela', 'Scott', 'pamela.scott@knab.com', NULL, 70000
+        UNION ALL SELECT 'justin.martin', 'Justin', 'Martin', 'justin.martin@knab.com', 'pamela.scott', 65000
+        UNION ALL SELECT 'sophia.clarke', 'Sophia', 'Clarke', 'sophia.clarke@knab.com', 'pamela.scott', 65000
+        UNION ALL SELECT 'mark.ketting', 'Mark', 'Ketting', 'mark.ketting@knab.com', NULL, 60000
+    """)

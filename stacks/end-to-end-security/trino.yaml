@@ -1,0 +1,152 @@
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCluster
+metadata:
+  name: trino
+spec:
+  image:
+    productVersion: "442"
+  clusterConfig:
+    listenerClass: external-unstable
+    tls:
+      serverSecretClass: tls
+    catalogLabelSelector:
+      matchLabels:
+        trino: trino
+    authentication:
+      - authenticationClass: trino-static-users
+      - authenticationClass: keycloak
+        oidc:
+          clientCredentialsSecret: trino-keycloak-client
+    authorization:
+      opa:
+        configMapName: opa
+        package: trino
+  coordinators:
+    podOverrides: &podOverrides
+      spec:
+        containers:
+          - name: trino
+            env:
+              - name: KERBEROS_REALM
+                value: KNAB.COM
+            volumeMounts:
+              - name: kerberos
+                mountPath: /stackable/kerberos
+              # Normally we would use a different location and set `-Djava.security.krb5.conf=/example/path/krb5.conf`,
+              # but we can not influence the JVM arguments.
+              - name: kerberos
+                mountPath: /etc/krb5.conf
+                subPath: krb5.conf
+        volumes:
+          - name: kerberos
+            ephemeral:
+              volumeClaimTemplate:
+                metadata:
+                  annotations:
+                    secrets.stackable.tech/class: kerberos
+                    secrets.stackable.tech/kerberos.service.names: trino
+                    secrets.stackable.tech/scope: service=trino
+                spec:
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: "1"
+                  storageClassName: secrets.stackable.tech
+    config:
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 100m
+    configOverrides:
+      config.properties:
+        http-server.authentication.oauth2.refresh-tokens: "true"
+    roleGroups:
+      default:
+        replicas: 1
+  workers:
+    podOverrides: *podOverrides
+    config:
+      resources: # I would like to run this stack on my Laptop
+        cpu:
+          min: 250m
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: lakehouse
+  labels:
+    trino: trino
+spec:
+  connector:
+    iceberg:
+      metastore:
+        configMap: hive-iceberg
+      hdfs:
+        configMap: hdfs
+  configOverrides:
+    # HDFS configuration
+    hive.hdfs.authentication.type: KERBEROS
+    hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.hdfs.trino.keytab: /stackable/kerberos/keytab
+    hive.hdfs.impersonation.enabled: "false"
+    hive.hdfs.wire-encryption.enabled: "true"
+    # HMS configuration
+    hive.metastore.authentication.type: KERBEROS
+    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.keytab: /stackable/kerberos/keytab
+    hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
+    hive.metastore.thrift.impersonation.enabled: "false"
+    # By default, Hive views are executed with the RUN AS DEFINER security mode. Set the hive.hive-views.run-as-invoker catalog configuration property to true to use RUN AS INVOKER semantics.
+    # However, this does *not* work for Iceberg catalogs :/ (I asked on the Trino slack: https://trinodb.slack.com/archives/CJ6UC075E/p1711449384648869)
+    # hive.hive-views.run-as-invoker: "true"
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpcds
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpcds: {}
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpch
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpch: {}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-keycloak-client
+stringData:
+  clientId: trino
+  clientSecret: "{{ keycloakTrinoClientSecret }}"
+---
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: trino-static-users
+spec:
+  provider:
+    static:
+      userCredentialsSecret:
+        name: trino-static-users
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-static-users
+type: kubernetes.io/opaque
+stringData:
+  superset: "{{ trinoSupersetUserPassword }}"
+  data-import: "{{ trinoDataImportUserPassword }}"

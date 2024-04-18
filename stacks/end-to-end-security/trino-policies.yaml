@@ -1,0 +1,187 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-policies
+  labels:
+    opa.stackable.tech/bundle: trino
+data:
+  trino_policies.rego: |
+    package trino_policies
+
+    import rego.v1
+
+    policies := {
+      "catalogs": [
+        # Needed to bootstrap schemas and tables
+        {
+          "user": "data-import",
+          "catalog": "lakehouse",
+          "allow": "all",
+        },
+        {
+          "user": "data-import",
+          "catalog": "tpcds",
+          "allow": "read-only",
+        },
+        # Everyone can read from lakehouse
+        {
+          "catalog": "lakehouse",
+          "allow": "read-only",
+        },
+        # Needed for JDBC clients
+        {
+          "catalog": "system",
+          "allow": "read-only",
+        },
+      ],
+      "schemas": [
+        # We don't need to grant schema ownership, as users don't need to CRUD schemas.
+        # Needed to bootstrap schemas and tables
+        {
+          "user": "data-import",
+          "catalog": "lakehouse",
+          "owner": true,
+        },
+      ],
+      "tables": [
+        # Needed to bootstrap schemas and tables
+        {
+          "user": "data-import",
+          "catalog": "lakehouse",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "user": "data-import",
+          "catalog": "tpcds",
+          "privileges": ["SELECT"],
+        },
+        # Actual rules start here
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "compliance_analytics",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "group": "/Customer Service/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "group": "/Marketing",
+          "catalog": "lakehouse",
+          "schema": "marketing",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "customer",
+          "privileges": ["SELECT"],
+          "columns" : [
+            {"name": "c_first_name", "allow": false},
+            {"name": "c_last_name", "allow": false},
+            {"name": "c_birth_day", "allow": false},
+            {"name": "c_birth_month", "allow": false},
+            {
+              "name": "c_customer_id",
+              "mask": "'sha256:' || to_hex(sha256(to_utf8(c_customer_id)))",
+            },
+            {
+              "name": "c_email_address",
+              "mask": "regexp_replace(c_email_address, '([^@]{1,3})([^@]+)@', '$1---@')",
+            },
+          ]
+        },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "customer_address",
+          "privileges": ["SELECT"],
+          "columns" : [
+            {"name": "ca_county", "allow": false},
+            {"name": "ca_street_number", "allow": false},
+            {"name": "ca_street_name", "allow": false},
+            {"name": "ca_street_type", "allow": false},
+            {"name": "ca_suite_number", "allow": false},
+            {"name": "ca_location_type", "allow": false},
+          ]
+        },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "customer_demographics",
+          "privileges": ["SELECT"],
+          "columns" : [
+            {"name": "cd_education_status", "allow": false},
+            {"name": "cd_purchase_estimate", "allow": false},
+          ]
+        },
+        {
+          "group": "/Compliance and Regulation/Analytics",
+          "catalog": "lakehouse",
+          "schema": "customer_analytics",
+          "table": "spark_report",
+          "privileges": ["SELECT"],
+        },
+        {
+          "catalog": "lakehouse",
+          "schema": "employees",
+          "table": "employees",
+          "privileges": ["SELECT"],
+          "filter": "username = current_user or supervisor = current_user",
+        },
+        # Needed for JDBC clients
+        {
+          "catalog": "system",
+          "schema": "jdbc|metadata", # E.g. system.metadata.table_comments
+          "privileges": ["SELECT"],
+        },
+      ],
+      "system_information": [],
+      "queries": [
+        # Users always have permission to view or kill their own queries.
+        {
+          "allow": ["execute"],
+        },
+        # {
+        #   "user": "admin",
+        #   "allow": ["kill", "view"],
+        # },
+      ],
+      "impersonation": [
+        {
+          "original_user": "superset",
+          "new_user": ".*",
+          "allow": true,
+        },
+      ],
+      "authorization": [],
+      "system_session_properties": [
+        {"allow": true},
+      ],
+      "catalog_session_properties": [
+        {"allow": true},
+      ],
+      "functions": [],
+      "procedures": [],
+    }
+
+    extra_groups := groups if {
+      request := {
+        "method": "POST",
+        "url": "http://127.0.0.1:9476/user",
+        "headers": {"Content-Type": "application/json"},
+        "body": {"id": input.context.identity.user},
+      }
+      response := http.send(request)
+
+      response.status_code == 200
+
+      groups := response.body.customAttributes.departments
+    }

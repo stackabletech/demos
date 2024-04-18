@@ -1,0 +1,1729 @@
+{% raw %}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-regorules
+  labels:
+    opa.stackable.tech/bundle: true
+data:
+  actual_permissions.rego: |
+    package trino
+
+    import data.util
+    import rego.v1
+
+    # This file contains functions to determine the actual permissions
+    # defined in the Trino policies for the given user and requested
+    # resource.
+    #
+    # For every resource, like catalog and table, the rules and functions
+    # are structured as follows:
+    #   * default resource_rules := ...
+    #     Default rules for the resource if not defined in the policies,
+    #     e.g. []
+    #   * resource_rules := policies.resource
+    #     Rules for the resource in the policies if defined
+    #   * first_matching_resource_rule(parameters like table name) := ...
+    #     Returns the first rule from resource_rules which match the
+    #     identity and the given parameters
+    #   * default resource_permission(_) := ...
+    #     Default permission if no matching rule was found, e.g. "none".
+    #   * resource_permission(parameters like table name) := ...
+    #     Permission returned by the first_matching_resource_rule function
+
+    identity := input.context.identity
+
+    # METADATA
+    # description: |
+    #   The externally provided policies, see the file-based access control
+    #   (https://trino.io/docs/current/security/file-system-access-control.html)
+    #   for further documentation.
+    #
+    #   Example:
+    #     package trino_policies
+    #     import rego.v1
+    #     policies := {
+    #         "catalogs": [
+    #             {
+    #                 "user": "admin",
+    #                 "allow": "all",
+    #             },
+    #         ],
+    #         "schemas": [
+    #             {
+    #                 "user": "admin",
+    #                 "owner": true,
+    #             },
+    #         ],
+    #         "tables": [
+    #             {
+    #                 "user": "admin",
+    #                 "privileges": [
+    #                     "OWNERSHIP",
+    #                     "GRANT_SELECT",
+    #                 ],
+    #             },
+    #         ],
+    #     }
+    policies := data.trino_policies.policies
+
+    # METADATA
+    # description: |
+    #   Externally provided groups; These groups are added to the ones in
+    #   input.context.identity.groups.
+    #
+    #   Example:
+    #     package trino_policies
+    #     import rego.v1
+    #     extra_groups := groups if {
+    #         request := {
+    #             "method": "POST",
+    #             "url": "http://127.0.0.1:9476/user",
+    #             "headers": {"Content-Type": "application/json"},
+    #             "body": {"username": input.context.identity.user},
+    #         }
+    #         response := http.send(request)
+    #         response.status_code == 200
+    #         groups := response.body.groups
+    #     }
+    default extra_groups := []
+
+    extra_groups := data.trino_policies.extra_groups
+
+    # Add an empty dummy group because the default pattern ".*" should match
+    # even if the user is not a member of a group.
+    groups := array.concat(
+      array.concat(identity.groups, extra_groups),
+      [""],
+    )
+
+    default match_any_group(_) := false
+
+    match_any_group(group_pattern) if {
+      some group in groups
+      util.match_entire(group_pattern, group)
+    }
+
+    default match_user_group(_) := false
+
+    match_user_group(rule) if {
+      user_pattern := object.get(rule, "user", ".*")
+      group_pattern := object.get(rule, "group", ".*")
+
+      util.match_entire(user_pattern, identity.user)
+      match_any_group(group_pattern)
+    }
+
+    default match_original_user_group(_) := false
+
+    match_original_user_group(rule) if {
+      user_pattern := object.get(rule, "original_user", ".*")
+      group_pattern := object.get(rule, "original_group", ".*")
+
+      util.match_entire(user_pattern, identity.user)
+      match_any_group(group_pattern)
+    }
+
+    default authorization_rules := []
+
+    authorization_rules := policies.authorization
+
+    first_matching_authorization_rule(grantee_name) := rule if {
+      rules := [rule |
+        some rule in authorization_rules
+
+        match_original_user_group(rule)
+
+        new_user_pattern := object.get(rule, "new_user", ".*")
+
+        util.match_entire(new_user_pattern, grantee_name)
+      ]
+      rule := object.union(
+        {"allow": true},
+        rules[0],
+      )
+    }
+
+    default authorization_permission(_) := false
+
+    authorization_permission(grantee_name) := first_matching_authorization_rule(grantee_name).allow
+
+    default catalog_rules := [{"allow": "all"}]
+
+    catalog_rules := policies.catalogs
+
+    first_matching_catalog_rule(catalog_name) := rule if {
+      rules := [rule |
+        some rule in catalog_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+      ]
+      rule := rules[0]
+    }
+
+    catalog_access_map := {
+      "all": {"all", "read-only"},
+      "read-only": {"read-only"},
+      "none": {"none"},
+    }
+
+    default catalog_access(_) := {"none"}
+
+    catalog_access(catalog_name) := catalog_access_map[first_matching_catalog_rule(catalog_name).allow]
+
+    default catalog_session_properties_rules := [{"allow": true}]
+
+    catalog_session_properties_rules := policies.catalog_session_properties
+
+    first_matching_catalog_session_properties_rule(
+      catalog_name,
+      property_name,
+    ) := rule if {
+      rules := [rule |
+        some rule in catalog_session_properties_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+        property_pattern := object.get(rule, "property", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+        util.match_entire(property_pattern, property_name)
+      ]
+      rule := rules[0]
+    }
+
+    default catalog_session_properties_access(_, _) := false
+
+    catalog_session_properties_access(
+      catalog_name,
+      property_name,
+    ) := first_matching_catalog_session_properties_rule(
+      catalog_name,
+      property_name,
+    ).allow
+
+    default catalog_visibility(_) := false
+
+    catalog_visibility(catalog_name) if {
+      "all" in catalog_access(catalog_name)
+    }
+
+    catalog_visibility(catalog_name) if {
+      catalog_access(catalog_name) == {"read-only"}
+
+      some rule in schema_rules
+
+      match_user_group(rule)
+
+      catalog_pattern := object.get(rule, "catalog", ".*")
+
+      util.match_entire(catalog_pattern, catalog_name)
+
+      rule.owner == true
+    }
+
+    catalog_visibility(catalog_name) if {
+      catalog_access(catalog_name) == {"read-only"}
+
+      rules := array.concat(
+        array.concat(
+          table_rules,
+          function_rules,
+        ),
+        procedure_rules,
+      )
+
+      some rule in rules
+
+      match_user_group(rule)
+
+      catalog_pattern := object.get(rule, "catalog", ".*")
+
+      util.match_entire(catalog_pattern, catalog_name)
+
+      count(rule.privileges) != 0
+    }
+
+    catalog_visibility(catalog_name) if {
+      catalog_access(catalog_name) == {"read-only"}
+
+      some rule in catalog_session_properties_rules
+
+      match_user_group(rule)
+
+      catalog_pattern := object.get(rule, "catalog", ".*")
+
+      util.match_entire(catalog_pattern, catalog_name)
+
+      rule.allow == true
+    }
+
+    default function_rules := [{
+      "catalog": "system",
+      "schema": "builtin",
+      "privileges": [
+        "GRANT_EXECUTE",
+        "EXECUTE",
+      ],
+    }]
+
+    function_rules := policies.functions
+
+    first_matching_function_rule(
+      catalog_name,
+      schema_name,
+      function_name,
+    ) := rule if {
+      rules := [rule |
+        some rule in function_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+        schema_pattern := object.get(rule, "schema", ".*")
+        function_pattern := object.get(rule, "function", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+        util.match_entire(schema_pattern, schema_name)
+        util.match_entire(function_pattern, function_name)
+      ]
+      rule := rules[0]
+    }
+
+    default function_privileges(_, _, _) := set()
+
+    function_privileges(
+      catalog_name,
+      schema_name,
+      function_name,
+    ) := {privilege |
+      some privilege in first_matching_function_rule(
+        catalog_name,
+        schema_name,
+        function_name,
+      ).privileges
+    }
+
+    default impersonation_rules := []
+
+    impersonation_rules := policies.impersonation
+
+    first_matching_impersonation_rule(user) := rule if {
+      rules := [rule |
+        some rule in impersonation_rules
+
+        match_original_user_group(rule)
+
+        original_user_pattern := object.get(rule, "original_user", ".*")
+        unsubstituted_new_user_pattern := object.get(rule, "new_user", ".*")
+
+        matches := regex.find_all_string_submatch_n(
+          original_user_pattern,
+          identity.user, -1,
+        )
+        substitutes := {var: match |
+          some i, match in matches[0]
+          var := concat("", ["$", format_int(i, 10)])
+        }
+
+        # strings.replace_n replaces "$10" with "$1" followed by "0".
+        # Therefore only nine capture groups are supported.
+        new_user_pattern := strings.replace_n(
+          substitutes,
+          unsubstituted_new_user_pattern,
+        )
+
+        util.match_entire(new_user_pattern, user)
+      ]
+      rule := object.union(
+        {"allow": true},
+        rules[0],
+      )
+    }
+
+    default impersonation_access(_) := false
+
+    impersonation_access(user) if {
+      user == identity.user
+    }
+
+    impersonation_access(user) := access if {
+      user != identity.user
+      access := first_matching_impersonation_rule(user).allow
+    }
+
+    default procedure_rules := [{
+      "catalog": "system",
+      "schema": "builtin",
+      "privileges": [
+        "GRANT_EXECUTE",
+        "EXECUTE",
+      ],
+    }]
+
+    procedure_rules := policies.procedures
+
+    # Matching the "function name" with the "procedure pattern" is intended.
+    # The requested procedure name is contained in
+    # `input.action.resource.function.functionName`. A rule applies if this
+    # name matches the pattern in
+    # `data.trino_policies.policies.procedures[_].procedure`.
+    first_matching_procedure_rule(
+      catalog_name,
+      schema_name,
+      function_name,
+    ) := rule if {
+      rules := [rule |
+        some rule in procedure_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+        schema_pattern := object.get(rule, "schema", ".*")
+        procedure_pattern := object.get(rule, "procedure", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+        util.match_entire(schema_pattern, schema_name)
+        util.match_entire(procedure_pattern, function_name)
+      ]
+      rule := rules[0]
+    }
+
+    default procedure_privileges(_, _, _) := set()
+
+    procedure_privileges(
+      catalog_name,
+      schema_name,
+      function_name,
+    ) := {privilege |
+      some privilege in first_matching_procedure_rule(
+        catalog_name,
+        schema_name,
+        function_name,
+      ).privileges
+    }
+
+    default query_rules := [{"allow": ["execute", "kill", "view"]}]
+
+    query_rules := policies.queries
+
+    first_matching_query_rule := rule if {
+      rules := [rule |
+        some rule in query_rules
+
+        match_user_group(rule)
+      ]
+      rule := rules[0]
+    }
+
+    default query_access := set()
+
+    query_access := {access | some access in first_matching_query_rule.allow}
+
+    first_matching_query_owned_by_rule(user) := rule if {
+      rules := [rule |
+        some rule in query_rules
+
+        match_user_group(rule)
+
+        query_owner_pattern := object.get(rule, "queryOwner", ".*")
+
+        util.match_entire(query_owner_pattern, user)
+      ]
+      rule := rules[0]
+    }
+
+    default query_owned_by_access(_) := set()
+
+    query_owned_by_access(user) := {"kill", "view"} if {
+      user == identity.user
+    }
+
+    query_owned_by_access(user) := access if {
+      user != identity.user
+      access := {access |
+        some access in first_matching_query_owned_by_rule(user).allow
+      }
+    }
+
+    default schema_rules := [{"owner": true}]
+
+    schema_rules := policies.schemas
+
+    first_matching_schema_rule(catalog_name, schema_name) := rule if {
+      rules := [rule |
+        some rule in schema_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+        schema_pattern := object.get(rule, "schema", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+        util.match_entire(schema_pattern, schema_name)
+      ]
+      rule := rules[0]
+    }
+
+    default schema_owner(_, _) := false
+
+    schema_owner(catalog_name, schema_name) := first_matching_schema_rule(
+      catalog_name,
+      schema_name,
+    ).owner
+
+    default schema_visibility(_, _) := false
+
+    schema_visibility(catalog_name, schema_name) if {
+      schema_owner(catalog_name, schema_name)
+    }
+
+    schema_visibility(_, "information_schema") := true
+
+    schema_visibility(catalog_name, schema_name) if {
+      schema_name != "information_schema"
+
+      rules := array.concat(
+        array.concat(
+          table_rules,
+          function_rules,
+        ),
+        procedure_rules,
+      )
+
+      some rule in rules
+
+      match_user_group(rule)
+
+      catalog_pattern := object.get(rule, "catalog", ".*")
+      schema_pattern := object.get(rule, "schema", ".*")
+
+      util.match_entire(catalog_pattern, catalog_name)
+      util.match_entire(schema_pattern, schema_name)
+
+      count(rule.privileges) != 0
+    }
+
+    default table_rules := [{
+      "privileges": [
+        "DELETE",
+        "GRANT_SELECT",
+        "INSERT",
+        "OWNERSHIP",
+        "SELECT",
+        "UPDATE",
+      ],
+      "filter": null,
+      "filter_environment": {"user": null},
+    }]
+
+    table_rules := policies.tables
+
+    first_matching_table_rule(_, "information_schema", _) := {
+      "schema": "information_schema",
+      "privileges": [
+        "DELETE",
+        "GRANT_SELECT",
+        "INSERT",
+        "OWNERSHIP",
+        "SELECT",
+        "UPDATE",
+      ],
+      "filter": null,
+      "filter_environment": {"user": null},
+    }
+
+    first_matching_table_rule(
+      catalog_name,
+      schema_name,
+      table_name,
+    ) := rule if {
+      schema_name != "information_schema"
+      rules := [rule |
+        some rule in table_rules
+
+        match_user_group(rule)
+
+        catalog_pattern := object.get(rule, "catalog", ".*")
+        schema_pattern := object.get(rule, "schema", ".*")
+        table_pattern := object.get(rule, "table", ".*")
+
+        util.match_entire(catalog_pattern, catalog_name)
+        util.match_entire(schema_pattern, schema_name)
+        util.match_entire(table_pattern, table_name)
+      ]
+      rule := object.union(
+        {
+          "filter": null,
+          "filter_environment": {"user": null},
+        },
+        rules[0],
+      )
+    }
+
+    default column_constraints(_, _, _, _) := {
+      "allow": true,
+      "mask": null,
+      "mask_environment": {"user": null},
+    }
+
+    column_constraints(_, "information_schema", _, _) := {
+      "allow": true,
+      "mask": null,
+      "mask_environment": {"user": null},
+    }
+
+    column_constraints(
+      catalog_name,
+      schema_name,
+      table_name,
+      column_name,
+    ) := constraints if {
+      schema_name != "information_schema"
+
+      rule := first_matching_table_rule(
+        catalog_name,
+        schema_name,
+        table_name,
+      )
+
+      some column in rule.columns
+      column.name == column_name
+
+      constraints := object.union(
+        {
+          "allow": true,
+          "mask": null,
+          "mask_environment": {"user": null},
+        },
+        column,
+      )
+    }
+
+    default table_privileges(_, _, _) := set()
+
+    table_privileges(
+      catalog_name,
+      schema_name,
+      table_name,
+    ) := {privilege |
+      some privilege in first_matching_table_rule(
+        catalog_name,
+        schema_name,
+        table_name,
+      ).privileges
+    }
+
+    default column_access(_, _, _, _) := false
+
+    column_access(
+      catalog_name,
+      schema_name,
+      table_name,
+      column_name,
+    ) := access if {
+      table_privileges(
+        catalog_name,
+        schema_name,
+        table_name,
+      ) != set()
+
+      column := column_constraints(
+        catalog_name,
+        schema_name,
+        table_name,
+        column_name,
+      )
+
+      access := column.allow
+    }
+
+    default system_information_rules := []
+
+    system_information_rules := policies.system_information
+
+    first_matching_system_information_rule := rule if {
+      rules := [rule |
+        some rule in system_information_rules
+
+        match_user_group(rule)
+      ]
+      rule := rules[0]
+    }
+
+    default system_information_access := set()
+
+    system_information_access := {access |
+      some access in first_matching_system_information_rule.allow
+    }
+
+    default system_session_properties_rules := [{"allow": true}]
+
+    system_session_properties_rules := policies.system_session_properties
+
+    first_matching_system_session_properties_rule(property_name) := rule if {
+      rules := [rule |
+        some rule in system_session_properties_rules
+
+        match_user_group(rule)
+
+        property_name_pattern := object.get(rule, "property", ".*")
+
+        util.match_entire(property_name_pattern, property_name)
+      ]
+      rule := rules[0]
+    }
+
+    default system_session_properties_access(_) := false
+
+    system_session_properties_access(property_name) := first_matching_system_session_properties_rule(property_name).allow
+  requested_permissions.rego: |
+    package trino
+
+    import rego.v1
+
+    # This file contains the requested_permissions rule which returns a set
+    # of required permissions for the given operation including the
+    # requested resource. Operations with the same set of required
+    # permissions are grouped together.
+    # The defined permissions should be identical to the ones implemented
+    # for the file-based access control
+    # (https://trino.io/docs/current/security/file-system-access-control.html).
+
+    action := input.action
+
+    operation := action.operation
+
+    requested_permissions := permissions if {
+      operation == "AccessCatalog"
+      permissions := {{
+        "resource": "catalog",
+        "catalogName": action.resource.catalog.name,
+        "allow": "read-only",
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "CreateSchema",
+        "DropSchema",
+        "ShowCreateSchema",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.schema.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "schema",
+          "catalogName": action.resource.schema.catalogName,
+          "schemaName": action.resource.schema.schemaName,
+          "owner": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "AddColumn",
+        "AlterColumn",
+        "CreateMaterializedView",
+        "CreateTable",
+        "CreateView",
+        "CreateViewWithSelectFromColumns",
+        "DropColumn",
+        "DropMaterializedView",
+        "DropTable",
+        "DropView",
+        "RenameColumn",
+        "SetColumnComment",
+        "SetMaterializedViewProperties",
+        "SetTableComment",
+        "SetTableProperties",
+        "SetViewComment",
+        "ShowCreateTable",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"OWNERSHIP"}},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "RefreshMaterializedView",
+        "UpdateTableColumns",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"UPDATE"}},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "DeleteFromTable",
+        "TruncateTable",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"DELETE"}},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "ExecuteQuery"
+      permissions := {{
+        "resource": "query",
+        "allow": {"execute"},
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation == "ExecuteTableProcedure"
+
+      # Executing table procedures is always allowed
+      permissions := set()
+    }
+
+    requested_permissions := permissions if {
+      operation == "FilterColumns"
+      permissions := {
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"anyOf": {
+            "SELECT",
+            "INSERT",
+            "DELETE",
+            "UPDATE",
+            "OWNERSHIP",
+            "GRANT_SELECT",
+          }},
+        },
+        {
+          "resource": "column",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "columnName": action.resource.table.columnName,
+          "allow": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "KillQueryOwnedBy"
+      permissions := {{
+        "resource": "query_owned_by",
+        "user": action.resource.user.user,
+        "groups": action.resource.user.groups,
+        "allow": {"kill"},
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "FilterViewQueryOwnedBy",
+        "ViewQueryOwnedBy",
+      }
+      permissions := {{
+        "resource": "query_owned_by",
+        "user": action.resource.user.user,
+        "groups": action.resource.user.groups,
+        "allow": {"view"},
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation == "FilterTables"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"anyOf": {
+            "SELECT",
+            "INSERT",
+            "DELETE",
+            "UPDATE",
+            "OWNERSHIP",
+            "GRANT_SELECT",
+          }},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "CreateFunction",
+        "DropFunction",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.function.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "function",
+          "catalogName": action.resource.function.catalogName,
+          "schemaName": action.resource.function.schemaName,
+          "functionName": action.resource.function.functionName,
+          "privileges": {"OWNERSHIP"},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "ExecuteFunction",
+        "FilterFunctions",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.function.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "function",
+          "catalogName": action.resource.function.catalogName,
+          "schemaName": action.resource.function.schemaName,
+          "functionName": action.resource.function.functionName,
+          "privileges": {"EXECUTE"},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "ExecuteProcedure"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.function.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "procedure",
+          "catalogName": action.resource.function.catalogName,
+          "schemaName": action.resource.function.schemaName,
+          "functionName": action.resource.function.functionName,
+          "privileges": {"EXECUTE"},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "CreateViewWithExecuteFunction"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.function.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "function",
+          "catalogName": action.resource.function.catalogName,
+          "schemaName": action.resource.function.schemaName,
+          "functionName": action.resource.function.functionName,
+          "privileges": {"GRANT_EXECUTE"},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "ImpersonateUser"
+      permissions := {{
+        "resource": "impersonation",
+        "user": action.resource.user.user,
+        "allow": true,
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation == "InsertIntoTable"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"INSERT"}},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "ReadSystemInformation"
+      permissions := {{
+        "resource": "system_information",
+        "allow": {"read"},
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation == "RenameSchema"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.schema.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "catalog",
+          "catalogName": action.targetResource.schema.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "schema",
+          "catalogName": action.resource.schema.catalogName,
+          "schemaName": action.resource.schema.schemaName,
+          "owner": true,
+        },
+        {
+          "resource": "schema",
+          "catalogName": action.targetResource.schema.catalogName,
+          "schemaName": action.targetResource.schema.schemaName,
+          "owner": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "RenameMaterializedView",
+        "RenameTable",
+        "RenameView",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "catalog",
+          "catalogName": action.targetResource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"OWNERSHIP"}},
+        },
+        {
+          "resource": "table",
+          "catalogName": action.targetResource.table.catalogName,
+          "schemaName": action.targetResource.table.schemaName,
+          "tableName": action.targetResource.table.tableName,
+          "privileges": {"allOf": {"OWNERSHIP"}},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "SelectFromColumns"
+      column_permissions := {
+      {
+        "resource": "column",
+        "catalogName": action.resource.table.catalogName,
+        "schemaName": action.resource.table.schemaName,
+        "tableName": action.resource.table.tableName,
+        "columnName": column_name,
+        "allow": true,
+      } |
+        some column_name in action.resource.table.columns
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"SELECT"}},
+        },
+      } | column_permissions
+    }
+
+    requested_permissions := permissions if {
+      operation == "SetSchemaAuthorization"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.schema.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "schema",
+          "catalogName": action.resource.schema.catalogName,
+          "schemaName": action.resource.schema.schemaName,
+          "owner": true,
+        },
+        {
+          "resource": "authorization",
+          "granteeName": action.grantee.name,
+          "granteeType": action.grantee.type,
+          "allow": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "SetTableAuthorization",
+        "SetViewAuthorization",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "all",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"allOf": {"OWNERSHIP"}},
+        },
+        {
+          "resource": "authorization",
+          "granteeName": action.grantee.name,
+          "granteeType": action.grantee.type,
+          "allow": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "ShowColumns"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.table.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "table",
+          "catalogName": action.resource.table.catalogName,
+          "schemaName": action.resource.table.schemaName,
+          "tableName": action.resource.table.tableName,
+          "privileges": {"anyOf": {
+            "SELECT",
+            "INSERT",
+            "DELETE",
+            "UPDATE",
+            "OWNERSHIP",
+            "GRANT_SELECT",
+          }},
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "FilterCatalogs",
+        "ShowSchemas",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.catalog.name,
+          "allow": "read-only",
+        },
+        {
+          "resource": "catalog_visibility",
+          "catalogName": action.resource.catalog.name,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation in {
+        "FilterSchemas",
+        "ShowFunctions",
+        "ShowTables",
+      }
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.schema.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "schema_visibility",
+          "catalogName": action.resource.schema.catalogName,
+          "schemaName": action.resource.schema.schemaName,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "SetCatalogSessionProperty"
+      permissions := {
+        {
+          "resource": "catalog",
+          "catalogName": action.resource.catalogSessionProperty.catalogName,
+          "allow": "read-only",
+        },
+        {
+          "resource": "catalog_session_properties",
+          "catalogName": action.resource.catalogSessionProperty.catalogName,
+          "propertyName": action.resource.catalogSessionProperty.propertyName,
+          "allow": true,
+        },
+      }
+    }
+
+    requested_permissions := permissions if {
+      operation == "SetSystemSessionProperty"
+      permissions := {{
+        "resource": "system_session_properties",
+        "propertyName": action.resource.systemSessionProperty.name,
+        "allow": true,
+      }}
+    }
+
+    requested_permissions := permissions if {
+      operation == "WriteSystemInformation"
+      permissions := {{
+        "resource": "system_information",
+        "allow": {"write"},
+      }}
+    }
+
+    requested_authorization_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "authorization"
+    }
+
+    requested_catalog_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "catalog"
+    }
+
+    requested_catalog_session_properties_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "catalog_session_properties"
+    }
+
+    requested_catalog_visibility_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "catalog_visibility"
+    }
+
+    requested_column_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "column"
+    }
+
+    requested_function_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "function"
+    }
+
+    requested_impersonation_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "impersonation"
+    }
+
+    requested_procedure_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "procedure"
+    }
+
+    requested_query_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "query"
+    }
+
+    requested_query_owned_by_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "query_owned_by"
+    }
+
+    requested_schema_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "schema"
+    }
+
+    requested_schema_visibility_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "schema_visibility"
+    }
+
+    requested_table_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "table"
+    }
+
+    requested_system_information_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "system_information"
+    }
+
+    requested_system_session_properties_permissions contains permission if {
+      some permission in requested_permissions
+      permission.resource == "system_session_properties"
+    }
+
+    requested_column_mask := request if {
+      operation == "GetColumnMask"
+      request := {
+        "catalogName": action.resource.column.catalogName,
+        "schemaName": action.resource.column.schemaName,
+        "tableName": action.resource.column.tableName,
+        "columnName": action.resource.column.columnName,
+      }
+    }
+
+    requested_row_filters := request if {
+      operation == "GetRowFilters"
+      request := {
+        "catalogName": action.resource.table.catalogName,
+        "schemaName": action.resource.table.schemaName,
+        "tableName": action.resource.table.tableName,
+      }
+    }
+  verification.rego: |
+    # METADATA
+    # description: |
+    #   The file verification.rego contains the entry points which are
+    #   queried from outside. These are:
+    #     - allow
+    #     - batch
+    #     - columnMask
+    #     - rowFilters
+    #   These rules use the rules and functions in requested_permission.rego
+    #   and actual_permissions.rego to calculate the result.
+    #
+    #   The file requested_permissions.rego contains the
+    #   requested_permissions rule which returns a set of required
+    #   permissions for the given operation including the requested
+    #   resource.
+    #
+    #   The file actual_permissions.rego contains functions to determine the
+    #   actual permissions defined in the Trino policies for the given user
+    #   and requested resource.
+    # schemas:
+    #   - input: schema.input
+    #   - data.trino_policies.policies: schema.policies
+    package trino
+
+    import rego.v1
+
+    # METADATA
+    # description: |
+    #   Entry point for OPA policies, configured in the Trino property
+    #   `opa.policy.uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "OperationName",
+    #       "resource": {
+    #         ...
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a boolean value indicating if the operation is allowed
+    #   or not on the given resource by the given user.
+    #
+    #   The allow rule compares the permissions configured in the
+    #   requested_permissions rule for the given operation with the Trino
+    #   policies given in data.trino_policies.policies for the given
+    #   identity.
+    #
+    #   For instance, if the user wants to insert data into a table then the
+    #   requested_permissions rule requires for the "InsertIntoTable"
+    #   operation "all" access to the catalog and the "INSERT" privilege on
+    #   the table. The functions catalog_access and table_privileges defined
+    #   in actual_permissions.rego are called to check if these requirements
+    #   are fulfilled by the policies for the given user.
+    # entrypoint: true
+    default allow := false
+
+    allow if {
+      # Fail if the requested permissions for the given operation are not
+      # implemented yet
+      #
+      # The following operations are intentionally not supported:
+      # - CreateCatalog
+      # - DropCatalog
+      requested_permissions
+
+      every requested_permission in requested_authorization_permissions {
+        permission := authorization_permission(requested_permission.granteeName)
+        requested_permission.allow == permission
+      }
+      every requested_permission in requested_catalog_permissions {
+        access := catalog_access(requested_permission.catalogName)
+        requested_permission.allow in access
+      }
+      every requested_permission in requested_catalog_session_properties_permissions {
+        access := catalog_session_properties_access(
+          requested_permission.catalogName,
+          requested_permission.propertyName,
+        )
+        requested_permission.allow == access
+      }
+      every requested_permission in requested_catalog_visibility_permissions {
+        catalog_visibility(requested_permission.catalogName)
+      }
+      every requested_permission in requested_column_permissions {
+        access := column_access(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+          requested_permission.tableName,
+          requested_permission.columnName,
+        )
+        requested_permission.allow == access
+      }
+      every requested_permission in requested_function_permissions {
+        privileges := function_privileges(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+          requested_permission.functionName,
+        )
+        object.subset(privileges, requested_permission.privileges)
+      }
+      every requested_permission in requested_impersonation_permissions {
+        access := impersonation_access(requested_permission.user)
+        requested_permission.allow == access
+      }
+      every requested_permission in requested_procedure_permissions {
+        privileges := procedure_privileges(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+          requested_permission.functionName,
+        )
+        object.subset(privileges, requested_permission.privileges)
+      }
+      every requested_permission in requested_query_permissions {
+        object.subset(query_access, requested_permission.allow)
+      }
+      every requested_permission in requested_query_owned_by_permissions {
+        object.subset(
+          query_owned_by_access(requested_permission.user),
+          requested_permission.allow,
+        )
+      }
+      every requested_permission in requested_schema_permissions {
+        schema_owner(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+        ) == requested_permission.owner
+      }
+      every requested_permission in requested_schema_visibility_permissions {
+        schema_visibility(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+        )
+      }
+      every requested_permission in requested_table_permissions {
+        privileges := table_privileges(
+          requested_permission.catalogName,
+          requested_permission.schemaName,
+          requested_permission.tableName,
+        )
+        all_of_requested := object.get(
+          requested_permission.privileges,
+          "allOf",
+          set(),
+        )
+        any_of_requested := object.get(
+          requested_permission.privileges,
+          "anyOf",
+          privileges,
+        )
+        object.subset(privileges, all_of_requested)
+        privileges & any_of_requested != set()
+      }
+      every requested_permission in requested_system_information_permissions {
+        object.subset(
+          system_information_access,
+          requested_permission.allow,
+        )
+      }
+      every requested_permission in requested_system_session_properties_permissions {
+        access := system_session_properties_access(requested_permission.propertyName)
+        requested_permission.allow == access
+      }
+    }
+
+    # METADATA
+    # description: |
+    #   Entry point for batch OPA policies, configured in the Trino property
+    #   `opa.policy.batched-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "FilterOperationName",
+    #       "filterResources": [
+    #         {"resource1": ...},
+    #         {"resource2": ...},
+    #         ...
+    #       ],
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a list of indices which are allowed.
+    #
+    #   The batch rule just calls the allow rule for each resource.
+    #
+    #   FilterColumns is different to the other filter operations because
+    #   "filterResources" contains exactly one table with a list of
+    #   columns and the expected result is the list of allowed column
+    #   indices and not of allowed tables.
+    # entrypoint: true
+    batch contains index if {
+      input.action.operation != "FilterColumns"
+
+      some index, resource in input.action.filterResources
+
+      # regal ignore:with-outside-test-context
+      allow with input.action.resource as resource
+    }
+
+    batch contains index if {
+      input.action.operation == "FilterColumns"
+
+      table := input.action.filterResources[0].table
+      some index, column_name in table.columns
+
+      # regal ignore:with-outside-test-context
+      allow with input.action.resource as {"table": {
+        "catalogName": table.catalogName,
+        "schemaName": table.schemaName,
+        "tableName": table.tableName,
+        "columnName": column_name,
+      }}
+    }
+
+    # METADATA
+    # description: |
+    #   Entry point for fetching column masks, configured in the Trino
+    #   property `opa.policy.column-masking-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "GetColumnMask",
+    #       "resource": {
+    #         "column": {
+    #           "catalogName": "catalog",
+    #           "schemaName": "schema",
+    #           "tableName": "table",
+    #           "columnName": "column",
+    #         },
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is an object containing the mask expression and the
+    #   identity for the mask evaluation.
+    #
+    #   The columnMask rule queries the column constraints in the Trino
+    #   policies and returns the expression if any is set. A column mask
+    #   is an SQL expression, e.g. "'XXX-XX-' + substring(credit_card, -4)".
+    # entrypoint: true
+    columnMask := column_mask if {
+      column := column_constraints(
+        requested_column_mask.catalogName,
+        requested_column_mask.schemaName,
+        requested_column_mask.tableName,
+        requested_column_mask.columnName,
+      )
+
+      is_string(column.mask)
+      is_string(column.mask_environment.user)
+
+      column_mask := {
+        "expression": column.mask,
+        "identity": column.mask_environment.user,
+      }
+    }
+
+    columnMask := column_mask if {
+      column := column_constraints(
+        requested_column_mask.catalogName,
+        requested_column_mask.schemaName,
+        requested_column_mask.tableName,
+        requested_column_mask.columnName,
+      )
+
+      is_string(column.mask)
+      is_null(column.mask_environment.user)
+
+      column_mask := {"expression": column.mask}
+    }
+
+    # METADATA
+    # description: |
+    #   Entry point for fetching row filters, configured in the Trino
+    #   property `opa.policy.row-filters-uri`.
+    #
+    #   The input has the following form:
+    #
+    #   {
+    #     "action": {
+    #       "operation": "GetRowFilters",
+    #       "resource": {
+    #         "table": {
+    #           "catalogName": "catalog",
+    #           "schemaName": "schema",
+    #           "tableName": "table",
+    #         },
+    #       },
+    #     },
+    #     "context": {
+    #       "identity": {
+    #         "groups": ["group1", ...],
+    #         "user": "username",
+    #       },
+    #       "softwareStack": {"trinoVersion": "442"},
+    #     }
+    #   }
+    #
+    #   The result is a list containing one object which consists of the
+    #   row filter expression and the identity for the filter evaluation.
+    #
+    #   The rowFilters rule queries the column constraints in the Trino
+    #   policies and returns the expression if any is set. A row filter is
+    #   an SQL condition, e.g. "user = current_user".
+    # entrypoint: true
+    rowFilters contains row_filter if {
+      rule := first_matching_table_rule(
+        requested_row_filters.catalogName,
+        requested_row_filters.schemaName,
+        requested_row_filters.tableName,
+      )
+
+      is_string(rule.filter)
+      is_string(rule.filter_environment.user)
+
+      row_filter := {
+        "expression": rule.filter,
+        "identity": rule.filter_environment.user,
+      }
+    }
+
+    rowFilters contains row_filter if {
+      rule := first_matching_table_rule(
+        requested_row_filters.catalogName,
+        requested_row_filters.schemaName,
+        requested_row_filters.tableName,
+      )
+
+      is_string(rule.filter)
+      is_null(rule.filter_environment.user)
+
+      row_filter := {"expression": rule.filter}
+    }
+  util.rego: |
+    # METADATA
+    # description: Utility package which extends the built-in functions
+    package util
+
+    import rego.v1
+
+    # METADATA
+    # description: |
+    #   Matches the entire string against a regular expression.
+    #
+    #   pattern (string)  regular expression
+    #   value (string)    value to match against pattern
+    #
+    #   Returns:
+    #     result (boolean)
+    match_entire(pattern, value) if {
+      # Add the anchors ^ and $
+      pattern_with_anchors := concat("", ["^", pattern, "$"])
+
+      regex.match(pattern_with_anchors, value)
+    }
+{% endraw %}

@@ -1,0 +1,27 @@
+---
+apiVersion: opa.stackable.tech/v1alpha1
+kind: OpaCluster
+metadata:
+  name: opa
+spec:
+  image:
+    productVersion: 0.61.0
+  clusterConfig:
+    userInfo:
+      backend:
+        experimentalXfscAas:
+          hostname: tsa
+          port: 5000
+    # userInfo:
+    #   backend:
+    #     keycloak:
+    #       hostname: keycloak.default.svc.cluster.local
+    #       port: 8080
+    #       tls: null
+    #       clientCredentialsSecret: user-info-fetcher-client-credentials
+    #       adminRealm: demo
+    #       userRealm: demo
+  servers:
+    roleGroups:
+      default:
+        replicas: 1

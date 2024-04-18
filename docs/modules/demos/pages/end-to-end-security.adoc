@@ -1,0 +1,64 @@
+= end-to-end-security
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install end-to-end-security
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 7 {k8s-cpu}[cpu units] (core/hyperthread)
+* 20GiB memory
+* 40GiB disk storage
+
+== Overview
+
+
+You can see the deployed products and their relationship in the following diagram:
+
+image::end-to-end-security/overview.drawio.svg[]
+
+== Listing the deployed Stackable services
+
+To list the installed Stackable services run the following command: `stackablectl stacklet list`
+
+[source,console]
+----
+$ stackablectl stacklet list
+
+┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                            ┆ CONDITIONS                      │
+╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hdfs      ┆ hdfs         ┆ default   ┆ namenode-default-0-https    https://172.18.0.2:31298 ┆ Available, Reconciling, Running │
+│           ┆              ┆           ┆ namenode-default-0-metrics  172.18.0.2:32070         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-rpc      172.18.0.2:32677         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-https    https://172.18.0.2:31220 ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-metrics  172.18.0.2:31098         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-rpc      172.18.0.2:32669         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive      ┆ hive-iceberg ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa       ┆ opa          ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset     ┆ default   ┆ external-http               http://172.18.0.2:32067  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino     ┆ trino        ┆ default   ┆ coordinator-metrics         172.18.0.2:31020         ┆ Available, Reconciling, Running │
+│           ┆              ┆           ┆ coordinator-https           https://172.18.0.2:31994 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper    ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
+└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────┴─────────────────────────────────┘
+----
+
+include::partial$instance-hint.adoc[]

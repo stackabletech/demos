@@ -1,5 +1,6 @@
 * xref:airflow-scheduled-job.adoc[]
 * xref:data-lakehouse-iceberg-trino-spark.adoc[]
+* xref:end-to-end-security.adoc[]
 * xref:hbase-hdfs-load-cycling-data.adoc[]
 * xref:jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data.adoc[]
 * xref:logging.adoc[]
