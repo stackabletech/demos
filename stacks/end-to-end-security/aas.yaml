@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
         - name: aas
-          image: oci.stackable.tech/sandbox/xfsc-aas:latest
+          image: oci.stackable.tech/sandbox/xfsc-aas@sha256:aaf86f2c5e450d3b699993c44dbb162b2e0265cf65104a76c6837b4d199c32d7
           ports:
             - name: web
               containerPort: 9000
