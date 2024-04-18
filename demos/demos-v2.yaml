@@ -43,8 +43,8 @@ demos:
       - opa
       - keycloak
     manifests:
-      - plainYaml: demos/end-to-end-security/create-trino-tables.yaml
-      - plainYaml: demos/end-to-end-security/spark-report.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/create-trino-tables.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/spark-report.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6250m
