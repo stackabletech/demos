@@ -89,7 +89,11 @@ data:
         def do_GET(self):
             parsed_url = urlparse(self.path)
             query_components = parse_qs(parsed_url.query)
-            if parsed_url.path.startswith('/requests'):
+            if parsed_url.path == '/health':
+                self.send_response(200)
+                self.end_headers()
+                self.wfile.write("Alles tschaka\n".encode('utf-8'))
+            elif parsed_url.path.startswith('/requests'):
                 request_id = parsed_url.query.split('=')[1]
                 self.send_response(200)
                 self.send_header('Content-type', 'text/html')
@@ -124,7 +128,8 @@ data:
                 self.end_headers()
                 self.wfile.write(json.dumps(claims).encode('utf-8'))
             else:
-                self._set_headers(404)
+                self.send_response(404)
+                self.end_headers()
                 self.wfile.write(json.dumps({'error': 'Endpoint not found'}).encode('utf-8'))
 
         def do_POST(self):
@@ -164,6 +169,7 @@ data:
 
             elif self.path == '/login':
                 self.send_response(200)
+                self.send_header('Content-type', 'text/html')
                 self.end_headers()
                 content_length = int(self.headers['Content-Length'])
                 post_data = self.rfile.read(content_length)
@@ -174,7 +180,18 @@ data:
                 REQUESTS[request_id]['requestId'] = request_id
                 REQUESTS[request_id]['status'] = 'accepted'
                 REQUESTS[request_id]['scopes'] = 'openid profile email'
-                self.wfile.write('OK'.encode('utf-8'))
+                self.wfile.write("""
+                Login succeeded, please wait until AAS notices...<br>
+                This window will be closed shortly.
+
+                <foot>
+                    <script>
+                        setTimeout(function(){
+                            window.close();
+                        }, 2000);
+                    </script>
+                </foot>
+                """.encode('utf-8'))
 
         def print_request(self, post_data=None):
             eprint(f"Received {self.command} request for {self.path}")
