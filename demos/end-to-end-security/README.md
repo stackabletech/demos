@@ -1,3 +1,13 @@
+# STACKIT sepcific
+
+## Nodepool
+
+Use a single `c1.5` machine (16 cores, 32 GB RAM) and at least 50 GB disk!
+
+## Install
+
+`➜  demos git:(feat/e2e-security-stack-it) ✗ stackablectl -s stacks/stacks-v2.yaml demo in end-to-end-security`
+
 # How to persist changes in Superset
 
 1. Log into Keycloak as the user `admin` (in the master realm) and create a user called `admin` in the demo realm.

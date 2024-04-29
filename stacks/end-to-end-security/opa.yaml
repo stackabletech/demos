@@ -11,7 +11,7 @@ spec:
       backend:
         keycloak:
           hostname: keycloak.default.svc.cluster.local
-          port: 8443
+          port: 8080
           tls:
             verification:
               server:

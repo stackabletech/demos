@@ -7,7 +7,7 @@ spec:
   image:
     productVersion: 3.1.0
   clusterConfig:
-    listenerClass: external-unstable
+    listenerClass: external-stable
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
     authentication:
