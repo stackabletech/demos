@@ -54,10 +54,6 @@ spec:
                     requests:
                       storage: "1"
                   storageClassName: secrets.stackable.tech
-    config:
-      resources: # I would like to run this stack on my Laptop
-        cpu:
-          min: 100m
     configOverrides:
       config.properties:
         http-server.authentication.oauth2.refresh-tokens: "true"
@@ -66,10 +62,6 @@ spec:
         replicas: 1
   workers:
     podOverrides: *podOverrides
-    config:
-      resources: # I would like to run this stack on my Laptop
-        cpu:
-          min: 250m
     roleGroups:
       default:
         replicas: 1
