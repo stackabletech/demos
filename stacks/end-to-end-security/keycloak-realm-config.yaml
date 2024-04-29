@@ -26,6 +26,7 @@ stringData:
     {
       "realm" : "demo",
       "enabled" : true,
+      "sslRequired": "none",
       "groups" : [ {
         "name" : "Compliance and Regulation",
         "path" : "/Compliance and Regulation",

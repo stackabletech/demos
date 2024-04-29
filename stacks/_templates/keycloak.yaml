@@ -21,6 +21,7 @@ spec:
           args:
             - start-dev
             - --import-realm
+#            - --hostname-url=http://keycloak:8080
             - --hostname-strict=false
           env:
             - name: KEYCLOAK_ADMIN
