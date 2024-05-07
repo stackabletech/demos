@@ -1,0 +1,50 @@
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperCluster
+metadata:
+  name: training-zookeeper
+spec:
+  image:
+    productVersion: 3.8.1
+  clusterConfig:
+    vectorAggregatorConfigMapName: vector-aggregator-discovery
+  servers:
+    podOverrides:
+      spec:
+        volumes:
+        - name: server-tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/backend.autotls.cert.lifetime: 25d
+        - name: quorum-tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/backend.autotls.cert.lifetime: 25d
+    roleGroups:
+      default:
+        configOverrides:
+          zoo.cfg:
+            client.portUnification: "true"
+            secureClientPort: "2281"
+        replicas: 3
+    config:
+      logging:
+        enableVectorAgent: true
+        containers:
+          vector:
+            file:
+              level: WARN
+          zookeeper:
+            console:
+              level: INFO
+            file:
+              level: INFO
+            loggers:
+              ROOT:
+                level: INFO
+              org.apache.zookeeper.server.NettyServerCnxn:
+                level: NONE
