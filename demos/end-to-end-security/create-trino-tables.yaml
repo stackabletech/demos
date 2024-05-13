@@ -266,6 +266,6 @@ data:
         UNION ALL SELECT 'daniel.king', 'Daniel', 'King', 'daniel.king@knab.com', 'sophia.clarke', 60000
         UNION ALL SELECT 'pamela.scott', 'Pamela', 'Scott', 'pamela.scott@knab.com', NULL, 70000
         UNION ALL SELECT 'justin.martin', 'Justin', 'Martin', 'justin.martin@knab.com', 'pamela.scott', 65000
-        UNION ALL SELECT 'sophia.clarke', 'Sophia', 'Clarke', 'sophia.clarke@knab.com', 'pamela.scott', 65000
+        UNION ALL SELECT 'isla.williams', 'Isla', 'Williams', 'isla.williams@knab.com', 'pamela.scott', 65000
         UNION ALL SELECT 'mark.ketting', 'Mark', 'Ketting', 'mark.ketting@knab.com', NULL, 60000
     """)
