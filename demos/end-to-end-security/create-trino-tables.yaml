@@ -261,8 +261,8 @@ data:
 
     run_query(connection, """
         CREATE TABLE IF NOT EXISTS lakehouse.employees.employees AS
-        SELECT 'william.lewis' as username, 'William' as given_name, 'Lewis' as family_name, 'william.lewis@knab.com' as email, 'sophia.clarke' as supervisor, 65000 as salary
-        UNION ALL SELECT 'sophia.clarke', 'Sophia', 'Clarke', 'sophia.clarke@knab.com', NULL, 60000
+        SELECT 'sophia.clarke' as username, 'Sophia' as given_name, 'Clarke' as family_name, 'sophia.clarke@knab.com' as email, NULL as supervisor, 65000 as salary
+        UNION ALL SELECT 'william.lewis', 'William', 'Lewis', 'william.lewis@knab.com', 'sophia.clarke', 60000
         UNION ALL SELECT 'daniel.king', 'Daniel', 'King', 'daniel.king@knab.com', 'sophia.clarke', 60000
         UNION ALL SELECT 'pamela.scott', 'Pamela', 'Scott', 'pamela.scott@knab.com', NULL, 70000
         UNION ALL SELECT 'justin.martin', 'Justin', 'Martin', 'justin.martin@knab.com', 'pamela.scott', 65000
