@@ -27,13 +27,12 @@ To run this demo, your system needs at least:
 
 You can see the deployed products and their relationship in the following diagram:
 
-// the svg does not have a specified size, so we need to size it here or it will be 0x0
-image::end-to-end-security/overview.svg[alt text here,700]
+image::end-to-end-security/overview.png[]
 
 The Trino schema (with schemas, tables and views) is shown below.
 
 // the svg does not have a specified size, so we need to size it here or it will be 0x0
-image::end-to-end-security/trino-schema.svg[alt text here,700]
+image::end-to-end-security/trino-schema.svg[trino-schema.svg,700]
 
 == Listing the deployed Stackable services
 
