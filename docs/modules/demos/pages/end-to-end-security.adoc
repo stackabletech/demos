@@ -23,10 +23,13 @@ To run this demo, your system needs at least:
 * 20GiB memory
 * 40GiB disk storage
 
-== Overview
+== Recording
 
+// We don't embed the video but only link it becuase of privacy concerns.
 *On 2024-05-16 our collegue Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
 You can find the recording on https://www.youtube.com/watch?v=ATlq_l3WNiA[Youtube].*
+
+== Overview
 
 You can see the deployed products and their relationship in the following diagram:
 
