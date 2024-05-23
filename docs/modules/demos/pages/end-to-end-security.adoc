@@ -23,42 +23,19 @@ To run this demo, your system needs at least:
 * 20GiB memory
 * 40GiB disk storage
 
-== Overview
+== Recording
 
+// We don't embed the video but only link it becuase of privacy concerns.
+*On 2024-05-16 our collegue Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
+You can find the recording on https://www.youtube.com/watch?v=ATlq_l3WNiA[Youtube].*
+
+== Overview
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::end-to-end-security/overview.drawio.svg[]
+image::end-to-end-security/overview.png[Architectural overview]
 
-== Listing the deployed Stackable services
+The Trino schema (with schemas, tables and views) is shown below.
 
-To list the installed Stackable services run the following command: `stackablectl stacklet list`
-
-[source,console]
-----
-$ stackablectl stacklet list
-
-┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                            ┆ CONDITIONS                      │
-╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ hdfs      ┆ hdfs         ┆ default   ┆ namenode-default-0-https    https://172.18.0.2:31298 ┆ Available, Reconciling, Running │
-│           ┆              ┆           ┆ namenode-default-0-metrics  172.18.0.2:32070         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-rpc      172.18.0.2:32677         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-https    https://172.18.0.2:31220 ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-metrics  172.18.0.2:31098         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-rpc      172.18.0.2:32669         ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive      ┆ hive-iceberg ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa       ┆ opa          ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset     ┆ default   ┆ external-http               http://172.18.0.2:32067  ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino     ┆ trino        ┆ default   ┆ coordinator-metrics         172.18.0.2:31020         ┆ Available, Reconciling, Running │
-│           ┆              ┆           ┆ coordinator-https           https://172.18.0.2:31994 ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper    ┆ default   ┆                                                      ┆ Available, Reconciling, Running │
-└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────┴─────────────────────────────────┘
-----
-
-include::partial$instance-hint.adoc[]
+// the svg does not have a specified size, so we need to size it here or it will be 0x0
+image::end-to-end-security/trino-schema.svg[Trino schema,700]
