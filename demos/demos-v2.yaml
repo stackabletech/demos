@@ -48,7 +48,7 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/create-spark-report.yaml
     supportedNamespaces: []
     resourceRequests:
-      cpu: 6250m
+      cpu: 9000m
       memory: 19586Mi
       pvc: 40Gi
   nifi-kafka-druid-earthquake-data:

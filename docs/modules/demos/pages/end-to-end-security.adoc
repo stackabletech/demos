@@ -19,7 +19,7 @@ This demo should not be run alongside other demos.
 
 To run this demo, your system needs at least:
 
-* 7 {k8s-cpu}[cpu units] (core/hyperthread)
+* 9 {k8s-cpu}[cpu units] (core/hyperthread)
 * 20GiB memory
 * 40GiB disk storage
 

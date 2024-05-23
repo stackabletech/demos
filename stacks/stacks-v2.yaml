@@ -526,7 +526,7 @@ stacks:
       - keycloak
     supportedNamespaces: ["default"] # SecretClass "kerberos" needs explicit namespace in adminKeytabSecret
     resourceRequests:
-      cpu: 6250m
+      cpu: 7000m
       memory: 19586Mi
       pvc: 40Gi
     manifests:
