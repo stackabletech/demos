@@ -55,8 +55,9 @@ spec:
         check_interval: 1s
         limit_percentage: 50
         spike_limit_percentage: 30
-      batch/every-10-seconds:
-        timeout: 10s
+      batch/every-second:
+        timeout: 1s
+        send_batch_max_size: 20000
       # extract key=value pairs from OTEL_RESOURCE_ATTRIBUTES
       resourcedetection/env:
         detectors: ["env"]
@@ -106,7 +107,7 @@ spec:
           receivers: [otlp/insecure]
           processors:
           - memory_limiter
-          - batch/every-10-seconds
+          - batch/every-second
           - resourcedetection/env
           exporters:
           - otlp/jaeger-insecure
@@ -116,7 +117,7 @@ spec:
           receivers: [otlp/insecure]
           processors:
           - memory_limiter
-          - batch/every-10-seconds
+          - batch/every-second
           - resourcedetection/env
           - resource/logs
           - attributes/logs
