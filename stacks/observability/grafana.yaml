@@ -8,6 +8,8 @@ version: 7.3.7
 options:
   admin:
     existingSecret: grafana-admin-credentials
+  service:
+    type: NodePort
   datasources:
     datasources.yaml:
       apiVersion: 1
