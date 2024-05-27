@@ -1,4 +1,4 @@
-apiVersion: opentelemetry.io/v1alpha1
+apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
   name: otel-collector-grpc
@@ -7,7 +7,7 @@ spec:
   # See: https://github.com/open-telemetry/opentelemetry-collector-releases/pkgs/container/opentelemetry-collector-releases%2Fopentelemetry-collector-contrib/versions?filters%5Bversion_type%5D=tagged
   # Using the contrib image so we get all of the useful plugins
   image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.97.0
-  config: |
+  config:
     # Configure the collector to receove via OTLP, and export to various "sinks".
     # For configuration structure, see: https://opentelemetry.io/docs/collector/configuration/
     #
