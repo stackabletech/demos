@@ -548,15 +548,14 @@ stacks:
       - observability
       - tracing
     manifests:
-      # TODO (@NickLarsenNZ): Prepend paths with: https://raw.githubusercontent.com/stackabletech/demos/main/stacks
-      - helmChart: ./stacks/observability/jaeger.yaml
-      - helmChart: ./stacks/observability/opentelemetry-operator.yaml
-      - plainYaml: ./stacks/observability/grafana-admin-credentials.yaml
-      - helmChart: ./stacks/observability/grafana.yaml
-      - helmChart: ./stacks/observability/grafana-tempo.yaml
-      - helmChart: ./stacks/observability/grafana-loki.yaml
-      - plainYaml: ./stacks/observability/opentelemetry-collector-sidecar.yaml
-      - plainYaml: ./stacks/observability/opentelemetry-collector-deployment.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/jaeger.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-operator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-admin-credentials.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-tempo.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-loki.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
     parameters:
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
