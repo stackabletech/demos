@@ -541,7 +541,7 @@ stacks:
     stackableRelease: dev
     stackableOperators:
       - commons
-      - secret 
+      - secret
     labels:
       - jaeger
       - opentelemetry
@@ -556,6 +556,7 @@ stacks:
       - helmChart: ./stacks/observability/grafana-tempo.yaml
       - helmChart: ./stacks/observability/grafana-loki.yaml
       - plainYaml: ./stacks/observability/opentelemetry-collector-sidecar.yaml
+      - plainYaml: ./stacks/observability/opentelemetry-collector-deployment.yaml
     parameters:
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
