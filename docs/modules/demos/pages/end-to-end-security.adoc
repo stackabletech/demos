@@ -25,7 +25,7 @@ To run this demo, your system needs at least:
 
 == Recording
 
-// We don't embed the video but only link it becuase of privacy concerns.
+// We don't embed the video but only link it because of privacy concerns.
 *On 2024-05-16 our collegue Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
 You can find the recording on https://www.youtube.com/watch?v=ATlq_l3WNiA[Youtube].*
 
@@ -39,3 +39,40 @@ The Trino schema (with schemas, tables and views) is shown below.
 
 // the svg does not have a specified size, so we need to size it here or it will be 0x0
 image::end-to-end-security/trino-schema.svg[Trino schema,700]
+
+=== User credentials
+
+The following user accounts are configured in Keycloak:
+
+[cols="1,1,2"]
+|===
+|Username|Password|Team member
+
+|sophia.clarke
+|sophia.clarke
+|Head of Compliance Analytics
+
+|william.lewis
+|william.lewis
+|Team member of Compliance Analytics
+
+|daniel.king
+|daniel.king
+|Team member of Compliance Analytics
+
+|pamela.scott
+|pamela.scott
+|Head of Customer Analytics
+
+|justin.martin
+|justin.martin
+|Team member of Customer Analytics
+
+|isla.williams
+|isla.williams
+|Team member of Customer Analytics
+
+|mark.ketting
+|mark.ketting
+|Head of Marketing
+|===
