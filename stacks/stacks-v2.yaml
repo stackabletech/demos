@@ -54,6 +54,31 @@ stacks:
       - name: setSysctlMaxMapCount
         description: Wether an init-container should be used to increase 'sysctl -w vm.max_map_count'. This requires to spawn an init-container with runsAsUser 0 privileges, which some clusters prohibit. You can increase 'vm.max_map_count' on all of the kubernetes nodes manually and set this to 'false'.
         default: "true"
+  observability:
+    description: >-
+      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - secret
+    labels:
+      - jaeger
+      - opentelemetry
+      - observability
+      - tracing
+    manifests:
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/jaeger.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-operator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-admin-credentials.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-tempo.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-loki.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
+    parameters:
+      - name: grafanaAdminPassword
+        description: Password of the Grafana admin user
+        default: adminadmin
   airflow:
     description: Stack containing Airflow scheduling platform
     stackableRelease: 24.3
@@ -534,29 +559,4 @@ stacks:
         default: adminadmin
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
-        default: adminadmin
-  observability:
-    description: >-
-      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
-    stackableRelease: dev
-    stackableOperators:
-      - commons
-      - secret
-    labels:
-      - jaeger
-      - opentelemetry
-      - observability
-      - tracing
-    manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/jaeger.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-operator.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-admin-credentials.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-tempo.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-loki.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
-    parameters:
-      - name: grafanaAdminPassword
-        description: Password of the Grafana admin user
         default: adminadmin
