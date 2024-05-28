@@ -1,3 +1,5 @@
+# https://github.com/jaegertracing/helm-charts/tree/main/charts/jaeger
+# The jaeger allInOne mode doesn't support NodePort services.
 releaseName: jaeger
 name: jaeger
 repo:

@@ -1,3 +1,5 @@
+# The OpenTelemetry Operator does not yet allow setting the service to be a NodePort
+# See: https://github.com/open-telemetry/opentelemetry-operator/issues/902
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
