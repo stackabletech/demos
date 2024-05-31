@@ -143,7 +143,13 @@ data:
           "privileges": ["SELECT"],
         },
       ],
-      "system_information": [],
+      "system_information": [
+        # This is needed for graceful shutdown
+        {
+          "user": "admin",
+          "allow": ["read", "write"]
+        },
+      ],
       "queries": [
         # Users always have permission to view or kill their own queries.
         {
