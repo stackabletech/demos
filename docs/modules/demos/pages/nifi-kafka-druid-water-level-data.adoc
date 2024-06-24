@@ -66,32 +66,32 @@ To list the installed Stackable services run the following command:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────┬─────────────┬───────────┬────────────────────────────────────────────────┐
-│ Product   ┆ Name        ┆ Namespace ┆ Endpoints                                      │
-╞═══════════╪═════════════╪═══════════╪════════════════════════════════════════════════╡
-│ druid     ┆ druid       ┆ default   ┆ broker-metrics        172.18.0.2:31804         │
-│           ┆             ┆           ┆ broker-https          https://172.18.0.2:31725 │
-│           ┆             ┆           ┆ coordinator-metrics   172.18.0.2:30547         │
-│           ┆             ┆           ┆ coordinator-https     https://172.18.0.2:31186 │
-│           ┆             ┆           ┆ historical-metrics    172.18.0.2:32024         │
-│           ┆             ┆           ┆ historical-https      https://172.18.0.2:31239 │
-│           ┆             ┆           ┆ middlemanager-metrics 172.18.0.2:32213         │
-│           ┆             ┆           ┆ middlemanager-https   https://172.18.0.2:31641 │
-│           ┆             ┆           ┆ router-metrics        172.18.0.2:30950         │
-│           ┆             ┆           ┆ router-https          https://172.18.0.2:30175 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka       ┆ default   ┆ metrics               172.18.0.2:30145         │
-│           ┆             ┆           ┆ kafka-tls             172.18.0.2:31662         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi        ┆ default   ┆ https                 https://172.18.0.2:30306 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset    ┆ default   ┆ external-superset     http://172.18.0.2:30963  │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper   ┆ default   ┆ zk                    172.18.0.2:32710         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-druid ┆ default   ┆ http                  http://172.18.0.2:30337  │
-│           ┆             ┆           ┆ console-http          http://172.18.0.2:31775  │
-└───────────┴─────────────┴───────────┴────────────────────────────────────────────────┘
+
+┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid         ┆ default   ┆ broker-metrics         172.18.0.2:32661         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-https           https://172.18.0.2:32130 ┆                                 │
+│           ┆               ┆           ┆ coordinator-metrics    172.18.0.2:31609         ┆                                 │
+│           ┆               ┆           ┆ coordinator-https      https://172.18.0.2:32209 ┆                                 │
+│           ┆               ┆           ┆ historical-metrics     172.18.0.2:32644         ┆                                 │
+│           ┆               ┆           ┆ historical-https       https://172.18.0.2:30865 ┆                                 │
+│           ┆               ┆           ┆ middlemanager-metrics  172.18.0.2:31184         ┆                                 │
+│           ┆               ┆           ┆ middlemanager-https    https://172.18.0.2:30239 ┆                                 │
+│           ┆               ┆           ┆ router-metrics         172.18.0.2:31912         ┆                                 │
+│           ┆               ┆           ┆ router-https           https://172.18.0.2:30616 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ metrics                172.18.0.2:31035         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ kafka-tls              172.18.0.2:31563         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ https                  https://172.18.0.2:30198 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ external-http          http://172.18.0.2:31037  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆                                                 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                   http://172.18.0.2:32345  ┆                                 │
+└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -374,7 +374,7 @@ deep storage. The Druid deep storage is based on the S3 store provided by MinIO.
 === View the Ingestion job
 
 You can have a look at the ingestion jobs running in Druid by opening the Druid endpoint `router-https` from your
-`stackablectl stacklet list` command output (https://172.18.0.2:31905 in this case).
+`stackablectl stacklet list` command output (https://172.18.0.2:31616 in this case).
 
 image::nifi-kafka-druid-water-level-data/druid_1.png[]
 
