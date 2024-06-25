@@ -1,7 +1,7 @@
 = nifi-kafka-druid-earthquake-data
 :page-aliases: stable@stackablectl::demos/nifi-kafka-druid-earthquake-data.adoc
 
-:superset-docs: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
+:superset-docs: https://superset.apache.org/docs/using-superset/creating-your-first-dashboard/#creating-charts-in-explore-view
 :druid-tutorial: https://druid.apache.org/docs/latest/tutorials/tutorial-kafka.html#loading-data-with-the-data-loader
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :earthquake: https://earthquake.usgs.gov/earthquakes/feed/v1.0/csv.php
@@ -27,7 +27,7 @@ FQDN service names (including the namespace), so that the used TLS certificates 
 To run this demo, your system needs at least:
 
 * 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 30GiB memory
+* 42GiB memory
 * 75GiB disk storage
 
 == Overview
@@ -37,7 +37,7 @@ This demo will
 * Install the required Stackable operators.
 * Spin up the following data products:
 ** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from
-   Druid via SQL queries and build dashboards on top of that data
+   Druid via SQL queries and build dashboards on top of that data.
 ** *Kafka*:  A distributed event streaming platform for high-performance data pipelines, streaming analytics and data
    integration. This demo uses it as an event streaming platform to stream the data in near real-time.
 ** *NiFi*:  An easy-to-use, robust system to process and distribute data. This demo uses it to fetch earthquake data
@@ -54,39 +54,40 @@ charts. You can see the deployed products and their relationship in the followin
 
 image::nifi-kafka-druid-earthquake-data/overview.png[]
 
-== Listing the deployed Stackable services
+== List the deployed Stackable services
 
 To list the installed Stackable services run the following command:
 
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────┬─────────────┬───────────┬────────────────────────────────────────────────┐
-│ Product   ┆ Name        ┆ Namespace ┆ Endpoints                                      │
-╞═══════════╪═════════════╪═══════════╪════════════════════════════════════════════════╡
-│ druid     ┆ druid       ┆ default   ┆ broker-metrics        172.18.0.2:32002         │
-│           ┆             ┆           ┆ broker-https          https://172.18.0.2:32304 │
-│           ┆             ┆           ┆ coordinator-metrics   172.18.0.2:32058         │
-│           ┆             ┆           ┆ coordinator-https     https://172.18.0.2:32545 │
-│           ┆             ┆           ┆ historical-metrics    172.18.0.2:30277         │
-│           ┆             ┆           ┆ historical-https      https://172.18.0.2:30903 │
-│           ┆             ┆           ┆ middlemanager-metrics 172.18.0.2:32459         │
-│           ┆             ┆           ┆ middlemanager-https   https://172.18.0.2:31967 │
-│           ┆             ┆           ┆ router-metrics        172.18.0.2:31720         │
-│           ┆             ┆           ┆ router-https          https://172.18.0.2:32656 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka       ┆ default   ┆ metrics               172.18.0.2:31501         │
-│           ┆             ┆           ┆ kafka-tls             172.18.0.2:31237         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi        ┆ default   ┆ https                 https://172.18.0.2:31214 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset    ┆ default   ┆ external-superset     http://172.18.0.2:30677  │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper   ┆ default   ┆ zk                    172.18.0.2:32682         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-druid ┆ default   ┆ http                  http://172.18.0.2:31516  │
-│           ┆             ┆           ┆ console-http          http://172.18.0.2:30835  │
-└───────────┴─────────────┴───────────┴────────────────────────────────────────────────┘
+
+┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid         ┆ default   ┆ broker-metrics         172.18.0.2:32001         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-https           https://172.18.0.2:32141 ┆                                 │
+│           ┆               ┆           ┆ coordinator-metrics    172.18.0.2:32353         ┆                                 │
+│           ┆               ┆           ┆ coordinator-https      https://172.18.0.2:30738 ┆                                 │
+│           ┆               ┆           ┆ historical-metrics     172.18.0.2:32009         ┆                                 │
+│           ┆               ┆           ┆ historical-https       https://172.18.0.2:32145 ┆                                 │
+│           ┆               ┆           ┆ middlemanager-metrics  172.18.0.2:32603         ┆                                 │
+│           ┆               ┆           ┆ middlemanager-https    https://172.18.0.2:30162 ┆                                 │
+│           ┆               ┆           ┆ router-metrics         172.18.0.2:32763         ┆                                 │
+│           ┆               ┆           ┆ router-https           https://172.18.0.2:31642 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ metrics                172.18.0.2:30429         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ kafka-tls              172.18.0.2:32602         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ https                  https://172.18.0.2:30596 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ external-http          http://172.18.0.2:32569  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆                                                 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                   http://172.18.0.2:30902  ┆                                 │
+└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
+
 ----
 
 include::partial$instance-hint.adoc[]
@@ -98,7 +99,7 @@ are structured in dedicated queues called topics. The test data will be put into
 are produced (put in) by the test data generator and consumed (read) by Druid afterwards in the same order they were
 created.
 
-As Kafka has no web interface, you must use a Kafka client like h{kcat}[kafkacat]. Kafka uses mutual TLS, so clients
+As Kafka has no web interface, you must use a Kafka client like {kcat}[kcat]. Kafka uses mutual TLS, so clients
 wanting to connect to Kafka must present a valid TLS certificate. The easiest way to obtain this is to shell into the
 `kafka-broker-default-0` Pod, as we will do in the following section for demonstration purposes. For a production setup,
 you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
@@ -108,9 +109,12 @@ Kafka Pod.
 
 You can execute a command on the Kafka broker to list the available topics as follows:
 
+// In the following commands the kcat-prober container instead of the kafka container is used to send requests to Kafka.
+// This is necessary because kcat cannot use key- and truststore files with empty passwords, which are mounted here to the kafka container.
+// However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:32175 (controller)
@@ -132,7 +136,7 @@ parameter.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t earthquakes -c 1"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t earthquakes -c 1"
 ----
 
 Below is an example of the output of one record:
@@ -171,7 +175,7 @@ The given pattern will print some metadata of the record.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t earthquakes -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t earthquakes -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
 Topic earthquakes / Partition 0 / Offset: 385011 / Timestamp: 1680607795568
 Topic earthquakes / Partition 0 / Offset: 385012 / Timestamp: 1680607795568
 Topic earthquakes / Partition 0 / Offset: 385013 / Timestamp: 1680607795570
@@ -195,7 +199,7 @@ Kafka.
 === View the testdata-generation Job
 
 You can have a look at the ingestion job running in NiFi by opening the endpoint `https` from your
-`stackablectl stacklet list` command output. In this case, it is https://172.18.0.3:32558. Open it with your favourite
+`stackablectl stacklet list` command output. In this case, it is https://172.18.0.2:30596. Open it with your favourite
 browser. Suppose you get a warning regarding the self-signed certificate generated by the
 xref:home:secret-operator:index.adoc[Secret Operator] (e.g. Warning: Potential Security Risk Ahead). In that case, you must
 tell your browser to trust the website and continue.
@@ -214,11 +218,11 @@ Double-click on the `InvokeHTTP` processor to show the processor details.
 
 image::nifi-kafka-druid-earthquake-data/nifi_3.png[]
 
-Head over to the Tab `PROPERTIES`.
+Head over to the tab `PROPERTIES`.
 
 image::nifi-kafka-druid-earthquake-data/nifi_4.png[]
 
-Here, you can see the setting `Remote URl`, which specifies the download URL from where the CSV file is retrieved. Close
+Here, you can see the setting `HTTP URL`, which specifies the download URL from where the CSV file is retrieved. Close
 the processor details popup by clicking `OK`. Afterwards, double-click on the processor `PublishKafkaRecord_2_6`.
 
 image::nifi-kafka-druid-earthquake-data/nifi_5.png[]
@@ -235,12 +239,12 @@ Druid deep storage is based on the S3 store provided by MinIO.
 
 === View the Ingestion job
 
-You can have a look at the ingestion job running in Druid by opening the endpoint `router-http` from your
-`stackablectl stacklet list` command output (http://172.18.0.4:30109 in this case).
+You can have a look at the ingestion job running in Druid by opening the endpoint `router-https` from your
+`stackablectl stacklet list` command output (http://172.18.0.2:31642 in this case).
 
 image::nifi-kafka-druid-earthquake-data/druid_1.png[]
 
-By clicking on `Ingestion` at the top, you can see the running ingestion jobs.
+By clicking on `Supervisors` at the top, you can see the running ingestion jobs.
 
 image::nifi-kafka-druid-earthquake-data/druid_2.png[]
 
@@ -250,7 +254,7 @@ errors.
 
 image::nifi-kafka-druid-earthquake-data/druid_3.png[]
 
-The statistics show that Druid is currently ingesting `1251` records/s and has ingested 2.1 million records already. All
+The statistics show that Druid ingested `5074` records during the last minute and has ingested 3 million records already. All
 entries have been consumed successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable`
 records.
 
@@ -261,8 +265,8 @@ by clicking on `Datasources` at the top.
 
 image::nifi-kafka-druid-earthquake-data/druid_4.png[]
 
-You can see the data source's segments by clicking on the `earthquake` data source. In this case, the `earthquake` data
-source is partitioned by the year of the earthquake, resulting in 73 segments.
+You can see the data source's segments by clicking on `segments` under `Availability` for the `earthquake` data source. In this case, the `earthquake` data
+source is partitioned by the year of the earthquakes, resulting in 73 segments.
 
 image::nifi-kafka-druid-earthquake-data/druid_5.png[]
 
@@ -271,7 +275,7 @@ the top.
 
 image::nifi-kafka-druid-earthquake-data/druid_6.png[]
 
-You can now enter any arbitrary SQL statement, to e.g. list 10 earthquakes runs
+You can now enter any arbitrary SQL statement, to e.g. list 10 earthquakes run
 
 [source,sql]
 ----
@@ -296,8 +300,8 @@ image::nifi-kafka-druid-earthquake-data/druid_8.png[]
 
 == Superset
 
-Superset provides the ability to execute SQL queries and build dashboards. Open the endpoint `external-superset` in your
-browser (http://172.18.0.3:32108 in this case).
+Superset provides the ability to execute SQL queries and build dashboards. Open the endpoint `external-http` in your
+browser (http://172.18.0.2:32569  in this case).
 
 image::nifi-kafka-druid-earthquake-data/superset_1.png[]
 
@@ -311,7 +315,7 @@ The demo has created a Dashboard to visualize the earthquake data. To open it, c
 
 image::nifi-kafka-druid-earthquake-data/superset_3.png[]
 
-Click on the dashboard called `Earthquakes`. It might take some time until the dashboards renders all included charts.
+Click on the dashboard called `Earthquakes`. It might take some time until the dashboard renders all included charts.
 
 image::nifi-kafka-druid-earthquake-data/superset_4.png[]
 
@@ -321,7 +325,7 @@ The dashboard `Earthquakes` consists of multiple charts. To list the charts, cli
 
 image::nifi-kafka-druid-earthquake-data/superset_5.png[]
 
-Click on the Chart `Number of earthquakes my magnitude`. On the left side you can modify the chart and click on `Run` to
+Click on the Chart `Number of earthquakes by magnitude`. On the left side you can modify the chart and click on `Update Chart` to
 see the effect.
 
 image::nifi-kafka-druid-earthquake-data/superset_6.png[]
@@ -349,7 +353,7 @@ image::nifi-kafka-druid-earthquake-data/superset_9.png[]
 === Execute arbitrary SQL statements
 
 Within Superset you can not only create dashboards but also run arbitrary SQL statements. On the top click on the tab
-`SQL Lab` -> `SQL Editor`.
+`SQL` -> `SQL Lab`.
 
 image::nifi-kafka-druid-earthquake-data/superset_10.png[]
 
@@ -374,7 +378,7 @@ image::nifi-kafka-druid-earthquake-data/superset_12.png[]
 == MinIO
 
 The S3 provided by MinIO is used as a persistent deep storage for Druid to store all the data used. Open the `minio`
-endpoint `console-http` in your browser (http://172.18.0.4:31664 in this case).
+endpoint `http` in your browser (http://172.18.0.2:30902 in this case).
 
 image::nifi-kafka-druid-earthquake-data/minio_1.png[]
 
@@ -382,13 +386,13 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-earthquake-data/minio_2.png[]
 
-Click on the blue button `Browse` on the bucket `druid` and open the folders `data` -> `earthquakes`.
+Click on the bucket `demo` and open the folders `data` -> `earthquakes`.
 
 image::nifi-kafka-druid-earthquake-data/minio_3.png[]
 
-As you can see druid saved 199MB of data within 73 prefixes (folders). One prefix corresponds to on segment which in
+As you can see Druid saved 201.5 MiB of data within 73 prefixes (folders). One prefix corresponds to one segment which in
 turn contains all the data of a year. If you don't see any folders or files, the reason is that Druid has not saved its
-data from memory to the deep storage yet. After waiting a few minutes, the data should have been flushed to S3 and
+data from memory to the deep storage yet. After waiting for roughly an hour, the data should have been flushed to S3 and
 show up.
 
 image::nifi-kafka-druid-earthquake-data/minio_4.png[]
@@ -419,7 +423,7 @@ You also can create additional charts and bundle them together in a Dashboard. H
 === Load additional data
 
 You can use the NiFi web interface to collect arbitrary data and write it to Kafka (it's recommended to use new Kafka
-topics for that). Alternatively, you can use a Kafka client like {kcat}[kafkacat] to create new topics and ingest data.
+topics for that). Alternatively, you can use a Kafka client like {kcat}[kcat] to create new topics and ingest data.
 Using the Druid web interface, you can start an ingestion job that consumes and stores the data in an internal data
 source. There is an excellent {druid-tutorial}[tutorial] from Druid on how to do this. Afterwards, the data source can
 be analyzed within Druid and Superset, like the earthquake data.

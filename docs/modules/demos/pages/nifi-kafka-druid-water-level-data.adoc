@@ -96,7 +96,7 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
-== Inspect data in Kafka
+== Inspect the data in Kafka
 
 Kafka is an event streaming platform to stream the data in near real-time. All the messages put in and read from Kafka
 are structured in dedicated queues called topics. The test data will be put into topics called stations and measurements. The records
@@ -452,7 +452,7 @@ The demo has created a Dashboard to visualize the water level data. To open it, 
 
 image::nifi-kafka-druid-water-level-data/superset_3.png[]
 
-Click on the dashboard called `Water level data`. It might take some time until the dashboards renders all the included
+Click on the dashboard called `Water level data`. It might take some time until the dashboard renders all the included
 charts.
 
 image::nifi-kafka-druid-water-level-data/superset_4.png[]
@@ -580,16 +580,16 @@ There are multiple paths to go from here. The following sections give you some i
 find the description of the water level data on the {pegelonline-rest}[PEGELONLINE REST API documentation
 (German only)].
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset (or the Druid web interface), you can execute arbitrary SQL statements to explore the water level data.
 
-=== Create Additional Dashboards
+=== Create additional dashboards
 
 You also can create additional charts and bundle them together in a Dashboard. Have a look at
 {superset}[the Superset documentation] on how to do that.
 
-=== Load Additional Data
+=== Load additional data
 
 You can use the NiFi web interface to collect arbitrary data and write it to Kafka (it's recommended to use new Kafka
 topics for that). Alternatively, you can use a Kafka client like {kcat}[kcat] to create new topics and ingest data.
