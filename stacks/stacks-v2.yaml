@@ -4,6 +4,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
      - commons
+     - listener
     labels:
       - monitoring
       - prometheus
@@ -26,6 +27,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - zookeeper # demo does install a zookeeper to produce logs
     labels:
@@ -54,11 +56,38 @@ stacks:
       - name: setSysctlMaxMapCount
         description: Wether an init-container should be used to increase 'sysctl -w vm.max_map_count'. This requires to spawn an init-container with runsAsUser 0 privileges, which some clusters prohibit. You can increase 'vm.max_map_count' on all of the kubernetes nodes manually and set this to 'false'.
         default: "true"
+  observability:
+    description: >-
+      An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+    labels:
+      - jaeger
+      - opentelemetry
+      - observability
+      - tracing
+    manifests:
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/jaeger.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-operator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-admin-credentials.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-tempo.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-loki.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
+    parameters:
+      - name: grafanaAdminPassword
+        description: Password of the Grafana admin user
+        default: adminadmin
   airflow:
     description: Stack containing Airflow scheduling platform
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - airflow
       - spark-k8s # Some demo does schedule a Spark job
@@ -85,6 +114,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - hive
       - trino
@@ -141,8 +171,8 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
-      - secret
       - listener
+      - secret
       - zookeeper
       - hdfs
       - hbase
@@ -164,6 +194,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - zookeeper
       - kafka
@@ -209,6 +240,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - hive
       - trino
@@ -253,6 +285,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - hive
       - trino
@@ -294,6 +327,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - hive
       - trino
@@ -327,8 +361,8 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
-      - secret
       - listener
+      - secret
       - zookeeper
       - hdfs
       - spark-k8s
@@ -357,8 +391,8 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
-      - secret
       - listener
+      - secret
       - zookeeper
       - hdfs
       - hive
@@ -394,6 +428,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
     labels:
       - authentication
@@ -416,6 +451,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
     labels:
       - authentication
@@ -441,8 +477,8 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
-      - secret
       - listener
+      - secret
       - trino
       - superset
       - zookeeper
@@ -507,8 +543,8 @@ stacks:
     stackableRelease: end-to-end-security-release
     stackableOperators:
       - commons
-      - secret
       - listener
+      - secret
       - opa
       - zookeeper
       - hdfs
@@ -577,6 +613,7 @@ stacks:
     stackableRelease: 24.3
     stackableOperators:
       - commons
+      - listener
       - secret
       - zookeeper
       - nifi

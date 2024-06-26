@@ -1,0 +1,30 @@
+# https://github.com/jaegertracing/helm-charts/tree/main/charts/jaeger
+# The jaeger allInOne mode doesn't support NodePort services.
+releaseName: jaeger
+name: jaeger
+repo:
+  name: jaeger
+  url: https://jaegertracing.github.io/helm-charts
+version: 2.0.1
+options:
+  # labels:
+  #   stackable.tech/vendor: Stackable
+  provisionDataStore:
+    cassandra: false
+  allInOne:
+    enabled: true
+    extraEnv: []
+    service:
+      headless: true
+      collector:
+        otlp:
+          grpc:
+            name: otlp-grpc
+          # http:
+          #   name: otlp-http
+  agent:
+    enabled: false
+  collector:
+    enabled: false
+  query:
+    enabled: false

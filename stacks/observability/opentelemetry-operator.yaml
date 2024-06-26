@@ -1,0 +1,14 @@
+# https://github.com/open-telemetry/opentelemetry-helm-charts/tree/main/charts/opentelemetry-operator
+releaseName: opentelemetry-operator
+name: opentelemetry-operator
+repo:
+  name: opentelemetry-operator
+  url: https://open-telemetry.github.io/opentelemetry-helm-charts
+version: 0.60.0
+options:
+  admissionWebhooks:
+    certManager:
+      enabled: false
+  manager:
+    collectorImage:
+      repository: "otel/opentelemetry-collector-contrib"

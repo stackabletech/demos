@@ -110,6 +110,8 @@ JupyterHub will create a Pod for each active user. In order to reach the Jupyter
 $ kubectl port-forward service/proxy-public 8080:http
 ----
 
+WARNING: Use the `proxy-public` service and not something else!
+
 Now access the JupyterHub web interface via http://localhost:8080
 
 You should see the JupyterHub login page.

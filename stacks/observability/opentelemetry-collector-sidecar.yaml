@@ -1,0 +1,160 @@
+apiVersion: opentelemetry.io/v1beta1
+kind: OpenTelemetryCollector
+metadata:
+  name: otel-collector-grpc
+spec:
+  mode: sidecar
+  # See: https://github.com/open-telemetry/opentelemetry-collector-releases/pkgs/container/opentelemetry-collector-releases%2Fopentelemetry-collector-contrib/versions?filters%5Bversion_type%5D=tagged
+  # Using the contrib image so we get all of the useful plugins
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.97.0
+  config:
+    # Configure the collector to receove via OTLP, and export to various "sinks".
+    # For configuration structure, see: https://opentelemetry.io/docs/collector/configuration/
+    #
+    # A receiver for logs/metrics/traces via OTLP
+    # See all available receivers:
+    # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver
+    # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver
+    receivers:
+      otlp/insecure:
+        protocols:
+          grpc:
+            # In sidecar mode, we don't want, nor need the sidecar to be
+            # accessible from outside the pod. For that reason, we do not enable
+            # TLS on the receiver(s) because only containers in the same pod can
+            # connect, and so network traffic will not leave the host.
+            endpoint: 127.0.0.1:4317
+    # Exporters to separate logs/metrics/taces
+    # See all available exporters:
+    # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
+    # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
+    exporters:
+      # When added to a logs/metrics/traces pipeline, the collector will print to stdout.
+      debug:
+        # verbosity: detailed
+      otlp/jaeger-insecure:
+        endpoint: jaeger-collector:4317
+        tls:
+          insecure: true
+      otlp/tempo:
+        endpoint: tempo.default.svc.cluster.local:4317
+        tls:
+          ca_file: /certs/ca.crt
+      loki:
+        endpoint: https://loki.default.svc.cluster.local:3100/loki/api/v1/push
+        tls:
+          ca_file: /certs/ca.crt
+      #     auth:
+      #       authenticator: basicauth/loki
+    # Processors to enrich logs/metrics/traces. For example, adding Kubernetes node/pod/deployment information
+    # See all available processors:
+    # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/processor
+    # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/processor
+    processors:
+      memory_limiter:
+        check_interval: 1s
+        limit_percentage: 50
+        spike_limit_percentage: 30
+      batch/every-second:
+        timeout: 1s
+        send_batch_max_size: 20000
+      # extract key=value pairs from OTEL_RESOURCE_ATTRIBUTES
+      resourcedetection/env:
+        detectors: ["env"]
+        timeout: 2s
+        override: false
+      ## extract EKS specific information from the AWS metadata API
+      # resourcedetection/eks:
+      #   detectors: ["eks"]
+      #   timeout: 2s
+      #   override: false
+      # resourcedetection/ec2:
+      #   detectors: ["ec2"]
+      #   ec2:
+      #     # A list of regex's to match tag keys to add as resource attributes can be specified
+      #     tags:
+      #     - ^Name$
+      #     - ^karpenter\.sh\/provisioner-name$
+      #
+      # See: https://github.com/open-telemetry/opentelemetry-collector-contrib/blob/main/exporter/lokiexporter/README.md#configuration-via-attribute-hints
+      attributes/logs:
+        actions:
+        - action: insert
+          key: loki.attribute.labels
+          value: event.domain, event.name
+      resource/logs:
+        attributes:
+        - action: insert
+          key: loki.format
+          value: logfmt
+        - action: insert
+          key: loki.resource.labels
+          value: service.name, service.namespace
+    # Extensions augment the collector's capability. For example, injecting headers or performing auth flows.
+    # See all available extensions:
+    # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension
+    # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension
+    extensions:
+      # basicauth/loki:
+      #   client_auth:
+      #     username: loki
+      #     password: loki
+    # Install the extensions, and initialise and connect the receivers, processors, and exporters in a pipeline.
+    service:
+      # extensions: [basicauth/loki]
+      pipelines:
+        traces:
+          receivers: [otlp/insecure]
+          processors:
+          - memory_limiter
+          - batch/every-second
+          - resourcedetection/env
+          exporters:
+          - otlp/jaeger-insecure
+          - otlp/tempo
+          # - debug
+        logs:
+          receivers: [otlp/insecure]
+          processors:
+          - memory_limiter
+          - batch/every-second
+          - resourcedetection/env
+          - resource/logs
+          - attributes/logs
+          exporters: 
+          - loki
+          # - debug
+      # Set the log level of the opentelemetry-collector application.
+      # You can also expose the collector metrcics (separate from the metrics receivers/exporters).
+      telemetry:
+        # logs:
+        #   level: DEBUG
+        # metrics:
+        #   level: detailed
+        #   address: 0.0.0.0:8888
+  resources:
+    limits:
+      cpu: 500m
+      memory: 256Mi
+    requests:
+      cpu: 250m
+      memory: 64Mi
+  volumeMounts:
+    # We mount a certificate from the secret-operator so that we have the CA 
+    # cert for exporters to trust what they connect to.
+    - name: tls
+      mountPath: /certs
+  volumes:
+    - name: tls
+      ephemeral:
+        volumeClaimTemplate:
+          metadata:
+            annotations:
+              secrets.stackable.tech/class: tls
+          spec:
+            storageClassName: secrets.stackable.tech
+            accessModes:
+              - ReadWriteOnce
+            resources:
+              requests:
+                storage: 1
