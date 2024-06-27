@@ -87,7 +87,7 @@ There should be one parquet file containing taxi trip data from September 2020.
 
 == JupyterHub
 
-Have a look at the available Pods before logging in (operator pods are left out for clarity, you will see more Pods):
+Have a look at the available Pods before logging in:
 
 [source,console]
 ----
@@ -118,8 +118,7 @@ You should see the JupyterHub login page.
 
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_login.png[]
 
-Log in with username `admin` and password `adminadmin`. There should appear a new pod called `jupyter-admin` (operator
-pods are left out for clarity, you will see more Pods):
+Log in with username `admin` and password `adminadmin`. There should appear a new pod called `jupyter-admin`:
 
 [source,console]
 ----
@@ -140,13 +139,13 @@ You should arrive at your workspace:
 
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_workspace.png[]
 
-Now you can click on the `notebooks` folder on the left, open and run the contained file. Click on the double arrow (⏩️) to
+Now you can double-click on the `notebook` folder on the left, open and run the contained file. Click on the double arrow (⏩️) to
 execute the Python scripts.
+
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
 
 You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from
 the discovery `ConfigMap` of the HDFS cluster are located.
-
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
 
 [NOTE]
 ====
