@@ -98,7 +98,7 @@ continuously:
 
 image::airflow-scheduled-job/airflow_7.png[]
 
-Click on the `run_every_minute` box in the centre of the page and then select `Log`:
+Click on the `run_every_minute` box in the centre of the page and then select `Logs`:
 
 [WARNING]
 ====
@@ -118,7 +118,7 @@ image::airflow-scheduled-job/airflow_10.png[]
 
 Go back to DAG overview screen. The `sparkapp_dag` job has a scheduled entry of `None` and a last-execution time
 (`2022-09-19, 07:36:55`). This allows a DAG to be executed exactly once, with neither schedule-based runs nor any
-https://airflow.apache.org/docs/apache-airflow/stable/dag-run.html?highlight=backfill#backfill[backfill]. The DAG can
+https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill[backfill]. The DAG can
 always be triggered manually again via REST or from within the Webserver UI.
 
 image::airflow-scheduled-job/airflow_11.png[]

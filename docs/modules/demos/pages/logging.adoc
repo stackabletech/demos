@@ -86,7 +86,11 @@ Log in with the username `admin` and password `adminadmin`.
 
 NOTE: On first login, you will be presented with some options. Feel free to bypass them to get to the logs.
 
-Click _Discovery_ in the menu to view the recent logs. If you do not see anything, increase the search window to greater than _Last 15 minutes_.
+Select the `Global` tenant to have access to the pre-configured `vector-*` index pattern.
+
+image::logging/tenant.png[]
+
+Click _Discover_ in the menu on the left to view the recent logs. If you do not see anything, increase the search window to greater than _Last 15 minutes_.
 
 image::logging/logs.png[]
 

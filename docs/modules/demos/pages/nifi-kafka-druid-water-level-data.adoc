@@ -1,7 +1,7 @@
 = nifi-kafka-druid-water-level-data
 :page-aliases: stable@stackablectl::demos/nifi-kafka-druid-water-level-data.adoc
 
-:superset: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
+:superset: https://superset.apache.org/docs/using-superset/creating-your-first-dashboard/#creating-charts-in-explore-view
 :druid-tutorial: https://druid.apache.org/docs/latest/tutorials/tutorial-kafka.html#loading-data-with-the-data-loader
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :pegelonline-rest: https://www.pegelonline.wsv.de/webservice/dokuRestapi
@@ -27,7 +27,7 @@ FQDN service names (including the namespace), so that the used TLS certificates 
 To run this demo, your system needs at least:
 
 * 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 30GiB memory
+* 42GiB memory
 * 75GiB disk storage
 
 == Overview
@@ -48,7 +48,7 @@ This demo will
 * Ingest water level data from the {pegelonline}[PEGELONLINE web service] into Kafka. The data contains measured water
   levels of different measuring stations all around Germany. If the web service is unavailable, this demo will not work,
   as it needs the web service to ingest the data.
-** First, historical data from the last 31 days will be fetched and ingested.
+** First, historical data from the last 30 days will be fetched and ingested.
 ** Afterwards, the demo will fetch the current measurement of every station approximately every two minutes and ingest it
    near-real-time into Kafka.
 * Start a Druid ingestion job that ingests the data into the Druid instance.
@@ -66,44 +66,44 @@ To list the installed Stackable services run the following command:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────┬─────────────┬───────────┬────────────────────────────────────────────────┐
-│ Product   ┆ Name        ┆ Namespace ┆ Endpoints                                      │
-╞═══════════╪═════════════╪═══════════╪════════════════════════════════════════════════╡
-│ druid     ┆ druid       ┆ default   ┆ broker-metrics        172.18.0.2:31804         │
-│           ┆             ┆           ┆ broker-https          https://172.18.0.2:31725 │
-│           ┆             ┆           ┆ coordinator-metrics   172.18.0.2:30547         │
-│           ┆             ┆           ┆ coordinator-https     https://172.18.0.2:31186 │
-│           ┆             ┆           ┆ historical-metrics    172.18.0.2:32024         │
-│           ┆             ┆           ┆ historical-https      https://172.18.0.2:31239 │
-│           ┆             ┆           ┆ middlemanager-metrics 172.18.0.2:32213         │
-│           ┆             ┆           ┆ middlemanager-https   https://172.18.0.2:31641 │
-│           ┆             ┆           ┆ router-metrics        172.18.0.2:30950         │
-│           ┆             ┆           ┆ router-https          https://172.18.0.2:30175 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka       ┆ default   ┆ metrics               172.18.0.2:30145         │
-│           ┆             ┆           ┆ kafka-tls             172.18.0.2:31662         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi        ┆ default   ┆ https                 https://172.18.0.2:30306 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset    ┆ default   ┆ external-superset     http://172.18.0.2:30963  │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper   ┆ default   ┆ zk                    172.18.0.2:32710         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-druid ┆ default   ┆ http                  http://172.18.0.2:30337  │
-│           ┆             ┆           ┆ console-http          http://172.18.0.2:31775  │
-└───────────┴─────────────┴───────────┴────────────────────────────────────────────────┘
+
+┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid         ┆ default   ┆ broker-metrics         172.18.0.2:32661         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-https           https://172.18.0.2:32130 ┆                                 │
+│           ┆               ┆           ┆ coordinator-metrics    172.18.0.2:31609         ┆                                 │
+│           ┆               ┆           ┆ coordinator-https      https://172.18.0.2:32209 ┆                                 │
+│           ┆               ┆           ┆ historical-metrics     172.18.0.2:32644         ┆                                 │
+│           ┆               ┆           ┆ historical-https       https://172.18.0.2:30865 ┆                                 │
+│           ┆               ┆           ┆ middlemanager-metrics  172.18.0.2:31184         ┆                                 │
+│           ┆               ┆           ┆ middlemanager-https    https://172.18.0.2:30239 ┆                                 │
+│           ┆               ┆           ┆ router-metrics         172.18.0.2:31912         ┆                                 │
+│           ┆               ┆           ┆ router-https           https://172.18.0.2:30616 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ metrics                172.18.0.2:31035         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ kafka-tls              172.18.0.2:31563         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ https                  https://172.18.0.2:30198 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ external-http          http://172.18.0.2:31037  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆                                                 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                   http://172.18.0.2:32345  ┆                                 │
+└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
-== Inspect data in Kafka
+== Inspect the data in Kafka
 
 Kafka is an event streaming platform to stream the data in near real-time. All the messages put in and read from Kafka
-are structured in dedicated queues called topics. The test data will be put into a topic called earthquakes. The records
+are structured in dedicated queues called topics. The test data will be put into topics called stations and measurements. The records
 are produced (put in) by the test data generator and consumed (read) by Druid afterwards in the same order they were
 created.
 
-As Kafka has no web interface, you must use a Kafka client like h{kcat}[kafkacat]. Kafka uses mutual TLS, so clients
+As Kafka has no web interface, you must use a Kafka client like {kcat}[kcat]. Kafka uses mutual TLS, so clients
 wanting to connect to Kafka must present a valid TLS certificate. The easiest way to obtain this is to shell into the
 `kafka-broker-default-0` Pod, as we will do in the following section for demonstration purposes. For a production setup,
 you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
@@ -113,9 +113,12 @@ Kafka Pod.
 
 You can execute a command on the Kafka broker to list the available topics as follows:
 
+// In the following commands the kcat-prober container instead of the kafka container is used to send requests to Kafka.
+// This is necessary because kcat cannot use key- and truststore files with empty passwords, which are mounted here to the kafka container.
+// However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:31146 (controller)
@@ -140,7 +143,7 @@ Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
     partition 7, leader 1001, replicas: 1001, isrs: 1001
 ----
 
-You can see that Kafka consists of one broker, and the topic `stations` and `measurements` have been created with eight
+You can see that Kafka consists of one broker, and the topics `stations` and `measurements` have been created with eight
 partitions each.
 
 === Show Sample Records
@@ -150,7 +153,7 @@ print via the `-c` parameter.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t stations -c 2"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t stations -c 2"
 ----
 
 Below is an example of the output of two records:
@@ -189,7 +192,7 @@ Below is an example of the output of two records:
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t measurements -c 3"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t measurements -c 3"
 ----
 
 Below is an example of the output of three records:
@@ -254,7 +257,7 @@ The given pattern will print some metadata of the record.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kafka -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_server_mount/ca.crt -C -t measurements -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t measurements -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
 Topic measurements / Partition 0 / Offset: 1324098 / Timestamp: 1680606104652
 Topic measurements / Partition 1 / Offset: 1346816 / Timestamp: 1680606100462
 Topic measurements / Partition 2 / Offset: 1339363 / Timestamp: 1680606100461
@@ -278,7 +281,7 @@ keeps streaming near-real-time updates for every available measuring station.
 === View the testdata-generation Job
 
 You can look at the ingestion job running in NiFi by opening the endpoint `https` from your `stackablectl stacklet list`
-command output. You have to use the endpoint from your command output. In this case, it is https://172.18.0.3:32440.
+command output. You have to use the endpoint from your command output. In this case, it is https://172.18.0.2:30198.
 Open it with your favourite browser. Suppose you get a warning regarding the self-signed certificate generated by the
 ref:secret-operator::index.adoc[Secret Operator] (e.g. Warning: Potential Security Risk Ahead). In that case, you must
 tell your browser to trust the website and continue.
@@ -289,10 +292,11 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-water-level-data/nifi_2.png[]
 
-As you can see, the NiFi workflow consists of lots of components. It is split into two main components:
+As you can see, the NiFi workflow consists of lots of components. It is split into three main components:
 
-. On the left is the part bulk-loading all the known stations and the historical data for the last 30 days
-. On the right is the other part iterating over all stations and emitting the current measurement in an endless loop
+. On the left is the first part bulk-loading all the known stations
+. In the middle is the second part bulk-loading the historical data for the last 30 days
+. On the right is the third part iterating over all stations and emitting the current measurement in an endless loop
 
 You can zoom in by using your mouse and mouse wheel.
 
@@ -304,17 +308,15 @@ The left workflows works as follows:
 . The `Get station list` processors fetch the current list of stations as JSON via HTTP from the
   {pegelonline}[PEGELONLINE web service].
 . `Produce stations records` takes the list and produces a Kafka record for every station into the topic `stations`.
-. `SplitRecords` simultaneously takes the single FlowFile (NiFI record) containing all the stations and crates a new
+. `SplitRecords` simultaneously takes the single FlowFile (NiFi Record) containing all the stations and creates a new
   FlowFile for every station.
 . `Extract station_uuid` takes every FlowFile representing a station and extract the attribute `station_uuid` into the
   metadata of the FlowFile.
 . `Get historic measurements` calls the {pegelonline}[PEGELONLINE web service] for every station and fetches the
-  measurements of the last 30 days. All failures are routed to the `LogAttribute` processor to inspect them in case any
-  failure occurs.
+  measurements of the last 30 days.
 . `Add station_uuid` will add the attribute `station_uuid` to the JSON list of measurements returned from the
   {pegelonline}[PEGELONLINE web service], which is missing.
-. `PublishKafkaRecord_2_6` finally emits every measurement as a Kafka record to the topic `measurements`. All failures
-  are routed to the `LogAttribute` processor to inspect them in case any failures occur.
+. `PublishKafkaRecord_2_6` finally emits every measurement as a Kafka record to the topic `measurements`.
 
 The right side works similarly but is executed in an endless loop to stream the data in near-realtime. Double-click on
 the `Get station list` processor to show the processor details.
@@ -325,7 +327,7 @@ Head over to the tab `PROPERTIES`.
 
 image::nifi-kafka-druid-water-level-data/nifi_6.png[]
 
-Here, you can see the setting `Remote URl`, which specifies the download URL from where the JSON file containing the
+Here, you can see the setting `HTTP URL`, which specifies the download URL from where the JSON file containing the
 stations is retrieved. Close the processor details popup by clicking `OK`. You can also have a detailed view of the
 `Produce station records` processor by double-clicking it.
 
@@ -333,15 +335,15 @@ image::nifi-kafka-druid-water-level-data/nifi_7.png[]
 
 The Kafka connection details within this processor - like broker addresses and topic names - are specified. It uses the
 `JsonTreeReader` to parse the downloaded JSON and the `JsonRecordSetWriter` to split it into individual JSON records
-before writing it out. Double-click the `Get historic measurements` processor.
+before writing it out. Double-click the `Get 30 days historic data` processor.
 
 image::nifi-kafka-druid-water-level-data/nifi_8.png[]
 
-This processor fetched the historical data for every station. Click on the `Remote URL` property.
+This processor fetched the historical data for every station. Click on the `HTTP URL` property.
 
 image::nifi-kafka-druid-water-level-data/nifi_9.png[]
 
-The `Remote URL` does contain the `$\{station_uuid\}` placeholder, which gets replaced for every station.
+The `HTTP URL` does contain the `$\{station_uuid\}` placeholder, which gets replaced for every station.
 
 Double-click the `PublishKafkaRecord_2_6` processor.
 
@@ -371,12 +373,12 @@ deep storage. The Druid deep storage is based on the S3 store provided by MinIO.
 
 === View the Ingestion job
 
-You can have a look at the ingestion jobs running in Druid by opening the Druid endpoint `router-http` from your
-`stackablectl stacklet list` command output (http://172.18.0.4:30899 in this case).
+You can have a look at the ingestion jobs running in Druid by opening the Druid endpoint `router-https` from your
+`stackablectl stacklet list` command output (https://172.18.0.2:31616 in this case).
 
 image::nifi-kafka-druid-water-level-data/druid_1.png[]
 
-By clicking on `Ingestion` at the top you can see the running ingestion jobs.
+By clicking on `Supervisors` at the top you can see the running ingestion jobs.
 
 image::nifi-kafka-druid-water-level-data/druid_2.png[]
 
@@ -386,7 +388,7 @@ number of processed records as well as the number of errors.
 
 image::nifi-kafka-druid-water-level-data/druid_3.png[]
 
-The statistics show that Druid is currently ingesting `3597` records/s and has already ingested ~10 million. All records
+The statistics show that Druid ingested `2435` records during the last minute and has already ingested ~30 million records in total. All records
 have been ingested successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable` records.
 
 === Query the Data Source
@@ -396,11 +398,11 @@ the available data sources by clicking on `Datasources` at the top.
 
 image::nifi-kafka-druid-water-level-data/druid_4.png[]
 
-The `Avg. row size (bytes)` column shows that a typical `measurement` record has `4` bytes, while a station record has
-`213`, more than 50 times the size. So, by choosing two dedicated topics over a single topic, this demo saved 50x of
+The `Avg. row size (bytes)` column shows that a typical `measurement` record has `3` bytes, while a station record has
+`222`, more than 50 times the size. So, by choosing two dedicated topics over a single topic, this demo saved 50x of
 storage and computation costs.
 
-By clicking on the `measurements` data source, you can see the segments of the data source. In this case, the
+By clicking on `segments` under `Availability` for the `measurements` data source, you can see the segments of the data source. In this case, the
 `measurements` data source is partitioned by the measurement day, resulting in 33 segments.
 
 image::nifi-kafka-druid-water-level-data/druid_5.png[]
@@ -436,7 +438,7 @@ image::nifi-kafka-druid-water-level-data/druid_8.png[]
 == Superset
 
 Superset provides the ability to execute SQL queries and build dashboards. Open the Superset endpoint
-`external-superset` in your browser (http://172.18.0.4:32251 in this case).
+`external-http` in your browser (http://172.18.0.4:32251 in this case).
 
 image::nifi-kafka-druid-water-level-data/superset_1.png[]
 
@@ -450,7 +452,7 @@ The demo has created a Dashboard to visualize the water level data. To open it, 
 
 image::nifi-kafka-druid-water-level-data/superset_3.png[]
 
-Click on the dashboard called `Water level data`. It might take some time until the dashboards renders all the included
+Click on the dashboard called `Water level data`. It might take some time until the dashboard renders all the included
 charts.
 
 image::nifi-kafka-druid-water-level-data/superset_4.png[]
@@ -461,18 +463,18 @@ The dashboard `Water level data` consists of multiple charts. To list the charts
 
 image::nifi-kafka-druid-water-level-data/superset_5.png[]
 
-Click on the Chart `Measurements / hour`. On the left side, you can modify the chart and click on `Run` to see the
+Click on the Chart `Measurements / hour`. On the left side, you can modify the chart and click on `Update Chart` to see the
 effect.
 
 image::nifi-kafka-druid-water-level-data/superset_6.png[]
 
-You can see that starting from `2022/08/12` some stations didn't measure or transmit their data. They started sending
-measurements again at `2022/08/14`.
+You can see that starting from `2024/06/16` some stations didn't measure or transmit their data. They started sending
+measurements again at `2024/06/17`.
 
 === View the Station Distribution on the World Map
 
 To look at the stations' geographical distribution, you have to click on the tab `Charts` at the top again. Afterwards,
-click on the chart `Stations` distribution.
+click on the chart `Stations distribution`.
 
 image::nifi-kafka-druid-water-level-data/superset_7.png[]
 
@@ -484,8 +486,8 @@ image::nifi-kafka-druid-water-level-data/superset_8.png[]
 
 === Execute arbitrary SQL statements
 
-Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL Lab` ->
-`SQL Editor`.
+Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL` ->
+`SQL Lab`.
 
 image::nifi-kafka-druid-water-level-data/superset_9.png[]
 
@@ -526,11 +528,11 @@ What might also be interesting is the average and current measurement of the sta
 
 [source,sql]
 ----
-select
+select 
   stations.longname as station,
   avg("value") as avg_measurement,
-  latest("value") as current_measurement,
-  latest("value") - avg("value") as diff
+  latest_by("value", measurements."__time") as current_measurement,
+  latest_by("value", measurements."__time") - avg("value") as diff
 from measurements inner join stations on stations.uuid = measurements.station_uuid
 group by 1
 order by 2 desc
@@ -541,7 +543,7 @@ image::nifi-kafka-druid-water-level-data/superset_13.png[]
 == MinIO
 
 The S3 MinIO store provides persistent deep storage for Druid to store all the data used. Open the MinIO endpoint
-`console-http` retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.5:32595 in this case).
+`http` retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.2:32345 in this case).
 
 image::nifi-kafka-druid-water-level-data/minio_1.png[]
 
@@ -549,17 +551,17 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-water-level-data/minio_2.png[]
 
-Click on the blue button `Browse` on the bucket `druid` and open the folders `data`.
+Click on the bucket `demo` and open the folder `data`.
 
 image::nifi-kafka-druid-water-level-data/minio_3.png[]
 
-You can see the druid has created a folder for both data sources. Go ahead and open the folder `measurements`.
+You can see that Druid has created a folder for both data sources. Go ahead and open the folder `measurements`.
 
 image::nifi-kafka-druid-water-level-data/minio_4.png[]
 
-Druid saved 35MB of data within 33 prefixes (folders). One prefix corresponds to one segment, which contains all the
+Druid saved 51.5 MiB of data within 33 prefixes (folders). One prefix corresponds to one segment, which contains all the
 measurements of a day. If you don't see any folders or files, the reason is that Druid still needs to save its data from
-memory to the deep storage. After waiting a few minutes, the data should have been flushed to S3 and show up.
+memory to the deep storage. After waiting for roughly an hour, the data should have been flushed to S3 and show up.
 
 image::nifi-kafka-druid-water-level-data/minio_5.png[]
 
@@ -567,7 +569,7 @@ If you open up a prefix for a specific day, you can see that Druid has placed a 
 
 == Summary
 
-The demo put station records into the Kafka stream pipeline topic `station`. It also streamed ~30,000 measurements/s for
+The demo puts station records into the Kafka stream pipeline topic `station`. It also streamed ~30,000 measurements/s for
 a total of ~11 million measurements into the topic `measurements`. Druid ingested the data near real-time into its data
 source and enabled SQL access to it. Superset was used as a web-based frontend to execute SQL statements and build
 dashboards.
@@ -575,22 +577,22 @@ dashboards.
 == Where to go from here
 
 There are multiple paths to go from here. The following sections give you some ideas on what to explore next. You can
-find the description of the water level data on the {pegelonline-rest}[on the PEGELONLINE REST API documentation
+find the description of the water level data on the {pegelonline-rest}[PEGELONLINE REST API documentation
 (German only)].
 
-=== Execute Arbitrary SQL Statements
+=== Execute arbitrary SQL statements
 
 Within Superset (or the Druid web interface), you can execute arbitrary SQL statements to explore the water level data.
 
-=== Create Additional Dashboards
+=== Create additional dashboards
 
 You also can create additional charts and bundle them together in a Dashboard. Have a look at
 {superset}[the Superset documentation] on how to do that.
 
-=== Load Additional Data
+=== Load additional data
 
 You can use the NiFi web interface to collect arbitrary data and write it to Kafka (it's recommended to use new Kafka
-topics for that). Alternatively, you can use a Kafka client like {kcat}[kafkacat] to create new topics and ingest data.
+topics for that). Alternatively, you can use a Kafka client like {kcat}[kcat] to create new topics and ingest data.
 Using the Druid web interface, you can start an ingestion job that consumes and stores the data in an internal data
 source. There is an excellent {druid-tutorial}[tutorial] from Druid on how to do this. Afterwards, the data source can
-be analyzed within Druid and Superset, like the earthquake data.
+be analyzed within Druid and Superset, like the water level data.

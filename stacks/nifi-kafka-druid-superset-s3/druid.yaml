@@ -23,7 +23,7 @@ spec:
             bucketName: demo
             connection:
               inline:
-                host: minio-druid
+                host: minio
                 port: 9000
                 accessStyle: Path
                 credentials:
@@ -62,7 +62,7 @@ spec:
               min: "1"
               max: "4" # Need enough CPU cores to run multiple ingestion jobs at once
             memory:
-              limit: 4Gi
+              limit: 16Gi
   routers:
     roleGroups:
       default:

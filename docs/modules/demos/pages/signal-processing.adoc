@@ -61,7 +61,7 @@ Now access the JupyterHub web interface via http://localhost:8000.
 
 You should see the JupyterHub login page where you can login with username `admin` and password `adminadmin`.
 
-You should arrive at your workspace where you can click on the `notebooks` folder on the left, open the file and run it. Click on the double arrow to execute the Python scripts:
+You should arrive at your workspace where you can double-click on the `notebook` folder on the left, open the file and run it. Click on the double arrow to execute the Python scripts:
 
 image::signal-processing/notebook.png[]
 
@@ -82,16 +82,16 @@ Grafana can be reached by first looking up the service endpoint:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────┬───────────┬───────────┬──────────────────────────────────┬─────────────────────────────────────────┐
-│ Product   ┆ Name      ┆ Namespace ┆ Endpoints                        ┆ Info                                    │
-╞═══════════╪═══════════╪═══════════╪══════════════════════════════════╪═════════════════════════════════════════╡
-│ nifi      ┆ nifi      ┆ default   ┆ https   https://172.19.0.3:30176 ┆                                         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper ┆ default   ┆                                  ┆                                         │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ grafana   ┆ grafana   ┆ default   ┆ service 172.19.0.3:30387         ┆ Third party service                     │
-│           ┆           ┆           ┆                                  ┆ Admin user: admin, password: adminadmin │
-└───────────┴───────────┴───────────┴──────────────────────────────────┴─────────────────────────────────────────┘
+
+┌───────────┬───────────┬───────────┬───────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME      ┆ NAMESPACE ┆ ENDPOINTS                         ┆ CONDITIONS                      │
+╞═══════════╪═══════════╪═══════════╪═══════════════════════════════════╪═════════════════════════════════╡
+│ nifi      ┆ nifi      ┆ default   ┆ https    https://172.18.0.3:30851 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper ┆ default   ┆                                   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ grafana   ┆ grafana   ┆ default   ┆ service  172.18.0.3:30499         ┆                                 │
+└───────────┴───────────┴───────────┴───────────────────────────────────┴─────────────────────────────────┘
 
 ----
 
@@ -99,7 +99,7 @@ Log in to Grafana with username `admin` and password `adminadmin` and navigate t
 
 === Measurements
 
-This is the original data. The first graph plots two measurments (`r1`, `r2`), togther with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`). These are superimposed on each other for ease of comparison.
+This is the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`). These are superimposed on each other for ease of comparison.
 
 image::signal-processing/measurements.png[]
 

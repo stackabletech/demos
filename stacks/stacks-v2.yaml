@@ -220,7 +220,7 @@ stacks:
     supportedNamespaces: []
     resourceRequests:
       cpu: 8900m
-      memory: 30042Mi
+      memory: 42330Mi
       pvc: 75Gi
     parameters:
       - name: nifiAdminPassword

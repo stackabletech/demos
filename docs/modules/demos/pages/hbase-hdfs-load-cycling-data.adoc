@@ -51,33 +51,31 @@ image::hbase-hdfs-load-cycling-data/overview.png[]
 
 To list the installed Stackable services run the following command: `stackablectl stacklet list`
 
-//TODO(Techassi): Update console output
-
 [source,console]
 ----
 $ stackablectl stacklet list
-PRODUCT    NAME       NAMESPACE  ENDPOINTS                                               EXTRA INFOS
 
- hbase      hbase      default    regionserver                  172.18.0.5:32282
-                                  ui                            http://172.18.0.5:31527
-                                  metrics                       172.18.0.5:31081
+┌───────────┬───────────┬───────────┬──────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME      ┆ NAMESPACE ┆ ENDPOINTS                                                    ┆ CONDITIONS                      │
+╞═══════════╪═══════════╪═══════════╪══════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hbase     ┆ hbase     ┆ default   ┆ regionserver                         172.18.0.2:31521        ┆ Available, Reconciling, Running │
+│           ┆           ┆           ┆ ui-http                              172.18.0.2:32064        ┆                                 │
+│           ┆           ┆           ┆ metrics                              172.18.0.2:31372        ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hdfs      ┆ hdfs      ┆ default   ┆ datanode-default-0-listener-data     172.18.0.2:31990        ┆ Available, Reconciling, Running │
+│           ┆           ┆           ┆ datanode-default-0-listener-http     http://172.18.0.2:30659 ┆                                 │
+│           ┆           ┆           ┆ datanode-default-0-listener-ipc      172.18.0.2:30678        ┆                                 │
+│           ┆           ┆           ┆ datanode-default-0-listener-metrics  172.18.0.2:31531        ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-http              http://172.18.0.2:32543 ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-metrics           172.18.0.2:30098        ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-rpc               172.18.0.2:30915        ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-http              http://172.18.0.2:31333 ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-metrics           172.18.0.2:30862        ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-rpc               172.18.0.2:31440        ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper ┆ default   ┆                                                              ┆ Available, Reconciling, Running │
+└───────────┴───────────┴───────────┴──────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 
- hdfs       hdfs       default    datanode-default-0-metrics    172.18.0.2:31441
-                                  datanode-default-0-data       172.18.0.2:32432
-                                  datanode-default-0-http       http://172.18.0.2:30758
-                                  datanode-default-0-ipc        172.18.0.2:32323
-                                  journalnode-default-0-metrics 172.18.0.5:31123
-                                  journalnode-default-0-http    http://172.18.0.5:30038
-                                  journalnode-default-0-https   https://172.18.0.5:31996
-                                  journalnode-default-0-rpc     172.18.0.5:30080
-                                  namenode-default-0-metrics    172.18.0.2:32753
-                                  namenode-default-0-http       http://172.18.0.2:32475
-                                  namenode-default-0-rpc        172.18.0.2:31639
-                                  namenode-default-1-metrics    172.18.0.4:32202
-                                  namenode-default-1-http       http://172.18.0.4:31486
-                                  namenode-default-1-rpc        172.18.0.4:31874
-
- zookeeper  zookeeper  default    zk                            172.18.0.4:32469
 ----
 
 include::partial$instance-hint.adoc[]
@@ -217,18 +215,18 @@ Below you will see the overview of your HDFS cluster.
 
 image::hbase-hdfs-load-cycling-data/hdfs-overview.png[]
 
-The UI will give you information on the datanodes via the datanodes tab.
+The UI will give you information on the datanodes via the `Datanodes` tab.
 
 image::hbase-hdfs-load-cycling-data/hdfs-datanode.png[]
 
-You can also browse the filesystem via the Utilities menu.
+You can also browse the file system by clicking on the `Utilities` tab and selecting `Browse the file system`.
 
 image::hbase-hdfs-load-cycling-data/hdfs-data.png[]
 
-The raw data from the distcp job can be found here.
+Navigate in the file system to the folder `data` and then the `raw` folder. Here you can find the raw data from the distcp job.
 
 image::hbase-hdfs-load-cycling-data/hdfs-data-raw.png[]
 
-The structure of the Hfiles can be seen here.
+Selecting the folder `data` and then `hfile` instead, gives you the structure of the Hfiles.
 
 image::hbase-hdfs-load-cycling-data/hdfs-data-hfile.png[]
