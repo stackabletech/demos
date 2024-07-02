@@ -5,14 +5,12 @@
 This is a demo to showcase what can be done with Open Policy Agent around authorization in the Stackable Data Platform.
 It covers the following aspects of security:
 
-
-
 This demo will:
 
 * Install the Stackable operators
 * Spin up the following data products
 ** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This demo uses it to enable SQL access to the data.
-** *Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo uses it to batch-process data from S3 by training and scoring an unsupervised anomaly detection model and writing the results into a Trino table. Spark uses an isolation forest algorithm from the scikit-learn machine learning library in this demo.
+** *Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo uses it to create a (rather simple) report and write the results back into the persistence.
 ** *HDFS*: A distributed file system that is designed to scale up from single servers to thousands of machines, each offering local computation and storage.
 ** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as metadata storage for Trino and Spark.
 ** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino, which decides which user can query which data.
@@ -48,7 +46,7 @@ To run this demo, your system needs at least:
 == Recording
 
 // We don't embed the video but only link it because of privacy concerns.
-*On 2024-05-16 our collegue Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
+*On 2024-05-16 our colleague Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
 You can find the recording on https://www.youtube.com/watch?v=ATlq_l3WNiA[Youtube].*
 
 == Overview
