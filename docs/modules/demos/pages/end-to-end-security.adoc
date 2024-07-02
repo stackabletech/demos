@@ -2,7 +2,27 @@
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
-Install this demo on an existing Kubernetes cluster:
+This is a demo to showcase what can be done with Open Policy Agent around authorization in the Stackable Data Platform.
+It covers the following aspects of security:
+
+This demo will:
+
+* Install the Stackable operators
+* Spin up the following data products
+** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This demo uses it to enable SQL access to the data.
+** *Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo uses it to create a (rather simple) report and write the results back into the persistence.
+** *HDFS*: A distributed file system that is designed to scale up from single servers to thousands of machines, each offering local computation and storage.
+** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as metadata storage for Trino and Spark.
+** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino, which decides which user can query which data.
+** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from Trino via SQL queries and build dashboards on top of that data.
+* Configure security to showcase the following features
+** Column- and row-level filtering
+** OIDC support across the board
+** Kerberos on Kubernetes
+** Keycloak and flexible group lookup
+** Open Policy Agent for the utmost flexibility in building access rules
+
+The following figure gives an overview of how the components interact with each other:
 
 [source,console]
 ----
@@ -25,8 +45,8 @@ To run this demo, your system needs at least:
 
 == Recording
 
-// We don't embed the video but only link it becuase of privacy concerns.
-*On 2024-05-16 our collegue Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
+// We don't embed the video but only link it because of privacy concerns.
+*On 2024-05-16 our colleague Sönke Liebau held a Stackable TechTalk - Mastering Data Platform Security.
 You can find the recording on https://www.youtube.com/watch?v=ATlq_l3WNiA[Youtube].*
 
 == Overview
@@ -35,7 +55,73 @@ You can see the deployed products and their relationship in the following diagra
 
 image::end-to-end-security/overview.png[Architectural overview]
 
+Please note the different types of arrows used to connect the technologies in here, which symbolize
+how authentication happens along that route and if impersonation is used for queries executed.
+
 The Trino schema (with schemas, tables and views) is shown below.
 
 // the svg does not have a specified size, so we need to size it here or it will be 0x0
 image::end-to-end-security/trino-schema.svg[Trino schema,700]
+
+=== User credentials
+
+The following user accounts are configured in Keycloak:
+
+[cols="1,1,2"]
+|===
+|Username|Password|Team member
+
+|sophia.clarke
+|sophia.clarke
+|Head of Compliance Analytics
+
+|william.lewis
+|william.lewis
+|Team member of Compliance Analytics
+
+|daniel.king
+|daniel.king
+|Team member of Compliance Analytics
+
+|pamela.scott
+|pamela.scott
+|Head of Customer Analytics
+
+|justin.martin
+|justin.martin
+|Team member of Customer Analytics
+
+|isla.williams
+|isla.williams
+|Team member of Customer Analytics
+
+|mark.ketting
+|mark.ketting
+|Head of Marketing
+|===
+
+=== Ruleset
+
+The rules that are configured in this demo show different options of giving full or restricted access to data with OPA.
+
+==== General Access Control
+At the highest level, everybody is allowed to see data from the schema of the department they are a member of.
+So in the following example, Justin Martin, who is a member of the Customer Service department will only be
+able to see tables from the Customer Service schema.
+
+image::e2e-justin.png[]
+
+==== Column-based Access Control
+
+Sophia Clarke from the Compliance department can see tables for the Compliance department, but has also been given
+restricted access to the customers table.
+
+The following diagram shows which rules are in place, you can easily test these with a sql editor of your chice.
+
+image::e2e-sophia.png[]
+
+==== Row-level Access Control
+Access control at the row level has been implemented on the employee table, where everybody can see information
+about themselves, as well as people who report to them.
+
+image::e2e-sophia-employee.png[]
