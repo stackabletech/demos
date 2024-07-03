@@ -90,7 +90,8 @@ Select the `Global` tenant to have access to the pre-configured `vector-*` index
 
 image::logging/tenant.png[]
 
-Click _Discover_ in the menu on the left to view the recent logs. If you do not see anything, increase the search window to greater than _Last 15 minutes_.
+Click _Discover_ in the menu on the left to view the recent logs.
+If you do not see anything, increase the search window to greater than _Last 15 minutes_.
 
 image::logging/logs.png[]
 
