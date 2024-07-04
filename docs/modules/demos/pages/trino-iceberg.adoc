@@ -21,8 +21,8 @@ This demo should not be run alongside other demos.
 
 To run this demo, your system needs at least:
 
-* 9 {k8s-cpu}[cpu units] (core/hyperthread)
-* 27GiB memory
+* 6 {k8s-cpu}[cpu units] (core/hyperthread)
+* 15GiB memory
 * 110GiB disk storage
 
 [NOTE]
@@ -519,9 +519,6 @@ spec:
           limit: 6Gi # Available RAM
   workers:
     config:
-	  # This limit can't be too big as otherwise the workers won't start.
-	  # We suggest setting it to half of spec.coordinators.config.resources.memory.limit
-      queryMaxMemoryPerNode: 6GB
       resources:
         cpu:
           max: "12" # CPU resources that can be used at a maximum
