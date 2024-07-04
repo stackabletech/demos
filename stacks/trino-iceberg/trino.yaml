@@ -22,22 +22,21 @@ spec:
       queryMaxMemory: 10TB
       resources:
         cpu:
-          min: "2"
-          max: "4"
+          min: "500m"
+          max: "2"
         memory:
-          limit: '6Gi'
+          limit: '2Gi'
     roleGroups:
       default:
         replicas: 1
   workers:
     config:
-      queryMaxMemoryPerNode: 6GB
       resources:
         cpu:
-          min: "2"
+          min: "1"
           max: "4"
         memory:
-          limit: '12Gi'
+          limit: '4Gi'
     roleGroups:
       default:
         replicas: 1

@@ -21,7 +21,7 @@ options:
   resources:
     requests:
       cpu: 500m
-      memory: 2Gi
+      memory: 1Gi
   service:
     type: NodePort
     nodePort: null

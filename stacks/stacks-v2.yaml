@@ -346,9 +346,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
     supportedNamespaces: []
     resourceRequests:
-      cpu: 8550m
-      memory: 26662Mi
-      pvc: 110Gi
+      cpu: 6000m # Measured 5600m
+      memory: 15Gi # Measured 13986Mi
+      pvc: 110Gi # 100Gi for MinIO
     parameters:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
