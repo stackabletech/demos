@@ -59,28 +59,26 @@ image::spark-k8s-anomaly-detection-taxi-data/overview.png[]
 
 To list the installed Stackable services run the following command:
 
-// TODO(Techassi): Update console output
-
 [source,console]
 ----
 $ stackablectl stacklet list
-PRODUCT   NAME          NAMESPACE               ENDPOINTS                                     EXTRA INFOS
 
- hive      hive          spark-k8s-ad-taxi-data  hive                172.18.0.2:31912
-                                                 metrics             172.18.0.2:30812
-
- hive      hive-iceberg  spark-k8s-ad-taxi-data  hive                172.18.0.4:32133
-                                                 metrics             172.18.0.4:32125
-
- opa       opa           spark-k8s-ad-taxi-data  http                http://172.18.0.3:31450
-
- superset  superset      spark-k8s-ad-taxi-data  external-superset   http://172.18.0.2:31339   Admin user: admin, password: adminadmin
-
- trino     trino         spark-k8s-ad-taxi-data  coordinator-metrics 172.18.0.3:32168
-                                                 coordinator-https   https://172.18.0.3:31408
-
- minio     minio-trino   spark-k8s-ad-taxi-data  http                http://172.18.0.3:30589   Third party service
-                                                 console-http        http://172.18.0.3:31452   Admin user: admin, password: adminadmin
+┌──────────┬───────────────┬───────────┬───────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                     ┆ CONDITIONS                      │
+╞══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive     ┆ hive          ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive     ┆ hive-iceberg  ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa      ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset ┆ superset      ┆ default   ┆ external-http        http://172.18.0.2:30562  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino    ┆ trino         ┆ default   ┆ coordinator-metrics  172.18.0.2:31980         ┆ Available, Reconciling, Running │
+│          ┆               ┆           ┆ coordinator-https    https://172.18.0.2:32186 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio    ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32276  ┆                                 │
+└──────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -89,8 +87,8 @@ include::partial$instance-hint.adoc[]
 
 === List Buckets
 
-The S3 provided by MinIO is used as persistent storage to store all the data used. Open the endpoint `console-http`
-retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.3:31452 in this case).
+The S3 provided by MinIO is used as persistent storage to store all the data used. Open the endpoint `http`
+retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.2:32276 in this case).
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_0.png[]
 
@@ -107,16 +105,16 @@ Here, you can see the two buckets the S3 is split into:
 
 === Inspect raw data
 
-Click on the blue button `Browse` on the bucket `demo`.
+Click on the bucket `demo` and then on `ny-taxi-data` and `raw` respectively.
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_3.png[]
 
-A folder (called prefixes in S3) contains a dataset of similarly structured data files. The data is partitioned by month
+This folder (called prefixes in S3) contains a dataset of similarly structured data files. The data is partitioned by month
 and contains several hundred MBs, which may seem small for a dataset. Still, the model is a time-series model where the
 data has decreasing relevance the "older" it is, especially when the data is subject to multiple external factors, many
 of which are unknown and fluctuating in scope and effect.
 
-The second bucket prediction contains the output from the model scoring process:
+The second bucket prediction contains the output from the model scoring process under `prediction/anomaly-detection/iforest/data`:
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_4.png[]
 
@@ -147,7 +145,9 @@ image::spark-k8s-anomaly-detection-taxi-data/spark_job.png[]
 
 == Dashboard
 
-The anomaly detection dashboard is pre-defined and accessible under `Dashboards` when logged in to Superset:
+Open the `external-http` Superset endpoint found in the output of the `stackablectl stacklet list` command. The anomaly detection
+dashboard is pre-defined and accessible under the `Dashboards` tab when logged in to Superset using the username `admin`
+password `adminadmin`:
 
 image::spark-k8s-anomaly-detection-taxi-data/superset_anomaly_scores.png[]
 
