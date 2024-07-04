@@ -46,25 +46,25 @@ This demo will
 
 == List the deployed Stackable services
 
-To list the installed installed Stackable services run the following command:
+To list the installed Stackable services run the following command:
 
 [source,console]
 ----
 $ stackablectl stacklet list
-┌─────────┬──────────────┬───────────┬──────────────────────────────────────────────┐
-│ PRODUCT ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                    │
-╞═════════╪══════════════╪═══════════╪══════════════════════════════════════════════╡
-│ hive    ┆ hive-iceberg ┆ default   ┆ hive                172.18.0.4:30637         │
-│         ┆              ┆           ┆ metrics             172.18.0.4:30176         │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa     ┆ opa          ┆ default   ┆ http                http://172.18.0.2:32470  │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino   ┆ trino        ┆ default   ┆ coordinator-metrics 172.18.0.2:32402         │
-│         ┆              ┆           ┆ coordinator-https   https://172.18.0.2:31605 │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio   ┆ minio        ┆ default   ┆ http                http://172.18.0.2:30357  │
-│         ┆              ┆           ┆ console-http        http://172.18.0.2:30310  │
-└─────────┴──────────────┴───────────┴──────────────────────────────────────────────┘
+
+┌─────────┬───────────────┬───────────┬───────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                     ┆ CONDITIONS                      │
+╞═════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive    ┆ hive-iceberg  ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa     ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino   ┆ trino         ┆ default   ┆ coordinator-metrics  172.18.0.2:32612         ┆ Available, Reconciling, Running │
+│         ┆               ┆           ┆ coordinator-https    https://172.18.0.2:30856 ┆                                 │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio   ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32489  ┆                                 │
+└─────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
+
 ----
 
 include::partial$instance-hint.adoc[]
@@ -72,16 +72,17 @@ include::partial$instance-hint.adoc[]
 == MinIO
 
 You can view the available buckets and objects (think of files) described in the
-xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo.
+xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo. Currently, the bucket `lakehouse`
+is still empty, but will be filled during the next steps.
 
 == Connect to Trino
 
-Have a look at the xref:data-lakehouse-iceberg-trino-spark.adoc#_connect_with_dbeaver[documentation] on how to
+Have a look at the https://docs.stackable.tech/home/stable/trino/usage-guide/connect_to_trino#_connect_with_dbeaver[documentation] on how to
 connect with DBeaver. As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
 
 [source,console]
 ----
-$ java -jar ~/Downloads/trino-cli-396-executable.jar --user admin --insecure --password --server https://172.18.0.3:31250
+$ java -jar ~/Downloads/trino-cli-451-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
 ----
 
 Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output. When
@@ -131,7 +132,7 @@ show tables in tpch.sf5;
 (8 rows)
 ----
 
-The dataset comes with different scale factors. This demo is intended to run on a Laptop, so it starts with a scale
+The dataset comes with different scale factors. This demo is intended to run on a laptop, so it starts with a scale
 factor of 5 (hence the `sf5` in the above query). If you have a sufficiently large S3 and Trino deployed, you can easily
 re-run the statements below with a different scale factor. This demo has been tested up to a scale factor of 10000, but
 you can choose any scale in between or even more if desired.
@@ -498,91 +499,6 @@ try to spin up 8 Trino workers with 16GB RAM each, chances are high that Pods wi
 resources required can't be fulfilled.
 ====
 
-=== Scale S3
-
-That should be the preferred option if you can access a managed S3, for example, from a Cloud provider with an excellent
-network interconnection.
-
-You can change the endpoint of the S3 by running `kubectl edit s3connection minio -o yaml` and `kubectl edit secret
-minio-s3-credentials`. Please note that the credentials need to be base64 encoded.
-
-.Example IONOS configuration
-[%collapsible]
-====
-[source,sql]
-----
-apiVersion: s3.stackable.tech/v1alpha1
-kind: S3Connection
-metadata:
-  name: ionos-sbernauer
-spec:
-  host: s3-eu-central-1.ionoscloud.com
-  port: 443
-  tls:
-    verification:
-      server:
-        caCert:
-          webPki: {}
-  credentials:
-    secretClass: ionos-sbernauer-s3-credentials
----
-apiVersion: secrets.stackable.tech/v1alpha1
-kind: SecretClass
-metadata:
-  name: ionos-sbernauer-s3-credentials
-spec:
-  backend:
-    k8sSearch:
-      searchNamespace:
-        pod: {}
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: ionos-sbernauer-s3-credentials
-  labels:
-    secrets.stackable.tech/class: ionos-sbernauer-s3-credentials
-stringData:
-  accessKey: "<username>"
-  secretKey: "<password>"
-----
-====
-
-If you don't have access to a managed S3 or don't want to use it, you can also scale up the MinIO cluster. You can see
-the available replicas using the following command:
-
-[source,console]
-----
-$ kubectl get statefulsets.apps minio
-
-NAME    READY   AGE
-minio   2/2     4m16s
-----
-
-You can edit the MinIO cluster using `kubectl edit statefulsets.apps minio`.
-Especially interesting are the following options:
-
-[source,yaml]
-----
-apiVersion: apps/v1
-kind: StatefulSet
-metadata:
-  name: minio
-spec:
-  replicas: 5 # Number of MinIO nodes
-  template:
-    spec:
-      containers:
-      - name: minio
-        resources:
-          requests:
-            cpu: 1000m # Guaranteed CPU available (one core in this case)
-            memory: 4Gi # RAM available
-----
-
-For example, set `spec.replicas` to `5` and save the changes. You can re-run `kubectl get statefulsets.apps minio` to see the
-effect.
-
 === Scale Trino
 
 Run `kubectl edit trinocluster trino`. Modify the following settings to your needs:
@@ -603,8 +519,8 @@ spec:
           limit: 6Gi # Available RAM
   workers:
     config:
-	  # This limit can't be to big as otherwise the workers won't start.
-	  # I suggest setting it to half of spec.coordinators.config.resources.memory.limit
+	  # This limit can't be too big as otherwise the workers won't start.
+	  # We suggest setting it to half of spec.coordinators.config.resources.memory.limit
       queryMaxMemoryPerNode: 6GB
       resources:
         cpu:
