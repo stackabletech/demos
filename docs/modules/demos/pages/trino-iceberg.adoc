@@ -514,7 +514,7 @@ minio-s3-credentials`. Please note that the credentials need to be base64 encode
 apiVersion: s3.stackable.tech/v1alpha1
 kind: S3Connection
 metadata:
-  name: ionos-sbernauer
+  name: ionos
 spec:
   host: s3-eu-central-1.ionoscloud.com
   port: 443
@@ -524,12 +524,12 @@ spec:
         caCert:
           webPki: {}
   credentials:
-    secretClass: ionos-sbernauer-s3-credentials
+    secretClass: ionos-s3-credentials
 ---
 apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
-  name: ionos-sbernauer-s3-credentials
+  name: ionos-s3-credentials
 spec:
   backend:
     k8sSearch:
@@ -539,9 +539,9 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: ionos-sbernauer-s3-credentials
+  name: ionos-s3-credentials
   labels:
-    secrets.stackable.tech/class: ionos-sbernauer-s3-credentials
+    secrets.stackable.tech/class: ionos-s3-credentials
 stringData:
   accessKey: "<username>"
   secretKey: "<password>"
@@ -603,9 +603,6 @@ spec:
           limit: 6Gi # Available RAM
   workers:
     config:
-	  # This limit can't be to big as otherwise the workers won't start.
-	  # I suggest setting it to half of spec.coordinators.config.resources.memory.limit
-      queryMaxMemoryPerNode: 6GB
       resources:
         cpu:
           max: "12" # CPU resources that can be used at a maximum
