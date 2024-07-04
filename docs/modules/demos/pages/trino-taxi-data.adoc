@@ -81,7 +81,7 @@ include::partial$instance-hint.adoc[]
 == Inspect the data in S3
 
 The S3 provided by MinIO is used as a persistent storage to store all the data used. You can look at the test data
-within the MinIO web interface by opening the endpoint `console-http` from your `stackablectl stacklet list` command
+within the MinIO web interface by opening the endpoint `http` from your `stackablectl stacklet list` command
 output. You have to use the endpoint from your command output. In this case, it is http://172.18.0.2:32654. Open it with
 your favourite browser.
 
@@ -115,7 +115,7 @@ When you start executing SQL queries, you will see the queries getting processed
 
 == Use the Superset web interface
 
-Superset gives the ability to execute SQL queries and build dashboards. Open the endpoint `external-superset`
+Superset gives the ability to execute SQL queries and build dashboards. Open the endpoint `external-http`
 in your browser (`http://172.18.0.2:31312` in this case).
 
 image::trino-taxi-data/superset_1.png[]
@@ -138,8 +138,8 @@ You can clearly see the impact of COVID-19 on the taxi business.
 
 === Execute arbitrary SQL statements
 
-Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL Lab` ->
-`SQL Editor`.
+Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL` ->
+`SQL Lab`.
 
 image::trino-taxi-data/superset_5.png[]
 
@@ -180,7 +180,7 @@ Within Superset you can execute arbitrary SQL statements to explore the taxi dat
 questions by executing SQL statements? The {trino-language-docs}[Trino documentation on their SQL language] might help
 you.
 
-How many taxi trips there where in the year 2021?
+How many taxi trips there were in the year 2021?
 
 .See the answer
 [%collapsible]
@@ -199,7 +199,7 @@ returns 30.903.982 trips.
 
 What was the maximum amount of passengers?
 
-.See the Answer
+.See the answer
 [%collapsible]
 ====
 
@@ -269,7 +269,7 @@ Pretty cheap for that amount of people! These are probably invalid records.
 
 What was the highest tip (measured in percentage of the original fee) ever given?
 
-.See the Answer
+.See the answer
 [%collapsible]
 ====
 
@@ -309,7 +309,7 @@ You also have the possibility to create additional charts and bundle them togeth
 You can use the MinIO webinterface to upload additional data. As an alternative you can use the S3 API with an S3 client
 like https://s3tools.org/s3cmd[s3cmd]. It is recommended to put the data into a folder (prefix) in the `demo` bucket.
 
-Have a look at the defined tables inside the `hive`.`demo` schema on how to inform Trino about the newly available data.
+Have a look at the defined tables inside the `hive.demo` schema on how to inform Trino about the newly available data.
 
 .Table Definitions
 [%collapsible]
@@ -372,5 +372,5 @@ AND tpep_pickup_datetime <= from_iso8601_timestamp('2022-05-31T00:00:00')
 
 === Connect to Trino via CLI, Python or DBeaver
 
-If you prefer running your SQL statements via command-line, a Python script or a graphical Database manager like DBeaver
+If you prefer running your SQL statements via command-line, a Python script or a graphical database manager like DBeaver
 please have a look at the {trino-client-docs}[the Trino documentation] on how to do that.
