@@ -3857,7 +3857,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value> https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
+                        <value>https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>
@@ -4790,7 +4790,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value> https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
+                        <value>https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>
@@ -6496,7 +6496,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value> https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
+                        <value>https://www.pegelonline.wsv.de/webservices/rest-api/v2/stations.json</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>

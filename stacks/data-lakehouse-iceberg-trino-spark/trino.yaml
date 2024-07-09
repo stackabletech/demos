@@ -129,22 +129,22 @@ data:
   trino.rego: |
     package trino
 
-    import future.keywords.in
+    import rego.v1
 
     default allow = false
 
     # Allow non-batched access
-    allow {
+    allow if {
       is_admin
     }
     # Allow batched access
-    extended[i] {
+    batch contains i if {
       some i
       input.action.filterResources[i]
       is_admin
     }
     # Corner case: filtering columns is done with a single table item, and many columns inside
-    extended[i] {
+    batch contains i if {
       some i
       input.action.operation == "FilterColumns"
       count(input.action.filterResources) == 1
@@ -152,6 +152,6 @@ data:
       is_admin
     }
 
-    is_admin() {
+    is_admin() if {
       input.context.identity.user == "admin"
     }

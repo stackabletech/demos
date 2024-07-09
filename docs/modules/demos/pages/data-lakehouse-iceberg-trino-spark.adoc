@@ -34,7 +34,7 @@ $ stackablectl demo install data-lakehouse-iceberg-trino-spark
 [#system-requirements]
 == System requirements
 
-The demo was developed and tested on a kubernetes cluster with 10 nodes (4 cores (8 threads), 20GB RAM and 30GB HDD).
+The demo was developed and tested on a kubernetes cluster with 10 nodes (4 cores (8 threads), 20GiB RAM and 30GB HDD).
 Instance types that loosely correspond to this on the Hyperscalers are:
 
 - *Google*: `e2-standard-8`
@@ -94,7 +94,7 @@ directly into S3 using the https://trino.io/docs/current/connector/hive.html[Hiv
   below-mentioned mechanism.
 * *Built-in compaction:* Running table maintenance functions such as compacting smaller files (including deleted files)
   into larger files for best query performance is recommended. Iceberg offers out-of-the-box tools for this.
-* *Hidden partitioning:* Image you have a table `sales (day varchar, ts timestamp)` partitioned by `day`. Lots of times,
+* *Hidden partitioning:* Imagine you have a table `sales (day varchar, ts timestamp)` partitioned by `day`. Lots of times,
   users would run a statement such as `select count(\*) where ts > now() - interval 1 day`, resulting in a full table
   scan as the partition column `day` was not filtered in the query. Iceberg resolves this problem by using hidden
   partitions. In Iceberg, your table would look like `sales (ts timestamp) with (partitioning = ARRAY['day(ts)'])`. The
@@ -112,35 +112,33 @@ https://iceberg.apache.org[website] or https://github.com/apache/iceberg/[GitHub
 
 To list the installed installed Stackable services run the following command:
 
-// TODO(Techassi): Update console output below
-
 [source,console]
 ----
 $ stackablectl stacklet list
- PRODUCT    NAME          NAMESPACE  ENDPOINTS                                          EXTRA INFOS
 
- hive       hive          default    hive                212.227.224.138:31022
-                                     metrics             212.227.224.138:30459
-
- hive       hive-iceberg  default    hive                212.227.233.131:31511
-                                     metrics             212.227.233.131:30003
-
- kafka      kafka         default    metrics             217.160.118.190:32160
-                                     kafka               217.160.118.190:31736
-
- nifi       nifi          default    https               https://217.160.120.117:31499  Admin user: admin, password: adminadmin
-
- opa        opa           default    http                http://217.160.222.211:31767
-
- superset   superset      default    external-superset   http://212.227.233.47:32393    Admin user: admin, password: adminadmin
-
- trino      trino         default    coordinator-metrics 212.227.224.138:30610
-                                     coordinator-https   https://212.227.224.138:30876
-
- zookeeper  zookeeper     default    zk                  212.227.224.138:32321
-
- minio      minio         default    http                http://217.160.222.211:32031   Third party service
-                                     console-http        http://217.160.222.211:31429   Admin user: admin, password: adminadmin
+┌───────────┬───────────────┬───────────┬────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                          ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive      ┆ hive          ┆ default   ┆                                                    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive      ┆ hive-iceberg  ┆ default   ┆                                                    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ metrics              217.160.99.235:31148          ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ kafka-tls            217.160.99.235:31202          ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ https                https://5.250.180.98:31825    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa       ┆ opa           ┆ default   ┆                                                    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ external-http        http://87.106.122.58:32452    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino     ┆ trino         ┆ default   ┆ coordinator-metrics  212.227.194.245:31920         ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ coordinator-https    https://212.227.194.245:30841 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆                                                    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                 http://217.160.99.235:30238   ┆                                 │
+└───────────┴───────────────┴───────────┴────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -150,7 +148,7 @@ include::partial$instance-hint.adoc[]
 === Listing Buckets
 
 The S3 provided by MinIO is used as persistent storage to store all the data used. Open the `minio` endpoint
-`console-http` retrieved by the `stackablectl stacklet list` command in your browser (http://217.160.222.211:31429 in
+`http` retrieved by the `stackablectl stacklet list` command in your browser (http://217.160.99.235:30238 in
 this case).
 
 image::data-lakehouse-iceberg-trino-spark/minio_1.png[]
@@ -168,7 +166,7 @@ Here, you can see the two buckets contained in the S3:
 
 === Inspecting Lakehouse
 
-Click on the blue button `Browse` on the bucket `lakehouse`.
+Click on the bucket `lakehouse`.
 
 image::data-lakehouse-iceberg-trino-spark/minio_3.png[]
 
@@ -177,7 +175,7 @@ Multiple folders (called prefixes in S3), each containing a different dataset, a
 
 image::data-lakehouse-iceberg-trino-spark/minio_4.png[]
 
-As you can see, the table `house-sales` is partitioned by day. Go ahead and click on any folder.
+As you can see, the table `house-sales` is partitioned by year. Go ahead and click on any folder.
 
 image::data-lakehouse-iceberg-trino-spark/minio_5.png[]
 
@@ -199,7 +197,7 @@ sources are statically downloaded (e.g. as CSV), and others are fetched dynamica
 === View ingestion jobs
 
 You can have a look at the ingestion job running in NiFi by opening the NiFi endpoint `https` from your
-`stackablectl stacklet list` command output (https://217.160.120.117:31499 in this case).
+`stackablectl stacklet list` command output (https://5.250.180.98:31825 in this case).
 
 [NOTE]
 ====
@@ -215,17 +213,18 @@ Log in with the username `admin` and password `adminadmin`.
 image::data-lakehouse-iceberg-trino-spark/nifi_2.png[]
 
 As you can see, the NiFi workflow consists of lots of components. You can zoom in by using your mouse and mouse wheel.
-On the left side are two strands, that
+On the left side are three strands, that
 
 . Fetch the list of known water-level stations and ingest them into Kafka.
-. Continuously run a loop fetching the measurements of the last 30 for every measuring station and ingesting them into
+. Fetch measurements of the last 30 days for every measuring station and ingest them into Kafka.
+. Continuously run a loop fetching the measurements for every measuring station and ingesting them into
   Kafka.
 
-On the right side are three strands that
+On the right side are three strands, that
 
 . Fetch the current shared bike station information
 . Fetch the current shared bike station status
-. Fetch the current shared bike bike status
+. Fetch the current shared bike status
 
 For details on the NiFi workflow ingesting water-level data, please read the
 xref:nifi-kafka-druid-water-level-data.adoc#_nifi[nifi-kafka-druid-water-level-data documentation on NiFi].
@@ -278,7 +277,7 @@ schema = StructType([ \
 ])
 ----
 
-Afterwards, a streaming read from Kafka is started. It reads from our Kafka at `kafka:9090` with the topic
+Afterwards, a streaming read from Kafka is started. It reads from our Kafka at `kafka:9093` with the topic
 `water_levels_measurements`. When starting up, the job will ready all the existing messages in Kafka (read from
 earliest) and will process 50000000 records as a maximum in a single batch. As Kafka has retention set up, Kafka records
 might alter out of the topic before Spark has read the records, which can be the case when the Spark application wasn't
@@ -294,7 +293,7 @@ explanation.
 spark \
 .readStream \
 .format("kafka") \
-.option("kafka.bootstrap.servers", "kafka:9092") \
+.options(**kafkaOptions) \
 .option("subscribe", "water_levels_measurements") \
 .option("startingOffsets", "earliest") \
 .option("maxOffsetsPerTrigger", 50000000) \
@@ -470,7 +469,7 @@ Trino is used to enable SQL access to the data.
 === Accessing the web interface
 
 Open up the the Trino endpoint `coordinator-https` from your `stackablectl stacklet list` command output
-(https://212.227.224.138:30876 in this case).
+(https://212.227.194.245:30841 in this case).
 
 image::data-lakehouse-iceberg-trino-spark/trino_1.png[]
 
@@ -498,7 +497,7 @@ Here you can see all the available Trino catalogs.
 == Superset
 
 Superset provides the ability to execute SQL queries and build dashboards. Open the Superset endpoint
-`external-superset` in your browser (http://212.227.233.47:32393 in this case).
+`external-http` in your browser (http://87.106.122.58:32452 in this case).
 
 image::data-lakehouse-iceberg-trino-spark/superset_1.png[]
 
@@ -526,7 +525,7 @@ Another dashboard to look at is `Taxi trips`.
 
 image::data-lakehouse-iceberg-trino-spark/superset_6.png[]
 
-There are multiple other dashboards you can explore on you own.
+There are multiple other dashboards you can explore on your own.
 
 === Viewing Charts
 
@@ -534,8 +533,8 @@ The dashboards consist of multiple charts. To list the charts, select the `Chart
 
 === Executing arbitrary SQL statements
 
-Within Superset, you can create dashboards and run arbitrary SQL statements. On the top click on the tab `SQL Lab` ->
-`SQL Editor`.
+Within Superset, you can create dashboards and run arbitrary SQL statements. On the top click on the tab `SQL` ->
+`SQL Lab`.
 
 image::data-lakehouse-iceberg-trino-spark/superset_7.png[]
 
@@ -543,6 +542,12 @@ On the left, select the database `Trino lakehouse`, the schema `house_sales`, an
 `house_sales`.
 
 image::data-lakehouse-iceberg-trino-spark/superset_8.png[]
+
+[NOTE]
+====
+This older screenshot shows how the table preview would look like. Currently, there is an https://github.com/apache/superset/issues/25307[open issue] 
+with previewing trino tables using the Iceberg connector. This doesn't affect the execution the following execution of the SQL statement.
+====
 
 In the right textbox, you can enter the desired SQL statement. If you want to avoid making one up, use the following:
 
