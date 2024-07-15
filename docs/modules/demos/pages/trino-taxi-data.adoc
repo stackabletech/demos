@@ -180,7 +180,7 @@ Within Superset you can execute arbitrary SQL statements to explore the taxi dat
 questions by executing SQL statements? The {trino-language-docs}[Trino documentation on their SQL language] might help
 you.
 
-How many taxi trips there were in the year 2021?
+How many taxi trips took place in the year 2021?
 
 .See the answer
 [%collapsible]
