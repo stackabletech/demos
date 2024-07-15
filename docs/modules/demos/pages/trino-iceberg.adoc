@@ -77,7 +77,7 @@ is still empty, but will be filled during the next steps.
 
 == Connect to Trino
 
-Have a look at the xref:operators:trino:usage-guide/connect_to_trino#_connect_with_dbeaver[documentation] on how to
+Have a look at the xref:trino:usage-guide/connect_to_trino#_connect_with_dbeaver[documentation] on how to
 connect with DBeaver. As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
 
 [source,console]
