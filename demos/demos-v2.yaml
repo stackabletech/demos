@@ -174,7 +174,7 @@ demos:
     resourceRequests:
       cpu: "80"
       memory: 200Gi
-      pvc: 1Ti
+      pvc: 300Gi
   jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data:
     description: Jupyterhub with PySpark and HDFS integration
     documentation: https://docs.stackable.tech/stackablectl/stable/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data.html
