@@ -5,7 +5,7 @@ metadata:
   name: superset
 spec:
   image:
-    productVersion: 3.1.0
+    productVersion: 4.0.2
   clusterConfig:
     listenerClass: external-unstable
     credentialsSecret: superset-credentials
