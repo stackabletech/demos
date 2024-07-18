@@ -46,10 +46,10 @@ This demo will
    synchronization, and providing group services. This demo makes its log data observable in OpenSearch Dashboards.
 ** *Vector*: A tool for building observability pipelines. This demo uses Vector as a log agent to gather and transform
    the logs and as an aggregator to forward the collected logs to OpenSearch.
-** *OpenSearch*: A data store and search engine. This demo uses it to store and index the of the log data.
+** *OpenSearch*: A data store and search engine. This demo uses it to store and index the log data.
 ** *OpenSearch Dashboards*: A visualization and user interface. This demo uses it to make the log data easily accessible
    to the user.
-* Create a view in OpenSearch Dashboards for convenient browsing the log data.
+* Create a view in OpenSearch Dashboards to conveniently browse the log data.
 
 You can see the deployed products and their relationship in the following diagram:
 
