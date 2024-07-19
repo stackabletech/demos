@@ -491,7 +491,7 @@ Here you can see all the available Trino catalogs.
 * `tpcds`: https://trino.io/docs/current/connector/tpcds.html[TPCDS connector] providing a set of schemas to support the
   http://www.tpc.org/tpcds/[TPC Benchmark™ DS]
 * `tpch`: https://trino.io/docs/current/connector/tpch.html[TPCH connector] providing a set of schemas to support the
-  http://www.tpc.org/tpcds/[TPC Benchmark™ DS]
+  http://www.tpc.org/tpch/[TPC Benchmark™ H]
 * `lakehouse`: The lakehouse area containing the enriched and performant accessible data
 
 == Superset
