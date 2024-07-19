@@ -541,13 +541,13 @@ image::data-lakehouse-iceberg-trino-spark/superset_7.png[]
 On the left, select the database `Trino lakehouse`, the schema `house_sales`, and set `See table schema` to
 `house_sales`.
 
-image::data-lakehouse-iceberg-trino-spark/superset_8.png[]
-
-[NOTE]
+[IMPORTANT]
 ====
-This older screenshot shows how the table preview would look like. Currently, there is an https://github.com/apache/superset/issues/25307[open issue] 
+The older screenshot below shows how the table preview would look like. Currently, there is an https://github.com/apache/superset/issues/25307[open issue] 
 with previewing trino tables using the Iceberg connector. This doesn't affect the execution the following execution of the SQL statement.
 ====
+
+image::data-lakehouse-iceberg-trino-spark/superset_8.png[]
 
 In the right textbox, you can enter the desired SQL statement. If you want to avoid making one up, use the following:
 
