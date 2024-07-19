@@ -3,7 +3,7 @@ name: jupyterhub
 repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
-version: 3.2.1
+version: 3.3.7
 options:
   hub:
     config:
@@ -49,7 +49,7 @@ options:
       HADOOP_CONF_DIR: "/home/jovyan/hdfs"
     initContainers:
       - name: download-notebook
-        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.3.0
+        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.7.0
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
         volumeMounts:
           - mountPath: /notebook
