@@ -179,7 +179,7 @@ As you can see, the table `house-sales` is partitioned by year. Go ahead and cli
 
 image::data-lakehouse-iceberg-trino-spark/minio_5.png[]
 
-You can see that Trino has placed a single file into the selected folder containing all the house sales of that
+You can see that Trino has data into the selected folder containing all the house sales of that
 particular year.
 
 == NiFi
