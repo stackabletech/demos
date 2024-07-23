@@ -1,1 +1,8 @@
+# Environment variables, for example for stackablectl
 .env
+
+# Local demo and stack definition files
+stacks-v1.local.yaml
+stacks-v2.local.yaml
+demos-v1.local.yaml
+demos-v2.local.yaml
