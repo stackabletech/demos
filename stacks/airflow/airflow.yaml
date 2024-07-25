@@ -6,7 +6,7 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 2.8.1
+    productVersion: 2.9.2
   clusterConfig:
     listenerClass: external-unstable
     loadExamples: false
@@ -272,7 +272,7 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        productVersion: 3.5.0
+        productVersion: 3.5.1
       mode: cluster
       mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
       job:

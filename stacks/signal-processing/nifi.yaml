@@ -5,8 +5,8 @@ metadata:
   name: nifi
 spec:
   image:
-    productVersion: 1.25.0
-    custom: docker.stackable.tech/demos/nifi:1.25.0-postgresql
+    productVersion: 1.27.0
+    custom: docker.stackable.tech/demos/nifi:1.27.0-postgresql
   clusterConfig:
     listenerClass: external-unstable
     zookeeperConfigMapName: nifi-znode

@@ -14,8 +14,6 @@ spec:
       connString: jdbc:postgresql://postgresql-druid/druid
       host: postgresql-druid
       port: 5432
-      user: druid
-      password: druid
     deepStorage:
       s3:
         bucket:
@@ -95,3 +93,11 @@ metadata:
 stringData:
   accessKey: admin
   secretKey: {{ minioAdminPassword }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: druid-db-credentials
+stringData:
+  username: druid
+  password: druid

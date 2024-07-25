@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: setup-keycloak
-        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.3.0
+        image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
         env:
           - name: KEYCLOAK_ADMIN_PASSWORD
             valueFrom:

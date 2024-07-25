@@ -48,7 +48,7 @@ spec:
             - name: tls
               mountPath: /tls/
         - name: create-auth-class
-          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable0.0.0-dev # We need 0.0.0-dev, so we get kubectl
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
           command: ["/bin/bash", "-c"]
           args:
             - |
