@@ -41,7 +41,7 @@ spec:
     database:
       connString: jdbc:postgresql://hivehdfs-postgresql:5432/hivehdfs
       dbType: postgres
-      credentialsSecret: postgres-credentials      
+      credentialsSecret: postgres-credentials
     hdfs:
       configMap: hdfs
   metastore:

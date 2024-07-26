@@ -10,7 +10,7 @@ spec:
     database:
       connString: jdbc:postgresql://postgresql-hive:5432/hive
       dbType: postgres
-      credentialsSecret: postgres-credentials      
+      credentialsSecret: postgres-credentials
     s3:
       reference: minio
   metastore:
@@ -29,7 +29,7 @@ spec:
     database:
       connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
       dbType: postgres
-      credentialsSecret: postgres-credentials      
+      credentialsSecret: postgres-credentials
     s3:
       reference: minio
   metastore:
