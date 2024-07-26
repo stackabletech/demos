@@ -28,9 +28,8 @@ spec:
   clusterConfig:
     database:
       connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
-      user: hive
-      password: hive
       dbType: postgres
+      credentialsSecret: postgres-credentials      
     s3:
       reference: minio
   metastore:
