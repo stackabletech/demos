@@ -40,9 +40,8 @@ spec:
   clusterConfig:
     database:
       connString: jdbc:postgresql://hivehdfs-postgresql:5432/hivehdfs
-      user: hive
-      password: hive
       dbType: postgres
+      credentialsSecret: postgres-credentials
     hdfs:
       configMap: hdfs
   metastore:
@@ -60,12 +59,20 @@ spec:
   clusterConfig:
     database:
       connString: jdbc:postgresql://hives3-postgresql:5432/hives3
-      user: hive
-      password: hive
       dbType: postgres
+      credentialsSecret: postgres-credentials
     s3:
       reference: minio
   metastore:
     roleGroups:
       default:
         replicas: 1
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: postgres-credentials
+type: Opaque
+stringData:
+  username: hive
+  password: hive

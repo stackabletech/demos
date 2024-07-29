@@ -14,6 +14,7 @@ spec:
       connString: jdbc:postgresql://postgresql-druid/druid
       host: postgresql-druid
       port: 5432
+      credentialsSecret: druid-db-credentials
     deepStorage:
       s3:
         bucket:
