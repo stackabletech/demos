@@ -274,7 +274,7 @@ data:
       sparkImage:
         productVersion: 3.5.0
       mode: cluster
-      mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
+      mainApplicationFile: local:///stackable/spark/examples/src/release-24.3/python/pi.py
       job:
         config:
           resources:
