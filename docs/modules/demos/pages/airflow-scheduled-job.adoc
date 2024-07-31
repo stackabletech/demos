@@ -1,5 +1,4 @@
 = airflow-scheduled-job
-:page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
 
 Install this demo on an existing Kubernetes cluster:
 
