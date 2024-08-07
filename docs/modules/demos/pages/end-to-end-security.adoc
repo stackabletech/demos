@@ -13,7 +13,7 @@ This demo will:
 ** *Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo uses it to create a (rather simple) report and write the results back into the persistence.
 ** *HDFS*: A distributed file system that is designed to scale up from single servers to thousands of machines, each offering local computation and storage.
 ** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as metadata storage for Trino and Spark.
-** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino, which decides which user can query which data.
+** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino and HDFS, which decides which user can query which data.
 ** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from Trino via SQL queries and build dashboards on top of that data.
 * Configure security to showcase the following features
 ** Column- and row-level filtering
@@ -125,3 +125,8 @@ Access control at the row level has been implemented on the employee table, wher
 about themselves, as well as people who report to them.
 
 image::e2e-sophia-employee.png[]
+
+=== Decision logging (aka audit log)
+
+The OPA server logs every single request it receives along with the decision it took to STDOUT.
+This gives you an audit log across the whole Data Platform.

@@ -21,6 +21,13 @@ spec:
           adminRealm: demo
           userRealm: demo
   servers:
+    config:
+      logging:
+        containers:
+          opa:
+            loggers:
+              decision:
+                level: INFO
     roleGroups:
       default:
         replicas: 1
