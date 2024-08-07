@@ -172,6 +172,8 @@ data:
       "procedures": [],
     }
 
+    # TODO: Once 24.11 is out, switch to https://github.com/stackabletech/opa-operator/pull/580 instead of doing the
+    # http call itself
     extra_groups := groups if {
       request := {
         "method": "POST",
