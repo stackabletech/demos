@@ -3,7 +3,7 @@ name: vector
 repo:
   name: vector
   url: https://helm.vector.dev
-version: 0.34.0
+version: 0.35.0 # app version 0.40.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
