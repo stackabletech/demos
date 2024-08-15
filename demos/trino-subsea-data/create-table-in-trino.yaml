@@ -60,17 +60,15 @@ data:
     run_query(connection, "CREATE SCHEMA IF NOT EXISTS hive.demo WITH (location = 's3a://demo/')")
     run_query(connection, """
         CREATE TABLE IF NOT EXISTS hive.demo.marispace (
-            footprint_x BIGINT,
-            footprint_y BIGINT,
-            water_depth BIGINT,
-            data_point_density BIGINT
+            footprint_x DOUBLE,
+            footprint_y DOUBLE,
+            water_depth DOUBLE,
+            data_point_density DOUBLE
         ) WITH (
             external_location = 's3a://demo/',
             format = 'parquet'
         )
     """)
-
-    ,footprint_y,water_depth,data_point_density,geometry
 
     loaded_rows = run_query(connection, "SELECT COUNT(*) FROM hive.demo.marispace")[0][0]
     print(f"Loaded {loaded_rows} rows")
