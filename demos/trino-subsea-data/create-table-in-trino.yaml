@@ -63,7 +63,8 @@ data:
             footprint_x DOUBLE,
             footprint_y DOUBLE,
             water_depth DOUBLE,
-            data_point_density DOUBLE
+            data_point_density DOUBLE,
+            geometry VARBINARY
         ) WITH (
             external_location = 's3a://demo/',
             format = 'parquet'
