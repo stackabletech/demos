@@ -1,8 +1,9 @@
 # klist -kt /stackable/kerberos/keytab
 # kinit -kt /stackable/kerberos/keytab nn/hdfs.default.svc.cluster.local@KNAB.COM
 # cat > /tmp/test.py
-# bin/hdfs dfs -mkdir /app
-# bin/hdfs dfs -put /tmp/test.py /app/test.py
+# bin/hdfs dfs -put /tmp/test.py /lakehouse/test.py
+# cat > /tmp/banner.py
+# bin/hdfs dfs -put /tmp/banner.py /lakehouse/banner.py
 ---
 apiVersion: spark.stackable.tech/v1alpha1
 kind: SparkApplication
@@ -12,11 +13,14 @@ spec:
   sparkImage:
     productVersion: 3.5.1
   mode: cluster
-  mainApplicationFile: hdfs://app/test.py
+  mainApplicationFile: hdfs:/lakehouse/test.py # Using this folder, as my user only has permissions for that folder (e2e-security demo)
   deps:
     packages:
       - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
   sparkConf:
+    ### SUT
+    spark.submit.pyFiles: hdfs:/lakehouse/banner.py
+    ### END SUT
     spark.driver.extraClassPath: /stackable/config/hdfs
     spark.executor.extraClassPath: /stackable/config/hdfs
     spark.hadoop.hive.metastore.kerberos.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
@@ -43,6 +47,7 @@ spec:
           subPath: krb5.conf
     envOverrides: &envOverrides
       KERBEROS_REALM: KNAB.COM
+      HADOOP_CONF_DIR: /stackable/config/hdfs
     # As the envOverrides are not working
     podOverrides:
       spec:
@@ -51,6 +56,8 @@ spec:
             env:
               - name: KERBEROS_REALM
                 value: KNAB.COM
+              - name: HADOOP_CONF_DIR
+                value: /stackable/config/hdfs
   driver:
     config:
       volumeMounts: *volumeMounts
@@ -66,6 +73,8 @@ spec:
             env:
               - name: KERBEROS_REALM
                 value: KNAB.COM
+              - name: HADOOP_CONF_DIR
+                value: /stackable/config/hdfs
   executor:
     replicas: 1
     config:

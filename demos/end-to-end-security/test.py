@@ -4,6 +4,11 @@ from pyspark.sql.functions import col, from_json, expr
 
 import time
 
+# Custom import to test loading dependencies
+import banner
+
+print(banner.bannertext)
+
 spark = SparkSession.builder.appName("spark-report").getOrCreate()
 
 spark.sql("show catalogs").show()
