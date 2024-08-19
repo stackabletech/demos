@@ -303,7 +303,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: ./stacks/trino-superset-s3/superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/feat/marispace-demo/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m

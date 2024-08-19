@@ -2,12 +2,12 @@
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: create-ny-taxi-data-table-in-trino
+  name: create-subsea-multibeam-table-in-trino
 spec:
   template:
     spec:
       containers:
-        - name: create-ny-taxi-data-table-in-trino
+        - name: create-subsea-multibeam-table-in-trino
           image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
           command: ["bash", "-c", "python -u /tmp/script/script.py"]
           volumeMounts:
@@ -18,7 +18,7 @@ spec:
       volumes:
         - name: script
           configMap:
-            name: create-ny-taxi-data-table-in-trino-script
+            name: create-subsea-multibeam-table-in-trino-script
         - name: trino-users
           secret:
             secretName: trino-users
@@ -28,7 +28,7 @@ spec:
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: create-ny-taxi-data-table-in-trino-script
+  name: create-subsea-multibeam-table-in-trino-script
 data:
   script.py: |
     import sys
