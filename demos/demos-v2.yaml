@@ -158,9 +158,9 @@ demos:
       - s3
       - parquet
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/feat/marispace-demo/demos/trino-subsea-data/load-test-data.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/feat/marispace-demo/demos/trino-subsea-data/create-table-in-trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/feat/marispace-demo/demos/trino-subsea-data/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/046a0e5c6589644c790bbeba74406c8d18a1e4ff/demos/trino-subsea-data/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/046a0e5c6589644c790bbeba74406c8d18a1e4ff/demos/trino-subsea-data/create-table-in-trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/046a0e5c6589644c790bbeba74406c8d18a1e4ff/demos/trino-subsea-data/setup-superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m

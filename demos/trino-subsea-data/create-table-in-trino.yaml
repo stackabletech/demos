@@ -59,25 +59,25 @@ data:
 
     run_query(connection, "CREATE SCHEMA IF NOT EXISTS hive.demo WITH (location = 's3a://demo/')")
     run_query(connection, """
-        CREATE TABLE IF NOT EXISTS hive.demo.marispace (
+        CREATE TABLE IF NOT EXISTS hive.demo.subsea (
             footprint_x DOUBLE,
             footprint_y DOUBLE,
             water_depth DOUBLE,
             data_point_density DOUBLE,
             geometry VARBINARY
         ) WITH (
-            external_location = 's3a://demo/',
+            external_location = 's3a://demo/subsea/',
             format = 'parquet'
         )
     """)
 
-    loaded_rows = run_query(connection, "SELECT COUNT(*) FROM hive.demo.marispace")[0][0]
+    loaded_rows = run_query(connection, "SELECT COUNT(*) FROM hive.demo.subsea")[0][0]
     print(f"Loaded {loaded_rows} rows")
     assert loaded_rows > 0
 
-    print("Analyzing table marispace")
-    analyze_rows = run_query(connection, """ANALYZE hive.demo.marispace""")[0][0]
+    print("Analyzing table subsea")
+    analyze_rows = run_query(connection, """ANALYZE hive.demo.subsea""")[0][0]
     assert analyze_rows == loaded_rows
-    stats = run_query(connection, """show stats for hive.demo.marispace""")
+    stats = run_query(connection, """show stats for hive.demo.subsea""")
     print("Produced the following stats:")
     print(*stats, sep="\n")
