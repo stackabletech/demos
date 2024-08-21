@@ -148,7 +148,7 @@ demos:
       memory: 15822Mi
       pvc: 28Gi
   trino-subsea-data:
-    description: TODO
+    description: Demo loading ca. 600m^2 of ocean floor in a surface plot to visualize the irregularities of the ocean floor.
     documentation: TODO
     stackableStack: trino-superset-s3
     labels:
