@@ -12,7 +12,7 @@ spec:
       serviceAccountName: demo-serviceaccount
       initContainers:
         - name: wait-for-trino-tables
-          image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.7.0
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
           command:
             - bash
             - -euo
@@ -23,7 +23,7 @@ spec:
               kubectl wait --timeout=30m --for=condition=complete job/create-tables-in-trino
       containers:
         - name: create-spark-report
-          image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.7.0
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
           command:
             - bash
             - -euo

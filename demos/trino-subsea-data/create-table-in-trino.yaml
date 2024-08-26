@@ -1,0 +1,83 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-subsea-multibeam-table-in-trino
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-subsea-multibeam-table-in-trino
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
+          command: ["bash", "-c", "python -u /tmp/script/script.py"]
+          volumeMounts:
+            - name: script
+              mountPath: /tmp/script
+            - name: trino-users
+              mountPath: /trino-users
+      volumes:
+        - name: script
+          configMap:
+            name: create-subsea-multibeam-table-in-trino-script
+        - name: trino-users
+          secret:
+            secretName: trino-users
+      restartPolicy: OnFailure
+  backoffLimit: 50
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-subsea-multibeam-table-in-trino-script
+data:
+  script.py: |
+    import sys
+    import trino
+
+    if not sys.warnoptions:
+        import warnings
+    warnings.simplefilter("ignore")
+
+    def get_connection():
+        connection = trino.dbapi.connect(
+            host="trino-coordinator",
+            port=8443,
+            user="admin",
+            http_scheme='https',
+            auth=trino.auth.BasicAuthentication("admin", open("/trino-users/admin").read()),
+        )
+        connection._http_session.verify = False
+        return connection
+
+    def run_query(connection, query):
+        print(f"[DEBUG] Executing query {query}")
+        cursor = connection.cursor()
+        cursor.execute(query)
+        return cursor.fetchall()
+
+    connection = get_connection()
+
+    run_query(connection, "CREATE SCHEMA IF NOT EXISTS hive.demo WITH (location = 's3a://demo/')")
+    run_query(connection, """
+        CREATE TABLE IF NOT EXISTS hive.demo.subsea (
+            footprint_x DOUBLE,
+            footprint_y DOUBLE,
+            water_depth DOUBLE,
+            data_point_density DOUBLE,
+            geometry VARBINARY
+        ) WITH (
+            external_location = 's3a://demo/subsea/',
+            format = 'parquet'
+        )
+    """)
+
+    loaded_rows = run_query(connection, "SELECT COUNT(*) FROM hive.demo.subsea")[0][0]
+    print(f"Loaded {loaded_rows} rows")
+    assert loaded_rows > 0
+
+    print("Analyzing table subsea")
+    analyze_rows = run_query(connection, """ANALYZE hive.demo.subsea""")[0][0]
+    assert analyze_rows == loaded_rows
+    stats = run_query(connection, """show stats for hive.demo.subsea""")
+    print("Produced the following stats:")
+    print(*stats, sep="\n")

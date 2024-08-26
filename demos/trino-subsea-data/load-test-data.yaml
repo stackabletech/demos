@@ -1,0 +1,21 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-subsea-multibeam-data
+spec:
+  template:
+    spec:
+      containers:
+        - name: load-subsea-multibeam-data
+          image: "bitnami/minio:2024-debian-12"
+          command: ["bash", "-c", "cd /tmp && curl -O https://repo.stackable.tech/repository/misc/marispace/multibeam_data_point_density_example.parquet && mc --insecure alias set minio http://minio:9000/ $(cat /minio-s3-credentials/accessKey) $(cat /minio-s3-credentials/secretKey) && mc cp multibeam_data_point_density_example.parquet minio/demo/subsea"]
+          volumeMounts:
+            - name: minio-s3-credentials
+              mountPath: /minio-s3-credentials
+      volumes:
+        - name: minio-s3-credentials
+          secret:
+            secretName: minio-s3-credentials
+      restartPolicy: OnFailure
+  backoffLimit: 50

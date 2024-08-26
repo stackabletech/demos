@@ -147,6 +147,25 @@ demos:
       cpu: 6800m
       memory: 15822Mi
       pvc: 28Gi
+  trino-subsea-data:
+    description: Demo loading ca. 600m^2 of ocean floor in a surface plot to visualize the irregularities of the ocean floor.
+    # documentation: -- Currently not documented
+    stackableStack: trino-superset-s3
+    labels:
+      - trino
+      - superset
+      - minio
+      - s3
+      - parquet
+    manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-subsea-data/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-subsea-data/create-table-in-trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-subsea-data/setup-superset.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 6800m
+      memory: 15822Mi
+      pvc: 28Gi
   data-lakehouse-iceberg-trino-spark:
     description: Data lakehouse using Iceberg lakehouse on S3, Trino as query engine, Spark for streaming ingest and Superset for data visualization. Multiple datasources like taxi data, water levels in Germany, earthquakes, e-charging stations and more are loaded.
     documentation: https://docs.stackable.tech/stackablectl/stable/demos/data-lakehouse-iceberg-trino-spark.html
