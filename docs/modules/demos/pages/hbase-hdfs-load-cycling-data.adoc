@@ -136,7 +136,7 @@ cycling-tripdata
 ----
 
 Secondly, we'll use `org.apache.hadoop.hbase.tool.LoadIncrementalHFiles` (see {bulkload}[bulk load docs]) to import
-the Hfiles into the table and ingest rows. 
+the Hfiles into the table and ingest rows.
 
 Now we will see how many rows are in the `cycling-tripdata` table:
 
@@ -209,8 +209,7 @@ image::hbase-hdfs-load-cycling-data/hbase-table-ui.png[]
 
 == Accessing the HDFS web interface
 
-You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of 
-the namenodes. 
+You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of the namenodes. 
 
 Below you will see the overview of your HDFS cluster.
 

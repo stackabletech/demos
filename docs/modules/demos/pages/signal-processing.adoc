@@ -40,10 +40,10 @@ image::signal-processing/overview.png[]
 
 == Data ingestion
 
-The data used in this demo is a set of gas sensor measurements*. 
-The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors. 
-In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table. 
-It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed. 
+The data used in this demo is a set of gas sensor measurements*.
+The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors.
+In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table.
+It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed.
 The Nifi flow that does this can easily be extended to process other sources of (actually streamed) data.
 
 == JupyterHub

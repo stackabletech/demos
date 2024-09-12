@@ -529,7 +529,7 @@ What might also be interesting is the average and current measurement of the sta
 
 [source,sql]
 ----
-select 
+select
   stations.longname as station,
   avg("value") as avg_measurement,
   latest_by("value", measurements."__time") as current_measurement,
