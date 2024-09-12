@@ -538,7 +538,7 @@ stacks:
     description: >-
       A stack used to demonstrate an end-to-end security concept.
 
-      Please note that this stack is tightly coupled with the demo.
+      Note that this stack is tightly coupled with the demo.
       So if you install the stack you will get demo-specific parts (such as Keycloak users or regorules).
     stackableRelease: 24.7
     stackableOperators:

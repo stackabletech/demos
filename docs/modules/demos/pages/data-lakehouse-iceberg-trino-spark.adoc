@@ -1,5 +1,6 @@
 = data-lakehouse-iceberg-trino-spark
 :page-aliases: stable@stackablectl::demos/data-lakehouse-iceberg-trino-spark.adoc
+:description: This demo shows a data workload with real-world data volumes using Trino, Kafka, Spark, NiFi, Superset and OPA.
 
 :demo-code: https://github.com/stackabletech/demos/blob/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
 :iceberg-table-maintenance: https://iceberg.apache.org/docs/latest/spark-procedures/#metadata-management
@@ -11,17 +12,17 @@
 
 [IMPORTANT]
 ====
-This demo shows a data workload with real-world data volumes and uses significant resources to ensure acceptable
-response times. It will likely not run on your workstation.
+This demo shows a data workload with real-world data volumes and uses significant resources to ensure acceptable response times.
+It will likely not run on your workstation.
 
-There is also the smaller xref:trino-iceberg.adoc[] demo focusing on the abilities a lakehouse using Apache
-Iceberg offers. The `trino-iceberg` demo has no streaming data and can be executed on a local workstation.
+There is also the smaller xref:trino-iceberg.adoc[] demo focusing on the abilities a lakehouse using Apache Iceberg offers.
+The `trino-iceberg` demo has no streaming data and can be executed on a local workstation.
 ====
 
 [CAUTION]
 ====
-This demo only runs in the `default` namespace, as a `ServiceAccount` will be created. Additionally, we have to use the
-FQDN service names (including the namespace), so that the used TLS certificates are valid.
+This demo only runs in the `default` namespace, as a `ServiceAccount` will be created.
+Additionally, we have to use the FQDN service names (including the namespace), so that the used TLS certificates are valid.
 ====
 
 Install this demo on an existing Kubernetes cluster:
@@ -37,9 +38,9 @@ $ stackablectl demo install data-lakehouse-iceberg-trino-spark
 The demo was developed and tested on a kubernetes cluster with about 12 nodes (4 cores with hyperthreading/SMT, 20GiB RAM and 30GB HDD).
 Instance types that loosely correspond to this on the Hyperscalers are:
 
-- *Google*: `e2-standard-8`
-- *Azure*: `Standard_D4_v2`
-- *AWS*: `m5.2xlarge`
+* *Google*: `e2-standard-8`
+* *Azure*: `Standard_D4_v2`
+* *AWS*: `m5.2xlarge`
 
 In addition to these nodes the operators will request multiple persistent volumes with a total capacity of about 300Gi.
 
@@ -49,26 +50,26 @@ This demo will
 
 * Install the required Stackable operators.
 * Spin up the following data products:
-** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This
-   demo uses it to enable SQL access to the data.
-** *Apache Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo
-   uses it to stream data from Kafka into the lakehouse.
-** *MinIO*: S3 compatible object store. This demo uses it as persistent storage to store all the data used
-** *Apache Kafka*: A distributed event streaming platform for high-performance data pipelines, streaming analytics and
-   data integration. This demo uses it as an event streaming platform to stream the data in near real-time.
-** *Apache NiFi*: An easy-to-use, robust system to process and distribute data. This demo uses it to fetch multiple
-   online real-time data sources and ingest it into Kafka.
-** *Apache Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it
-   as metadata storage for Trino and Spark.
-** *Open policy agent* (OPA): An open-source, general-purpose policy engine unifying policy enforcement across the
-   stack. This demo uses it as the authorizer for Trino, which decides which user can query which data.
-** *Apache Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data
-   from Trino via SQL queries and build dashboards on top of that data.
+** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe.
+   This demo uses it to enable SQL access to the data.
+** *Apache Spark*: A multi-language engine for executing data engineering, data science, and machine learning.
+   This demo uses it to stream data from Kafka into the lakehouse.
+** *MinIO*: S3 compatible object store.
+   This demo uses it as persistent storage to store all the data used
+** *Apache Kafka*: A distributed event streaming platform for high-performance data pipelines, streaming analytics and data integration.
+   This demo uses it as an event streaming platform to stream the data in near real-time.
+** *Apache NiFi*: An easy-to-use, robust system to process and distribute data.
+   This demo uses it to fetch multiple online real-time data sources and ingest it into Kafka.
+** *Apache Hive metastore*: A service that stores metadata related to Apache Hive and other services.
+   This demo uses it as metadata storage for Trino and Spark.
+** *Open policy agent* (OPA): An open-source, general-purpose policy engine unifying policy enforcement across the stack.
+   This demo uses it as the authorizer for Trino, which decides which user can query which data.
+** *Apache Superset*: A modern data exploration and visualization platform.
+   This demo utilizes Superset to retrieve data from Trino via SQL queries and build dashboards on top of that data.
 * Copy multiple data sources in CSV and Parquet format into the S3 staging area.
-* Let Trino copy the data from the staging area into the lakehouse area. During the copy, transformations such as
-  validating, casting, parsing timestamps and enriching the data by joining lookup tables are done.
-* Simultaneously, start a NiFi workflow, which fetches datasets in real-time via the internet and ingests the data as
-  JSON records into Kafka.
+* Let Trino copy the data from the staging area into the lakehouse area.
+  During the copy, transformations such as validating, casting, parsing timestamps and enriching the data by joining lookup tables are done.
+* Simultaneously, start a NiFi workflow, which fetches datasets in real-time via the internet and ingests the data as JSON records into Kafka.
 * Spark structured streaming job is started, which streams the data out of Kafka into the lakehouse.
 * Create Superset dashboards for visualization of the different datasets.
 
@@ -83,9 +84,8 @@ As Apache Iceberg states on their https://iceberg.apache.org/docs/latest/[websit
 > Apache Iceberg is an open table format for huge analytic datasets. Iceberg adds tables to compute engines including
 Spark, Trino, PrestoDB, Flink, Hive and Impala using a high-performance table format that works just like a SQL table.
 
-This demo uses Iceberg, which plays nicely with object storage and has integrations for Trino and Spark. It also
-provides the following benefits among other things, instead of putting https://parquet.apache.org/[Apache Parquet] files
-directly into S3 using the https://trino.io/docs/current/connector/hive.html[Hive connector]:
+This demo uses Iceberg, which plays nicely with object storage and has integrations for Trino and Spark.
+It also provides the following benefits among other things, instead of putting https://parquet.apache.org/[Apache Parquet] files directly into S3 using the https://trino.io/docs/current/connector/hive.html[Hive connector]:
 
 * *Standardized table storage:* Using this standardized specification, multiple tools such as Trino, Spark and Flink can
   read and write Iceberg tables.
@@ -101,11 +101,11 @@ directly into S3 using the https://trino.io/docs/current/connector/hive.html[Hiv
   column `day` is not needed anymore, and the query `select count(\*) where ts > now() - interval 1 day` would use
   partition pruning as expected to read only one the partitions from today and yesterday.
 * *Branching and tagging:* Iceberg enables git-like semantics on your lakehouse. You can create tags pointing to a
-specific snapshot of your data and branches. For details, please read
+specific snapshot of your data and branches. For details, read
 https://www.dremio.com/blog/exploring-branch-tags-in-apache-iceberg-using-spark/[this excellent blog post]. Currently,
 this is only supported in Spark. Trino is https://github.com/trinodb/trino/issues/12844[working on support].
 
-If you want to read more about the motivation and the working principles of Iceberg, please have a read on their
+If you want to read more about the motivation and the working principles of Iceberg, have a read on their
 https://iceberg.apache.org[website] or https://github.com/apache/iceberg/[GitHub repository].
 
 == List the deployed Stackable services
@@ -226,8 +226,7 @@ On the right side are three strands, that
 . Fetch the current shared bike station status
 . Fetch the current shared bike status
 
-For details on the NiFi workflow ingesting water-level data, please read the
-xref:nifi-kafka-druid-water-level-data.adoc#_nifi[nifi-kafka-druid-water-level-data documentation on NiFi].
+For details on the NiFi workflow ingesting water-level data, read the xref:nifi-kafka-druid-water-level-data.adoc#_nifi[nifi-kafka-druid-water-level-data documentation on NiFi].
 
 == Spark
 
@@ -310,9 +309,10 @@ to strings and the json needs to be parsed.
 .withColumn("json", from_json(col("value"), schema)) \
 ----
 
-Afterwards, we only select the needed fields (coming from JSON). We are not interested in all the other fields, such as
-`key`, `value`, `topic` or `offset`. The metadata of the Kafka records, such as `topic`, `timestamp`, `partition` and
-`offset`, are also available. Please have a look at the {spark-streaming-docs}[Spark streaming documentation on Kafka].
+Afterwards, we only select the needed fields (coming from JSON).
+We are not interested in all the other fields, such as `key`, `value`, `topic` or `offset`.
+The metadata of the Kafka records, such as `topic`, `timestamp`, `partition` and `offset`, are also available.
+Have a look at the {spark-streaming-docs}[Spark streaming documentation on Kafka].
 
 [source,python]
 ----
@@ -459,8 +459,7 @@ data files causes an unnecessary amount of metadata and less efficient queries f
 data files in parallel using Spark with the rewriteDataFiles action. This will combine small files into larger files to
 reduce metadata overhead and runtime file open cost.
 
-Some tables will also be sorted during rewrite, please have a look at the
-{iceberg-rewrite}[documentation on rewrite_data_files].
+Some tables will also be sorted during rewrite, have a look at the {iceberg-rewrite}[documentation on rewrite_data_files].
 
 == Trino
 
@@ -479,8 +478,8 @@ image::data-lakehouse-iceberg-trino-spark/trino_2.png[]
 
 === Connect to Trino
 
-Please have a look at the xref:home:trino:usage-guide/connect_to_trino.adoc[trino-operator documentation on how to
-connect to Trino]. This demo recommends to use DBeaver, as Trino consists of many schemas and tables you can explore.
+Have a look at the xref:home:trino:usage-guide/connect_to_trino.adoc[trino-operator documentation on how to connect to Trino].
+This demo recommends to use DBeaver, as Trino consists of many schemas and tables you can explore.
 
 image::data-lakehouse-iceberg-trino-spark/dbeaver_1.png[]
 

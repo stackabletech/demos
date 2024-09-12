@@ -1,5 +1,6 @@
 = hbase-hdfs-cycling-data
 :page-aliases: stable@stackablectl::demos/hbase-hdfs-load-cycling-data.adoc
+:description: Load cyclist data from HDFS to HBase on Kubernetes using Stackable's demo. Install, copy data, create HFiles, and query efficiently.
 
 :kaggle: https://www.kaggle.com/datasets/timgid/cyclistic-dataset-google-certificate-capstone?select=Divvy_Trips_2020_Q1.csv
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
@@ -195,7 +196,7 @@ COLUMN FAMILIES DESCRIPTION
 [TIP]
 ====
 Run `stackablectl stacklet list` to get the address of the _ui-http_ endpoint.
-If the UI is unavailable, please do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
+If the UI is unavailable, do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
 ====
 
 The Hbase web UI will give you information on the status and metrics of your Hbase cluster. See below for the start page.

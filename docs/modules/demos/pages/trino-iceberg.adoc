@@ -1,5 +1,6 @@
 = trino-iceberg
 :page-aliases: stable@stackablectl::demos/trino-iceberg.adoc
+:description: Install and explore Trino with Apache Iceberg for efficient SQL queries and scalable data management in a demo environment.
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :tcph-spec: https://www.tpc.org/tpc_documents_current_versions/pdf/tpc-h_v3.0.1.pdf
@@ -11,10 +12,7 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install trino-iceberg
 ----
 
-[WARNING]
-====
-This demo should not be run alongside other demos.
-====
+WARNING: This demo should not be run alongside other demos.
 
 [#system-requirements]
 == System requirements
@@ -27,10 +25,9 @@ To run this demo, your system needs at least:
 
 [NOTE]
 ====
-This demo is a condensed form of the xref:data-lakehouse-iceberg-trino-spark.adoc[] demo focusing on using the
-lakehouse to store and modify data. It focuses on the Trino and Iceberg integration and should run on your local
-workstation. If you want a more complex lakehouse setup, please look at the
-xref:data-lakehouse-iceberg-trino-spark.adoc[] demo.
+This demo is a condensed form of the xref:data-lakehouse-iceberg-trino-spark.adoc[] demo focusing on using the lakehouse to store and modify data.
+It focuses on the Trino and Iceberg integration and should run on your local workstation.
+If you want a more complex lakehouse setup, look at the xref:data-lakehouse-iceberg-trino-spark.adoc[] demo.
 ====
 
 == Overview
@@ -71,22 +68,21 @@ include::partial$instance-hint.adoc[]
 
 == MinIO
 
-You can view the available buckets and objects (think of files) described in the
-xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo. Currently, the bucket `lakehouse`
-is still empty, but will be filled during the next steps.
+You can view the available buckets and objects (think of files) described in the xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo.
+Currently, the bucket `lakehouse` is still empty, but will be filled during the next steps.
 
 == Connect to Trino
 
-Have a look at the xref:trino:usage-guide/connect_to_trino#_connect_with_dbeaver[documentation] on how to
-connect with DBeaver. As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
+Have a look at the xref:trino:usage-guide/connect_to_trino#_connect_with_dbeaver[documentation] on how to connect with DBeaver.
+As an alternative, you can use https://trino.io/download.html[trino-cli] by running:
 
 [source,console]
 ----
 $ java -jar ~/Downloads/trino-cli-451-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
 ----
 
-Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output. When
-prompted, enter the password `adminadmin`.
+Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output.
+When prompted, enter the password `adminadmin`.
 
 == Create test data
 
@@ -99,8 +95,7 @@ First, you must create a schema in the lakehouse to store the test data:
 CREATE SCHEMA lakehouse.tpch WITH (location = 's3a://lakehouse/tpch');
 ----
 
-Afterwards, you can set the context to the freshly created schema so that you don't need to write out every table as
-`lakehouse.tpch.<table-name>` but instead can use `<table-name>` directly.
+Afterwards, you can set the context to the freshly created schema so that you don't need to write out every table as `lakehouse.tpch.<table-name>` but instead can use `<table-name>` directly.
 
 [source,sql]
 ----
@@ -109,9 +104,8 @@ use lakehouse.tpch;
 
 === Create the tables
 
-You can use the https://www.tpc.org/tpch/[TPC-H dataset] to have some test data to work with. Trino offers a special
-https://trino.io/docs/current/connector/tpch.html[TPCH connector] that generates the test data deterministically on the
-fly.
+You can use the https://www.tpc.org/tpch/[TPC-H dataset] to have some test data to work with.
+Trino offers a special https://trino.io/docs/current/connector/tpch.html[TPCH connector] that generates the test data deterministically on the fly.
 
 You can list the tables that are part of the dataset using:
 
@@ -132,14 +126,14 @@ show tables in tpch.sf5;
 (8 rows)
 ----
 
-The dataset comes with different scale factors. This demo is intended to run on a laptop, so it starts with a scale
-factor of 5 (hence the `sf5` in the above query). If you have a sufficiently large S3 and Trino deployed, you can easily
-re-run the statements below with a different scale factor. This demo has been tested up to a scale factor of 10000, but
-you can choose any scale in between or even more if desired.
+The dataset comes with different scale factors.
+This demo is intended to run on a laptop, so it starts with a scale factor of 5 (hence the `sf5` in the above query).
+If you have a sufficiently large S3 and Trino deployed, you can easily re-run the statements below with a different scale factor.
+This demo has been tested up to a scale factor of 10000, but you can choose any scale in between or even more if desired.
 
-If you have decided on your scale factor, run the queries below to create tables in the lakehouse and propagate them
-with test data. Depending on the scale factor, this can take considerable time (the queries are ordered by size
-ascending). The progress of the query can be tracked in the web interface.
+After you have decided on your scale factor, run the queries below to create tables in the lakehouse and propagate them with test data.
+Depending on the scale factor, this can take considerable time (the queries are ordered by size ascending).
+The progress of the query can be tracked in the web interface.
 
 [source,sql]
 ----
@@ -171,8 +165,7 @@ drop table if exists customers_to_prioritize;
 ----
 ====
 
-Afterwards, your database overview in DBeaver should look like the following (you might need to refresh the contents
-with `F5`).
+Afterwards, your database overview in DBeaver should look like the following (you might need to refresh the contents with `F5`).
 
 image::trino-iceberg/dbeaver_1.png[]
 
@@ -180,7 +173,7 @@ image::trino-iceberg/dbeaver_1.png[]
 
 === Basic table information
 
-To create a view containing some basic information about the tables, please execute the statement below:
+To create a view containing some basic information about the tables, execute the statement below:
 
 .Statement to create table_information view
 [%collapsible]
@@ -256,8 +249,8 @@ select * from table_information order by records desc;
 
 === Query the data
 
-You can now use standard SQL to analyze the data. The relation of the tables to each other is explained in the
-{tcph-spec}[TPC-H specification] and looks as follows:
+You can now use standard SQL to analyze the data.
+The relation of the tables to each other is explained in the {tcph-spec}[TPC-H specification] and looks as follows:
 
 image::trino-iceberg/tpch_schema.png[]
 
@@ -289,27 +282,26 @@ order by returnflag, linestatus;
 (4 rows)
 ----
 
-The query is inspired by the first query `Q1` of the {tcph-spec}[TPC-H benchmark]. The only difference is that the
-`where shipdate <= date '1998-12-01' - interval '[DELTA]' day` clause was omitted to produce a full-table scan.
+The query is inspired by the first query `Q1` of the {tcph-spec}[TPC-H benchmark].
+The only difference is that the `where shipdate <= date '1998-12-01' - interval '[DELTA]' day` clause was omitted to produce a full-table scan.
 
 === Row-level deletes
 
-So far, the tables have been written once and have only been read afterwards. Trino - combined with Iceberg - can read
-data and do row-level deletes (deleting single rows out of a table). They achieve this by writing so-called "delete
-files", which mark rows for deletion.
+So far, the tables have been written once and have only been read afterwards.
+Trino - combined with Iceberg - can read data and do row-level deletes (deleting single rows out of a table).
+They achieve this by writing so-called "delete files", which mark rows for deletion.
 
-First, imagine a situation where some customers want all their data deleted. You track all the deletion requests in a
-dedicated table and have a nightly job that deletes all your data about the user. Let's create a table
-`customers_to_delete` containing a random sample of 1% of our user base. You can leave the command unchanged if you run
-with a larger scale factor.
+First, imagine a situation where some customers want all their data deleted.
+You track all the deletion requests in a dedicated table and have a nightly job that deletes all your data about the user.
+Let's create a table `customers_to_delete` containing a random sample of 1% of our user base.
+You can leave the command unchanged if you run with a larger scale factor.
 
 [source,sql]
 ----
 create table customers_to_delete as select custkey from customer tablesample bernoulli (1);
 ----
 
-If you want to add new users to be scheduled for deletion, you can insert new users into the `customers_to_delete` table
-using the following query:
+If you want to add new users to be scheduled for deletion, you can insert new users into the `customers_to_delete` table using the following query:
 
 .Statement to add new users to customers_to_delete
 [%collapsible]
@@ -320,8 +312,7 @@ insert into customers_to_delete select custkey from customer tablesample bernoul
 ----
 ====
 
-The next step is the actual deletion process. It starts with the `lineitem` table and deletes all items in the
-customer's orders:
+The next step is the actual deletion process. It starts with the `lineitem` table and deletes all items in the customer's orders:
 
 [source,sql]
 ----
@@ -344,7 +335,8 @@ As a last step the actual users get deleted:
 delete from customer where custkey in (select custkey from customers_to_delete);
 ----
 
-Let's check that we actually deleted the data. Both of the queries below should return `0`:
+Let's check that we actually deleted the data.
+Both of the queries below should return `0`:
 
 [source,sql]
 ----
@@ -354,8 +346,9 @@ select count(*) from orders where custkey in (select custkey from customers_to_d
 
 === Row Level Updates
 
-Iceberg does not only offer row-level deletes but also updates. For example, a customer relocation requires an address
-change. The customer is identified by its key `112501` and name `Customer#000112501`.
+Iceberg does not only offer row-level deletes but also updates.
+For example, a customer relocation requires an address change.
+The customer is identified by its key `112501` and name `Customer#000112501`.
 
 First, let's see its current status:
 
@@ -379,12 +372,12 @@ Afterwards, the records should look the same as before, with the difference that
 
 === The MERGE INTO Statement
 
-Trino also offers a https://trino.io/docs/current/sql/merge.html[MERGE INTO] statement, which gives you great
-flexibility.
+Trino also offers a https://trino.io/docs/current/sql/merge.html[MERGE INTO] statement, which gives you great flexibility.
 
-We want to pick some customers and give them VIP status to show their usage. We do this by giving all of their orders
-maximum priority. We could easily do this with an `UPDATE` statement, but here, we want to add some additional
-requirements and use the `MERGE INTO` statement. So, we need to track the previous priority.
+We want to pick some customers and give them VIP status to show their usage.
+We do this by giving all of their orders maximum priority.
+We could easily do this with an `UPDATE` statement, but here, we want to add some additional requirements and use the `MERGE INTO` statement.
+So, we need to track the previous priority.
 
 Let's inspect the `orders` table first:
 
@@ -486,22 +479,22 @@ select orderpriority_prev, count(*) from orders where custkey in (select custkey
 
 == Scaling up to a larger amount of data
 
-So far, we have executed all the queries against a dataset created from TPC-H with a scale factor of 5. The demo can
-handle much larger data volumes.
+So far, we have executed all the queries against a dataset created from TPC-H with a scale factor of 5.
+The demo can handle much larger data volumes.
 
-This section describes how to scale up your environment to drop and re-create the tables with a more significant scale
-factor. After creating the tables, you should be able to execute the above queries again without changing anything.
+This section describes how to scale up your environment to drop and re-create the tables with a more significant scale factor.
+After creating the tables, you should be able to execute the above queries again without changing anything.
 
 [NOTE]
 ====
-Your Kubernetes cluster must be large enough to handle the scale-up. If you are running, e.g. on your local machine and
-try to spin up 8 Trino workers with 16GB RAM each, chances are high that Pods will be stuck in `Pending` as the
-resources required can't be fulfilled.
+Your Kubernetes cluster must be large enough to handle the scale-up.
+If you are running, e.g. on your local machine and try to spin up 8 Trino workers with 16GB RAM each, chances are high that Pods will be stuck in `Pending` as the resources required can't be fulfilled.
 ====
 
 === Scale Trino
 
-Run `kubectl edit trinocluster trino`. Modify the following settings to your needs:
+Run `kubectl edit trinocluster trino`.
+Modify the following settings to your needs:
 
 [source,yaml]
 ----
