@@ -85,8 +85,6 @@ This demo will run two jobs to automatically load data.
 === distcp-cycling-data
 
 {distcp}[DistCp] (distributed copy) efficiently transfers large amounts of data from one location to another.
-It uses MapReduce to effect its distribution, error handling, recovery, and reporting.
-It expands a list of files and directories into input to map tasks, each of which will copy a partition of the files specified in the source list.
 Therefore, the first Job uses DistCp to copy data from a S3 bucket into HDFS.
 Below, you'll see parts from the logs.
 
