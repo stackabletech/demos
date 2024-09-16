@@ -98,7 +98,7 @@ include::partial$instance-hint.adoc[]
 Kafka is an event streaming platform to stream the data in near real-time.
 All the messages put in and read from Kafka are structured in dedicated queues called topics.
 The test data will be put into a topic called earthquakes.
-The records are produced (put in) by the test data generator and consumed (read) by Druid afterwards in the same order they were created.
+The records are produced (written) by the test data generator and consumed (read) by Druid afterwards in the same order they were created.
 
 As Kafka has no web interface, you must use a Kafka client like {kcat}[kcat].
 Kafka uses mutual TLS, so clients wanting to connect to Kafka must present a valid TLS certificate.
