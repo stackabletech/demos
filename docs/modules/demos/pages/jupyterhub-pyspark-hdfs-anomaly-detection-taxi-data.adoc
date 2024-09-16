@@ -40,7 +40,7 @@ To run this demo, your system needs at least:
 
 == Aim / Context
 
-This demo does not use the Stackable spark-k8s-operator but rather delegates the creation of executor pods to JupyterHub.
+This demo does not use the Stackable operator for Spark but rather delegates the creation of executor pods to JupyterHub.
 The intention is to demonstrate how to interact with SDP components when designing and testing Spark jobs:
 the resulting script and Spark job definition can then be transferred with a Stackable SparkApplication resource.
 When logging in to JupyterHub (described below), a pod will be created with the username as a suffix, e.g. `jupyter-admin`.
