@@ -1,5 +1,6 @@
 = trino-taxi-data
 :page-aliases: stable@stackablectl::demos/trino-taxi-data.adoc
+:description: Install and demo Trino with NYC taxi data: Query with SQL, visualize with Superset, and explore data in MinIO and Trino on Kubernetes.
 
 :superset-docs: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
 :nyc-website: https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
@@ -301,13 +302,12 @@ returns
 
 === Create Additional Dashboards
 
-You also have the possibility to create additional charts and bundle them together in a Dashboard. Have a look at
-{superset-docs}[the Superset documentation] on how to do that.
+You also have the possibility to create additional charts and bundle them together in a Dashboard. Have a look at {superset-docs}[the Superset documentation] on how to do that.
 
 === Load Additional Data
 
-You can use the MinIO webinterface to upload additional data. As an alternative you can use the S3 API with an S3 client
-like https://s3tools.org/s3cmd[s3cmd]. It is recommended to put the data into a folder (prefix) in the `demo` bucket.
+You can use the MinIO webinterface to upload additional data. As an alternative you can use the S3 API with an S3 client like https://s3tools.org/s3cmd[s3cmd].
+It is recommended to put the data into a folder (prefix) in the `demo` bucket.
 
 Have a look at the defined tables inside the `hive.demo` schema on how to inform Trino about the newly available data.
 
@@ -340,8 +340,7 @@ CREATE TABLE hive.demo.ny_taxi_data_raw (
 )
 ----
 
-If you want to transform or filter your data in any way before using it e.g. in Superset you can create a view as
-follows:
+If you want to transform or filter your data in any way before using it e.g. in Superset you can create a view as follows:
 
 [source,sql]
 ----
@@ -372,5 +371,4 @@ AND tpep_pickup_datetime <= from_iso8601_timestamp('2022-05-31T00:00:00')
 
 === Connect to Trino via CLI, Python or DBeaver
 
-If you prefer running your SQL statements via command-line, a Python script or a graphical database manager like DBeaver
-please have a look at the {trino-client-docs}[the Trino documentation] on how to do that.
+If you prefer running your SQL statements via command-line, a Python script or a graphical database manager like DBeaver, consult the {trino-client-docs}[the Trino documentation] on how to do that.

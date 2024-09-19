@@ -1,5 +1,6 @@
 = hbase-hdfs-cycling-data
 :page-aliases: stable@stackablectl::demos/hbase-hdfs-load-cycling-data.adoc
+:description: Load cyclist data from HDFS to HBase on Kubernetes using Stackable's demo. Install, copy data, create HFiles, and query efficiently.
 
 :kaggle: https://www.kaggle.com/datasets/timgid/cyclistic-dataset-google-certificate-capstone?select=Divvy_Trips_2020_Q1.csv
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
@@ -14,10 +15,7 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install hbase-hdfs-load-cycling-data
 ----
 
-[WARNING]
-====
-This demo should not be run alongside other demos.
-====
+WARNING: This demo should not be run alongside other demos.
 
 [#system-requirements]
 == System requirements
@@ -34,11 +32,11 @@ This demo will
 
 * Install the required Stackable operators.
 * Spin up the following data products:
-** *Hbase:* An open source distributed, scalable, big data store. This demo uses it to store the
+** *HBase:* An open source distributed, scalable, big data store. This demo uses it to store the
    {kaggle}[cyclist dataset] and enable access.
-** *HDFS:* A distributed file system used to intermediately store the dataset before importing it into Hbase
+** *HDFS:* A distributed file system used to intermediately store the dataset before importing it into HBase
 * Use {distcp}[distcp] to copy a {kaggle}[cyclist dataset] from an S3 bucket into HDFS.
-* Create HFiles, a File format for hbase consisting of sorted key/value pairs. Both keys and values are byte arrays.
+* Create HFiles, a File format for hBase consisting of sorted key/value pairs. Both keys and values are byte arrays.
 * Load Hfiles into an existing table via the `Importtsv` utility, which will load data in `TSV` or `CSV` format into
   HBase.
 * Query data via the `hbase` shell, which is an interactive shell to execute commands on the created table
@@ -86,10 +84,9 @@ This demo will run two jobs to automatically load data.
 
 === distcp-cycling-data
 
-{distcp}[DistCp] (distributed copy) is used for large inter/intra-cluster copying. It uses MapReduce to effect its
-distribution, error handling, recovery, and reporting. It expands a list of files and directories into input to map
-tasks, each of which will copy a partition of the files specified in the source list. Therefore, the first Job uses
-DistCp to copy data from a S3 bucket into HDFS. Below, you'll see parts from the logs.
+{distcp}[DistCp] (distributed copy) efficiently transfers large amounts of data from one location to another.
+Therefore, the first Job uses DistCp to copy data from a S3 bucket into HDFS.
+Below, you'll see parts from the logs.
 
 [source]
 ----
@@ -110,11 +107,12 @@ Copying s3a://public-backup-nyc-tlc/cycling-tripdata/demo-cycling-tripdata.csv.g
 
 The second Job consists of 2 steps.
 
-First, we use `org.apache.hadoop.hbase.mapreduce.ImportTsv` (see {importtsv}[ImportTsv Docs]) to create a table and
-Hfiles. Hfile is an Hbase dedicated file format which is performance optimized for hbase. It stores meta-information
-about the data and thus increases the performance of hbase. When connecting to the hbase master, opening a hbase shell
-and executing `list`, you will see the created table. However, it'll contain 0 rows at this point. You can connect to
-the shell via:
+First, we use `org.apache.hadoop.hbase.mapreduce.ImportTsv` (see {importtsv}[ImportTsv Docs]) to create a table and Hfiles.
+Hfile is an HBase dedicated file format which is performance optimized for HBase.
+It stores meta-information about the data and thus increases the performance of HBase.
+When connecting to the HBase master, opening a HBase shell and executing `list`, you will see the created table.
+However, it'll contain 0 rows at this point.
+You can connect to the shell via:
 
 [source,console]
 ----
@@ -135,7 +133,7 @@ cycling-tripdata
 ----
 
 Secondly, we'll use `org.apache.hadoop.hbase.tool.LoadIncrementalHFiles` (see {bulkload}[bulk load docs]) to import
-the Hfiles into the table and ingest rows. 
+the Hfiles into the table and ingest rows.
 
 Now we will see how many rows are in the `cycling-tripdata` table:
 
@@ -162,7 +160,7 @@ Took 13.4666 seconds
 
 == Inspecting the Table
 
-You can now use the table and the data. You can use all available hbase shell commands.
+You can now use the table and the data. You can use all available HBase shell commands.
 
 [source,sql]
 ----
@@ -190,15 +188,15 @@ COLUMN FAMILIES DESCRIPTION
 {NAME => 'started_at', BLOOMFILTER => 'ROW', IN_MEMORY => 'false', VERSIONS => '1', KEEP_DELETED_CELLS => 'FALSE', DATA_BLOCK_ENCODING => 'NONE', COMPRESSION => 'NONE', TTL => 'FOREVER', MIN_VERSIONS => '0', BLOCKCACHE => 'true', BLOCKSIZE => '65536', REPLICATION_SCOPE => '0'}
 ----
 
-== Accessing the Hbase web interface
+== Accessing the HBase web interface
 
 [TIP]
 ====
 Run `stackablectl stacklet list` to get the address of the _ui-http_ endpoint.
-If the UI is unavailable, please do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
+If the UI is unavailable, do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
 ====
 
-The Hbase web UI will give you information on the status and metrics of your Hbase cluster. See below for the start page.
+The HBase web UI will give you information on the status and metrics of your HBase cluster. See below for the start page.
 
 image::hbase-hdfs-load-cycling-data/hbase-ui-start-page.png[]
 
@@ -208,8 +206,7 @@ image::hbase-hdfs-load-cycling-data/hbase-table-ui.png[]
 
 == Accessing the HDFS web interface
 
-You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of 
-the namenodes. 
+You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of the namenodes.
 
 Below you will see the overview of your HDFS cluster.
 
@@ -223,7 +220,8 @@ You can also browse the file system by clicking on the `Utilities` tab and selec
 
 image::hbase-hdfs-load-cycling-data/hdfs-data.png[]
 
-Navigate in the file system to the folder `data` and then the `raw` folder. Here you can find the raw data from the distcp job.
+Navigate in the file system to the folder `data` and then the `raw` folder.
+Here you can find the raw data from the distcp job.
 
 image::hbase-hdfs-load-cycling-data/hdfs-data-raw.png[]
 
