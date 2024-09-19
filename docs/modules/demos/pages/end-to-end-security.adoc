@@ -1,6 +1,6 @@
 = end-to-end-security
-
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:description: This demo showcases end-to-end security in Stackable Data Platform with OPA, featuring row/column access control, OIDC, Kerberos, and flexible group policies.
 
 This is a demo to showcase what can be done with Open Policy Agent around authorization in the Stackable Data Platform.
 It covers the following aspects of security:
@@ -55,8 +55,7 @@ You can see the deployed products and their relationship in the following diagra
 
 image::end-to-end-security/overview.png[Architectural overview]
 
-Please note the different types of arrows used to connect the technologies in here, which symbolize
-how authentication happens along that route and if impersonation is used for queries executed.
+Note the different types of arrows used to connect the technologies in here, which symbolize how authentication happens along that route and if impersonation is used for queries executed.
 
 The Trino schema (with schemas, tables and views) is shown below.
 

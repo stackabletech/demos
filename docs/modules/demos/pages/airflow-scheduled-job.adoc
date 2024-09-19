@@ -1,5 +1,6 @@
 = airflow-scheduled-job
 :page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
+:description: This demo installs Airflow with Postgres and Redis on Kubernetes, showcasing DAG scheduling, job runs, and status verification via the Airflow UI.
 
 Install this demo on an existing Kubernetes cluster:
 
@@ -102,9 +103,10 @@ Click on the `run_every_minute` box in the centre of the page and then select `L
 
 [WARNING]
 ====
-In this demo, the logs are not available when the KubernetesExecutor is deployed. See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/executor/kubernetes.html#managing-dags-and-logs[Airflow Documentation] for more details.
+In this demo, the logs are not available when the KubernetesExecutor is deployed.
+See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/executor/kubernetes.html#managing-dags-and-logs[Airflow Documentation] for more details.
 
-If you are interested in persisting the logs, please take a look at the xref:logging.adoc[] demo.
+If you are interested in persisting the logs, take a look at the xref:logging.adoc[] demo.
 ====
 
 image::airflow-scheduled-job/airflow_9.png[]

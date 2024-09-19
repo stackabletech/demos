@@ -1,5 +1,6 @@
 = spark-k8s-anomaly-detection-taxi-data
 :page-aliases: stable@stackablectl::demos/spark-k8s-anomaly-detection-taxi-data.adoc
+:description: Deploy a Kubernetes-based Spark demo for anomaly detection using the popular New York taxi dataset, featuring Trino, Spark, MinIO, and Superset.
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
@@ -87,8 +88,8 @@ include::partial$instance-hint.adoc[]
 
 === List Buckets
 
-The S3 provided by MinIO is used as persistent storage to store all the data used. Open the endpoint `http`
-retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.2:32276 in this case).
+The S3 provided by MinIO is used as persistent storage to store all the data used.
+Open the endpoint `http` retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.2:32276 in this case).
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_0.png[]
 
@@ -109,10 +110,9 @@ Click on the bucket `demo` and then on `ny-taxi-data` and `raw` respectively.
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_3.png[]
 
-This folder (called prefixes in S3) contains a dataset of similarly structured data files. The data is partitioned by month
-and contains several hundred MBs, which may seem small for a dataset. Still, the model is a time-series model where the
-data has decreasing relevance the "older" it is, especially when the data is subject to multiple external factors, many
-of which are unknown and fluctuating in scope and effect.
+This folder (called prefixes in S3) contains a dataset of similarly structured data files.
+The data is partitioned by month and contains several hundred MBs, which may seem small for a dataset.
+Still, the model is a time-series model where the data has decreasing relevance the "older" it is, especially when the data is subject to multiple external factors, many of which are unknown and fluctuating in scope and effect.
 
 The second bucket prediction contains the output from the model scoring process under `prediction/anomaly-detection/iforest/data`:
 
@@ -122,15 +122,12 @@ This is a much smaller file, as it only contains scores for each aggregated peri
 
 == Spark
 
-The Spark job ingests the raw data and performs straightforward data wrangling and feature engineering. Any windowing
-features designed to capture the time-series nature of the data - such as lags or rolling averages - need to use evenly
-distributed partitions so that Spark can execute these tasks in parallel. The job uses an implementation of the
-Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn {scikit-lib}[library]: the model is trained in a
-single task but is then distributed to each executor from where a user-defined function invokes it (see
-{forest-article}[this article] for how to call the sklearn library with a pyspark UDF). The Isolation Forest algorithm
-is used for unsupervised model training, meaning that a labelled set of data - against which the model is trained - is
-unnecessary. This makes model preparation easier as we do not have to divide the data set into training and validation
-datasets.
+The Spark job ingests the raw data and performs straightforward data wrangling and feature engineering.
+Any windowing features designed to capture the time-series nature of the data - such as lags or rolling averages - need to use evenly distributed partitions so that Spark can execute these tasks in parallel.
+The job uses an implementation of the Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn {scikit-lib}[library]:
+the model is trained in a single task but is then distributed to each executor from where a user-defined function invokes it (see {forest-article}[this article] for how to call the sklearn library with a pyspark UDF).
+The Isolation Forest algorithm is used for unsupervised model training, meaning that a labelled set of data - against which the model is trained - is unnecessary.
+This makes model preparation easier as we do not have to divide the data set into training and validation datasets.
 
 You can inspect a running Spark job by forwarding the port used by the Spark-UI:
 
@@ -145,14 +142,13 @@ image::spark-k8s-anomaly-detection-taxi-data/spark_job.png[]
 
 == Dashboard
 
-Open the `external-http` Superset endpoint found in the output of the `stackablectl stacklet list` command. The anomaly detection
-dashboard is pre-defined and accessible under the `Dashboards` tab when logged in to Superset using the username `admin`
-password `adminadmin`:
+Open the `external-http` Superset endpoint found in the output of the `stackablectl stacklet list` command.
+The anomaly detection dashboard is pre-defined and accessible under the `Dashboards` tab when logged in to Superset using the username `admin` password `adminadmin`:
 
 image::spark-k8s-anomaly-detection-taxi-data/superset_anomaly_scores.png[]
 
-The model does not yield data that can be used directly for a root cause analysis. An isolation forest is a type of
-random forest that measures how many branches are needed in its underlying decision trees to isolate each data point:
+The model does not yield data that can be used directly for a root cause analysis.
+An isolation forest is a type of random forest that measures how many branches are needed in its underlying decision trees to isolate each data point:
 the more abnormal the data, the easier this will be - a clear outlier may only need a single partition to isolate it,
-whereas tightly clustered data will require significantly more. The number of partitions to isolate is, therefore, in
-inverse proportion to the anomaly-ness of the data.
+whereas tightly clustered data will require significantly more.
+The number of partitions to isolate is, therefore, in inverse proportion to the anomaly-ness of the data.

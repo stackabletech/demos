@@ -1,4 +1,5 @@
 = signal-processing
+:description: Install a Kubernetes demo to process time-series data using Apache NiFi, TimescaleDB, Grafana, and JupyterHub for real-time insights.
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 
@@ -9,10 +10,7 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install signal-processing
 ----
 
-[WARNING]
-====
-This demo should not be run alongside other demos.
-====
+WARNING: This demo should not be run alongside other demos.
 
 [#system-requirements]
 == System Requirements
@@ -42,10 +40,10 @@ image::signal-processing/overview.png[]
 
 == Data ingestion
 
-The data used in this demo is a set of gas sensor measurements*. 
-The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors. 
-In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table. 
-It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed. 
+The data used in this demo is a set of gas sensor measurements*.
+The dataset provides resistance values (r-values hereafter) for each of 14 gas sensors.
+In order to simulate near-real-time ingestion of this data, it is downloaded and batch-inserted into a Timescale table.
+It's then updated in-place retaining the same time offsets but shifting the timestamps such that the notebook code can "move through" the data using windows as if it were being streamed.
 The Nifi flow that does this can easily be extended to process other sources of (actually streamed) data.
 
 == JupyterHub
@@ -71,9 +69,9 @@ The notebook reads the measurement data in windowed batches using a loop, comput
 
 The enriched data is calculated using an online, unsupervised https://docs.seldon.io/projects/alibi-detect/en/stable/od/methods/sr.html[model] that uses a technique called http://www.houxiaodi.com/assets/papers/cvpr07.pdf[Spectral Residuals].
 
-- `online`: in this context this means that the model does not require a training phase and can apply the algorithm to a batch in isolation. However, a light-weight training phase can be introduced if an estimated threshold value is required. This would take the form of a single batch "up front" used to determine some baselines. This is not implemented in this demo.
-- `unsupervised`: the data is not labelled and the algorithm seeks to extract useful information (alerts etc.) from the raw data alone.
-- `spectral residuals`: this algorithm executes a double Fourier transformation to reconstruct the original data, with the reconstruction error being used as a measure of outlier-ness.
+* `online`: in this context this means that the model does not require a training phase and can apply the algorithm to a batch in isolation. However, a light-weight training phase can be introduced if an estimated threshold value is required. This would take the form of a single batch "up front" used to determine some baselines. This is not implemented in this demo.
+* `unsupervised`: the data is not labelled and the algorithm seeks to extract useful information (alerts etc.) from the raw data alone.
+* `spectral residuals`: this algorithm executes a double Fourier transformation to reconstruct the original data, with the reconstruction error being used as a measure of outlier-ness.
 
 == Visualization
 
@@ -95,17 +93,22 @@ $ stackablectl stacklet list
 
 ----
 
-Log in to Grafana with username `admin` and password `adminadmin` and navigate to the dashboards. There are two located in the "Stackable Data Platform" folder.
+Log in to Grafana with username `admin` and password `adminadmin` and navigate to the dashboards.
+There are two located in the "Stackable Data Platform" folder.
 
 === Measurements
 
-This is the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`). These are superimposed on each other for ease of comparison.
+This is the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
+These are superimposed on each other for ease of comparison.
 
 image::signal-processing/measurements.png[]
 
 === Predictions
 
-In this second dashboard the predictions for all r-values are plotted: the top graph takes an average across all measurements, with a threshold marked as a red line across the top. This can be used for triggering email alerts. Underneath the individual r-values are plotted, firstly as raw data and then the same using downsampling. Downsampling uses a built-in Timescale extension to significantly reduce the number of data plotted while retaining the same overall shape.
+In this second dashboard the predictions for all r-values are plotted: the top graph takes an average across all measurements, with a threshold marked as a red line across the top.
+This can be used for triggering email alerts.
+Underneath the individual r-values are plotted, firstly as raw data and then the same using downsampling.
+Downsampling uses a built-in Timescale extension to significantly reduce the number of data plotted while retaining the same overall shape.
 
 image::signal-processing/predictions.png[]
 
