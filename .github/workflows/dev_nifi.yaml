@@ -1,0 +1,115 @@
+---
+name: Build and publish NiFi for signal-processing demo
+
+env:
+  IMAGE_NAME: nifi
+  IMAGE_VERSION: 1.27.0-postgresql
+  REGISTRY_PATH: demos
+  DOCKERFILE_PATH: "../demos/signal-processing/Dockerfile-nifi"
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - demos/signal-processing/Dockerfile-nifi
+      - .github/workflows/dev_nifi.yaml
+
+jobs:
+  build:
+    name: Build/Publish ${{ matrix.runner.arch }} Image
+    permissions:
+      id-token: write
+    runs-on: ${{ matrix.runner.name }}
+    strategy:
+      matrix:
+        runner:
+          - {name: "ubuntu-latest", arch: "amd64"}
+          - {name: "ubicloud-standard-8-arm", arch: "arm64"}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Free Disk Space (Ubuntu)
+        uses: jlumbroso/free-disk-space@54081f138730dfa15788a46383842cd2f914a1be # v1.3.1
+        with:
+          # This might remove tools that are actually needed, if set to "true" but
+          # frees about 6 GB.
+          tool-cache: false
+
+          # All of these default to true, but feel free to set to "false" if
+          # necessary for your workflow.
+          android: true
+          dotnet: true
+          haskell: true
+          large-packages: true
+          docker-images: true
+          swap-storage: true
+
+      - name: Setup Docker Buildx
+        uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
+
+      - name: Building ${{ env.IMAGE_NAME }}
+        shell: bash
+        run: echo ${{ env.IMAGE_NAME }}
+
+      - name: Build image
+        env:
+          IMAGE_REPOSITORY: ${{ env.IMAGE_NAME }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IMAGE_ARCH="$(uname -m | sed -e 's#x86_64#amd64#' | sed -e 's#aarch64#arm64#')"
+
+          docker buildx build -f ${{ DOCKERFILE_PATH }} --platform linux/${IMAGE_ARCH} --tag registry-placeholder/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} .
+
+          echo "IMAGE_ARCH=$IMAGE_ARCH" >> $GITHUB_ENV
+
+      - name: Publish Container Image on docker.stackable.tech
+        uses: stackabletech/actions/publish-image
+        with:
+          image-registry-uri: docker.stackable.tech
+          image-registry-username: github
+          image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
+          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-manifest-tag: ${{ env.IMAGE_VERSION }}-${{ IMAGE_ARCH }}
+          source-image-uri: registry-placeholder/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
+
+      - name: Publish Container Image on oci.stackable.tech
+        uses: stackabletech/actions/publish-image
+        with:
+          image-registry-uri: oci.stackable.tech
+          image-registry-username: robot$sdp+github-action-build
+          image-registry-password: ${{ secrets.HARBOR_ROBOT_SDP_GITHUB_ACTION_BUILD_SECRET }}
+          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-manifest-tag: ${{ env.IMAGE_VERSION }}-${{ IMAGE_ARCH }}
+          source-image-uri: registry-placeholder/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
+
+  publish_manifests:
+    name: Build/Publish Manifest
+    needs: [build]
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
+
+      - name: Publish and Sign Image Index Manifest to docker.stackable.tech
+        uses: stackabletech/actions/publish-index-manifest
+        with:
+          image-registry-uri: docker.stackable.tech
+          image-registry-username: github
+          image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
+          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+
+      - name: Publish and Sign Image Index Manifest to oci.stackable.tech
+        uses: stackabletech/actions/publish-index-manifest
+        with:
+          image-registry-uri: oci.stackable.tech
+          image-registry-username: robot$sdp+github-action-build
+          image-registry-password: ${{ secrets.HARBOR_ROBOT_SDP_GITHUB_ACTION_BUILD_SECRET }}
+          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
