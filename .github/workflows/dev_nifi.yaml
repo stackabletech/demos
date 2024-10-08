@@ -62,7 +62,7 @@ jobs:
           set -euo pipefail
           IMAGE_ARCH="$(uname -m | sed -e 's#x86_64#amd64#' | sed -e 's#aarch64#arm64#')"
 
-          docker buildx build -f ${{ env.DOCKERFILE_PATH }} --platform linux/"${IMAGE_ARCH}" --tag registry-placeholder/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }} .
+          docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform linux/"${IMAGE_ARCH}" --tag "registry-placeholder/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
 
           echo "IMAGE_ARCH=${IMAGE_ARCH}" >> $GITHUB_ENV
 
