@@ -62,7 +62,7 @@ jobs:
         run: |
           set -euo pipefail
           docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform "linux/${{ env.IMAGE_ARCH }}" --tag "registry-placeholder/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
-          echo "IMAGE_ARCH=${{ env.IMAGE_ARCH }}" >> $GITHUB_ENV
+          echo "IMAGE_ARCH=${{ env.IMAGE_ARCH }}" >> "$GITHUB_ENV"
 
       - name: Publish Container Image on docker.stackable.tech
         uses: stackabletech/actions/publish-image@e8781161bc1eb037198098334cec6061fe24b6c3 # 0.0.2
