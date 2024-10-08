@@ -4,7 +4,7 @@ name: Build and publish NiFi for signal-processing demo
 env:
   IMAGE_NAME: nifi
   IMAGE_VERSION: 1.27.0-postgresql
-  REGISTRY_PATH: demos
+  REGISTRY_PATH: stackable
   DOCKERFILE_PATH: "../demos/signal-processing/Dockerfile-nifi"
 
 on:
@@ -58,7 +58,7 @@ jobs:
         run: |
           set -euo pipefail
           echo "Building ${{ env.IMAGE_NAME }}"
-          docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform "linux/${{ env.IMAGE_ARCH }}" --tag "localhost/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
+          docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform "linux/${{ env.IMAGE_ARCH }}" --tag "localhost/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
           echo "IMAGE_ARCH=${{ env.IMAGE_ARCH }}" >> "$GITHUB_ENV"
 
       - name: Publish Container Image on docker.stackable.tech
@@ -67,7 +67,7 @@ jobs:
           image-registry-uri: docker.stackable.tech
           image-registry-username: github
           image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
-          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-repository: demos/${{ env.IMAGE_NAME }}
           image-manifest-tag: ${{ env.IMAGE_VERSION }}-${{ env.IMAGE_ARCH }}
           source-image-uri: localhost/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
 
@@ -97,7 +97,7 @@ jobs:
           image-registry-uri: docker.stackable.tech
           image-registry-username: github
           image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
-          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
+          image-repository: demos/${{ env.IMAGE_NAME }}
           image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
 
       - name: Publish and Sign Image Index Manifest to oci.stackable.tech
