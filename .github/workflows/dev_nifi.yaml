@@ -50,10 +50,6 @@ jobs:
       - name: Setup Docker Buildx
         uses: docker/setup-buildx-action@988b5a0280414f521da01fcc63a27aeeb4b104db # v3.6.1
 
-      - name: Building ${{ env.IMAGE_NAME }}
-        shell: bash
-        run: echo ${{ env.IMAGE_NAME }}
-
       - name: Build image
         env:
           IMAGE_REPOSITORY: ${{ env.IMAGE_NAME }}
@@ -61,7 +57,8 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform "linux/${{ env.IMAGE_ARCH }}" --tag "registry-placeholder/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
+          echo "Building ${{ env.IMAGE_NAME }}"
+          docker buildx build -f "${{ env.DOCKERFILE_PATH }}" --platform "linux/${{ env.IMAGE_ARCH }}" --tag "localhost/${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}:${{ env.IMAGE_VERSION }}" .
           echo "IMAGE_ARCH=${{ env.IMAGE_ARCH }}" >> "$GITHUB_ENV"
 
       - name: Publish Container Image on docker.stackable.tech
@@ -72,7 +69,7 @@ jobs:
           image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
           image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
           image-manifest-tag: ${{ env.IMAGE_VERSION }}-${{ env.IMAGE_ARCH }}
-          source-image-uri: registry-placeholder/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
+          source-image-uri: localhost/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
 
       - name: Publish Container Image on oci.stackable.tech
         uses: stackabletech/actions/publish-image@e8781161bc1eb037198098334cec6061fe24b6c3 # 0.0.2
@@ -82,7 +79,7 @@ jobs:
           image-registry-password: ${{ secrets.HARBOR_ROBOT_SDP_GITHUB_ACTION_BUILD_SECRET }}
           image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
           image-manifest-tag: ${{ env.IMAGE_VERSION }}-${{ env.IMAGE_ARCH }}
-          source-image-uri: registry-placeholder/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
+          source-image-uri: localhost/${{ env.PRODUCT_NAME }}:${{ env.IMAGE_VERSION }}
 
   publish_manifests:
     name: Build/Publish Manifest
