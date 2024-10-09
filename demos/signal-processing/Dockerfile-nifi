@@ -1,5 +1,3 @@
-# docker build -f ./Dockerfile-nifi -t docker.stackable.tech/demos/nifi:1.27.0-postgresql .
-
 FROM docker.stackable.tech/stackable/nifi:1.27.0-stackable24.7.0
 
 RUN curl --fail -o /stackable/nifi/postgresql-42.6.0.jar "https://repo.stackable.tech/repository/misc/postgresql-timescaledb/postgresql-42.6.0.jar"
