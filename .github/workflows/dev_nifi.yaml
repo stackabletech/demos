@@ -47,6 +47,7 @@ jobs:
           image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
           image-repository: demos/${{ env.IMAGE_NAME }}
           image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
+          source-image-uri: localhost/${{ env.IMAGE_NAME }}:${{ steps.build.outputs.image-manifest-tag }}
 
       - name: Publish Container Image on oci.stackable.tech
         uses: stackabletech/actions/publish-image@c179c509951343185095cbf032248b71ee6998f4 # 0.0.3
@@ -56,6 +57,7 @@ jobs:
           image-registry-password: ${{ secrets.HARBOR_ROBOT_STACKABLE_GITHUB_ACTION_BUILD_SECRET }}
           image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
           image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
+          source-image-uri: localhost/${{ env.IMAGE_NAME }}:${{ steps.build.outputs.image-manifest-tag }}
 
   publish_manifests:
     name: Build/Publish Manifest
