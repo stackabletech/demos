@@ -5,7 +5,7 @@ env:
   IMAGE_NAME: nifi
   IMAGE_VERSION: 1.27.0-postgresql
   REGISTRY_PATH: stackable
-  DOCKERFILE_PATH: "../demos/signal-processing/Dockerfile-nifi"
+  DOCKERFILE_PATH: "demos/signal-processing/Dockerfile-nifi"
 
 on:
   workflow_dispatch:
