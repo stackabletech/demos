@@ -65,6 +65,50 @@ image::signal-processing/notebook.png[]
 
 The notebook reads the measurement data in windowed batches using a loop, computes some predictions for each batch and persists the scores in a separate timescale table.
 
+=== Adding libraries
+
+The notebook shows (commented out lines at the top of the first cell) one way of installing python libraries (using an inline `pip` command). There are two ways of doing this, depending on where the resources are required (in the notebook itself, or in an image used by the notebook, in this case a spark image):
+
+==== Install from within the notebook
+
+This can be done by executing `!pip install` from within a notebook cell, as shown in the screenshot:
+
+[source,console]
+----
+!pip install psycopg2-binary
+!pip install -U tsfresh
+!pip install alibi-detect
+----
+
+These libraries will be available to the notebook, but not to any image that the notebook uses. For instance, the notebook shown below starts a Spark job and specifies an image, but that image would *not* include python dependencies added from within the notebook itself:
+
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
+
+==== Install the libraries into a custom image
+
+Alternatively dependencies can be added into a base image, either the one used for jupyterhub, or for any other product called from within the notebook. This could make use of any Dockerfile mechanism (downloading via `curl`, using a package manager etc.) and is not limited to python libraries. To achieve the same imports as mentioned in the previous section, build the dockerfile like this:
+
+[source,console]
+----
+FROM jupyter/pyspark-notebook:python-3.9
+
+COPY requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && \
+pip install --no-cache-dir -r ./requirements.txt
+----
+
+Where `requirements.txt` contains:
+
+[source,console]
+----
+psycopg2-binary==2.9.9
+tsfresh==0.20.1
+alibi-detect==0.11.4
+----
+
+NOTE: using a custom image requires access to a repository where the image can be made available.
+
 == Model details
 
 The enriched data is calculated using an online, unsupervised https://docs.seldon.io/projects/alibi-detect/en/stable/od/methods/sr.html[model] that uses a technique called http://www.houxiaodi.com/assets/papers/cvpr07.pdf[Spectral Residuals].
