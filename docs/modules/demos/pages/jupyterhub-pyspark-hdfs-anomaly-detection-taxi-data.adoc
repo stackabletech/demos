@@ -179,7 +179,8 @@ It requires a specific Spark image:
 ...
 ----
 
-This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0`, installing specific python libraries into it, and re-tagging the image:
+This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0`, installing specific python libraries into it
+, and re-tagging the image:
 
 [source,console]
 ----
