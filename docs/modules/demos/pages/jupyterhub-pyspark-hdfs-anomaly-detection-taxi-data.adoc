@@ -149,7 +149,7 @@ This is described below.
 
 === Install the libraries into a product image
 
-Libraries can be added to a custom *product* image launched by the notebook. In this section a Spark job is defined:
+Libraries can be added to a custom *product* image launched by the notebook. Suppose a Spark job is prepared like this:
 
 [source,python]
 ----
@@ -179,7 +179,7 @@ It requires a specific Spark image:
 ...
 ----
 
-This is prepared by taking a Spark image, in this `docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0`, installing specific python libraries, and re-tagging the image:
+This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0`, installing specific python libraries into it, and re-tagging the image:
 
 [source,console]
 ----
