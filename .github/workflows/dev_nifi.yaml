@@ -33,14 +33,14 @@ jobs:
 
       - name: Build image
         id: build
-        uses: stackabletech/actions/build-container-image@ab97c67d79a79d9c6b0dc81b5dbe2fc5fd216a5a # v0.0.4
+        uses: stackabletech/actions/build-container-image@9bd13255f286e4b7a654617268abe1b2f37c3e0a # v0.0.5
         with:
           image-name: ${{ env.IMAGE_NAME }}
           image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
           container-file: ${{ env.DOCKERFILE_PATH }}
 
       - name: Publish Container Image on docker.stackable.tech
-        uses: stackabletech/actions/publish-image@ab97c67d79a79d9c6b0dc81b5dbe2fc5fd216a5a # v0.0.4
+        uses: stackabletech/actions/publish-image@9bd13255f286e4b7a654617268abe1b2f37c3e0a # v0.0.5
         with:
           image-registry-uri: docker.stackable.tech
           image-registry-username: github
@@ -50,7 +50,7 @@ jobs:
           source-image-uri: ${{ steps.build.outputs.image-manifest-uri }}
 
       - name: Publish Container Image on oci.stackable.tech
-        uses: stackabletech/actions/publish-image@ab97c67d79a79d9c6b0dc81b5dbe2fc5fd216a5a # v0.0.4
+        uses: stackabletech/actions/publish-image@9bd13255f286e4b7a654617268abe1b2f37c3e0a # v0.0.5
         with:
           image-registry-uri: oci.stackable.tech
           image-registry-username: robot$stackable+github-action-build
@@ -70,7 +70,7 @@ jobs:
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
       - name: Publish and Sign Image Index Manifest to docker.stackable.tech
-        uses: stackabletech/actions/publish-index-manifest@ab97c67d79a79d9c6b0dc81b5dbe2fc5fd216a5a # v0.0.4
+        uses: stackabletech/actions/publish-index-manifest@9bd13255f286e4b7a654617268abe1b2f37c3e0a # v0.0.5
         with:
           image-registry-uri: docker.stackable.tech
           image-registry-username: github
@@ -79,7 +79,7 @@ jobs:
           image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
 
       - name: Publish and Sign Image Index Manifest to oci.stackable.tech
-        uses: stackabletech/actions/publish-index-manifest@ab97c67d79a79d9c6b0dc81b5dbe2fc5fd216a5a # v0.0.4
+        uses: stackabletech/actions/publish-index-manifest@9bd13255f286e4b7a654617268abe1b2f37c3e0a # v0.0.5
         with:
           image-registry-uri: oci.stackable.tech
           image-registry-username: robot$stackable+github-action-build
