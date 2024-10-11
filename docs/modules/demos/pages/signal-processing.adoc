@@ -67,7 +67,8 @@ The notebook reads the measurement data in windowed batches using a loop, comput
 
 === Adding libraries
 
-The notebook shows (commented out lines at the top of the first cell) one way of installing python libraries (using an inline `pip` command). There are two ways of doing this, depending on where the resources are required (in the notebook itself, or in an image used by the notebook, in this case a spark image):
+The notebook shows (commented out lines at the top of the first cell) one way of installing python libraries: by using an inline `pip` command.
+There are two ways of doing this:
 
 ==== Install from within the notebook
 
@@ -80,13 +81,11 @@ This can be done by executing `!pip install` from within a notebook cell, as sho
 !pip install alibi-detect
 ----
 
-These libraries will be available to the notebook, but not to any image that the notebook uses. For instance, the notebook shown below starts a Spark job and specifies an image, but that image would *not* include python dependencies added from within the notebook itself:
-
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
-
 ==== Install the libraries into a custom image
 
-Alternatively dependencies can be added into a base image, either the one used for jupyterhub, or for any other product called from within the notebook. This could make use of any Dockerfile mechanism (downloading via `curl`, using a package manager etc.) and is not limited to python libraries. To achieve the same imports as mentioned in the previous section, build the dockerfile like this:
+Alternatively dependencies can be added into the base image used for jupyterhub.
+This could make use of any Dockerfile mechanism (downloading via `curl`, using a package manager etc.) and is not limited to python libraries.
+To achieve the same imports as mentioned in the previous section, build the dockerfile like this:
 
 [source,console]
 ----
