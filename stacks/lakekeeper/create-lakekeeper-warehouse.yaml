@@ -1,0 +1,53 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-lakekeeper-warehouse
+spec:
+  template:
+    spec:
+      containers:
+        - name: create-lakekeeper-warehouse
+          image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
+          command:
+            - bash
+            - -c
+            - "curl --fail -X POST -H 'Content-Type: application/json' -d @/tmp/lakekeeper-warehouse-definition/lakekeeper-warehouse-definition.json http://lakekeeper:8080/management/v1/warehouse"
+          volumeMounts:
+            - name: lakekeeper-warehouse-definition
+              mountPath: /tmp/lakekeeper-warehouse-definition
+      volumes:
+        - name: lakekeeper-warehouse-definition
+          secret:
+            secretName: lakekeeper-warehouse-definition
+      restartPolicy: OnFailure
+  backoffLimit: 50
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: lakekeeper-warehouse-definition
+stringData:
+  lakekeeper-warehouse-definition.json: |
+    {
+      "warehouse-name": "lakehouse",
+      "project-id": "00000000-0000-0000-0000-000000000000",
+      "storage-profile": {
+        "type": "s3",
+        "bucket": "lakehouse",
+        "key-prefix": "lakehouse",
+        "assume-role-arn": null,
+        "endpoint": "http://minio:9000",
+        "region": "local-01",
+        "path-style-access": true,
+        "sts_role_arn": null,
+        "flavor": "minio",
+        "sts-enabled": false
+      },
+      "storage-credential": {
+        "type": "s3",
+        "credential-type": "access-key",
+        "aws-access-key-id": "admin",
+        "aws-secret-access-key": "{{ minioAdminPassword }}"
+      }
+    }

@@ -1,0 +1,173 @@
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCluster
+metadata:
+  name: trino
+spec:
+  image:
+    productVersion: "451"
+  clusterConfig:
+    listenerClass: external-unstable
+    catalogLabelSelector:
+      matchLabels:
+        trino: trino
+    authentication:
+      - authenticationClass: trino-users
+    authorization:
+      opa:
+        configMapName: opa
+        package: trino
+  coordinators:
+    roleGroups:
+      default:
+        replicas: 1
+  workers:
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: trino-users
+spec:
+  provider:
+    static:
+      userCredentialsSecret:
+        name: trino-users
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-users
+type: kubernetes.io/opaque
+stringData:
+  admin: "{{ trinoAdminPassword }}"
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: lakehouse
+  labels:
+    trino: trino
+spec:
+  # connector:
+  #   iceberg:
+  #     # The field metastore is mandatory (at least for now), so let's pass a dummy
+  #     metastore:
+  #       configMap: dummy-hive-discovery
+  #     s3:
+  #       reference: minio
+  # configOverrides:
+  #   # https://trino.io/docs/current/object-storage/metastores.html#rest-catalog
+  #   iceberg.catalog.type: rest
+  #   iceberg.rest-catalog.uri: http://lakekeeper:8080
+  #   iceberg.rest-catalog.warehouse: s3://lakehouse/lakehouse/
+  #   # TODO
+  #   hive.metastore.uri: ""
+  connector:
+    generic:
+      connectorName: iceberg
+      properties:
+        iceberg.catalog.type:
+          value: rest
+        iceberg.rest-catalog.uri:
+          value: http://lakekeeper:8080/catalog/
+        iceberg.rest-catalog.security:
+          value: NONE
+        iceberg.rest-catalog.warehouse:
+          value: 00000000-0000-0000-0000-000000000000/lakehouse
+        # iceberg.rest-catalog.warehouse:
+        #   value: s3://lakehouse/lakehouse/
+        hive.s3.endpoint:
+          value: http://minio:9000
+        hive.s3.ssl.enabled:
+          value: "false"
+        hive.s3.path-style-access:
+          value: "true"
+        hive.s3.aws-access-key:
+          valueFromSecret:
+            name: minio-s3-credentials
+            key: accessKey
+        hive.s3.aws-secret-key:
+          valueFromSecret:
+            name: minio-s3-credentials
+            key: secretKey
+        iceberg.security:
+          value: allow-all
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: dummy-hive-discovery
+data:
+  HIVE: dummy-value
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpcds
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpcds: {}
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpch
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpch: {}
+---
+apiVersion: opa.stackable.tech/v1alpha1
+kind: OpaCluster
+metadata:
+  name: opa
+spec:
+  image:
+    productVersion: 0.66.0
+  servers:
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-opa-bundle
+  labels:
+    opa.stackable.tech/bundle: "trino"
+data:
+  trino.rego: |
+    package trino
+
+    import rego.v1
+
+    default allow = false
+
+    # Allow non-batched access
+    allow if {
+      is_admin
+    }
+    # Allow batched access
+    batch contains i if {
+      some i
+      input.action.filterResources[i]
+      is_admin
+    }
+    # Corner case: filtering columns is done with a single table item, and many columns inside
+    batch contains i if {
+      some i
+      input.action.operation == "FilterColumns"
+      count(input.action.filterResources) == 1
+      input.action.filterResources[0].table.columns[i]
+      is_admin
+    }
+
+    is_admin() if {
+      input.context.identity.user == "admin"
+    }

@@ -1,0 +1,13 @@
+# Not working because of stackablectl restrictions
+
+# `helm install lakekeeper https://github.com/lakekeeper/lakekeeper-charts/releases/download/lakekeeper-0.1.2/lakekeeper-0.1.2.tgz`
+# releaseName: lakekeeper
+# name: lakekeeper
+# repo:
+#   name: lakekeeper-0.1.2
+#   url: https://github.com/lakekeeper/lakekeeper-charts/releases/download/lakekeeper-0.1.2/
+# version: 0.1.2
+# options: {}
+# TODO
+#  additionalLabels:
+#    stackable.tech/vendor: Stackable

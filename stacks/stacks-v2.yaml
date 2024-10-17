@@ -535,6 +535,36 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
+  lakekeeper:
+    description: Test of https://github.com/hansetag/iceberg-catalog. Basically the same as the trino-iceberg stack, but using lakekeeper instead of a Hive metastore.
+    stackableRelease: 24.7
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - trino
+      - opa
+    labels:
+      - lakekeeper
+      - trino
+      - opa
+      - iceberg
+      - minio
+      - s3
+    manifests:
+      - helmChart: stacks/_templates/minio-distributed-small.yaml
+      # - helmChart: stacks/_templates/lakekeeper.yaml
+      - plainYaml: stacks/lakekeeper/create-lakekeeper-warehouse.yaml
+      - plainYaml: stacks/lakekeeper/s3-connection.yaml
+      - plainYaml: stacks/lakekeeper/trino.yaml
+    supportedNamespaces: []
+    parameters:
+      - name: trinoAdminPassword
+        description: Password of the Trino admin user
+        default: adminadmin
+      - name: minioAdminPassword
+        description: Password of the MinIO admin user
+        default: adminadmin
   end-to-end-security:
     description: >-
       A stack used to demonstrate an end-to-end security concept.
