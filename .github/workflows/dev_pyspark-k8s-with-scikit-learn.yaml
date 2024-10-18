@@ -2,8 +2,8 @@
 name: Build and publish pyspark-k8s-with-scikit-learn
 
 env:
-  IMAGE_NAME: pyspark-k8s-with-scikit-learn
-  IMAGE_VERSION: 3.4.0-stackable0.0.0-dev
+  IMAGE_NAME: spark-k8s-with-scikit-learn
+  IMAGE_VERSION: 3.5.0-stackable24.3.0
   REGISTRY_PATH: stackable
   DOCKERFILE_PATH: "demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/Dockerfile"
 
