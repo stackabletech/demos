@@ -12,7 +12,7 @@ options:
         allowed_users:
           - admin
       DummyAuthenticator:
-        password: {{ jupyterHubAdminPassword }}
+        password: {{jupyterHubAdminPassword}}
       JupyterHub:
         authenticator_class: dummy
     labels:
