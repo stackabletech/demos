@@ -1,5 +1,5 @@
 ---
-name: Build and publish pyspark-k8s-with-scikit-learn
+name: Build and publish spark-k8s-with-scikit-learn
 
 env:
   IMAGE_NAME: spark-k8s-with-scikit-learn
@@ -15,7 +15,7 @@ on:
     paths:
       - demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/Dockerfile
       - demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/requirements.txt
-      - .github/workflows/dev_pyspark-k8s-with-scikit-learn.yaml
+      - .github/workflows/dev_spark-k8s-with-scikit-learn.yaml
 
 jobs:
   build:
