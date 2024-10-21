@@ -104,7 +104,7 @@ psycopg2-binary==2.9.9
 alibi-detect==0.11.4
 ----
 
-NOTE: using a custom image requires access to a repository where the image can be made available.
+NOTE: Using a custom image requires access to a repository where the image can be made available.
 
 == Model details
 
