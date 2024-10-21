@@ -156,7 +156,7 @@ Libraries can be added to a custom *product* image launched by the notebook. Sup
 spark = (SparkSession
             .builder
             .master(f'k8s://https://{os.environ["KUBERNETES_SERVICE_HOST"]}:{os.environ["KUBERNETES_SERVICE_PORT"]}')
-            .config("spark.kubernetes.container.image", "docker.stackable.tech/demos/pyspark-k8s-with-scikit-learn:3.3.0-stackable23.4")
+            .config("spark.kubernetes.container.image", "docker.stackable.tech/demos/spark-k8s-with-scikit-learn:3.5.0-stackable24.3.0")
             .config("spark.driver.port", "2222")
             .config("spark.driver.blockManager.port", "7777")
             .config("spark.driver.host", "driver-service.default.svc.cluster.local")
@@ -175,18 +175,18 @@ It requires a specific Spark image:
 [source,python]
 ----
 .config("spark.kubernetes.container.image",
-  "docker.stackable.tech/demos/pyspark-k8s-with-scikit-learn:3.3.0-stackable23.4"),
+  "docker.stackable.tech/demos/spark-k8s-with-scikit-learn:3.5.0-stackable24.3.0"),
 ...
 ----
 
-This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0`, installing specific python libraries into it
+This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/spark-k8s:3.5.0-stackable24.3.0`, installing specific python libraries into it
 , and re-tagging the image:
 
 [source,console]
 ----
-FROM docker.stackable.tech/stackable/pyspark-k8s:3.3.0-stackable23.4.0
+FROM docker.stackable.tech/stackable/spark-k8s:3.5.0-stackable24.3.0
 
-COPY requirements.txt .
+COPY demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r ./requirements.txt
@@ -196,8 +196,8 @@ Where `requirements.txt` contains:
 
 [source,console]
 ----
-scikit-learn==1.1.3
-pandas==1.5.1
+scikit-learn==1.3.1
+pandas==2.0.3
 ----
 
 NOTE: using a custom image requires access to a repository where the image can be made available.

@@ -77,7 +77,6 @@ This can be done by executing `!pip install` from within a notebook cell, as sho
 [source,console]
 ----
 !pip install psycopg2-binary
-!pip install -U tsfresh
 !pip install alibi-detect
 ----
 
@@ -91,10 +90,10 @@ To achieve the same imports as mentioned in the previous section, build the dock
 ----
 FROM jupyter/pyspark-notebook:python-3.9
 
-COPY requirements.txt .
+COPY demos/signal-processing/requirements.txt .
 
 RUN pip install --no-cache-dir --upgrade pip && \
-pip install --no-cache-dir -r ./requirements.txt
+    pip install --no-cache-dir -r ./requirements.txt
 ----
 
 Where `requirements.txt` contains:
@@ -102,7 +101,6 @@ Where `requirements.txt` contains:
 [source,console]
 ----
 psycopg2-binary==2.9.9
-tsfresh==0.20.1
 alibi-detect==0.11.4
 ----
 
