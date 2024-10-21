@@ -1,3 +1,4 @@
+---
 releaseName: jupyterhub
 name: jupyterhub
 repo:
@@ -11,7 +12,7 @@ options:
         allowed_users:
           - admin
       DummyAuthenticator:
-        password: {{ jupyterHubAdminPassword }}
+        password: {{jupyterHubAdminPassword}}
       JupyterHub:
         authenticator_class: dummy
     labels:
@@ -39,7 +40,7 @@ options:
       # Inspect the Dockerfile at:
       # https://github.com/jupyter/docker-stacks/tree/HEAD/datascience-notebook/Dockerfile
       name: jupyter/pyspark-notebook
-      tag: python-3.9
+      tag: python-3.11
     serviceAccountName: spark
     networkPolicy:
       enabled: false
