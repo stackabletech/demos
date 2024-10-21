@@ -138,7 +138,7 @@ image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_workspace
 Now you can double-click on the `notebook` folder on the left, open and run the contained file.
 Click on the double arrow (⏩️) to execute the Python scripts (click on the image below to go to the notebook file).
 
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[link="../../../../stacks/jupyterhub-pyspark-hdfs/notebook.ipynb"]
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[link=https://github.com/stackabletech/demos/blob/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,window=_blank]
 
 You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
 
