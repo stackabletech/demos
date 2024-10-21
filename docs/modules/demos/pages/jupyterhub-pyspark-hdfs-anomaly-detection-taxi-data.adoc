@@ -143,7 +143,7 @@ image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_noteb
 You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
 
 The image defined for the spark job must contain all dependencies needed for that job to run.
-For pyspark jobs, this will mean that Python libraries either need to be baked into the image or {spark-pkg}[packaged in some other way].
+For PySpark jobs, this will mean that Python libraries either need to be baked into the image or {spark-pkg}[packaged in some other way].
 This demo contains a custom image created from a Dockerfile that is used to generate an image containing scikit-learn, pandas and their dependencies.
 This is described below.
 
