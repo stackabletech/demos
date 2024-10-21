@@ -67,7 +67,6 @@ The notebook reads the measurement data in windowed batches using a loop, comput
 
 === Adding libraries
 
-The notebook shows (commented out lines at the top of the first cell) one way of installing python libraries: by using an inline `pip` command.
 There are two ways of doing this:
 
 ==== Install from within the notebook
