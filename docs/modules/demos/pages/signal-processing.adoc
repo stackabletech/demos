@@ -84,7 +84,7 @@ This can be done by executing `!pip install` from within a notebook cell, as sho
 
 Alternatively dependencies can be added into the base image used for jupyterhub.
 This could make use of any Dockerfile mechanism (downloading via `curl`, using a package manager etc.) and is not limited to python libraries.
-To achieve the same imports as mentioned in the previous section, build the dockerfile like this:
+To achieve the same imports as mentioned in the previous section, build the Dockerfile like this:
 
 [source,console]
 ----
