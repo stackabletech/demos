@@ -1,4 +1,4 @@
-{% raw %}
+# {% raw %}
 ---
 apiVersion: airflow.stackable.tech/v1alpha1
 kind: AirflowCluster
@@ -285,7 +285,7 @@ data:
               limit: 512Mi
       driver:
         config:
-          resources: 
+          resources:
             cpu:
               min: 1000m
               max: 1200m
@@ -293,14 +293,14 @@ data:
               limit: 1024Mi
       executor:
         config:
-          resources: 
+          resources:
             cpu:
               min: 500m
               max: 1000m
             memory:
               limit: 1024Mi
         replicas: 3
-{% endraw %}
+# {% endraw %}
 ---
 apiVersion: v1
 kind: Secret
