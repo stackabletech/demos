@@ -1460,7 +1460,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1610,7 +1610,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1671,7 +1671,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1736,7 +1736,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #

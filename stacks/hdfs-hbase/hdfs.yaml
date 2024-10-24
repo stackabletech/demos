@@ -1,10 +1,11 @@
+---
 apiVersion: hdfs.stackable.tech/v1alpha1
 kind: HdfsCluster
 metadata:
   name: hdfs
 spec:
   image:
-    productVersion: 3.3.4
+    productVersion: 3.4.0
   clusterConfig:
     dfsReplication: 1
     zookeeperConfigMapName: hdfs-znode
