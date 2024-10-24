@@ -1385,7 +1385,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value>https://ip-api.mobidata-bw.de/v1/NVBW/gbfs/v2/free_bike_status.json</value>
+                        <value>https://api.mobidata-bw.de/sharing/gbfs/v2/deer/free_bike_status</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>
@@ -2963,7 +2963,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value>https://ip-api.mobidata-bw.de/v1/NVBW/gbfs/v2/station_information.json</value>
+                        <value>https://api.mobidata-bw.de/sharing/gbfs/v2/deer/station_information</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>
@@ -5584,7 +5584,7 @@
                     </entry>
                     <entry>
                         <key>Remote URL</key>
-                        <value>https://ip-api.mobidata-bw.de/v1/NVBW/gbfs/v2/station_status.json</value>
+                        <value>https://api.mobidata-bw.de/sharing/gbfs/v2/deer/station_status</value>
                     </entry>
                     <entry>
                         <key>disable-http2</key>
