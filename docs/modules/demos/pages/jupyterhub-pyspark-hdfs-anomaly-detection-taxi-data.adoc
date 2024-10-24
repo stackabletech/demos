@@ -136,17 +136,71 @@ You should arrive at your workspace:
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_workspace.png[]
 
 Now you can double-click on the `notebook` folder on the left, open and run the contained file.
-Click on the double arrow (⏩️) to execute the Python scripts.
+Click on the double arrow (⏩️) to execute the Python scripts (click on the image below to go to the notebook file).
 
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[]
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[link=https://github.com/stackabletech/demos/blob/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,window=_blank]
 
 You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
 
-[NOTE]
-====
 The image defined for the spark job must contain all dependencies needed for that job to run.
-For pyspark jobs, this will mean that Python libraries either need to be baked into the image (this demo contains a Dockerfile that was used to generate an image containing scikit-learn, pandas and their dependencies) or {spark-pkg}[packaged in some other way].
-====
+For PySpark jobs, this will mean that Python libraries either need to be baked into the image or {spark-pkg}[packaged in some other way].
+This demo contains a custom image created from a Dockerfile that is used to generate an image containing scikit-learn, pandas and their dependencies.
+This is described below.
+
+=== Install the libraries into a product image
+
+Libraries can be added to a custom *product* image launched by the notebook. Suppose a Spark job is prepared like this:
+
+[source,python]
+----
+spark = (SparkSession
+            .builder
+            .master(f'k8s://https://{os.environ["KUBERNETES_SERVICE_HOST"]}:{os.environ["KUBERNETES_SERVICE_PORT"]}')
+            .config("spark.kubernetes.container.image", "docker.stackable.tech/demos/spark-k8s-with-scikit-learn:3.5.0-stackable24.3.0")
+            .config("spark.driver.port", "2222")
+            .config("spark.driver.blockManager.port", "7777")
+            .config("spark.driver.host", "driver-service.default.svc.cluster.local")
+            .config("spark.driver.bindAddress", "0.0.0.0")
+            .config("spark.kubernetes.authenticate.driver.serviceAccountName", "spark")
+            .config("spark.kubernetes.authenticate.serviceAccountName", "spark")
+            .config("spark.executor.instances", "4")
+            .config("spark.kubernetes.container.image.pullPolicy", "IfNotPresent")
+            .appName("taxi-data-anomaly-detection")
+            .getOrCreate()
+        )
+----
+
+It requires a specific Spark image:
+
+[source,python]
+----
+.config("spark.kubernetes.container.image",
+  "docker.stackable.tech/demos/spark-k8s-with-scikit-learn:3.5.0-stackable24.3.0"),
+...
+----
+
+This is created by taking a Spark image, in this case `docker.stackable.tech/stackable/spark-k8s:3.5.0-stackable24.3.0`, installing specific python libraries into it
+, and re-tagging the image:
+
+[source,console]
+----
+FROM docker.stackable.tech/stackable/spark-k8s:3.5.0-stackable24.3.0
+
+COPY demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r ./requirements.txt
+----
+
+Where `requirements.txt` contains:
+
+[source,console]
+----
+scikit-learn==1.3.1
+pandas==2.0.3
+----
+
+NOTE: Using a custom image requires access to a repository where the image can be made available.
 
 == Model details
 

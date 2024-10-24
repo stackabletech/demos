@@ -65,6 +65,46 @@ image::signal-processing/notebook.png[]
 
 The notebook reads the measurement data in windowed batches using a loop, computes some predictions for each batch and persists the scores in a separate timescale table.
 
+=== Adding libraries
+
+There are two ways of doing this:
+
+==== Install from within the notebook
+
+This can be done by executing `!pip install` from within a notebook cell, as shown in the screenshot:
+
+[source,console]
+----
+!pip install psycopg2-binary
+!pip install alibi-detect
+----
+
+==== Install the libraries into a custom image
+
+Alternatively dependencies can be added into the base image used for jupyterhub.
+This could make use of any Dockerfile mechanism (downloading via `curl`, using a package manager etc.) and is not limited to python libraries.
+To achieve the same imports as mentioned in the previous section, build the Dockerfile like this:
+
+[source,console]
+----
+FROM jupyter/pyspark-notebook:python-3.9
+
+COPY demos/signal-processing/requirements.txt .
+
+RUN pip install --no-cache-dir --upgrade pip && \
+    pip install --no-cache-dir -r ./requirements.txt
+----
+
+Where `requirements.txt` contains:
+
+[source,console]
+----
+psycopg2-binary==2.9.9
+alibi-detect==0.11.4
+----
+
+NOTE: Using a custom image requires access to a repository where the image can be made available.
+
 == Model details
 
 The enriched data is calculated using an online, unsupervised https://docs.seldon.io/projects/alibi-detect/en/stable/od/methods/sr.html[model] that uses a technique called http://www.houxiaodi.com/assets/papers/cvpr07.pdf[Spectral Residuals].
