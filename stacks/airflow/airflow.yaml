@@ -1,5 +1,5 @@
-# {% raw %}
 ---
+# {% raw %}
 apiVersion: airflow.stackable.tech/v1alpha1
 kind: AirflowCluster
 metadata:
