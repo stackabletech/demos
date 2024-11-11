@@ -1,12 +1,12 @@
-{% raw %}
 ---
+# {% raw %}
 apiVersion: airflow.stackable.tech/v1alpha1
 kind: AirflowCluster
 metadata:
   name: airflow
 spec:
   image:
-    productVersion: 2.9.2
+    productVersion: 2.9.3
   clusterConfig:
     listenerClass: external-unstable
     loadExamples: false
@@ -272,7 +272,7 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        productVersion: 3.5.1
+        productVersion: 3.5.2
       mode: cluster
       mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
       job:
@@ -285,7 +285,7 @@ data:
               limit: 512Mi
       driver:
         config:
-          resources: 
+          resources:
             cpu:
               min: 1000m
               max: 1200m
@@ -293,14 +293,14 @@ data:
               limit: 1024Mi
       executor:
         config:
-          resources: 
+          resources:
             cpu:
               min: 500m
               max: 1000m
             memory:
               limit: 1024Mi
         replicas: 3
-{% endraw %}
+# {% endraw %}
 ---
 apiVersion: v1
 kind: Secret
