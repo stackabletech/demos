@@ -1,9 +1,10 @@
+---
 releaseName: grafana
 name: grafana
 repo:
   name: grafana
   url: https://grafana.github.io/helm-charts
-version: 7.3.7
+version: 8.6.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
@@ -21,14 +22,14 @@ options:
     stackable-dashboardprovider.yaml:
       apiVersion: 1
       providers:
-      - name: 'stackable'
-        orgId: 1
-        folder: 'Stackable Data Platform'
-        type: file
-        disableDeletion: false
-        allowUiUpdates: true
-        options:
-          path: /var/lib/grafana/dashboards/stackable
+        - name: 'stackable'
+          orgId: 1
+          folder: 'Stackable Data Platform'
+          type: file
+          disableDeletion: false
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards/stackable
   dashboardsConfigMaps:
     stackable: stackable-grafana-dashboards
   datasources:

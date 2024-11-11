@@ -7,4 +7,8 @@ rules:
     check-keys: false
   comments:
     min-spaces-from-content: 1  # Needed due to https://github.com/adrienverge/yamllint/issues/443
-  braces: disable # because the yaml files are templates which can have {{ ... }}
+  braces:
+    # because the yaml files are templates which can have {{ ... }}
+    ignore: |
+      stacks/signal-processing/*
+      stacks/_templates/*

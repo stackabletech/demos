@@ -35,7 +35,7 @@ $ stackablectl demo install data-lakehouse-iceberg-trino-spark
 [#system-requirements]
 == System requirements
 
-The demo was developed and tested on a kubernetes cluster with about 12 nodes (4 cores with hyperthreading/SMT, 20GiB RAM and 30GB HDD).
+The demo was developed and tested on a kubernetes cluster with about 10 nodes (4 cores with hyperthreading/SMT, 32GB RAM and 30GB HDD).
 Instance types that loosely correspond to this on the Hyperscalers are:
 
 * *Google*: `e2-standard-8`

@@ -1,9 +1,10 @@
+---
 releaseName: redis-airflow
 name: redis
 repo:
   name: bitnami
   url: https://charts.bitnami.com/bitnami/
-version: 19.6.1
+version: 19.6.4
 options:
   commonLabels:
     stackable.tech/vendor: Stackable

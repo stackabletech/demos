@@ -1,3 +1,4 @@
+---
 releaseName: postgresql-timescaledb
 name: timescaledb-single
 repo:

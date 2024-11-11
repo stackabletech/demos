@@ -1,9 +1,10 @@
+---
 releaseName: hivehdfs
 name: postgresql
 repo:
   name: bitnami
   url: https://charts.bitnami.com/bitnami/
-version: 15.5.16
+version: 16.1.2
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
