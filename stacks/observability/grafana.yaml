@@ -4,7 +4,7 @@ name: grafana
 repo:
   name: grafana
   url: https://grafana.github.io/helm-charts
-version: 7.3.7
+version: 8.6.0
 options:
   admin:
     existingSecret: grafana-admin-credentials

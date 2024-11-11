@@ -4,7 +4,7 @@ name: tempo
 repo:
   name: tempo
   url: https://grafana.github.io/helm-charts
-version: 1.7.2
+version: 1.13.0
 options:
   tempo:
     server:
