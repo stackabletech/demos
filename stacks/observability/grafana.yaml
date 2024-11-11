@@ -1,4 +1,5 @@
 # https://github.com/grafana/helm-charts/tree/main/charts/grafana
+---
 releaseName: grafana
 name: grafana
 repo:
@@ -14,24 +15,24 @@ options:
     datasources.yaml:
       apiVersion: 1
       datasources:
-      - name: Loki
-        type: loki
-        url: https://loki.default.svc.cluster.local:3100
-        access: proxy
-        isDefault: false
-        jsonData:
-          tlsAuthWithCACert: true
-        secureJsonData:
-          tlsCACert: $__file{/etc/grafana/certs/ca.crt}
-      - name: Tempo
-        type: tempo
-        url: https://tempo.default.svc.cluster.local:3100
-        access: proxy
-        isDefault: false
-        jsonData:
-          tlsAuthWithCACert: true
-        secureJsonData:
-          tlsCACert: $__file{/etc/grafana/certs/ca.crt}
+        - name: Loki
+          type: loki
+          url: https://loki.default.svc.cluster.local:3100
+          access: proxy
+          isDefault: false
+          jsonData:
+            tlsAuthWithCACert: true
+          secureJsonData:
+            tlsCACert: $__file{/etc/grafana/certs/ca.crt}
+        - name: Tempo
+          type: tempo
+          url: https://tempo.default.svc.cluster.local:3100
+          access: proxy
+          isDefault: false
+          jsonData:
+            tlsAuthWithCACert: true
+          secureJsonData:
+            tlsCACert: $__file{/etc/grafana/certs/ca.crt}
   readinessProbe:
     httpGet:
       scheme: HTTPS

@@ -1,4 +1,5 @@
 # https://github.com/grafana/loki/tree/main/production/helm/loki
+---
 releaseName: loki
 name: loki
 repo:

@@ -1,3 +1,4 @@
+---
 releaseName: redis-airflow
 name: redis
 repo:

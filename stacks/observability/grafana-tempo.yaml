@@ -1,4 +1,5 @@
 # https://github.com/grafana/helm-charts/tree/main/charts/tempo
+---
 releaseName: tempo
 name: tempo
 repo:

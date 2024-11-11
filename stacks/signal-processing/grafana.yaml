@@ -1,3 +1,4 @@
+---
 releaseName: grafana
 name: grafana
 repo:
@@ -21,14 +22,14 @@ options:
     stackable-dashboardprovider.yaml:
       apiVersion: 1
       providers:
-      - name: 'stackable'
-        orgId: 1
-        folder: 'Stackable Data Platform'
-        type: file
-        disableDeletion: false
-        allowUiUpdates: true
-        options:
-          path: /var/lib/grafana/dashboards/stackable
+        - name: 'stackable'
+          orgId: 1
+          folder: 'Stackable Data Platform'
+          type: file
+          disableDeletion: false
+          allowUiUpdates: true
+          options:
+            path: /var/lib/grafana/dashboards/stackable
   dashboardsConfigMaps:
     stackable: stackable-grafana-dashboards
   datasources:
