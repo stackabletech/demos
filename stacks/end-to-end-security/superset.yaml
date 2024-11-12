@@ -25,7 +25,7 @@ spec:
         initContainers:
         # The postgres image does not contain curl or wget...
           - name: download-dump
-            image: docker.stackable.tech/stackable/testing-tools:0.1.0-stackable0.1.0
+            image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
             command:
               - bash
               - -c
