@@ -3,7 +3,7 @@ name: Pre-Release Demo Upgrade Testing from Stable to Nightly
 about: |
     This template can be used to track the upgrade testing of demos from stable to nightly leading
     up to the next Stackable release
-title: "chore(tracking): Test demos on nightly versions"
+title: "chore(tracking): Test demos on nightly versions for XX.(X)X"
 labels: ['epic']
 assignees: ''
 ---
@@ -71,9 +71,17 @@ Replace the items in the task lists below with the applicable Pull Requests (if 
 
 These instructions are for deploying the nightly demo, as well as upgrading the operators and CRDS.
 
+<!--
+    Make sure to update the version mentioned below when creating the issue.
+-->
+
 ```shell
-# Install demo (stable operators)
-stackablectl demo install <DEMO_NAME>
+# Install demo (stable operators) for the previous release (24.7)
+# For now, we have to deploy from the release branch, otherwise we get new changes.
+# Stackablectl doesn't yet support deploying a demo from a branch
+git checkout release-24.7
+git pull
+stackablectl --stack-file=stacks/stacks-v2.yaml --demo-file=demos/demos-v2.yaml demo install <DEMO_NAME>
 
 # --- IMPORTANT ---
 # Run through the nightly demo instructions (refer to the tasklist below).
@@ -93,23 +101,23 @@ helm list
 helm repo add minio https://charts.min.io/
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
-# Finally, upgrade the Charts. For example:
+# Finally, upgrade the Charts to what is defined in `main`.
+# For example:
 helm upgrade minio minio/minio --version x.x.x
 helm upgrade postgresql-hive bitnami/postgresql --version x.x.x
 # --- OPTIONAL END ---
 
 # Uninstall operators
-stackablectl release uninstall <CURRENT_RELEASE>
+stackablectl release uninstall 24.7
 
 # Update CRDs to nightly version (on main)
-# Repeat this for every operator used by the demo
+# Repeat this for every operator used by the demo (use the list from the earlier step before deleting the operators)
 kubectl replace -f https://raw.githubusercontent.com/stackabletech/commons-operator/main/deploy/helm/commons-operator/crds/crds.yaml
 kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/main/deploy/helm/...-operator/crds/crds.yaml
 
-# Install nightly version of operators (use the list from the earlier step
-# before deleting the operators)
+# Install nightly version of operators (use the list from the earlier step before deleting the operators)
 stackablectl operator install commons ...
 
-# Optionally update the product versions in the CRDs, e.g.:
+# Optionally update the product versions in the CRDs (to the latest non-experimental version for the new release), e.g.:
 kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "/spec/image/productVersion", "value":"x.x.x"}]' # changed
 ```
