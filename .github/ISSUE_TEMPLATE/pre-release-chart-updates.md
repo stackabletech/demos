@@ -41,6 +41,18 @@ jupyterhub            https://jupyterhub.github.io/helm-chart/
 opensearch            https://opensearch-project.github.io/helm-charts
 ```
 
+To add any that are missing, run:
+
+```shell
+helm repo add bitnami https://charts.bitnami.com/bitnami --force-update
+```
+
+Then make sure you have the latest indexes:
+
+```shell
+helm repo update
+```
+
 Next, search for the latest version of the desired chart, eg `grafana/grafana`:
 
 ```shell
@@ -53,5 +65,11 @@ grafana/grafana  8.5.11         11.3.0
 grafana/grafana  8.5.10         11.3.0
 ```
 
-Use the latest version displayed to replace the current one in the YAML files. Take a look at
-previous PRs for additional guidance, eg. <https://github.com/stackabletech/demos/pull/119>.
+Use the applicable chart version displayed to replace the current one in the YAML files. Make sure
+to add the app version in the comments. Eg:
+
+```yml
+version: 3.2.1 # 1.2.3
+```
+
+Take a look at previous PRs for additional guidance, eg. <https://github.com/stackabletech/demos/pull/119>.
