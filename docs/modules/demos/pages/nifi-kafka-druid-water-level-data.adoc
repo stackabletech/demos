@@ -68,31 +68,33 @@ To list the installed Stackable services run the following command:
 ----
 $ stackablectl stacklet list
 
-┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
-╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
-│ druid     ┆ druid         ┆ default   ┆ broker-metrics         172.18.0.2:32661         ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ broker-https           https://172.18.0.2:32130 ┆                                 │
-│           ┆               ┆           ┆ coordinator-metrics    172.18.0.2:31609         ┆                                 │
-│           ┆               ┆           ┆ coordinator-https      https://172.18.0.2:32209 ┆                                 │
-│           ┆               ┆           ┆ historical-metrics     172.18.0.2:32644         ┆                                 │
-│           ┆               ┆           ┆ historical-https       https://172.18.0.2:30865 ┆                                 │
-│           ┆               ┆           ┆ middlemanager-metrics  172.18.0.2:31184         ┆                                 │
-│           ┆               ┆           ┆ middlemanager-https    https://172.18.0.2:30239 ┆                                 │
-│           ┆               ┆           ┆ router-metrics         172.18.0.2:31912         ┆                                 │
-│           ┆               ┆           ┆ router-https           https://172.18.0.2:30616 ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka         ┆ default   ┆ metrics                172.18.0.2:31035         ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ kafka-tls              172.18.0.2:31563         ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi          ┆ default   ┆ https                  https://172.18.0.2:30198 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset      ┆ default   ┆ external-http          http://172.18.0.2:31037  ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper     ┆ default   ┆                                                 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-console ┆ default   ┆ http                   http://172.18.0.2:32345  ┆                                 │
-└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────┬───────────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                                         ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid         ┆ default   ┆ broker-metrics                              172.18.0.3:30800                                                      ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-https                                https://172.18.0.3:32366                                              ┆                                 │
+│           ┆               ┆           ┆ coordinator-metrics                         172.18.0.3:32387                                                      ┆                                 │
+│           ┆               ┆           ┆ coordinator-https                           https://172.18.0.3:31091                                              ┆                                 │
+│           ┆               ┆           ┆ historical-metrics                          172.18.0.3:30596                                                      ┆                                 │
+│           ┆               ┆           ┆ historical-https                            https://172.18.0.3:30450                                              ┆                                 │
+│           ┆               ┆           ┆ middlemanager-metrics                       172.18.0.3:30175                                                      ┆                                 │
+│           ┆               ┆           ┆ middlemanager-https                         https://172.18.0.3:32286                                              ┆                                 │
+│           ┆               ┆           ┆ router-metrics                              172.18.0.3:31588                                                      ┆                                 │
+│           ┆               ┆           ┆ router-https                                https://172.18.0.3:31713                                              ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  kafka-broker-default-0-listener-broker.default.svc.cluster.local:9093 ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    kafka-broker-default-0-listener-broker.default.svc.cluster.local:9606 ┆                                 │
+│           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.default.svc.cluster.local:9093         ┆                                 │
+│           ┆               ┆           ┆ broker-default-bootstrap-metrics            kafka-broker-default-bootstrap.default.svc.cluster.local:9606         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ https                                       https://172.18.0.3:30560                                              ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ external-http                               http://172.18.0.3:31366                                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆                                                                                                                   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                                        http://172.18.0.3:32376                                               ┆                                 │
+└───────────┴───────────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -119,7 +121,7 @@ You can execute a command on the Kafka broker to list the available topics as fo
 // However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:31146 (controller)
@@ -154,7 +156,7 @@ print via the `-c` parameter.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t stations -c 2"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t stations -c 2"
 ----
 
 Below is an example of the output of two records:
@@ -193,7 +195,7 @@ Below is an example of the output of two records:
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t measurements -c 3"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t measurements -c 3"
 ----
 
 Below is an example of the output of three records:
@@ -258,7 +260,7 @@ The given pattern will print some metadata of the record.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t measurements -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t measurements -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
 Topic measurements / Partition 0 / Offset: 1324098 / Timestamp: 1680606104652
 Topic measurements / Partition 1 / Offset: 1346816 / Timestamp: 1680606100462
 Topic measurements / Partition 2 / Offset: 1339363 / Timestamp: 1680606100461
@@ -284,7 +286,7 @@ keeps streaming near-real-time updates for every available measuring station.
 You can look at the ingestion job running in NiFi by opening the endpoint `https` from your `stackablectl stacklet list`
 command output. You have to use the endpoint from your command output. In this case, it is https://172.18.0.2:30198.
 Open it with your favourite browser. Suppose you get a warning regarding the self-signed certificate generated by the
-ref:secret-operator::index.adoc[Secret Operator] (e.g. Warning: Potential Security Risk Ahead). In that case, you must
+xref:secret-operator::index.adoc[Secret Operator] (e.g. Warning: Potential Security Risk Ahead). In that case, you must
 tell your browser to trust the website and continue.
 
 image::nifi-kafka-druid-water-level-data/nifi_1.png[]
