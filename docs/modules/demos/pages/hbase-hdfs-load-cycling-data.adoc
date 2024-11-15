@@ -206,7 +206,7 @@ image::hbase-hdfs-load-cycling-data/hbase-table-ui.png[]
 
 == Accessing the HDFS web interface
 
-You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the link next to one of the namenodes.
+You can also see HDFS details via a UI by running `stackablectl stacklet list` and following the http links next to the namenodes.
 
 Below you will see the overview of your HDFS cluster.
 
@@ -217,6 +217,11 @@ The UI will give you information on the datanodes via the `Datanodes` tab.
 image::hbase-hdfs-load-cycling-data/hdfs-datanode.png[]
 
 You can also browse the file system by clicking on the `Utilities` tab and selecting `Browse the file system`.
+
+[TIP]
+====
+Check that the namenode you browse to is the _active_ namenode in the Overview page. Otherwise you will not be able to browse files.
+====
 
 image::hbase-hdfs-load-cycling-data/hdfs-data.png[]
 
