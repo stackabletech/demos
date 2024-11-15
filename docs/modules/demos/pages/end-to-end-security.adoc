@@ -255,6 +255,7 @@ policies := {
     ]
 }
 ----
+
 This is just a snippet from the full ACL definition that can be found in the {trino-policies}[trino-policies ConfigMap] deployed by the end-to-end-security demo.
 
 The demo also contains examples of row-level filtering. One of these is the restriction on the `employees` table, where employees can only see themselves and not the records of other employees (except if they are their supervisor).
