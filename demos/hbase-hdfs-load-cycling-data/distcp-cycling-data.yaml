@@ -9,9 +9,9 @@ spec:
       containers:
         - name: distcp-cycling-data
           # We use 24.3.0 here which contains the distcp MapReduce components
-          # This is not included in the 24.7 images and will fail.
+          # This is not included in the 24.7 and 24.11 images and will fail.
           # See: https://github.com/stackabletech/docker-images/issues/793
-          image: docker.stackable.tech/stackable/hadoop:3.4.0-stackable0.0.0-dev
+          image: docker.stackable.tech/stackable/hadoop:3.3.6-stackable24.3.0
           env:
             - name: HADOOP_USER_NAME
               value: stackable
@@ -20,7 +20,16 @@ spec:
             - name: HADOOP_CLASSPATH
               value: "/stackable/hadoop/share/hadoop/tools/lib/*.jar"
           # yamllint disable-line rule:line-length
-          command: ["bash", "-c", "bin/hdfs dfs -mkdir -p /data/raw && bin/hadoop distcp -D fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider s3a://public-backup-nyc-tlc/cycling-tripdata/demo-cycling-tripdata.csv.gz hdfs://hdfs/data/raw"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              bin/hdfs dfs -mkdir -p /data/raw
+              bin/hadoop distcp -D fs.s3a.aws.credentials.provider=org.apache.hadoop.fs.s3a.AnonymousAWSCredentialsProvider \
+                s3a://public-backup-nyc-tlc/cycling-tripdata/demo-cycling-tripdata.csv.gz \
+                hdfs://hdfs/data/raw
           volumeMounts:
             - name: config-volume-hdfs
               mountPath: /stackable/conf/hdfs
