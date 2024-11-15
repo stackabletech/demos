@@ -539,8 +539,14 @@ On the left, select the database `Trino lakehouse`, the schema `house_sales`, an
 
 [IMPORTANT]
 ====
-The older screenshot below shows how the table preview would look like. Currently, there is an https://github.com/apache/superset/issues/25307[open issue] with previewing trino tables using the Iceberg connector.
-This doesn't affect the execution the following execution of the SQL statement.
+Currently, there is an https://github.com/apache/superset/issues/25307[open issue] with previewing trino tables using the Iceberg connector.
+Until it is fixed, you will see the following error:
+
+```
+trino error: TrinoUserError(type=USER_ERROR, name=COLUMN_NOT_FOUND, message="line 3:7: Column 'partition' cannot be resolved", query_id=20241114_162624_00095_6hvqh)
+```
+
+This does not affect the execution of the following SQL statement.
 ====
 
 image::data-lakehouse-iceberg-trino-spark/superset_8.png[]
