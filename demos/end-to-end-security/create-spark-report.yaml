@@ -60,7 +60,7 @@ data:
       mainApplicationFile: local:///stackable/spark/jobs/spark-report.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.5.0
+          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0
       sparkConf:
         spark.driver.extraClassPath: /stackable/config/hdfs
         spark.executor.extraClassPath: /stackable/config/hdfs

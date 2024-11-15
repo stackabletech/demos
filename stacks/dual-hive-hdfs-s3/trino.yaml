@@ -86,7 +86,7 @@ metadata:
   name: opa
 spec:
   image:
-    productVersion: 0.51.0
+    productVersion: 0.67.1
   servers:
     roleGroups:
       default:
