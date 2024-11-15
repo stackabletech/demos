@@ -178,7 +178,13 @@ include::partial$instance-hint.adoc[]
 Have a look at the xref:home:trino:usage-guide/connect_to_trino.adoc[trino-operator documentation on how to connect to Trino].
 It is recommended to use DBeaver, as Trino consists of many schemas and tables and they are easier to explore via a UI. The host and port for the connection can be found in the `stackablectl stacklet list` output used earlier using the `coordinator-https` endpoint. In this case it would be `https://172.18.0.2:31604`.
 
-One DBeaver configuration differs from the trino-operator documentation linked above: Since the demo uses OIDC to connect to Keycloak for authentication, the `Username` and `Password` fields are left blank and instead you have to set `externalAuthentication` in the `Driver properties`, when creating the Trino connection, to `true`.
+[IMPORTANT]
+====
+Because this demo uses OIDC for authentication there are slightly different settings required than what are described in trino-operator documentation linked above:
+
+- The `Username` and `Password` fields must be left blank.
+- An addition setting in the Driver Properties must be added: `externalAuthentication: true`.
+====
 
 image::end-to-end-security/dbeaver_1.png[]
 
