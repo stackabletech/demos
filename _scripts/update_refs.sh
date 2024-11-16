@@ -5,6 +5,8 @@ set -euo pipefail
 # repository branch references as well as the stackableRelease versions so that
 # demos are properly versioned.
 
+# TODO (@NickLarsenNZ): Add an option to commit each change
+
 CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
 
 # Ensure we are not on the `main` branch.
@@ -19,22 +21,35 @@ if ! git diff-index --quiet HEAD --; then
   exit 2
 fi
 
+# prepend a string to each line of stdout
+function prepend {
+  while read -r line; do
+    echo -e "${1}${line}"
+  done
+}
+
 if [[ "$CURRENT_BRANCH" == release-* ]]; then
   STACKABLE_RELEASE="${CURRENT_BRANCH#release-}"
   echo "Updating stackableRelease to $STACKABLE_RELEASE"
-  sed -i -E "s/(stackableRelease:\s+)(\S+)/\1${STACKABLE_RELEASE}/" stacks/stacks-v2.yaml
+  # NOTE (@NickLarsenNZ): find is not required for such a trivial case, but it is done for consitency
+  find stacks/stacks-v2.yaml \
+    -exec grep --color=always -l stackableRelease {} \; \
+    -exec sed -i -E "s/(stackableRelease:\s+)(\S+)/\1${STACKABLE_RELEASE}/" {} \; \
+  | prepend "\t"
 
   # TODO (@NickLarsenNZ): Replace 0.0.0-dev refs with ${STACKABLE_RELEASE}.0
   # handle patches later, and what about release-candidates?
-  SEARCH='stackable(0\.0\.0-dev|24\.7\.\d+)' # TODO (@NickLarsenNZ): After https://github.com/stackabletech/stackable-cockpit/issues/310, only search for 0.0.0-dev
+  SEARCH='stackable(0\.0\.0-dev|24\.7\.[0-9]+)' # TODO (@NickLarsenNZ): After https://github.com/stackabletech/stackable-cockpit/issues/310, only search for 0.0.0-dev
   REPLACEMENT="stackable${STACKABLE_RELEASE}.0" # TODO (@NickLarsenNZ): Be a bit smarter about patch releases.
   echo "Updating image references. Searching for $SEARCH, replacing with $REPLACEMENT"
   find demos stacks -type f \
-    -exec sed -i -E "s/${SEARCH}/${REPLACEMENT}/" {} \;
+    -exec grep --color=always -lE "$SEARCH" {} \; \
+    -exec sed -i -E "s/${SEARCH}/${REPLACEMENT}/" {} \; \
+  | prepend "\t"
 
   # Look for remaining references
   echo "Checking files with older stackable release references which will be assumed to be intentional."
-  grep --color=always -ronE "stackable24\.3(\.[0-9]+)"
+  grep --color=always -ronE "stackable24\.3(\.[0-9]+)" | prepend "\t"
 else
   >&2 echo "WARNING: doesn't look like a release branch. Will not update stackableRelease versions in stacks."
 fi
@@ -45,8 +60,9 @@ echo "Replacing githubusercontent references main->${CURRENT_BRANCH}"
 # This is done just in case the branch has special regex characters (like `/`).
 # shellcheck disable=SC2016 # We intentionally don't want to expand the variable.
 find demos stacks -type f \
-  -exec grep -l githubusercontent {} \; \
-  -exec sed -i -E 's/(stackabletech\/demos)\/main\//\1\/\${UPDATE_BRANCH_REF}\//' {} \;
+  -exec grep --color=always -l githubusercontent {} \; \
+  -exec sed -i -E 's/(stackabletech\/demos)\/main\//\1\/\${UPDATE_BRANCH_REF}\//' {} \; \
+| prepend "\t"
 
 # Now, for all modified files, we can use envsubst
 export UPDATE_BRANCH_REF="$CURRENT_BRANCH"
