@@ -8,3 +8,4 @@ rules:
   comments:
     min-spaces-from-content: 1  # Needed due to https://github.com/adrienverge/yamllint/issues/443
   braces: disable # because the yaml files are templates which can have {{ ... }}
+  indentation: disable # There are many conflicting styles and it isn't so important in this repo. It can be enabled later if we want consistency.

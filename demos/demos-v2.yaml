@@ -73,7 +73,7 @@ demos:
       memory: 42034Mi
       pvc: 75Gi # 30Gi for Kafka
   nifi-kafka-druid-water-level-data:
-    description:  Demo ingesting water level data into Kafka using NiFi, streaming it into Druid and creating a Superset dashboard
+    description: Demo ingesting water level data into Kafka using NiFi, streaming it into Druid and creating a Superset dashboard
     documentation: https://docs.stackable.tech/stackablectl/stable/demos/nifi-kafka-druid-water-level-data.html
     stackableStack: nifi-kafka-druid-superset-s3
     labels:

@@ -5,6 +5,7 @@
 3. Optional: Add Database connection
 4. Add admin user in Keycloak to all relevant groups (so that he has access to the tables, so he can create datasets, charts and dashboards).
 5. `pgdump` the Postgres and update the dump in Git. For that shell into `postgresql-superset-0` and execute
+
 ```sh
 export PGPASSWORD="$POSTGRES_POSTGRES_PASSWORD"
 

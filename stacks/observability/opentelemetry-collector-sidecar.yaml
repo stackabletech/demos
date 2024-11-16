@@ -1,3 +1,5 @@
+# yamllint disable rule:comments-indentation
+---
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
@@ -121,7 +123,7 @@ spec:
           - resourcedetection/env
           - resource/logs
           - attributes/logs
-          exporters: 
+          exporters:
           - loki
           # - debug
       # Set the log level of the opentelemetry-collector application.
@@ -140,7 +142,7 @@ spec:
       cpu: 250m
       memory: 64Mi
   volumeMounts:
-    # We mount a certificate from the secret-operator so that we have the CA 
+    # We mount a certificate from the secret-operator so that we have the CA
     # cert for exporters to trust what they connect to.
     - name: tls
       mountPath: /certs

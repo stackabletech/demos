@@ -23,7 +23,7 @@ spec:
       spec:
         # We need to restore the postgres state before the superset container itself starts some database migrations
         initContainers:
-        # The postgres image does not contain curl or wget...
+          # The postgres image does not contain curl or wget...
           - name: download-dump
             image: docker.stackable.tech/stackable/testing-tools:0.2.0-stackable24.7.0
             command:

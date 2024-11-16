@@ -1,3 +1,6 @@
+#!/usr/bin/env bash
+set -euo pipefail
+
 # This script is not used for the demo
 # Its purpose is to document how to retrieve the used earthquake data
 

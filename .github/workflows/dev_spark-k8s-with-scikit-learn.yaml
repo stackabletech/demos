@@ -34,7 +34,7 @@ jobs:
           # TODO: the image 3.5.0-stackable24.3.0 does not have an arm64 build.
           # Re-activate the arm runner when the image is updated to one that does.
           # Also adjust publish_manifest step to include arm architecture
-          #- {name: "ubicloud-standard-8-arm", arch: "arm64"}
+          # - {name: "ubicloud-standard-8-arm", arch: "arm64"}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7

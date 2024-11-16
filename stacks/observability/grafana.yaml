@@ -1,5 +1,6 @@
-# https://github.com/grafana/helm-charts/tree/main/charts/grafana
+# yamllint disable rule:comments-indentation
 ---
+# https://github.com/grafana/helm-charts/tree/main/charts/grafana
 releaseName: grafana
 name: grafana
 repo:
