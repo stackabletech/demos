@@ -38,9 +38,8 @@ function maybe_commit {
   PATCH=$(mktemp)
   git add -u
   git diff --staged > "$PATCH"
-  git commit -m "$MESSAGE"
-  echo "committed changes with message: $MESSAGE"
-  echo "patch written to: $PATCH"
+  git commit -S -m "$MESSAGE" --no-verify
+  echo "patch written to: $PATCH" | prepend "\t"
 }
 
 if [[ "$CURRENT_BRANCH" == release-* ]]; then
