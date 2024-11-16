@@ -151,6 +151,10 @@ This is described below.
 
 Libraries can be added to a custom *product* image launched by the notebook. Suppose a Spark job is prepared like this:
 
+// TODO (@NickLarsenNZ): Use stackable0.0.0-dev so that the demo is reproducable for the release
+// and it will be automatically replaced for the release branch.
+// Also update the reference in notebook.ipynb.
+
 [source,python]
 ----
 spark = (SparkSession
@@ -171,6 +175,10 @@ spark = (SparkSession
 ----
 
 It requires a specific Spark image:
+
+// TODO (@NickLarsenNZ): Use stackable0.0.0-dev so that the demo is reproducable for the release
+// and it will be automatically replaced for the release branch.
+// Also update the reference in notebook.ipynb.
 
 [source,python]
 ----
