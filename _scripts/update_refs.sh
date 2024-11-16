@@ -19,15 +19,28 @@ if ! git diff-index --quiet HEAD --; then
   exit 2
 fi
 
-# Warn if the branch isn't a `release-*` branch (these changes shouldn't be in a branch that gets merged to main)
 if [[ "$CURRENT_BRANCH" == release-* ]]; then
   STACKABLE_RELEASE="${CURRENT_BRANCH#release-}"
   echo "Updating stackableRelease to $STACKABLE_RELEASE"
   sed -i -E "s/(stackableRelease:\s+)(\S+)/\1${STACKABLE_RELEASE}/" stacks/stacks-v2.yaml
+
+  # TODO (@NickLarsenNZ): Replace 0.0.0-dev refs with ${STACKABLE_RELEASE}.0
+  # handle patches later, and what about release-candidates?
+  SEARCH='stackable(0\.0\.0-dev|24\.7\.\d+)' # TODO (@NickLarsenNZ): After https://github.com/stackabletech/stackable-cockpit/issues/310, only search for 0.0.0-dev
+  REPLACEMENT="stackable${STACKABLE_RELEASE}.0" # TODO (@NickLarsenNZ): Be a bit smarter about patch releases.
+  echo "Updating image references. Searching for $SEARCH, replacing with $REPLACEMENT"
+  find demos stacks -type f \
+    -exec sed -i -E "s/${SEARCH}/${REPLACEMENT}/" {} \;
+
+  # Look for remaining references
+  echo "Checking files with older stackable release references which will be assumed to be intentional."
+  grep --color=always -ronE "stackable24\.3(\.[0-9]+)"
 else
   >&2 echo "WARNING: doesn't look like a release branch. Will not update stackableRelease versions in stacks."
 fi
 
+echo
+echo "Replacing githubusercontent references main->${CURRENT_BRANCH}"
 # Search for githubusercontent urls and replace the branch reference with a placeholder variable
 # This is done just in case the branch has special regex characters (like `/`).
 # shellcheck disable=SC2016 # We intentionally don't want to expand the variable.
