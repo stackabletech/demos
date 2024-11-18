@@ -11,9 +11,9 @@ stacks:
       - prometheus
       - grafana
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/grafana-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/prometheus.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/prometheus-service-monitor.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/monitoring/grafana-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/prometheus.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/prometheus-service-monitor.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 1750m
@@ -37,11 +37,11 @@ stacks:
       - opensearch-dashboards
       - vector
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/setup-opensearch-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/opensearch.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/opensearch-dashboards.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/logging/setup-opensearch-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/vector-aggregator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/vector-aggregator-discovery.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 5150m
@@ -71,14 +71,14 @@ stacks:
       - observability
       - tracing
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/jaeger.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-operator.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-admin-credentials.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-tempo.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/grafana-loki.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/jaeger.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/opentelemetry-operator.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/grafana-admin-credentials.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/grafana-tempo.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/grafana-loki.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/opentelemetry-collector-sidecar.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/observability/opentelemetry-collector-deployment.yaml
     parameters:
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
@@ -95,9 +95,9 @@ stacks:
     labels:
       - airflow
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/redis-airflow.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-airflow.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/redis-airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/airflow/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
@@ -135,17 +135,17 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio-distributed.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
     supportedNamespaces: []
     resourceRequests:
       cpu: "71"
@@ -181,9 +181,9 @@ stacks:
       - hbase
       - hdfs
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hbase.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/hdfs-hbase/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/hdfs-hbase/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/hdfs-hbase/hbase.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 4200m
@@ -210,14 +210,14 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/kafka.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/nifi.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-druid.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/nifi.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 8900m
@@ -254,15 +254,15 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/spark-trino-superset-s3/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 7100m
@@ -298,13 +298,13 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m
@@ -340,11 +340,11 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio-distributed-small.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive-iceberg.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-iceberg/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-iceberg/hive-metastores.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/trino-iceberg/trino.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6000m # Measured 5600m
@@ -372,12 +372,12 @@ stacks:
       - hdfs
       - pyspark
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/jupyterhub.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/jupyterhub.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
       # TODO Use patched JHub that created service for us from customer setup (ask Sebastian)
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3350m
@@ -405,12 +405,12 @@ stacks:
       - hdfs
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hivehdfs.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hives3.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hive.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/trino.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hivehdfs.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hives3.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/dual-hive-hdfs-s3/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/dual-hive-hdfs-s3/hive.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/dual-hive-hdfs-s3/trino.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 7750m
@@ -435,7 +435,7 @@ stacks:
       - authentication
       - ldap
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/authentication/openldap-tls.yaml
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 1950m
@@ -458,8 +458,8 @@ stacks:
       - authentication
       - ldap
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls-authenticationclass.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/authentication/openldap-tls.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/authentication/openldap-tls-authenticationclass.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 1950m
@@ -490,18 +490,18 @@ stacks:
       - authentication
       - sso
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/keycloak.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/setup-keycloak.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/opa.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/policies.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/keycloak.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/setup-keycloak.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/policies.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/druid.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/keycloak-opa-poc/superset.yaml
     supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
     resourceRequests:
       cpu: 7850m
@@ -567,22 +567,22 @@ stacks:
       memory: 19586Mi
       pvc: 40Gi
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/keycloak-serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/keycloak-realm-config.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/keycloak.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/krb5.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/kerberos-secretclass.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/opa.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/zookeeper.yaml # TODO: Add authentication
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs-regorules.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-regorules.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/keycloak-serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/keycloak-realm-config.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/keycloak.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/krb5.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/kerberos-secretclass.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/zookeeper.yaml # TODO: Add authentication
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/hdfs-regorules.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/trino-regorules.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/trino-policies.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/end-to-end-security/superset.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
@@ -624,15 +624,15 @@ stacks:
       - jupyterhub
       - grafana
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/secrets.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/grafana-dashboards.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/grafana.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-timescaledb.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/signal-processing/secrets.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/signal-processing/grafana-dashboards.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/signal-processing/grafana.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/_templates/postgresql-timescaledb.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/signal-processing/nifi.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-24.11/stacks/signal-processing/jupyterhub.yaml
     parameters:
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
