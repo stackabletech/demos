@@ -30,7 +30,7 @@ options:
   singleuser:
     cmd: null
     image:
-      # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+      # TODO (@NickLarsenNZ): Use a versioned image with stackable24.11.0 or stackableXX.X.X so that
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
       name: docker.stackable.tech/demos/jupyter-pyspark-with-alibi-detect
       tag: python-3.9
@@ -41,7 +41,7 @@ options:
       stackable.tech/vendor: Stackable
     initContainers:
       - name: download-notebook
-        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.7.0
+        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.11.0
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook
