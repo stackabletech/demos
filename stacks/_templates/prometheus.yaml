@@ -1,9 +1,10 @@
+---
 releaseName: prometheus
 name: kube-prometheus-stack
 repo:
   name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-version: 54.2.2
+version: 66.1.0
 options:
   commonMetaLabels:
     stackable.tech/vendor: Stackable
@@ -34,14 +35,14 @@ options:
       stackable-dashboardprovider.yaml:
         apiVersion: 1
         providers:
-        - name: 'stackable'
-          orgId: 1
-          folder: 'Stackable Data Platform'
-          type: file
-          disableDeletion: false
-          allowUiUpdates: true # TODO set to false. Is enabled so Dashboards can be build easier. Note: If a provisioned dashboard is saved from the UI and then later updated from the source, the dashboard stored in the database will always be overwritten
-          options:
-            path: /var/lib/grafana/dashboards/stackable # Must be /var/lib/grafana/dashboards/<provider_name>
+          - name: 'stackable'
+            orgId: 1
+            folder: 'Stackable Data Platform'
+            type: file
+            disableDeletion: false
+            allowUiUpdates: true # TODO set to false. Is enabled so Dashboards can be build easier. Note: If a provisioned dashboard is saved from the UI and then later updated from the source, the dashboard stored in the database will always be overwritten
+            options:
+              path: /var/lib/grafana/dashboards/stackable # Must be /var/lib/grafana/dashboards/<provider_name>
     dashboardsConfigMaps:
       stackable: stackable-grafana-dashboards
   kube-state-metrics:

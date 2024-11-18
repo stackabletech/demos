@@ -5,7 +5,7 @@ metadata:
   name: druid
 spec:
   image:
-    productVersion: 28.0.1
+    productVersion: 30.0.0
   clusterConfig:
     listenerClass: external-unstable
     deepStorage:
@@ -67,7 +67,7 @@ spec:
           "druid-pac4j"]
 
         # basic authenticator needed for internal authentication among Druid processes
-        # Trying to use the pac4j authenticator in the escalator below leads to 302 errors, 
+        # Trying to use the pac4j authenticator in the escalator below leads to 302 errors,
         # it seems like the Druid processes cannot handle the OIDC authentication flow.
         druid.auth.authenticator.MyBasicMetadataAuthenticator.type: basic
         druid.auth.authenticator.MyBasicMetadataAuthenticator.initialInternalClientPassword: '${env:DRUID_SYSTEM_USER_PASSWORD}' # Default password for internal 'druid_system' user

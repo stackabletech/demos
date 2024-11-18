@@ -28,16 +28,24 @@ spec:
             - mountPath: /stackable/conf/hbase-env.sh
               name: config-volume-hbase
               subPath: hbase-env.sh
-          command: [ "bash", "-c", "/stackable/hbase/bin/hbase \
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+                # https://hbase.apache.org/book.html#tools
+                /stackable/hbase/bin/hbase \
                                     org.apache.hadoop.hbase.mapreduce.ImportTsv \
                                     -Dimporttsv.separator=, \
                                     -Dimporttsv.columns=HBASE_ROW_KEY,rideable_type,started_at,ended_at,start_station_name,start_station_id,end_station_name,end_station_id,start_lat,start_lng,end_lat,end_lng,member_casual \
                                     -Dimporttsv.bulk.output=hdfs://hdfs/data/hfile \
-                                    cycling-tripdata hdfs://hdfs/data/raw/demo-cycling-tripdata.csv.gz \
-                                    && /stackable/hbase/bin/hbase \
+                  cycling-tripdata hdfs://hdfs/data/raw/demo-cycling-tripdata.csv.gz
+
+                /stackable/hbase/bin/hbase \
                                     org.apache.hadoop.hbase.tool.LoadIncrementalHFiles \
                                     hdfs://hdfs/data/hfile \
-                                    cycling-tripdata" ] # https://hbase.apache.org/book.html#tools
+                  cycling-tripdata
       volumes:
         - name: config-volume-hbase
           configMap:

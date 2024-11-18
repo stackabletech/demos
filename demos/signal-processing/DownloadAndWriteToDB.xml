@@ -61,7 +61,7 @@
             <bundle>
                 <artifact>nifi-dbcp-service-nar</artifact>
                 <group>org.apache.nifi</group>
-                <version>1.21.0</version>
+                <version>1.27.0</version>
             </bundle>
             <comments></comments>
             <descriptors>
@@ -258,7 +258,7 @@
             <bundle>
                 <artifact>nifi-record-serialization-services-nar</artifact>
                 <group>org.apache.nifi</group>
-                <version>1.21.0</version>
+                <version>1.27.0</version>
             </bundle>
             <comments></comments>
             <descriptors>
@@ -561,7 +561,7 @@
             </position>
             <height>88.0</height>
             <label>This flow downloads a dataset, writing it to a temporary table in TimescaleDB.
-This data is then written to the target table with the time offsets preserved, 
+This data is then written to the target table with the time offsets preserved,
 but re-based to the current time. This means that the data can be displayed
 in Grafana as if it were being streamed, whereas in fact the dashboard moves
 through "future" data that has already been persisted.</label>
@@ -584,7 +584,7 @@ through "future" data that has already been persisted.</label>
             <bundle>
                 <artifact>nifi-standard-nar</artifact>
                 <group>org.apache.nifi</group>
-                <version>1.21.0</version>
+                <version>1.27.0</version>
             </bundle>
             <config>
                 <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
@@ -1069,7 +1069,7 @@ through "future" data that has already been persisted.</label>
             <bundle>
                 <artifact>nifi-standard-nar</artifact>
                 <group>org.apache.nifi</group>
-                <version>1.21.0</version>
+                <version>1.27.0</version>
             </bundle>
             <config>
                 <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>
@@ -1223,7 +1223,7 @@ from conditions_temp;</value>
             <bundle>
                 <artifact>nifi-standard-nar</artifact>
                 <group>org.apache.nifi</group>
-                <version>1.21.0</version>
+                <version>1.27.0</version>
             </bundle>
             <config>
                 <backoffMechanism>PENALIZE_FLOWFILE</backoffMechanism>

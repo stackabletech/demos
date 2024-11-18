@@ -114,7 +114,7 @@ You can execute a command on the Kafka broker to list the available topics as fo
 // However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -L"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
   broker 1001 at 172.18.0.2:32175 (controller)
@@ -136,7 +136,7 @@ parameter.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t earthquakes -c 1"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t earthquakes -c 1"
 ----
 
 Below is an example of the output of one record:
@@ -175,7 +175,7 @@ The given pattern will print some metadata of the record.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls_cert_server_mount/tls.key -X ssl.certificate.location=/stackable/tls_cert_server_mount/tls.crt -X ssl.ca.location=/stackable/tls_cert_server_mount/ca.crt -C -t earthquakes -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
+$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t earthquakes -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
 Topic earthquakes / Partition 0 / Offset: 385011 / Timestamp: 1680607795568
 Topic earthquakes / Partition 0 / Offset: 385012 / Timestamp: 1680607795568
 Topic earthquakes / Partition 0 / Offset: 385013 / Timestamp: 1680607795570

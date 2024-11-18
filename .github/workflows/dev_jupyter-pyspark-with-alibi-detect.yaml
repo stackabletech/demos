@@ -3,6 +3,8 @@ name: Build and publish jupyter-pyspark-with-alibi-detect
 
 env:
   IMAGE_NAME: jupyter-pyspark-with-alibi-detect
+  # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+  # the demo is reproducable for the release and it will be automatically replaced for the release branch.
   IMAGE_VERSION: python-3.9
   REGISTRY_PATH: stackable
   DOCKERFILE_PATH: "demos/signal-processing/Dockerfile-jupyter"
@@ -12,6 +14,8 @@ on:
   push:
     branches:
       - main
+      # TODO (@NickLarsenNZ): Also build on release branches, but with a stackable0.0.0-dev or stackableXX.X.X tag.
+      # - release-*
     paths:
       - demos/signal-processing/Dockerfile-jupyter
       - demos/signal-processing/requirements.txt

@@ -1,9 +1,10 @@
+---
 releaseName: jupyterhub
 name: jupyterhub
 repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
-version: 3.2.1
+version: 4.0.0
 options:
   hub:
     config:
@@ -29,6 +30,8 @@ options:
   singleuser:
     cmd: null
     image:
+      # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+      # the demo is reproducable for the release and it will be automatically replaced for the release branch.
       name: docker.stackable.tech/demos/jupyter-pyspark-with-alibi-detect
       tag: python-3.9
     serviceAccountName: spark

@@ -1,5 +1,5 @@
-{% raw %}
 ---
+# {% raw %}
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -1460,7 +1460,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1610,7 +1610,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1671,7 +1671,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1736,7 +1736,7 @@ data:
     #         "groups": ["group1", ...],
     #         "user": "username",
     #       },
-    #       "softwareStack": {"trinoVersion": "442"},
+    #       "softwareStack": {"trinoVersion": "455"},
     #     }
     #   }
     #
@@ -1797,4 +1797,4 @@ data:
 
       regex.match(pattern_with_anchors, value)
     }
-{% endraw %}
+# {% endraw %}

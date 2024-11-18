@@ -1,6 +1,9 @@
 = end-to-end-security
-:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :description: This demo showcases end-to-end security in Stackable Data Platform with OPA, featuring row/column access control, OIDC, Kerberos, and flexible group policies.
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:rego: https://www.openpolicyagent.org/docs/latest/policy-language/
+:trino-policies: https://github.com/stackabletech/demos/blob/main/stacks/end-to-end-security/trino-policies.yaml
 
 This is a demo to showcase what can be done with Open Policy Agent around authorization in the Stackable Data Platform.
 It covers the following aspects of security:
@@ -22,7 +25,7 @@ This demo will:
 ** Keycloak and flexible group lookup
 ** Open Policy Agent for the utmost flexibility in building access rules
 
-The following figure gives an overview of how the components interact with each other:
+Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
@@ -62,6 +65,7 @@ The Trino schema (with schemas, tables and views) is shown below.
 // the svg does not have a specified size, so we need to size it here or it will be 0x0
 image::end-to-end-security/trino-schema.svg[Trino schema,700]
 
+[#user-credentials]
 === User credentials
 
 The following user accounts are configured in Keycloak:
@@ -99,6 +103,7 @@ The following user accounts are configured in Keycloak:
 |Head of Marketing
 |===
 
+[#ruleset]
 === Ruleset
 
 The rules that are configured in this demo show different options of giving full or restricted access to data with OPA.
@@ -108,7 +113,7 @@ At the highest level, everybody is allowed to see data from the schema of the de
 So in the following example, Justin Martin, who is a member of the Customer Service department will only be
 able to see tables from the Customer Service schema.
 
-image::e2e-justin.png[]
+image::end-to-end-security/e2e-justin.png[]
 
 ==== Column-based Access Control
 
@@ -117,15 +122,215 @@ restricted access to the customers table.
 
 The following diagram shows which rules are in place, you can easily test these with a sql editor of your chice.
 
-image::e2e-sophia.png[]
+image::end-to-end-security/e2e-sophia.png[]
 
 ==== Row-level Access Control
 Access control at the row level has been implemented on the employee table, where everybody can see information
 about themselves, as well as people who report to them.
 
-image::e2e-sophia-employee.png[]
+image::end-to-end-security/e2e-sophia-employee.png[]
 
 === Decision logging (aka audit log)
 
 The OPA server logs every single request it receives along with the decision it took to STDOUT.
 This gives you an audit log across the whole Data Platform.
+
+== List deployed Stackable services
+
+To list the installed Stackable services run the following command:
+
+[source,console]
+----
+$ stackablectl stacklet list
+┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                                                                                    ┆ CONDITIONS                      │
+╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hdfs      ┆ hdfs         ┆ default   ┆ datanode-default-0-listener-data     hdfs-datanode-default-0-listener.default.svc.cluster.local:9866         ┆ Available, Reconciling, Running │
+│           ┆              ┆           ┆ datanode-default-0-listener-https    https://hdfs-datanode-default-0-listener.default.svc.cluster.local:9865 ┆                                 │
+│           ┆              ┆           ┆ datanode-default-0-listener-ipc      hdfs-datanode-default-0-listener.default.svc.cluster.local:9867         ┆                                 │
+│           ┆              ┆           ┆ datanode-default-0-listener-metrics  hdfs-datanode-default-0-listener.default.svc.cluster.local:8082         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-https             https://listener-hdfs-namenode-default-0.default.svc.cluster.local:9871 ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-metrics           listener-hdfs-namenode-default-0.default.svc.cluster.local:8183         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-rpc               listener-hdfs-namenode-default-0.default.svc.cluster.local:8020         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-https             https://listener-hdfs-namenode-default-1.default.svc.cluster.local:9871 ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-metrics           listener-hdfs-namenode-default-1.default.svc.cluster.local:8183         ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-rpc               listener-hdfs-namenode-default-1.default.svc.cluster.local:8020         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive      ┆ hive-iceberg ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa       ┆ opa          ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset     ┆ default   ┆ external-http                        http://172.18.0.2:30443                                                 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino     ┆ trino        ┆ default   ┆ coordinator-metrics                  172.18.0.2:32156                                                        ┆ Available, Reconciling, Running │
+│           ┆              ┆           ┆ coordinator-https                    https://172.18.0.2:31604                                                ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper    ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
+└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+----
+
+include::partial$instance-hint.adoc[]
+
+== Explore the Data
+
+=== Connect to Trino
+
+Have a look at the xref:home:trino:usage-guide/connect_to_trino.adoc[trino-operator documentation on how to connect to Trino].
+It is recommended to use DBeaver, as Trino consists of many schemas and tables and they are easier to explore via a UI. The host and port for the connection can be found in the `stackablectl stacklet list` output used earlier using the `coordinator-https` endpoint. In this case it would be `https://172.18.0.2:31604`.
+
+[IMPORTANT]
+====
+Because this demo uses OIDC for authentication there are slightly different settings required than what are described in trino-operator documentation linked above:
+
+- The `Username` and `Password` fields must be left blank.
+- An addition setting in the Driver Properties must be added: `externalAuthentication: true`.
+====
+
+image::end-to-end-security/dbeaver_1.png[]
+
+When connecting to Trino you should be redirected to the Keycloak login screen, where you can use the credentials listed <<user-credentials, here>>.
+
+image::end-to-end-security/keycloak_1.png[]
+
+=== Access the data
+
+As an example, logging in using the user `justin.martin` results in the following view of the data:
+
+image::end-to-end-security/dbeaver_2.png[]
+
+This user has only access to the `employees` and `customer_analytics` schemas and not to the `compliance_analytics` and `marketing` schemas as defined by the <<ruleset, ruleset>>.
+
+== Security Features
+
+[#column-row-filtering]
+=== Column- and row-level filtering
+
+To demonstrate column-level filtering, this demo has different access configurations for different departments. `justin.martin` (Customer Analytics department) has full access to the `customer` table of the `customer-analytics` schema, while `sophia.clarke` (Compliance Analytics department) only sees a subset of the columns in the same table. This can be tested by running the following SQL query as `justin.martin` and `sophia.clarke` respectively:
+
+[source,sql]
+----
+select * from lakehouse.customer_analytics.customer;
+----
+
+For `sophia.clarke` this query will return an error, since the query is trying to fetch all columns of the table and `sophia.clarke` is not authorized for all of them. To show only the columns which are accessible using the same query, run the following session configuration query first:
+
+[source,sql]
+----
+set session hide_inaccessible_columns = true;
+----
+
+image::end-to-end-security/dbeaver_3.png[]
+
+The ACLs configuring this behavior (written with the {rego}[Rego language]) on the `customer` table look like the following code snippet for the Compliance Analytics department. By setting the `allow` property of a column to `false`, the column becomes inaccessible for the group set in the `group` property. Additionally, in this example the contents of the `c_customer_id` and `c_email_address` columns are masked, one by encrypting the contents with sha256 and the other by replacing parts of the email address using a regular expression.
+
+[source,rego]
+----
+package trino_policies
+
+import rego.v1
+
+policies := {
+    "tables": [
+        {
+            "group": "/Compliance and Regulation/Analytics",
+            "catalog": "lakehouse",
+            "schema": "customer_analytics",
+            "table": "customer",
+            "privileges": ["SELECT"],
+            "columns" : [
+            {"name": "c_first_name", "allow": false},
+            {"name": "c_last_name", "allow": false},
+            {"name": "c_birth_day", "allow": false},
+            {"name": "c_birth_month", "allow": false},
+            {
+                "name": "c_customer_id",
+                "mask": "'sha256:' || to_hex(sha256(to_utf8(c_customer_id)))",
+            },
+            {
+                "name": "c_email_address",
+                "mask": "regexp_replace(c_email_address, '([^@]{1,3})([^@]+)@', '$1---@')",
+            },
+            ]
+        }
+    ]
+}
+----
+
+This is just a snippet from the full ACL definition that can be found in the {trino-policies}[trino-policies ConfigMap] deployed by the end-to-end-security demo.
+
+The demo also contains examples of row-level filtering. One of these is the restriction on the `employees` table, where employees can only see themselves and not the records of other employees (except if they are their supervisor).
+
+Logging in as `justin.martin` results in these rows being shown:
+
+image::end-to-end-security/dbeaver_4.png[]
+
+The Rego rule for this behavior looks like this (again a snippet from the {trino-policies}[trino-policies ConfigMap]):
+
+[source,rego]
+----
+package trino_policies
+
+import rego.v1
+
+policies := {
+    "tables": [
+        {
+            "catalog": "lakehouse",
+            "schema": "employees",
+            "table": "employees",
+            "privileges": ["SELECT"],
+            "filter": "username = current_user or supervisor = current_user",
+        }
+    ]
+}
+----
+
+=== Keycloak and flexible group lookup
+
+To connect to the deployed Keycloak instance use a port-forward on the `keycloak` Service deployed in your cluster:
+
+[source,console]
+----
+$ kubectl port-forward service/keycloak 8443:8443
+----
+
+And then open the url https://localhost:8443 to access the Keycloak UI. You can login using the credentials `admin` for username and `adminadmin` for password.
+
+The demo has two realms configured, `master` and `demo`, shown in the screenshot below. The `demo` realm is the relevant one with the organizational configurations for the group memberships of the employees.
+
+image::end-to-end-security/keycloak_2.png[]
+
+Selecting `Groups` in the menu on the left, gives an overview of the groups defined in Keycloak.
+
+image::end-to-end-security/keycloak_3.png[]
+
+By navigating to the `Customer Service` group (clicking on it in the groups overview), then the `Analytics` child group and lastly selecting the `Members` tab, you can see the users belonging to that group.
+
+image::end-to-end-security/keycloak_4.png[]
+
+Click the `Add member` button, select `sophia.clarke` and press `Add` to add her to the `Customer Service` group.
+
+image::end-to-end-security/keycloak_5.png[]
+
+Using the Trino connection again logged in as `sophia.clarke` you can run the following command again, and compare the output to the one before the group change. `sophia.clarke` should now be able to see more columns than before.
+
+[source,sql]
+----
+select * from lakehouse.customer_analytics.customer;
+----
+
+image::end-to-end-security/dbeaver_5.png[]
+
+=== OIDC support across the board
+
+If you already logged in to Trino, you can try opening up the Superset UI. That is reachable with the `external-http` endpoint provided by `stackablectl stacklet list`. In this case the endpoint is http://172.18.0.2:30443. You should see the `Sign in with Keycloak` button on your screen.
+
+image::end-to-end-security/superset_1.png[]
+
+When clicking on the button, you are redirected to the Superset UI being already logged in without the need to enter any credentials. That's because Superset can make use of Single Sign On thanks to already being logged in via Trino.
+
+image::end-to-end-security/superset_2.png[]
+
+=== Open Policy Agent for the utmost flexibility in building access rules
+
+Some examples of access rules you can define for the Open Policy Agent authorization mechanism were already shown in the <<column-row-filtering, Column- and row-level filtering section>>. For more examples, check out the {trino-policies}[trino-policies ConfigMap] of this demo and also the https://www.youtube.com/watch?v=ATlq_l3WNiA&t=1970s[ACL section of the 'Mastering Data Platform Security' recording from above].

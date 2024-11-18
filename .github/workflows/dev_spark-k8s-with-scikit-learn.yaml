@@ -1,9 +1,11 @@
 ---
-name: Build and publish pyspark-k8s-with-scikit-learn
+name: Build and publish spark-k8s-with-scikit-learn
 
 env:
-  IMAGE_NAME: pyspark-k8s-with-scikit-learn
-  IMAGE_VERSION: 3.4.0-stackable0.0.0-dev
+  IMAGE_NAME: spark-k8s-with-scikit-learn
+  # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+  # the demo is reproducable for the release and it will be automatically replaced for the release branch.
+  IMAGE_VERSION: 3.5.0-stackable24.3.0
   REGISTRY_PATH: stackable
   DOCKERFILE_PATH: "demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/Dockerfile"
 
@@ -12,10 +14,12 @@ on:
   push:
     branches:
       - main
+      # TODO (@NickLarsenNZ): Also build on release branches, but with a stackable0.0.0-dev or stackableXX.X.X tag.
+      # - release-*
     paths:
       - demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/Dockerfile
       - demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/requirements.txt
-      - .github/workflows/dev_pyspark-k8s-with-scikit-learn.yaml
+      - .github/workflows/dev_spark-k8s-with-scikit-learn.yaml
 
 jobs:
   build:
@@ -27,7 +31,10 @@ jobs:
       matrix:
         runner:
           - {name: "ubuntu-latest", arch: "amd64"}
-          - {name: "ubicloud-standard-8-arm", arch: "arm64"}
+          # TODO: the image 3.5.0-stackable24.3.0 does not have an arm64 build.
+          # Re-activate the arm runner when the image is updated to one that does.
+          # Also adjust publish_manifest step to include arm architecture
+          # - {name: "ubicloud-standard-8-arm", arch: "arm64"}
     steps:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
@@ -70,6 +77,7 @@ jobs:
       - name: Checkout Repository
         uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
 
+      # TODO: remove image-architecture key once arm image is also built
       - name: Publish and Sign Image Index Manifest to docker.stackable.tech
         uses: stackabletech/actions/publish-index-manifest@013e6482fbc0edf2d38cf9220fc931f6a81336fb # v0.0.6
         with:
@@ -78,7 +86,9 @@ jobs:
           image-registry-password: ${{ secrets.NEXUS_PASSWORD }}
           image-repository: demos/${{ env.IMAGE_NAME }}
           image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+          image-architectures: '["amd64"]'
 
+      # TODO: remove image-architecture key once arm image is also built
       - name: Publish and Sign Image Index Manifest to oci.stackable.tech
         uses: stackabletech/actions/publish-index-manifest@013e6482fbc0edf2d38cf9220fc931f6a81336fb # v0.0.6
         with:
@@ -87,3 +97,4 @@ jobs:
           image-registry-password: ${{ secrets.HARBOR_ROBOT_STACKABLE_GITHUB_ACTION_BUILD_SECRET }}
           image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
           image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+          image-architectures: '["amd64"]'

@@ -338,29 +338,6 @@ data:
         )
     """)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     run_query(connection, """
         create table if not exists lakehouse.house_sales.house_sales with (
             partitioning = ARRAY['year(date_of_transfer)']
@@ -504,23 +481,6 @@ data:
         where tpep_pickup_datetime >= date '2015-01-01' and tpep_pickup_datetime <= now() -- We have to remove some invalid records
     """)
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     run_query(connection, """
       create or replace materialized view lakehouse.taxi.yellow_tripdata_daily_agg as
       select
@@ -565,11 +525,6 @@ data:
     run_query(connection, """
         REFRESH MATERIALIZED VIEW lakehouse.taxi.yellow_tripdata_monthly_agg
     """)
-
-
-
-
-
 
     # At this point Spark should have created the needed underlying tables
     run_query(connection, """

@@ -1,9 +1,10 @@
+---
 releaseName: minio
 name: minio
 repo:
   name: minio
   url: https://charts.min.io/
-version: 5.2.0
+version: 5.3.0
 options:
   additionalLabels:
     stackable.tech/vendor: Stackable

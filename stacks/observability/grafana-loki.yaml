@@ -1,10 +1,11 @@
 # https://github.com/grafana/loki/tree/main/production/helm/loki
+---
 releaseName: loki
 name: loki
 repo:
   name: loki
   url: https://grafana.github.io/helm-charts
-version: 5.47.2
+version: 6.19.0
 options:
   loki:
     auth_enabled: false
