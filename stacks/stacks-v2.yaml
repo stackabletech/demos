@@ -646,3 +646,31 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  jupyterhub-keycloak:
+    description: >-
+      A stack used to demonstrate JupyterHub and Keycloak.
+    stackableRelease: dev
+    labels:
+      - jupyterhub
+      - keycloak
+    supportedNamespaces: []
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+    resourceRequests:
+      cpu: 3400m
+      memory: 9010Mi
+      pvc: 24Gi
+    manifests:
+      - plainYaml: stacks/jupyter-keycloak/serviceaccount.yaml
+      - plainYaml: stacks/jupyter-keycloak/keycloak-realm-config.yaml
+      - plainYaml: stacks/jupyter-keycloak/keycloak.yaml
+
+    parameters:
+      - name: keycloakAdminPassword
+        description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: keycloakJupyterhubClientSecret
+        description: Secret ID of the Keycloak Jupyterhub client
+        default: jupyterhubjupyterhub
