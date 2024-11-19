@@ -1,0 +1,64 @@
+---
+releaseName: jupyterhub
+name: jupyterhub
+repo:
+  name: jupyterhub
+  url: https://jupyterhub.github.io/helm-chart/
+version: 4.0.0
+options:
+  hub:
+    config:
+      GenericOAuthenticator:
+        client_id: jupyterhub
+        client_secret: jupyterhubjupyterhub
+        #oauth_callback_url: https://your-jupyterhub-domain/hub/oauth_callback
+        authorize_url: https://172.19.0.3:31245/realms/jupyterhub/protocol/openid-connect/auth
+        token_url: https:///172.19.0.3:31245/realms/jupyterhub/protocol/openid-connect/token
+        userdata_url: https://172.19.0.3:31245/realms/jupyterhub/protocol/openid-connect/userinfo
+        #login_service: keycloak
+        username_claim: preferred_username
+        auth_state_groups_key: "oauth_user.groups"
+        #userdata_params:
+        #  state: state
+        #claim_groups_key: roles
+        manage_groups: True
+        tls_verify: False
+        allowed_groups:
+          - "Notebook Developers"
+        #admin_groups:
+        #  - admin
+        scope:
+          - openid
+      JupyterHub:
+        authenticator_class: generic-oauth
+  proxy:
+    service:
+      type: NodePort
+  rbac:
+    create: true
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false
+  scheduling:
+    userScheduler:
+      enabled: false
+  singleuser:
+    cmd: null
+    image:
+      name: jupyter/pyspark-notebook
+      tag: python-3.11
+    serviceAccountName: hub
+    networkPolicy:
+      enabled: false
+    extraLabels:
+      stackable.tech/vendor: Stackable
+    storage:
+      extraVolumes:
+        - name: notebook
+          emptyDir:
+            sizeLimit: 500Mi
+      extraVolumeMounts:
+        - name: notebook
+          mountPath: /home/jovyan/notebook

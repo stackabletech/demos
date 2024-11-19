@@ -666,10 +666,14 @@ stacks:
       - plainYaml: stacks/jupyter-keycloak/serviceaccount.yaml
       - plainYaml: stacks/jupyter-keycloak/keycloak-realm-config.yaml
       - plainYaml: stacks/jupyter-keycloak/keycloak.yaml
+      - helmChart: stacks/jupyter-keycloak/jupyterhub.yaml
 
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: jupyterhubAdminPassword
+        description: Password for JupyterHub Admin
         default: adminadmin
       - name: keycloakJupyterhubClientSecret
         description: Secret ID of the Keycloak Jupyterhub client
