@@ -1,5 +1,4 @@
 = trino-taxi-data
-:page-aliases: stable@stackablectl::demos/trino-taxi-data.adoc
 :description: Install and demo Trino with NYC taxi data: Query with SQL, visualize with Superset, and explore data in MinIO and Trino on Kubernetes.
 
 :superset-docs: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view

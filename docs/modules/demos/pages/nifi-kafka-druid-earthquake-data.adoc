@@ -1,5 +1,4 @@
 = nifi-kafka-druid-earthquake-data
-:page-aliases: stable@stackablectl::demos/nifi-kafka-druid-earthquake-data.adoc
 :description: Install this demo for a showcase of using Kafka, Druid and Superset to view the global earthquake distribution.
 
 :superset-docs: https://superset.apache.org/docs/using-superset/creating-your-first-dashboard/#creating-charts-in-explore-view
