@@ -1,5 +1,4 @@
 = logging
-:page-aliases: stable@stackablectl::demos/logging.adoc
 :description: Deploy a logging stack with OpenSearch, Vector, and Zookeeper for log data analysis using OpenSearch Dashboards in Kubernetes.
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu

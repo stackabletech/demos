@@ -1,5 +1,4 @@
 = spark-k8s-anomaly-detection-taxi-data
-:page-aliases: stable@stackablectl::demos/spark-k8s-anomaly-detection-taxi-data.adoc
 :description: Deploy a Kubernetes-based Spark demo for anomaly detection using the popular New York taxi dataset, featuring Trino, Spark, MinIO, and Superset.
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html

@@ -1,5 +1,4 @@
 = nifi-kafka-druid-water-level-data
-:page-aliases: stable@stackablectl::demos/nifi-kafka-druid-water-level-data.adoc
 :description: Install this demo for a showcase of using Kafka, Druid and Superset to visualize water levels in across Germany.
 
 :superset: https://superset.apache.org/docs/using-superset/creating-your-first-dashboard/#creating-charts-in-explore-view
