@@ -5,7 +5,7 @@ metadata:
   name: jupyterhub-client-credentials
 stringData:
   clientId: jupyterhub
-  clientSecret: {{ keycloakJupyterhubClientSecret }}
+  clientSecret: jupyterhubjupyterhub #{{ keycloakJupyterhubClientSecret }}
 ---
 apiVersion: v1
 kind: Secret
@@ -56,7 +56,7 @@ stringData:
         "enabled" : true,
         "alwaysDisplayInConsole" : true,
         "clientAuthenticatorType" : "client-secret",
-        "secret" : "{{ keycloakJupyterhubClientSecret }}",
+        "secret" : "jupyterhubjupyterhub",
         "redirectUris" : [ "*" ],
         "webOrigins" : [ "*" ],
         "notBefore" : 0,

@@ -1,0 +1,165 @@
+# The environment variables must be replaced.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: keycloak-realms
+data:
+  test-realm.json: |
+    {
+      "realm": "jupyterhub",
+      "enabled": true,
+      "groups" : [ {
+        "name" : "Notebook Developers",
+        "path" : "/Notebook Developers",
+        "subGroups" : [ {
+          "name" : "Analytics",
+          "path" : "/Notebook Developers/Analytics"
+        } ]
+      } ],
+      "users": [
+        {
+          "enabled": true,
+          "username": "dev",
+          "firstName" : "Dev",
+          "lastName" : "User",
+          "email" : "dev@noemail.com",
+          "credentials": [
+            {
+              "type": "password",
+              "value": "dev"
+            }
+          ],
+          "realmRoles": [
+            "user"
+          ],
+          "groups" : [
+            "/Notebook Developers/Analytics"
+          ]
+        }
+      ],
+      "roles": {
+        "realm": [
+          {
+            "name": "user",
+            "description": "User privileges"
+          }
+        ]
+      },
+      "clients": [
+        {
+          "clientId": "jupyterhub",
+          "enabled": true,
+          "clientAuthenticatorType": "client-secret",
+          "secret": "jupyterhubjupyterhub",
+          "redirectUris": [
+            "*"
+          ],
+          "webOrigins": [
+            "*"
+          ],
+          "standardFlowEnabled": true,
+          "attributes" : {
+            "realm_client" : "false",
+            "oidc.ciba.grant.enabled" : "true",
+            "backchannel.logout.session.required" : "true",
+            "post.logout.redirect.uris" : "+",
+            "oauth2.device.authorization.grant.enabled" : "false",
+            "display.on.consent.screen" : "false",
+            "backchannel.logout.revoke.offline.tokens" : "false"
+          },
+          "protocol": "openid-connect"
+        }
+      ]
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          image: quay.io/keycloak/keycloak:23.0.4
+          args:
+            - start-dev
+            - --import-realm
+            - --https-certificate-file=/tls/tls.crt
+            - --https-certificate-key-file=/tls/tls.key
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              value: admin
+          ports:
+            - name: https
+              containerPort: 8443
+          volumeMounts:
+            - name: realms
+              mountPath: /opt/keycloak/data/import
+            - name: tls
+              mountPath: /tls
+          readinessProbe:
+            httpGet:
+              path: /realms/master
+              port: 8443
+              scheme: HTTPS
+      volumes:
+        - name: realms
+          configMap:
+            name: keycloak-realms
+        - ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: keycloak-tls-default
+                  secrets.stackable.tech/format: tls-pem
+                  secrets.stackable.tech/scope: service=keycloak
+              spec:
+                accessModes:
+                - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+                volumeMode: Filesystem
+          name: tls
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  type: NodePort
+  selector:
+    app: keycloak
+  ports:
+    - name: https
+      port: 8443
+      targetPort: 8443
+---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: SecretClass
+metadata:
+  name: keycloak-tls-default
+spec:
+  backend:
+    autoTls:
+      ca:
+        autoGenerate: true
+        secret:
+          name: keycloak-tls-ca-default # should be available for jupyterhub
+          namespace: default
