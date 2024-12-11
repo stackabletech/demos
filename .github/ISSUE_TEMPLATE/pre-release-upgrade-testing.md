@@ -9,13 +9,13 @@ assignees: ''
 ---
 
 <!--
-    Make sure to update the link in '.github/ISSUE_TEMPLATE/release.md' when
+    Make sure to update the link in 'stackabletech/issues/.github/ISSUE_TEMPLATE/release.md' when
     you change the filename.
 -->
 
 <!--
     DO NOT REMOVE THIS COMMENT. It is intended for people who might copy/paste from the previous release issue.
-    This was created by an issue template: https://github.com/stackabletech/issues/issues/new/choose.
+    This was created by an issue template: https://github.com/stackabletech/demos/issues/new/choose.
 -->
 
 ## Pre-Release Demo Testing on Nightly
