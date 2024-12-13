@@ -5,7 +5,7 @@ metadata:
   name: trino
 spec:
   image:
-    productVersion: "451"
+    productVersion: "455"
   clusterConfig:
     listenerClass: external-unstable
     catalogLabelSelector:
@@ -72,11 +72,11 @@ spec:
         iceberg.catalog.type:
           value: rest
         iceberg.rest-catalog.uri:
-          value: http://lakekeeper:8080/catalog/
+          value: http://lakekeeper:8181/catalog/
         iceberg.rest-catalog.security:
           value: NONE
         iceberg.rest-catalog.warehouse:
-          value: 00000000-0000-0000-0000-000000000000/lakehouse
+          value: d1e852f0-b774-48e7-a484-fa857a0973e0/lakehouse
         # iceberg.rest-catalog.warehouse:
         #   value: s3://lakehouse/lakehouse/
         hive.s3.endpoint:

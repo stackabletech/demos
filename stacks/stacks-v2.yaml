@@ -535,9 +535,9 @@ stacks:
       - name: supersetSecretKey
         description: Superset's secret key used to generate e.g. user session tokens
         default: supersetSecretKey
-  lakekeeper:
+  trino-iceberg-lakekeeper:
     description: Test of https://github.com/hansetag/iceberg-catalog. Basically the same as the trino-iceberg stack, but using lakekeeper instead of a Hive metastore.
-    stackableRelease: 24.7
+    stackableRelease: 24.11
     stackableOperators:
       - commons
       - listener
@@ -552,11 +552,13 @@ stacks:
       - minio
       - s3
     manifests:
+      - plainYaml: stacks/trino-iceberg-lakekeeper/serviceaccount.yaml
       - helmChart: stacks/_templates/minio-distributed-small.yaml
-      # - helmChart: stacks/_templates/lakekeeper.yaml
-      - plainYaml: stacks/lakekeeper/create-lakekeeper-warehouse.yaml
-      - plainYaml: stacks/lakekeeper/s3-connection.yaml
-      - plainYaml: stacks/lakekeeper/trino.yaml
+      - plainYaml: stacks/trino-iceberg-lakekeeper/install-lakekeeper-job.yaml
+      - plainYaml: stacks/trino-iceberg-lakekeeper/create-lakekeeper-warehouse.yaml
+      - plainYaml: stacks/trino-iceberg-lakekeeper/s3-connection.yaml
+      - plainYaml: stacks/trino-iceberg-lakekeeper/trino.yaml
+      - plainYaml: stacks/trino-iceberg-lakekeeper/create-trino-tables.yaml # TODO: Move into demo
     supportedNamespaces: []
     parameters:
       - name: trinoAdminPassword

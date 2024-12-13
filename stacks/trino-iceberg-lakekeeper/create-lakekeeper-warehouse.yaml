@@ -12,7 +12,8 @@ spec:
           command:
             - bash
             - -c
-            - "curl --fail -X POST -H 'Content-Type: application/json' -d @/tmp/lakekeeper-warehouse-definition/lakekeeper-warehouse-definition.json http://lakekeeper:8080/management/v1/warehouse"
+            - "curl --fail -X POST -H 'Content-Type: application/json' -d @/tmp/lakekeeper-warehouse-definition/lakekeeper-project-definition.json http://lakekeeper:8181/management/v1/project"
+            - "curl --fail -X POST -H 'Content-Type: application/json' -d @/tmp/lakekeeper-warehouse-definition/lakekeeper-warehouse-definition.json http://lakekeeper:8181/management/v1/warehouse"
           volumeMounts:
             - name: lakekeeper-warehouse-definition
               mountPath: /tmp/lakekeeper-warehouse-definition
@@ -28,10 +29,18 @@ kind: Secret
 metadata:
   name: lakekeeper-warehouse-definition
 stringData:
+  lakekeeper-project-definition.json: |
+    {
+      "project-name": "demo",
+      "project-id": "d1e852f0-b774-48e7-a484-fa857a0973e0"
+    }
   lakekeeper-warehouse-definition.json: |
     {
       "warehouse-name": "lakehouse",
-      "project-id": "00000000-0000-0000-0000-000000000000",
+      "project-id": "d1e852f0-b774-48e7-a484-fa857a0973e0",
+      "delete-profile": {
+        "type": "hard"
+      },
       "storage-profile": {
         "type": "s3",
         "bucket": "lakehouse",
@@ -41,7 +50,7 @@ stringData:
         "region": "local-01",
         "path-style-access": true,
         "sts_role_arn": null,
-        "flavor": "minio",
+        "flavor": "s3-compat",
         "sts-enabled": false
       },
       "storage-credential": {

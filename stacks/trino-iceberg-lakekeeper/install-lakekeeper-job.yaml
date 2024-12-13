@@ -1,0 +1,25 @@
+# Ideally we would use stackablectl to install the helm-chart.
+# However, as of 2024-12-12 it is only shipped as .tar.gz, which https://github.com/mittwald/go-helm-client
+# does not support yet.
+#
+# Instead, we let a Pod "helm install" it. Long term it would be great if stackablectl could do it,
+# or if lakekeeper would provide a helm repository.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: install-lakekeeper
+spec:
+  template:
+    spec:
+      serviceAccountName: demo-serviceaccount
+      containers:
+        - name: install-lakekeeper
+          image: alpine/helm:3.16 # We don't ship helm in any image
+          command:
+            - bash
+            - -c
+            - |
+              echo "Installing Lakekeeper"
+              helm upgrade --install --wait lakekeeper https://github.com/lakekeeper/lakekeeper-charts/releases/download/lakekeeper-0.2.0/lakekeeper-0.2.0.tgz
+      restartPolicy: OnFailure

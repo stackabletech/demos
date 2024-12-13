@@ -1,0 +1,8 @@
+= trino-iceberg-lakekeeper
+
+This demo is pretty similar to the xref:trino-iceberg.adoc[] demo, but it is using https://github.com/lakekeeper/lakekeeper[Lakekeeper] instead of an Hive metastore.
+
+[source,console]
+----
+helm upgrade --install lakekeeper https://github.com/lakekeeper/lakekeeper-charts/releases/download/lakekeeper-0.2.0/lakekeeper-0.2.0.tgz --set catalog.service.type=LoadBalancer --set catalog.config.ICEBERG_REST__BASE_URI=http://87.106.32.189:8181
+----
