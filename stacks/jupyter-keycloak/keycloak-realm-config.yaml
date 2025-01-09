@@ -18,64 +18,16 @@ stringData:
     {
       "realm" : "jupyterhub",
       "enabled" : true,
-      "groups" : [ {
-        "name" : "Notebook Developers",
-        "path" : "/Notebook Developers",
-        "subGroups" : [ {
-          "name" : "Analytics",
-          "path" : "/Notebook Developers/Analytics"
-        } ]
-      } ],
-      "users" : [ {
-        "id" : "e44a09fa-bce1-40e8-a1da-28902b79dcf0",
-        "createdTimestamp" : 1711375603780,
-        "username" : "dev.user",
-        "enabled" : true,
-        "totp" : false,
-        "emailVerified" : true,
-        "firstName" : "Developer",
-        "lastName" : "User",
-        "email" : "dev.user@dummymail.com",
-        "credentials" : [ {
-          "id" : "77343b9c-661e-4f04-8ea3-c4dd7f86abde",
-          "type" : "password",
-          "userLabel" : "My password",
-          "createdDate" : 1711375610955,
-          "secretData" : "{\"value\":\"jNVzthZCkPipHW1KHZCncU/G/DHc+5QqmGEKernet5E=\",\"salt\":\"7woqv8IPicuA0cpa3U6dEg==\",\"additionalParameters\":{}}",
-          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
-        } ],
-        "disableableCredentialTypes" : [ ],
-        "requiredActions" : [ ],
-        "realmRoles" : [ "default-roles-jupyterhub" ],
-        "notBefore" : 0,
-        "groups" : [ "/Notebook Developers/Analytics" ]
-      } ],
+      "groups" : [],
+      "users" : [],
       "clients" : [ {
         "clientId" : "jupyterhub",
-        "surrogateAuthRequired" : false,
         "enabled" : true,
-        "alwaysDisplayInConsole" : true,
+        "protocol" : "openid-connect",
         "clientAuthenticatorType" : "client-secret",
         "secret" : "jupyterhubjupyterhub",
         "redirectUris" : [ "*" ],
         "webOrigins" : [ "*" ],
-        "notBefore" : 0,
-        "bearerOnly" : false,
-        "serviceAccountsEnabled" : true,
-        "standardFlowEnabled" : true,
-        "publicClient" : false,
-        "frontchannelLogout" : true,
-        "protocol" : "openid-connect",
-        "attributes" : {
-          "realm_client" : "false",
-          "oidc.ciba.grant.enabled" : "true",
-          "backchannel.logout.session.required" : "true",
-          "post.logout.redirect.uris" : "+",
-          "oauth2.device.authorization.grant.enabled" : "false",
-          "display.on.consent.screen" : "false",
-          "backchannel.logout.revoke.offline.tokens" : "false"
-        },
-        "authenticationFlowBindingOverrides" : { },
-        "fullScopeAllowed" : true
+        "standardFlowEnabled" : true
       } ]
     }

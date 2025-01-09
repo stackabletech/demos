@@ -9,14 +9,7 @@ data:
     {
       "realm": "jupyterhub",
       "enabled": true,
-      "groups" : [ {
-        "name" : "Notebook Developers",
-        "path" : "/Notebook Developers",
-        "subGroups" : [ {
-          "name" : "Analytics",
-          "path" : "/Notebook Developers/Analytics"
-        } ]
-      } ],
+      "groups" : [],
       "users": [
         {
           "enabled": true,
@@ -29,23 +22,9 @@ data:
               "type": "password",
               "value": "dev"
             }
-          ],
-          "realmRoles": [
-            "user"
-          ],
-          "groups" : [
-            "/Notebook Developers/Analytics"
           ]
         }
       ],
-      "roles": {
-        "realm": [
-          {
-            "name": "user",
-            "description": "User privileges"
-          }
-        ]
-      },
       "clients": [
         {
           "clientId": "jupyterhub",
@@ -59,15 +38,7 @@ data:
             "*"
           ],
           "standardFlowEnabled": true,
-          "attributes" : {
-            "realm_client" : "false",
-            "oidc.ciba.grant.enabled" : "true",
-            "backchannel.logout.session.required" : "true",
-            "post.logout.redirect.uris" : "+",
-            "oauth2.device.authorization.grant.enabled" : "false",
-            "display.on.consent.screen" : "false",
-            "backchannel.logout.revoke.offline.tokens" : "false"
-          },
+          "serviceAccountsEnabled" : true,
           "protocol": "openid-connect"
         }
       ]
@@ -97,14 +68,18 @@ spec:
             - --import-realm
             - --https-certificate-file=/tls/tls.crt
             - --https-certificate-key-file=/tls/tls.key
+            - --log-level=DEBUG
           env:
             - name: KEYCLOAK_ADMIN
               value: admin
             - name: KEYCLOAK_ADMIN_PASSWORD
               value: admin
+            - name: KEYCLOAK_LOGLEVEL
+              value: DEBUG
           ports:
             - name: https
               containerPort: 8443
+          resources: {}
           volumeMounts:
             - name: realms
               mountPath: /opt/keycloak/data/import
@@ -115,6 +90,7 @@ spec:
               path: /realms/master
               port: 8443
               scheme: HTTPS
+      serviceAccountName: keycloak-serviceaccount
       volumes:
         - name: realms
           configMap:
@@ -125,7 +101,7 @@ spec:
                 annotations:
                   secrets.stackable.tech/class: keycloak-tls-default
                   secrets.stackable.tech/format: tls-pem
-                  secrets.stackable.tech/scope: service=keycloak
+                  secrets.stackable.tech/scope: service=keycloak,service=keycloak-external
               spec:
                 accessModes:
                 - ReadWriteOnce
@@ -143,13 +119,29 @@ metadata:
   labels:
     app: keycloak
 spec:
-  type: NodePort
+  type: ClusterIP
   selector:
     app: keycloak
   ports:
     - name: https
       port: 8443
       targetPort: 8443
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak-external
+  labels:
+    app: keycloak
+spec:
+  type: NodePort
+  selector:
+    app: keycloak
+  ports:
+  - name: https
+    port: 8443
+    targetPort: 8443
+    nodePort: 31093
 ---
 apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass

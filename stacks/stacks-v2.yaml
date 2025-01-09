@@ -663,9 +663,9 @@ stacks:
       memory: 9010Mi
       pvc: 24Gi
     manifests:
-      - plainYaml: stacks/jupyter-keycloak/serviceaccount.yaml
-      - plainYaml: stacks/jupyter-keycloak/keycloak-realm-config.yaml
-      - plainYaml: stacks/jupyter-keycloak/keycloak.yaml
+      #- plainYaml: stacks/jupyter-keycloak/serviceaccount.yaml
+      #- plainYaml: stacks/jupyter-keycloak/keycloak-realm-config.yaml
+      - plainYaml: stacks/jupyter-keycloak/kc.yaml
       #- helmChart: stacks/jupyter-keycloak/jupyterhub.yaml
     parameters:
       - name: keycloakAdminPassword

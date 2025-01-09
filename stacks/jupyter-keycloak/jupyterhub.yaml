@@ -11,39 +11,39 @@ options:
       GenericOAuthenticator:
         client_id: jupyterhub
         client_secret: jupyterhubjupyterhub
-        # TODO: How to define this here before Jupyterhub has been deployed?
-        #oauth_callback_url: proxy-public:80/hub/oauth_callback
-        oauth_callback_url: http://proxy-public.default.svc.cluster.local:30687/hub/oauth_callback
+        oauth_callback_url: http://proxy-public.default.svc.cluster.local:31095/hub/oauth_callback
         # Keycloak URLs: IPs unless we have an ingress, but we need hostnames to match the certificates
-        authorize_url: https://keycloak.default.svc.cluster.local:32428/realms/jupyterhub/protocol/openid-connect/auth
-        token_url: https://keycloak.default.svc.cluster.local:32428/realms/jupyterhub/protocol/openid-connect/token
-        userdata_url: https://keycloak.default.svc.cluster.local:32428/realms/jupyterhub/protocol/openid-connect/userinfo
+        authorize_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/auth
+        token_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/token
+        userdata_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/userinfo
         username_claim: preferred_username
-        auth_state_groups_key: "oauth_user.groups"
-        manage_groups: True
+        #auth_state_groups_key: "oauth_user.groups"
+        #manage_groups: True
         tls_verify: False
-        allowed_groups:
-          - "Notebook Developers"
+        #allowed_groups:
+        #  - "Notebook Developers"
         scope:
           - openid
-        http_client_opts:
-          verify: "/etc/ssl/certs/keycloak-ca.crt"
+        #ca_certs: None
+        enable_pkce: False
       JupyterHub:
         authenticator_class: generic-oauth
+        log_level: 'DEBUG'
     extraEnv:
       SSL_CERT_FILE: /etc/ssl/certs/keycloak-ca.crt #/usr/local/share/ca-certificates/keycloak-ca.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/keycloak-ca.crt
       CURL_CA_BUNDLE: /etc/ssl/certs/keycloak-ca.crt
-    extraConfig:
-      custom_ssl_config: |
-        import ssl
-        import tornado.httpclient
-        from tornado.curl_httpclient import CurlAsyncHTTPClient
+      #OAUTH_TLS_VERIFY: "False"
+    #extraConfig:
+      #custom_ssl_config: |
+      #   import ssl
+      #   import tornado.httpclient
+      #   from tornado.curl_httpclient import CurlAsyncHTTPClient
 
-        # Set custom CA bundle for tornado's CurlHttpClient
-        ssl_context = ssl.create_default_context(cafile='/etc/ssl/certs/keycloak-ca.crt')
-        client = CurlAsyncHTTPClient()
-        client.configure(None, ssl_options=ssl_context)
+      #   # Set custom CA bundle for tornado's CurlHttpClient
+      #   ssl_context = ssl.create_default_context(cafile='/etc/ssl/certs/keycloak-ca.crt')
+      #   client = CurlAsyncHTTPClient()
+      #   client.configure(None, ssl_options=ssl_context)
     #  log_level_config: |
     #    c.Application.log_level = 'DEBUG'
     #  setSSLVerification: |
@@ -59,9 +59,13 @@ options:
         #mountPath: /usr/local/share/ca-certificates/keycloak-ca.crt
         mountPath: /etc/ssl/certs/keycloak-ca.crt
         subPath: 0.ca.crt
+    service:
+      type: NodePort
   proxy:
     service:
       type: NodePort
+      nodePorts:
+        http: 31095
   rbac:
     create: true
   prePuller:
@@ -74,10 +78,10 @@ options:
       enabled: false
   singleuser:
     cmd: null
-    image:
-      name: jupyter/pyspark-notebook
-      tag: python-3.11
-    serviceAccountName: hub
+    #image:
+    #  name: jupyter/pyspark-notebook
+    #  tag: python-3.11
+    #serviceAccountName: hub
     networkPolicy:
       enabled: false
     extraLabels:
