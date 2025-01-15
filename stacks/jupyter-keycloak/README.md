@@ -30,7 +30,11 @@ kubectl port-forward svc/keycloak-external 31093:8443
 http://proxy-public.default.svc.cluster.local:31095
 ```
 
-and log in.
+and log in as
+
+```shell
+dev/dev
+```
 
 This currently fails with:
 
