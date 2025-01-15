@@ -19,7 +19,7 @@ options:
         username_claim: preferred_username
         #auth_state_groups_key: "oauth_user.groups"
         #manage_groups: True
-        tls_verify: False
+        tls_ca_path: /etc/ssl/certs/keycloak-ca.crt
         #allowed_groups:
         #  - "Notebook Developers"
         scope:
@@ -61,11 +61,27 @@ options:
         subPath: 0.ca.crt
     service:
       type: NodePort
+    networkPolicy:
+      enabled: true
+      egress:
+        - to:
+          - podSelector:
+              matchLabels:
+                app: keycloak
+          ports:
+          - protocol: TCP
+            port: 8443
   proxy:
     service:
       type: NodePort
       nodePorts:
         http: 31095
+    chp:
+      networkPolicy:
+        enabled: true
+    traefik:
+      networkPolicy:
+        enabled: true
   rbac:
     create: true
   prePuller:
@@ -83,7 +99,7 @@ options:
     #  tag: python-3.11
     #serviceAccountName: hub
     networkPolicy:
-      enabled: false
+      enabled: true
     extraLabels:
       stackable.tech/vendor: Stackable
     storage:
