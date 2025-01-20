@@ -11,7 +11,7 @@ spec:
           # We use 24.3.0 here which contains the distcp MapReduce components
           # This is not included in the 24.7 and 24.11 images and will fail.
           # See: https://github.com/stackabletech/docker-images/issues/793
-          image: docker.stackable.tech/stackable/hadoop:3.3.6-stackable24.3.0
+          image: oci.stackable.tech/sdp/hadoop:3.3.6-stackable24.3.0
           env:
             - name: HADOOP_USER_NAME
               value: stackable
