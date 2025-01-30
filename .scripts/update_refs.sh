@@ -55,7 +55,7 @@ if [[ "$CURRENT_BRANCH" == release-* ]]; then
 
   # Replace 0.0.0-dev refs with ${STACKABLE_RELEASE}.0
   # TODO (@NickLarsenNZ): handle patches later, and what about release-candidates?
-  SEARCH='stackable(0\.0\.0-dev|24\.11\.[0-9]+)' # TODO (@NickLarsenNZ): After https://github.com/stackabletech/stackable-cockpit/issues/310, only search for 0.0.0-dev
+  SEARCH='stackable(0\.0\.0-dev)'
   REPLACEMENT="stackable${STACKABLE_RELEASE}.0" # TODO (@NickLarsenNZ): Be a bit smarter about patch releases.
   MESSAGE="Update image references with $REPLACEMENT"
   echo "$MESSAGE"
