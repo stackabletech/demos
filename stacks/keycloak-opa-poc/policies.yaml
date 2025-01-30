@@ -8,7 +8,6 @@ metadata:
 data:
   trino.rego: |
     package trino
-    import rego.v1
 
     default allow = false
 
@@ -31,7 +30,6 @@ data:
   druid.rego: |
     package druid
     import data.bundles.opagroups.admins
-    import rego.v1
 
     default allow = false
 
