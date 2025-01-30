@@ -70,7 +70,7 @@ spec:
     spec:
       containers:
       - name: propagate-keycloak-address
-        image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable24.7.0
+        image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
         command:
           - bash
           - -x

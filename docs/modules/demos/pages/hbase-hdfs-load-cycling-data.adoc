@@ -1,5 +1,4 @@
 = hbase-hdfs-cycling-data
-:page-aliases: stable@stackablectl::demos/hbase-hdfs-load-cycling-data.adoc
 :description: Load cyclist data from HDFS to HBase on Kubernetes using Stackable's demo. Install, copy data, create HFiles, and query efficiently.
 
 :kaggle: https://www.kaggle.com/datasets/timgid/cyclistic-dataset-google-certificate-capstone?select=Divvy_Trips_2020_Q1.csv

@@ -14,7 +14,7 @@ spec:
     spec:
       initContainers:
         - name: init
-          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable24.7.0
+          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable0.0.0-dev
           args:
             - sh
             - -euo
@@ -35,7 +35,7 @@ spec:
               name: data
       containers:
         - name: kdc
-          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable24.7.0
+          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable0.0.0-dev
           args:
             - krb5kdc
             - -n
@@ -48,7 +48,7 @@ spec:
             - mountPath: /var/kerberos/krb5kdc
               name: data
         - name: kadmind
-          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable24.7.0
+          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable0.0.0-dev
           args:
             - kadmind
             - -nofork
@@ -61,7 +61,7 @@ spec:
             - mountPath: /var/kerberos/krb5kdc
               name: data
         - name: client
-          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable24.7.0
+          image: oci.stackable.tech/sdp/krb5:1.21.1-stackable0.0.0-dev
           tty: true
           stdin: true
           env:

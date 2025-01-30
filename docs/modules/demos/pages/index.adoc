@@ -1,5 +1,4 @@
 = Demos
-:page-aliases: stable@stackablectl::demos/index.adoc
 :description: Explore Stackable demos showcasing data platform architectures. Includes external components for evaluation.
 
 The pages in this section guide you on how to use the demos provided by Stackable.
