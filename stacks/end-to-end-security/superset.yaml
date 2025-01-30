@@ -47,7 +47,7 @@ spec:
               - -c
               - |
                 if psql --host postgresql-superset --user postgres --csv -c "SELECT datname FROM pg_database where datname = 'superset' limit 1" | grep -q superset; then
-                  # The flask app will do any necesary migrations.
+                  # The flask app will do any necessary migrations.
                   echo "Skip restoring the DB as it already exists"
                   exit 0
                 fi
