@@ -12,23 +12,21 @@ options:
         client_id: jupyterhub
         client_secret: jupyterhubjupyterhub
         oauth_callback_url: http://proxy-public.default.svc.cluster.local:31095/hub/oauth_callback
-        # Keycloak URLs: IPs unless we have an ingress, but we need hostnames to match the certificates
-        authorize_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/auth
-        token_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/token
-        userdata_url: https://keycloak.default.svc.cluster.local:31093/realms/jupyterhub/protocol/openid-connect/userinfo
+        authorize_url: https://jupyterhub-keycloak.demo.com/realms/jupyterhub/protocol/openid-connect/auth # see ingress
+        token_url: https://keycloak.default.svc.cluster.local:8443/realms/jupyterhub/protocol/openid-connect/token
+        userdata_url: https://keycloak.default.svc.cluster.local:8443/realms/jupyterhub/protocol/openid-connect/userinfo # needed?
         username_claim: preferred_username
-        #auth_state_groups_key: "oauth_user.groups"
-        #manage_groups: True
         tls_ca_path: /etc/ssl/certs/keycloak-ca.crt
-        #allowed_groups:
-        #  - "Notebook Developers"
         scope:
           - openid
+          #- profile
+          #- email
         #ca_certs: None
         enable_pkce: False
       JupyterHub:
         authenticator_class: generic-oauth
         log_level: 'DEBUG'
+      debug: 'True'
     extraEnv:
       SSL_CERT_FILE: /etc/ssl/certs/keycloak-ca.crt #/usr/local/share/ca-certificates/keycloak-ca.crt
       REQUESTS_CA_BUNDLE: /etc/ssl/certs/keycloak-ca.crt

@@ -38,7 +38,8 @@ data:
             "*"
           ],
           "standardFlowEnabled": true,
-          "serviceAccountsEnabled" : true,
+          "serviceAccountsEnabled": true,
+          "directAccessGrantsEnabled": true,
           "protocol": "openid-connect"
         }
       ]
