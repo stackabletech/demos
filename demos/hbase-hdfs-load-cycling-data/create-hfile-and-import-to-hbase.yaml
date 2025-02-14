@@ -9,7 +9,7 @@ spec:
     spec:
       containers:
         - name: create-hfile-and-import-to-hbase
-          image: oci.stackable.tech/sdp/hbase:2.4.18-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/hbase:2.6.1-stackable0.0.0-dev
           env:
             - name: HADOOP_USER_NAME
               value: stackable
