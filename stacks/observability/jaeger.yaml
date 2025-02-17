@@ -14,15 +14,8 @@ options:
     cassandra: false
   allInOne:
     enabled: true
-    extraEnv: []
-    service:
-      headless: true
-      collector:
-        otlp:
-          # http:
-          #   name: otlp-http
-          grpc:
-            name: otlp-grpc
+  storage:
+    type: memory
   agent:
     enabled: false
   collector:
