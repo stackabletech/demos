@@ -582,7 +582,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
+      - plainYaml: stacks/end-to-end-security/rbac.yaml
+      - plainYaml: stacks/end-to-end-security/setup-postgresql.yaml
+      - plainYaml: stacks/end-to-end-security/superset.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
