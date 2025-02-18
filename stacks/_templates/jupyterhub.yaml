@@ -50,7 +50,7 @@ options:
       HADOOP_CONF_DIR: "/home/jovyan/hdfs"
     initContainers:
       - name: download-notebook
-        image: docker.stackable.tech/stackable/tools:1.0.0-stackable24.7.0
+        image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
         volumeMounts:
           - mountPath: /notebook

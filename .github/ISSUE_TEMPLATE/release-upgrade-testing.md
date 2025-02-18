@@ -1,32 +1,32 @@
 ---
-name: Pre-Release Demo Upgrade Testing from Stable to Nightly
+name: Release Demo and Upgrade Testing
 about: |
-    This template can be used to track the upgrade testing of demos from stable to nightly leading
-    up to the next Stackable release
-title: "chore(tracking): Test demos on nightly versions for XX.(X)X"
+  This template can be used to track the upgrade testing of demos from the outgoing stable to
+  the new release, and new release from scratch before officially marking the new release as stable.
+title: "chore(tracking): Test demos on nightly versions for YY.M.X"
 labels: ['epic']
 assignees: ''
 ---
 
 <!--
-    Make sure to update the link in '.github/ISSUE_TEMPLATE/release.md' when
+    Make sure to update the link in 'stackabletech/issues/.github/ISSUE_TEMPLATE/release.md' when
     you change the filename.
 -->
 
 <!--
     DO NOT REMOVE THIS COMMENT. It is intended for people who might copy/paste from the previous release issue.
-    This was created by an issue template: https://github.com/stackabletech/issues/issues/new/choose.
+    This was created by an issue template: https://github.com/stackabletech/demos/issues/new/choose.
 -->
 
-## Pre-Release Demo Testing on Nightly
+## Pre-Release Demo Testing
 
 Part of <https://github.com/stackabletech/issues/issues/TRACKING_ISSUE>
 
 This is testing:
 
-1. The demos documented in nightly (with the updated product versions) still work.
-2. That the operators can be upgraded from the current release to the nightly release and do not
-   negatively impact the products.
+1. That upgrades from the outgoing _stable_ release to the new release of the operators and products do
+   not negatively impact the products.
+2. That the new release demos work as documented from scratch.
 
 > [!NOTE]
 > Record any issues or anomalies during the process in a comment on this issue.
@@ -51,6 +51,9 @@ Replace the items in the task lists below with the applicable Pull Requests (if 
     | xargs -I {} echo "- [ ] [{}](https://docs.stackable.tech/home/nightly/demos/{})"
 -->
 
+> [!NOTE]
+> At this point, the new release docs are still versoined as _nightly_.
+
 ```[tasklist]
 ### Testing Demos on Nightly
 - [ ] [airflow-scheduled-job](https://docs.stackable.tech/home/nightly/demos/airflow-scheduled-job)
@@ -67,24 +70,30 @@ Replace the items in the task lists below with the applicable Pull Requests (if 
 - [ ] [trino-taxi-data](https://docs.stackable.tech/home/nightly/demos/trino-taxi-data)
 ```
 
-### Testing Instructions
+### Outgoing Stable to new YY.M Upgrade Testing Instructions
 
-These instructions are for deploying the nightly demo, as well as upgrading the operators and CRDS.
+These instructions are for deploying and completing the outgoing stable demo, and then
+upgading operators, CRDs, and products to the nightly versions well as upgrading
+the operators and CRDS.
 
 <!--
-    Make sure to update the version mentioned below when creating the issue.
+    Make sure to update the YY.M.X and YY.M versions mentioned below when creating the issue.
 -->
 
+> [!TIP]
+> Be sure to select the _stable_ docs version on <https://docs.stackable.tech/home/stable/demos/>.
+
 ```shell
-# Install demo (stable operators) for the previous release (24.7)
-# For now, we have to deploy from the release branch, otherwise we get new changes.
-# Stackablectl doesn't yet support deploying a demo from a branch
-git checkout release-24.7
+# Install demo (stable operators) for the stable release (YY.M).
+# Until https://github.com/stackabletech/stackable-cockpit/issues/310 is merged,
+# this will need to be done by pointing stackablectl to local files checked out
+# from the outgoing stable release branch.
+git checkout release-OUTGOING_STABLE
 git pull
 stackablectl --stack-file=stacks/stacks-v2.yaml --demo-file=demos/demos-v2.yaml demo install <DEMO_NAME>
 
 # --- IMPORTANT ---
-# Run through the nightly demo instructions (refer to the tasklist below).
+# Run through the stable demo instructions (refer to the tasklist above).
 
 # Get a list of installed operators
 stackablectl operator installed --output=plain
@@ -107,17 +116,44 @@ helm upgrade minio minio/minio --version x.x.x
 helm upgrade postgresql-hive bitnami/postgresql --version x.x.x
 # --- OPTIONAL END ---
 
-# Uninstall operators
-stackablectl release uninstall 24.7
+# Uninstall operators for the stable release (OUTGOING_STABLE)
+stackablectl release uninstall OUTGOING_STABLE
 
-# Update CRDs to nightly version (on main)
+# At this point, we assume release.yml has been updated with the new YY.M release.
+# if it hasn't, you will need to point stackablectl at a locally updated file using --release-file
+
+# Update CRDs to nightly version (on release-YY.M)
 # Repeat this for every operator used by the demo (use the list from the earlier step before deleting the operators)
-kubectl replace -f https://raw.githubusercontent.com/stackabletech/commons-operator/main/deploy/helm/commons-operator/crds/crds.yaml
-kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/main/deploy/helm/...-operator/crds/crds.yaml
+kubectl replace -f https://raw.githubusercontent.com/stackabletech/commons-operator/release-YY.M/deploy/helm/commons-operator/crds/crds.yaml
+kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/release-YY.M/deploy/helm/...-operator/crds/crds.yaml
 
-# Install nightly version of operators (use the list from the earlier step before deleting the operators)
-stackablectl operator install commons ...
+# Install new release operators (use the list from the earlier step before deleting the operators)
+stackablectl operator install commons=YY.M ...
 
 # Optionally update the product versions in the CRDs (to the latest non-experimental version for the new release), e.g.:
 kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "/spec/image/productVersion", "value":"x.x.x"}]' # changed
+```
+
+### YY.M from Scratch Testing Instructions
+
+These instructions are for deploying and completing the YY.M demo from scratch.
+
+<!--
+    Make sure to update the version mentioned below when creating the issue.
+-->
+
+> [!TIP]
+> Be sure to select the _nightly_ docs version on <https://docs.stackable.tech/home/nightly/demos/>.
+
+```shell
+# Install demo (stable operators) for the nightly release.
+# Until https://github.com/stackabletech/stackable-cockpit/issues/310 is merged,
+# this will need to be done by pointing stackablectl to local files checked out
+# from the release-YY.M branch.
+git checkout release-YY.M
+git pull
+stackablectl --stack-file=stacks/stacks-v2.yaml --demo-file=demos/demos-v2.yaml demo install <DEMO_NAME>
+
+# --- IMPORTANT ---
+# Run through the nightly demo instructions (refer to the tasklist above).
 ```

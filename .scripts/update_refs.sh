@@ -35,10 +35,10 @@ function prepend {
 function maybe_commit {
   [ "$COMMIT" == "true" ] || return 0
   local MESSAGE="$1"
-  PATCH=$(mktemp)
+  PATCH=$(mktemp --suffix=.diff)
   git add -u
   git diff --staged > "$PATCH"
-  git commit -S -m "$MESSAGE" --no-verify
+  git diff-index --quiet HEAD -- || git commit -S -m "$MESSAGE" --no-verify
   echo "patch written to: $PATCH" | prepend "\t"
 }
 
@@ -55,7 +55,7 @@ if [[ "$CURRENT_BRANCH" == release-* ]]; then
 
   # Replace 0.0.0-dev refs with ${STACKABLE_RELEASE}.0
   # TODO (@NickLarsenNZ): handle patches later, and what about release-candidates?
-  SEARCH='stackable(0\.0\.0-dev|24\.7\.[0-9]+)' # TODO (@NickLarsenNZ): After https://github.com/stackabletech/stackable-cockpit/issues/310, only search for 0.0.0-dev
+  SEARCH='stackable(0\.0\.0-dev)'
   REPLACEMENT="stackable${STACKABLE_RELEASE}.0" # TODO (@NickLarsenNZ): Be a bit smarter about patch releases.
   MESSAGE="Update image references with $REPLACEMENT"
   echo "$MESSAGE"

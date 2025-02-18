@@ -8,7 +8,7 @@ spec:
     productVersion: 1.27.0
     # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
     # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-    custom: docker.stackable.tech/demos/nifi:1.27.0-postgresql
+    custom: oci.stackable.tech/stackable/nifi:1.27.0-postgresql
   clusterConfig:
     listenerClass: external-unstable
     zookeeperConfigMapName: nifi-znode

@@ -227,8 +227,6 @@ The ACLs configuring this behavior (written with the {rego}[Rego language]) on t
 ----
 package trino_policies
 
-import rego.v1
-
 policies := {
     "tables": [
         {
@@ -269,8 +267,6 @@ The Rego rule for this behavior looks like this (again a snippet from the {trino
 [source,rego]
 ----
 package trino_policies
-
-import rego.v1
 
 policies := {
     "tables": [

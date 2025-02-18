@@ -1,0 +1,50 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup-db-job
+spec:
+  template:
+    spec:
+      initContainers:
+        # The postgres image does not contain curl or wget...
+        - name: download-dump
+          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -c
+            - |
+              kubectl rollout status --watch statefulset/postgresql-superset
+              cd /tmp
+              curl --fail -O https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/postgres_superset_dump.sql.gz
+              gunzip postgres_superset_dump.sql.gz
+
+              # We need to omit changing the users password, as otherwise the content in the Secrets does not match
+              # the actual password in Postgres.
+              grep -vwE '(CREATE ROLE postgres;|CREATE ROLE superset;|ALTER ROLE postgres|ALTER ROLE superset)' postgres_superset_dump.sql > /dump/postgres_superset_dump.sql
+          volumeMounts:
+            - name: dump
+              mountPath: /dump/
+      containers:
+        - name: restore-postgres
+          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r11 # Same image as the bitnami postgres helm-chart is using
+          command:
+            - bash
+            - -c
+            - |
+              echo "Preparing restore..."
+              psql --host postgresql-superset --user postgres < /dump/postgres_superset_dump.sql
+          env:
+            - name: PGPASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: postgresql-superset
+                  key: postgres-password
+          volumeMounts:
+            - name: dump
+              mountPath: /dump/
+      volumes:
+        - name: dump
+          emptyDir: {}
+      restartPolicy: OnFailure
+  backoffLimit: 20

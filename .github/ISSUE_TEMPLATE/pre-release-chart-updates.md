@@ -1,7 +1,7 @@
 ---
 name: Pre-Release Demo Chart Updates
 about: This template can be used to track the Helm chart updates for all demos.
-title: "chore(tracking): Update Helm charts for XX.(X)X"
+title: "chore(tracking): Update Helm charts for YY.M.X"
 labels: []
 assignees: ''
 ---
