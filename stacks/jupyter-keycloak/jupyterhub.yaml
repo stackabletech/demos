@@ -12,7 +12,7 @@ options:
         client_id: jupyterhub
         client_secret: jupyterhubjupyterhub
         oauth_callback_url: http://proxy-public.default.svc.cluster.local:31095/hub/oauth_callback
-        authorize_url: https://jupyterhub-keycloak.demo.com/realms/jupyterhub/protocol/openid-connect/auth # see ingress
+        authorize_url: https://keycloak.default.svc.cluster.local/realms/jupyterhub/protocol/openid-connect/auth # see ingress
         token_url: https://keycloak.default.svc.cluster.local:8443/realms/jupyterhub/protocol/openid-connect/token
         userdata_url: https://keycloak.default.svc.cluster.local:8443/realms/jupyterhub/protocol/openid-connect/userinfo # needed?
         username_claim: preferred_username
@@ -28,35 +28,43 @@ options:
         log_level: 'DEBUG'
       debug: 'True'
     extraEnv:
-      SSL_CERT_FILE: /etc/ssl/certs/keycloak-ca.crt #/usr/local/share/ca-certificates/keycloak-ca.crt
-      REQUESTS_CA_BUNDLE: /etc/ssl/certs/keycloak-ca.crt
-      CURL_CA_BUNDLE: /etc/ssl/certs/keycloak-ca.crt
-      #OAUTH_TLS_VERIFY: "False"
-    #extraConfig:
-      #custom_ssl_config: |
-      #   import ssl
-      #   import tornado.httpclient
-      #   from tornado.curl_httpclient import CurlAsyncHTTPClient
-
-      #   # Set custom CA bundle for tornado's CurlHttpClient
-      #   ssl_context = ssl.create_default_context(cafile='/etc/ssl/certs/keycloak-ca.crt')
-      #   client = CurlAsyncHTTPClient()
-      #   client.configure(None, ssl_options=ssl_context)
-    #  log_level_config: |
-    #    c.Application.log_level = 'DEBUG'
-    #  setSSLVerification: |
-    #    import os
-    #    os.environ["REQUESTS_CA_BUNDLE"] = "/usr/local/share/ca-certificates/keycloak-ca.crt"
-    #    os.environ["CURL_CA_BUNDLE"] = "/usr/local/share/ca-certificates/keycloak-ca.crt"
+      # Not sure if all of these are necessary
+      CURL_SSL_BACKEND: openssl # https://stackoverflow.com/a/76605700
+      PYCURL_SSL_LIBRARY: openssl
+      CURLOPT_SSL_VERIFYPEER: "false"
+      CURLOPT_SSL_VERIFYHOST: "false"
+      OAUTH2_TLS_VERIFY: "false"
+      CACERT: /etc/ssl/certs/keycloak-ca.crt
+      CERT: /etc/ssl/certs/keycloak-ca.crt
+      CURLOPT_CAINFO: /etc/ssl/certs/keycloak-ca.crt
+      # necessary
+      SSL_CERT_FILE: /etc/ssl/certs/ca-certificates.crt
+      REQUESTS_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
+      CURL_CA_BUNDLE: /etc/ssl/certs/ca-certificates.crt
     extraVolumes:
-      - name: keycloak-tls
-        secret:
-          secretName: keycloak-tls-ca-default
+        - ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: keycloak-tls-default
+                  secrets.stackable.tech/format: tls-pem
+                  secrets.stackable.tech/scope: service=keycloak,service=keycloak-external
+              spec:
+                accessModes:
+                - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+                volumeMode: Filesystem
+          name: keycloak-tls
     extraVolumeMounts:
       - name: keycloak-tls
-        #mountPath: /usr/local/share/ca-certificates/keycloak-ca.crt
         mountPath: /etc/ssl/certs/keycloak-ca.crt
-        subPath: 0.ca.crt
+        subPath: ca.crt
+      - name: keycloak-tls
+        mountPath: /usr/local/lib/python3.12/site-packages/certifi/cacert.pem
+        subPath: ca.crt
     service:
       type: NodePort
     networkPolicy:
@@ -74,12 +82,12 @@ options:
       type: NodePort
       nodePorts:
         http: 31095
-    chp:
-      networkPolicy:
-        enabled: true
-    traefik:
-      networkPolicy:
-        enabled: true
+    # chp:
+    #   networkPolicy:
+    #     enabled: true
+    # traefik:
+    #   networkPolicy:
+    #     enabled: true
   rbac:
     create: true
   prePuller:
@@ -97,7 +105,7 @@ options:
     #  tag: python-3.11
     #serviceAccountName: hub
     networkPolicy:
-      enabled: true
+      enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
     storage:
