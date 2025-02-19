@@ -673,24 +673,3 @@ stacks:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin
-      - name: keycloakUserinfoFetcherClientSecret
-        description: Secret ID of the Keycloak UserinfoFetcher client that is used by the UserinfoFetcher to retrieve user information
-        default: user-info-fetcheruser-info-fetcher
-      - name: keycloakSupersetClientSecret
-        description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
-        default: supersetsuperset
-      - name: keycloakTrinoClientSecret
-        description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
-        default: trinotrino
-      - name: supersetAdminPassword
-        description: Password of the Superset admin user
-        default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
-      - name: trinoSupersetUserPassword
-        description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
-        default: supersetsuperset
-      - name: trinoDataImportUserPassword
-        description: Password of the service user used to load data into Trino
-        default: data-importdata-import

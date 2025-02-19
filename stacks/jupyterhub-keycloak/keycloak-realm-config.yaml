@@ -2,26 +2,8 @@
 apiVersion: v1
 kind: Secret
 metadata:
-  name: keycloak-clients
-stringData:
-  superset: "{{ keycloakSupersetClientSecret }}"
-  trino: "{{ keycloakTrinoClientSecret }}"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: user-info-fetcher-client-credentials
-stringData:
-  clientId: user-info-fetcher
-  clientSecret: {{ keycloakUserinfoFetcherClientSecret }}
----
-apiVersion: v1
-kind: Secret
-metadata:
   name: keycloak-realm-config
 stringData:
-  # Created by clicking users in Keycloak WebUI and than running `/opt/keycloak/bin/kc.sh export --dir /tmp`
-  # (as well as some manual modifications).
   realm.json: |
     {
       "realm" : "demo",
@@ -206,64 +188,8 @@ stringData:
         "realmRoles" : [ "default-roles-demo" ],
         "notBefore" : 0,
         "groups" : [ "/Compliance and Regulation/Analytics" ]
-      } , {
-        "username" : "service-account-user-info-fetcher",
-        "enabled" : true,
-        "totp" : false,
-        "emailVerified" : false,
-        "serviceAccountClientId" : "user-info-fetcher",
-        "credentials" : [ ],
-        "disableableCredentialTypes" : [ ],
-        "requiredActions" : [ ],
-        "realmRoles" : [ "default-roles-demo" ],
-        "clientRoles" : {
-          "realm-management" : [
-            "view-users"
-          ]
-        },
-        "notBefore" : 0,
-        "groups" : [ ]
       } ],
       "clients" : [ {
-        "clientId" : "user-info-fetcher",
-        "surrogateAuthRequired" : false,
-        "enabled" : true,
-        "alwaysDisplayInConsole" : false,
-        "clientAuthenticatorType" : "client-secret",
-        "secret" : "{{ keycloakUserinfoFetcherClientSecret }}",
-        "redirectUris" : [ "*" ],
-        "webOrigins" : [ "*" ],
-        "notBefore" : 0,
-        "bearerOnly" : false,
-        "serviceAccountsEnabled" : true,
-        "publicClient" : false,
-        "frontchannelLogout" : true,
-        "protocol" : "openid-connect",
-        "attributes" : {
-          "oidc.ciba.grant.enabled" : "true",
-          "oauth2.device.authorization.grant.enabled" : "false"
-        },
-        "authenticationFlowBindingOverrides" : { },
-        "fullScopeAllowed" : true
-      }, {
-        "clientId": "trino",
-        "enabled": true,
-        "protocol": "openid-connect",
-        "clientAuthenticatorType": "client-secret",
-        "secret": "{{ keycloakTrinoClientSecret }}",
-        "redirectUris" : [ "*" ],
-        "webOrigins" : [ "*" ],
-        "standardFlowEnabled": true
-      }, {
-        "clientId": "superset",
-        "enabled": true,
-        "protocol": "openid-connect",
-        "clientAuthenticatorType": "client-secret",
-        "secret": "{{ keycloakSupersetClientSecret }}",
-        "redirectUris" : [ "*" ],
-        "webOrigins" : [ "*" ],
-        "standardFlowEnabled": true
-      }, {
         "clientId": "jupyterhub",
         "enabled": true,
         "protocol": "openid-connect",
