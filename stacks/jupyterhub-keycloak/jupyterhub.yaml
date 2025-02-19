@@ -9,10 +9,8 @@ options:
   hub:
     config:
       Authenticator:
-        admin_users:
-          - justin.martin
-        allowed_users:
-          - justin.martin
+        # don't filter here: delegate to Keycloak
+        allow_all: True
       GenericOAuthenticator:
         client_id: jupyterhub
         client_secret: jupyterhubjupyterhub
@@ -111,7 +109,7 @@ options:
             display_name: CPU
             choices:
               "2":
-                display_name: "{{cpu}}"
+                display_name: "2 request, 2 limit"
                 kubespawner_override:
                   cpu_guarantee: 2
                   cpu_limit: 2
