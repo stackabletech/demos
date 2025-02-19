@@ -650,32 +650,47 @@ stacks:
         default: adminadmin
   jupyterhub-keycloak:
     description: >-
-      A stack used to demonstrate JupyterHub and Keycloak.
+      A stack used to demonstrate JupyterHub and Keycloak, using parts of the end-to-end security demo.
     stackableRelease: dev
-    labels:
-      - jupyterhub
-      - keycloak
-    supportedNamespaces: []
     stackableOperators:
       - commons
       - listener
       - secret
+    labels:
+      - security
+      - jupyterhub
+      - keycloak
+    supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
       memory: 9010Mi
       pvc: 24Gi
     manifests:
-      #- plainYaml: stacks/jupyter-keycloak/serviceaccount.yaml
-      #- plainYaml: stacks/jupyter-keycloak/keycloak-realm-config.yaml
-      - plainYaml: stacks/jupyter-keycloak/kc.yaml
-      #- helmChart: stacks/jupyter-keycloak/jupyterhub.yaml
+      - plainYaml: stacks/_templates/keycloak-serviceaccount.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
+      - plainYaml: stacks/_templates/keycloak.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin
-      - name: jupyterhubAdminPassword
-        description: Password for JupyterHub Admin
+      - name: keycloakUserinfoFetcherClientSecret
+        description: Secret ID of the Keycloak UserinfoFetcher client that is used by the UserinfoFetcher to retrieve user information
+        default: user-info-fetcheruser-info-fetcher
+      - name: keycloakSupersetClientSecret
+        description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
+        default: supersetsuperset
+      - name: keycloakTrinoClientSecret
+        description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
+        default: trinotrino
+      - name: supersetAdminPassword
+        description: Password of the Superset admin user
         default: adminadmin
-      - name: keycloakJupyterhubClientSecret
-        description: Secret ID of the Keycloak Jupyterhub client
-        default: jupyterhubjupyterhub
+      - name: supersetSecretKey
+        description: Superset's secret key used to generate e.g. user session tokens
+        default: supersetSecretKey
+      - name: trinoSupersetUserPassword
+        description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
+        default: supersetsuperset
+      - name: trinoDataImportUserPassword
+        description: Password of the service user used to load data into Trino
+        default: data-importdata-import

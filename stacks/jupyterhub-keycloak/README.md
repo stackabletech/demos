@@ -35,24 +35,26 @@ Deploy the scripts:
 # and then:-
 # deploy kc etc.
 
-stackablectl op in secret commons listener
-kubectl apply -f stacks/jupyter-keycloak/serviceaccount.yaml
-kubectl apply -f stacks/jupyter-keycloak/kc.yaml
-kubectl apply -f stacks/jupyter-keycloak/in.yaml
+stackablectl stack install jupyterhub-keycloak --release dev -s stacks/stacks-v2.yaml
 
 # deploy jhub by extracting the values from the jupyterhub.yaml
-export TARGET_FILE=stacks/jupyter-keycloak/jupyterhub.yaml
+export TARGET_FILE=stacks/jupyterhub-keycloak/jupyterhub.yaml
 helm upgrade --install $(yq '.releaseName' $TARGET_FILE) $(yq '.name' $TARGET_FILE) --repo $(yq '.repo.url' $TARGET_FILE) --version $(yq '.version' $TARGET_FILE) -f <(yq '.options' $TARGET_FILE)
+
+
+
+
+
 
 # check token retrieval
 HUB_POD=$(kubectl -n default get pod -l app=jupyterhub,component=hub -o name | head -n 1 | sed -e 's#pod/##')
-kubectl exec -it $HUB_POD -- curl -v -X POST -d "grant_type=client_credentials&client_id=jupyterhub&client_secret=jupyterhubjupyterhub" https://keycloak.default.svc.cluster.local:8443/realms/jupyterhub/protocol/openid-connect/token
+kubectl exec -it $HUB_POD -- curl -v -X POST -d "grant_type=password&username=superset&password=supersetsuperset&client_id=jupyterhub&client_secret=jupyterhubjupyterhub" https://172.19.0.3:32502/realms/demo/protocol/openid-connect/token
 ```
 
 ## Navigate to
 
 ```shell
-http://proxy-public.default.svc.cluster.local:31095
+http://172.19.0.3:31398
 ```
 
 and log in as
