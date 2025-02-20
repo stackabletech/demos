@@ -669,6 +669,7 @@ stacks:
       - plainYaml: stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
       - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
       - plainYaml: stacks/jupyterhub-keycloak/keycloak.yaml
+      - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
