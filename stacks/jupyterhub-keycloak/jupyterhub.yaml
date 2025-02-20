@@ -15,10 +15,10 @@ options:
         client_id: jupyterhub
         client_secret: jupyterhubjupyterhub
         # TODO/FIX: these urls are dynamic (and need to be updated here once keycloak is running)
-        oauth_callback_url: http://172.19.0.3:30619/hub/oauth_callback
-        authorize_url: https://172.19.0.3:31438/realms/demo/protocol/openid-connect/auth
-        token_url: https://172.19.0.3:31438/realms/demo/protocol/openid-connect/token
-        userdata_url: https://172.19.0.3:31438/realms/demo/protocol/openid-connect/userinfo
+        oauth_callback_url: http://172.19.0.3:31095/hub/oauth_callback
+        authorize_url: https://172.19.0.3:31093/realms/demo/protocol/openid-connect/auth
+        token_url: https://172.19.0.3:31093/realms/demo/protocol/openid-connect/token
+        userdata_url: https://172.19.0.3:31093/realms/demo/protocol/openid-connect/userinfo
         username_claim: preferred_username
         scope:
           - openid
@@ -55,6 +55,8 @@ options:
   proxy:
     service:
       type: NodePort
+      nodePorts:
+        http: 31095
   rbac:
     create: true
   prePuller:

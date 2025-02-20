@@ -124,6 +124,7 @@ spec:
     - name: https
       port: 8443
       targetPort: 8443
+      nodePort: 31093
 ---
 apiVersion: v1
 kind: PersistentVolumeClaim
