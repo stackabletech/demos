@@ -77,7 +77,7 @@ As an alternative, you can use https://trino.io/download.html[trino-cli] by runn
 
 [source,console]
 ----
-$ java -jar ~/Downloads/trino-cli-455-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
+$ java -jar ~/Downloads/trino-cli-470-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
 ----
 
 Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output.
