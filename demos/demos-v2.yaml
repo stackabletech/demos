@@ -226,3 +226,19 @@ demos:
       cpu: "3"
       memory: 5098Mi
       pvc: 16Gi
+  jupyterhub-keycloak:
+    description: Demo showing jupyterhub notebooks secured with keycloak
+    documentation: TODO
+    stackableStack: jupyterhub-keycloak
+    labels:
+      - jupyterhub
+      - keycloak
+      - spark
+      - S3
+    manifests:
+      - plainYaml: demos/jupyterhub-keycloak/load-gas-data.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 6400m
+      memory: 12622Mi
+      pvc: 20Gi
