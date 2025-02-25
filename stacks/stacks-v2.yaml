@@ -670,7 +670,14 @@ stacks:
       - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
       - plainYaml: stacks/jupyterhub-keycloak/keycloak.yaml
       - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/serviceaccount.yaml
+      #- plainYaml: stacks/jupyterhub-keycloak/spark_driver_service.yaml
+      - helmChart: stacks/_templates/minio.yaml
+      - plainYaml: stacks/trino-superset-s3/s3-connection.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: minioAdminPassword
+        description: Password of the MinIO admin user
         default: adminadmin

@@ -49,6 +49,57 @@ options:
       - name: tls-ca-cert
         mountPath: /usr/local/lib/python3.12/site-packages/certifi/cacert.pem
         subPath: ca.crt
+    extraConfig:
+      01-drop-security-context-hook: |
+        from kubespawner import KubeSpawner
+
+        async def modify_pod_hook(spawner: KubeSpawner, pod: dict):
+          pod.spec.security_context = None
+          for container in pod.spec.containers:
+            container.security_context = None
+
+          # JupyterHub does add weird stuff that requires NET_ADMIN capability, which we don't need
+          pod.spec.init_containers = []
+
+          return pod
+
+        c.KubeSpawner.modify_pod_hook = modify_pod_hook
+      02-create-spark-driver-service-hook: |
+        # Thanks to https://github.com/jupyterhub/kubespawner/pull/644
+        from jupyterhub.utils import exponential_backoff
+        from kubespawner import KubeSpawner
+        from kubespawner.objects import make_owner_reference
+        from kubernetes_asyncio.client.models import V1ServicePort
+        from functools import partial
+
+        async def after_pod_created_hook(spawner: KubeSpawner, pod: dict):
+          owner_reference = make_owner_reference(
+            pod["metadata"]["name"], pod["metadata"]["uid"]
+          )
+          service_manifest = spawner.get_service_manifest(owner_reference)
+
+          service_manifest.spec.type = "ClusterIP"
+          service_manifest.spec.clusterIP = "None" # Headless Services is all we need
+          service_manifest.spec.ports += [
+            V1ServicePort(name='spark-ui',            port=4040, target_port=4040),
+            V1ServicePort(name='spark-driver',        port=2222, target_port=2222),
+            V1ServicePort(name='spark-block-manager', port=7777, target_port=7777)
+          ]
+
+          await exponential_backoff(
+              partial(
+                  spawner._ensure_not_exists,
+                  "service",
+                  service_manifest.metadata.name,
+              ),
+              f"Failed to delete service {service_manifest.metadata.name}",
+          )
+          await exponential_backoff(
+              partial(spawner._make_create_resource_request, "service", service_manifest),
+              f"Failed to create service {service_manifest.metadata.name}",
+          )
+
+        c.KubeSpawner.after_pod_created_hook = after_pod_created_hook
     service:
       type: NodePort
   proxy:
@@ -68,6 +119,7 @@ options:
       enabled: false
   singleuser:
     cmd: null
+    serviceAccountName: spark
     networkPolicy:
       enabled: false
     extraLabels:
@@ -124,7 +176,39 @@ options:
           image:
             display_name: Image
             choices:
+              "jupyter/pyspark-notebook:python-3.8":
+                display_name: "jupyter/pyspark-notebook:python-3.8"
+                kubespawner_override:
+                  image: "jupyter/pyspark-notebook:python-3.8"
               "jupyter/pyspark-notebook:python-3.9":
                 display_name: "jupyter/pyspark-notebook:python-3.9"
                 kubespawner_override:
                   image: "jupyter/pyspark-notebook:python-3.9"
+              "jupyter/pyspark-notebook:python-3.11":
+                display_name: "jupyter/pyspark-notebook:python-3.11"
+                kubespawner_override:
+                  image: "jupyter/pyspark-notebook:python-3.11"
+              "quay.io/jupyter/pyspark-notebook:python-3.11.7":
+                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.7"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.7"
+              "quay.io/jupyter/pyspark-notebook:python-3.11.8":
+                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.8"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.8"
+              "quay.io/jupyter/pyspark-notebook:python-3.11.9":
+                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
+              "quay.io/jupyter/pyspark-notebook:spark-3.5.0":
+                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.0"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.0"
+              "quay.io/jupyter/pyspark-notebook:spark-3.5.1":
+                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.1"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.1"
+              "quay.io/jupyter/pyspark-notebook:spark-3.5.2":
+                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.2"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.2"
