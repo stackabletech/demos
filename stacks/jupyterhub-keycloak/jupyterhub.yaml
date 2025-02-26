@@ -64,8 +64,13 @@ options:
           for container in pod.spec.containers:
             container.security_context = None
 
-          # JupyterHub does add weird stuff that requires NET_ADMIN capability, which we don't need
-          pod.spec.init_containers = []
+          # JupyterHub adds NET_ADMIN settings, which we don't need
+          #retain_init_containers = []
+          #for init_container in pod.spec.init_containers:
+          #  # retain just the download init container defined below
+          #  if init_container.name == "download-notebook":
+          #    init_container.security_context = None
+          #    retain_init_containers.append(init_container)
 
           return pod
 
