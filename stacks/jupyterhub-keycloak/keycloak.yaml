@@ -74,7 +74,8 @@ spec:
                     metadata:
                       name: keycloak-address
                     data:
-                      address: "$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT"
+                      keycloakAddress: "$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT"
+                      keycloakNodeIp: "$KEYCLOAK_HOSTNAME"
               EOF
                 fi
 
