@@ -146,6 +146,13 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
+    initContainers:
+      - name: download-notebook
+        image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/feat/keycloak-jupyterhub/stacks/jupyterhub-keycloak/process-s3.ipynb -o /notebook/process-s3.ipynb']
+        volumeMounts:
+          - mountPath: /notebook
+            name: notebook
     storage:
       extraVolumes:
         - name: tls-ca-cert
@@ -164,11 +171,16 @@ options:
         - name: minio-s3-credentials
           secret:
             secretName: minio-s3-credentials
+        - name: notebook
+          emptyDir:
+            sizeLimit: 500Mi
       extraVolumeMounts:
         - name: tls-ca-cert
           mountPath: /stackable/secrets/tls-ca-cert
         - name: minio-s3-credentials
           mountPath: /minio-s3-credentials
+        - name: notebook
+          mountPath: /home/jovyan/notebook
     profileList:
       - display_name: "Default"
         description: "Default profile"
@@ -203,38 +215,10 @@ options:
           image:
             display_name: Image
             choices:
-              "jupyter/pyspark-notebook:python-3.8":
-                display_name: "jupyter/pyspark-notebook:python-3.8"
-                kubespawner_override:
-                  image: "jupyter/pyspark-notebook:python-3.8"
-              "jupyter/pyspark-notebook:python-3.9":
-                display_name: "jupyter/pyspark-notebook:python-3.9"
-                kubespawner_override:
-                  image: "jupyter/pyspark-notebook:python-3.9"
-              "jupyter/pyspark-notebook:python-3.11":
-                display_name: "jupyter/pyspark-notebook:python-3.11"
-                kubespawner_override:
-                  image: "jupyter/pyspark-notebook:python-3.11"
-              "quay.io/jupyter/pyspark-notebook:python-3.11.7":
-                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.7"
-                kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.7"
-              "quay.io/jupyter/pyspark-notebook:python-3.11.8":
-                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.8"
-                kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.8"
               "quay.io/jupyter/pyspark-notebook:python-3.11.9":
                 display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
                 kubespawner_override:
                   image: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
-              "quay.io/jupyter/pyspark-notebook:spark-3.5.0":
-                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.0"
-                kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.0"
-              "quay.io/jupyter/pyspark-notebook:spark-3.5.1":
-                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.1"
-                kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.1"
               "quay.io/jupyter/pyspark-notebook:spark-3.5.2":
                 display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.2"
                 kubespawner_override:
