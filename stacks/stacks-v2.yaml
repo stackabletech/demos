@@ -680,3 +680,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
+      - name: jupyterhubClientPassword
+        description: Password of the JupyterHub client user
+        default: jupyterhubjupyterhub

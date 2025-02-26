@@ -13,7 +13,7 @@ options:
         allow_all: True
       GenericOAuthenticator:
         client_id: jupyterhub
-        client_secret: jupyterhubjupyterhub
+        client_secret: {{jupyterhubClientPassword}}
         username_claim: preferred_username
         scope:
           - openid
