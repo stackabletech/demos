@@ -1,4 +1,4 @@
-FROM docker.stackable.tech/stackable/spark-k8s:3.5.0-stackable24.3.0
+FROM oci.stackable.tech/sdp/spark-k8s:3.5.0-stackable24.3.0
 
 COPY demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/requirements.txt .
 

@@ -1,5 +1,4 @@
 = trino-iceberg
-:page-aliases: stable@stackablectl::demos/trino-iceberg.adoc
 :description: Install and explore Trino with Apache Iceberg for efficient SQL queries and scalable data management in a demo environment.
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu

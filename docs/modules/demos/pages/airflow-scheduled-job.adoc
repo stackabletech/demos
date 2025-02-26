@@ -1,5 +1,4 @@
 = airflow-scheduled-job
-:page-aliases: stable@stackablectl::demos/airflow-scheduled-job.adoc
 :description: This demo installs Airflow with Postgres and Redis on Kubernetes, showcasing DAG scheduling, job runs, and status verification via the Airflow UI.
 
 Install this demo on an existing Kubernetes cluster:

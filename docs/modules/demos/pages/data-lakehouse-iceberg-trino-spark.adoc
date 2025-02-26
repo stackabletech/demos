@@ -1,5 +1,4 @@
 = data-lakehouse-iceberg-trino-spark
-:page-aliases: stable@stackablectl::demos/data-lakehouse-iceberg-trino-spark.adoc
 :description: This demo shows a data workload with real-world data volumes using Trino, Kafka, Spark, NiFi, Superset and OPA.
 
 :demo-code: https://github.com/stackabletech/demos/blob/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
