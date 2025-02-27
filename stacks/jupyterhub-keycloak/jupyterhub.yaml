@@ -11,6 +11,8 @@ options:
       Authenticator:
         # don't filter here: delegate to Keycloak
         allow_all: True
+        admin_users:
+          - isla.williams
       GenericOAuthenticator:
         client_id: jupyterhub
         client_secret: {{jupyterhubClientPassword}}

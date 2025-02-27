@@ -1,0 +1,71 @@
+---
+releaseName: jupyterhub
+name: jupyterhub
+repo:
+  name: jupyterhub
+  url: https://jupyterhub.github.io/helm-chart/
+version: 4.0.0
+options:
+  hub:
+    config:
+      Authenticator:
+        allow_all: True
+        admin_users:
+          - admin
+      JupyterHub:
+        authenticator_class: nativeauthenticator.NativeAuthenticator
+      NativeAuthenticator:
+        open_signup: true
+  proxy:
+    service:
+      type: ClusterIP
+  rbac:
+    create: true
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false
+  scheduling:
+    userScheduler:
+      enabled: false
+  singleuser:
+    cmd: null
+    serviceAccountName: hub
+    networkPolicy:
+      enabled: false
+    extraLabels:
+      stackable.tech/vendor: Stackable
+    profileList:
+      - display_name: "Default"
+        description: "Default profile"
+        default: true
+        profile_options:
+          cpu:
+            display_name: CPU
+            choices:
+              "2":
+                display_name: "2 request, 2 limit"
+                kubespawner_override:
+                  cpu_guarantee: 2
+                  cpu_limit: 2
+              "1 request, 16 limit":
+                display_name: "1 request, 16 limit"
+                kubespawner_override:
+                  cpu_guarantee: 1
+                  cpu_limit: 16
+          memory:
+            display_name: Memory
+            choices:
+              "8 GB":
+                display_name: "8 GB"
+                kubespawner_override:
+                  mem_guarantee: "8G"
+                  mem_limit: "8G"
+          image:
+            display_name: Image
+            choices:
+              "quay.io/jupyter/pyspark-notebook:python-3.11.9":
+                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
+                kubespawner_override:
+                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.9"

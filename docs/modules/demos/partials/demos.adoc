@@ -2,6 +2,7 @@
 * xref:data-lakehouse-iceberg-trino-spark.adoc[]
 * xref:end-to-end-security.adoc[]
 * xref:hbase-hdfs-load-cycling-data.adoc[]
+* xref:jupyterhub-keycloak.adoc[]
 * xref:jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data.adoc[]
 * xref:logging.adoc[]
 * xref:nifi-kafka-druid-earthquake-data.adoc[]

@@ -1,0 +1,187 @@
+= jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:spark-pkg: https://spark.apache.org/docs/latest/api/python/user_guide/python_packaging.html
+:pyspark: https://spark.apache.org/docs/latest/api/python/getting_started/index.html
+:jupyterhub-k8s: https://github.com/jupyterhub/zero-to-jupyterhub-k8s
+:jupyterlab: https://jupyterlab.readthedocs.io/en/stable/
+:jupyter: https://jupyter.org
+:keycloak: https://www.keycloak.org/
+:gas-sensor: https://archive.ics.uci.edu/dataset/487/gas+sensor+array+temperature+modulation
+:jhub-foundation: https://github.com/jupyter/docker-stacks/blob/main/images/docker-stacks-foundation/Dockerfile#L6
+:spark-infra: https://github.com/apache/spark/blob/v3.5.2/dev/infra/Dockerfile
+
+This demo showcases the integration between {jupyter}[Jupyter] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
+{jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
+A simple notebook is provided that shows how to start a standalone Spark cluster, reading and writing data from:
+
+- an S3 instance
+- HDFS
+
+The SDP makes this integration easy by publishing a discovery ConfigMap for the HDFS cluster.
+This ConfigMap is then mounted in all Pods running {pyspark}[PySpark] notebooks so that these have access to HDFS data.
+For this demo a small sample of {gas-sensor}[gas sensor measurements*] is provided.
+
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install jupyterhub-keycloak
+----
+
+WARNING: There are security issues to be aware of when running a distributed spark cluster from within a JupyterHub notebook.
+With distributed spark the Notebook acts as the driver and requests executors Pods from k8s.
+These Pods in turn can mount *all* volumes and Secrets in that namespaces.
+To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to have OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 32GiB memory
+
+== Aim / Context
+
+This demo shows how to authenticate JupyerHub users against a Keycloak backend using JupyterHub's OAuthenticator.
+The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
+The notebook offers a simple template for using spark to interact with different backends.
+
+== Overview
+
+This demo will:
+
+* Install the required Stackable Data Platform operators
+* Spin up the following data products:
+** *JupyterHub*: A multi-user server for Jupyter notebooks
+** *Keycloak*: An identity and access management product
+** *S3*: A Minio instance for data storage
+** *Apache HDFS*: A distributed file system
+* Download a sample of the gas sensor dataset into S3
+* Install the Jupyter notebook
+* Demonstrate some basic data operations against S3 and HDFS
+* Illustrate multi-user usage
+
+== JupyterHub
+
+Have a look at the available Pods before logging in:
+
+[source,console]
+----
+$ kubectl get pods
+NAME                        READY   STATUS      RESTARTS   AGE
+hub-7469c78668-sgzp6        1/1     Running     0          3m39s
+keycloak-544d757f57-2qgjb   2/2     Running     0          3m41s
+load-gas-data-z7qxb         0/1     Completed   0          37s
+minio-5486d7584f-whw69      1/1     Running     0          4m5s
+proxy-cd7d57d78-xjlrp       1/1     Running     0          3m39s
+----
+
+The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed as a NodePort.
+In order to reach the JupyterHub web interface, navigate to this service.
+The node port IP can be found in the ConfigMap `keycloak-address` (written by the Keycloak deployment as it starts up).
+In the example below that would then be 172.19.0.5:31095:
+
+[source,yaml]
+----
+apiVersion: v1
+data:
+  keycloakAddress: 172.19.0.5:31093 # Keycloak itself
+  keycloakNodeIp: 172.19.0.5 # can be used to access the proxy-public service
+kind: ConfigMap
+metadata:
+  name: keycloak-address
+  namespace: default
+----
+
+NOTE: The hub may show `CreateContainerConfigError`` for a few moments on start-up as it requires the ConfigMap written by the Keycloak deployment.
+
+You should see the JupyterHub login page, which will indicate a re-direct to the OAuth service (Keycloak):
+
+image::jupyterhub-keycloak/oauth-login.png[]
+
+Click on the sign-in button.
+You will redirected to the Keycloak login, where you can enter one of the afore-mentioned users:
+
+image::jupyterhub-keycloak/keycloak-login.png[]
+
+A successful login will redirect you back to JupyterHub where different profiles are listed (the drop-down options are visible when you click on the respective fields):
+
+image::jupyterhub-keycloak/server-options.png[]
+
+The demo includes a notebook that is already mounted.
+Double-click on the file process-s3.ipynb in the explorer window on the left:
+
+image::jupyterhub-keycloak/load-nb.png[]
+
+Run the notebook by selecting "Run All Cells" from the menu:
+
+image::jupyterhub-keycloak/run-nb.png[]
+
+The notebook includes some comments regarding image compatibility and uses a custom image built off the official Spark official that matches the Spark version used in the notebook.
+The java versions also match exactly.
+Python versions need to match at the `major:minor` level, which is why Python 3.11 is used in the custom image.
+
+WARNING: spark security issues
+
+Once the spark executor has been started (we have specified `spark.executor.instances` = 1) it will spin up as an extra pod.
+We have named the spark job to incorporate the current user (justin-martin).
+JupyterHub has started a pod for the user's notebook instance (`jupyter-justin-martin---bdd3b4a1`) and another one for the spark executor (`process-s3-jupyter-justin-martin-bdd3b4a1-9e9da995473f481f-exec-1`):
+
+[source,console]
+----
+12:49 $ kubectl get pods
+NAME                                   READY   STATUS      RESTARTS   AGE
+hub-7469c78668-sgzp6                   1/1     Running     0          25m
+jupyter-justin-martin---bdd3b4a1       1/1     Running     0          17m
+keycloak-544d757f57-2qgjb              2/2     Running     0          25m
+load-gas-data-z7qxb                    0/1     Completed   0          22m
+minio-5486d7584f-whw69                 1/1     Running     0          26m
+process-s3-jupyter-justin-martin-...   1/1     Running     0          2m9s
+proxy-cd7d57d78-xjlrp                  1/1     Running     0          25m
+----
+
+Stop the kernel in the notebook (which will shut down the spark session and thus the executor) and log out as the current user.
+Log in now as `daniel.king` and then again `isla.williams` (you may need so do this in a clean browser sessions so that existing login cookies are removed).
+This user has been defined as an admin user in the jupyterhub configuration:
+
+[source,yaml]
+----
+  ...
+  hub:
+    config:
+      Authenticator:
+        # don't filter here: delegate to Keycloak
+        allow_all: True
+        admin_users:
+          - isla.williams
+  ...
+----
+
+You should now see user-specific pods for all three users:
+
+
+[source,console]
+----
+16:16 $ kubectl get pods
+NAME                               READY   STATUS      RESTARTS   AGE
+hub-7666dfd6cf-p52sn               1/1     Running     0          7m30s
+jupyter-daniel-king---181a80ce     1/1     Running     0          6m17s
+jupyter-isla-williams---14730816   1/1     Running     0          4m50s
+jupyter-justin-martin---bdd3b4a1   1/1     Running     0          3h47m
+keycloak-544d757f57-2qgjb          2/2     Running     0          3h56m
+load-gas-data-z7qxb                0/1     Completed   0          3h53m
+minio-5486d7584f-whw69             1/1     Running     0          3h56m
+proxy-6c86fb64f7-422d6             1/1     Running     0          7m31s
+----
+
+The admin user (`isla.williams`) will also have an extra Admin tab in the JupyterHub console where current users can be managed:
+
+image::jupyterhub-keycloak/admin-tab.png[]
+
+NOTE: if you attempt to re-run the notebook you will need to first remove the `_temporary folders` from the S3 buckets.
+These are created by spark jobs and are not removed from the bucket when the job has completed.
+
+*See: Burgués, Javier, Juan Manuel Jiménez-Soto, and Santiago Marco. "Estimation of the limit of detection in semiconductor gas sensors through linearized calibration models." Analytica chimica acta 1013 (2018): 13-25
+Burgués, Javier, and Santiago Marco. "Multivariate estimation of the limit of detection by orthogonal partial least squares in temperature-modulated MOX sensors." Analytica chimica acta 1019 (2018): 49-64.
