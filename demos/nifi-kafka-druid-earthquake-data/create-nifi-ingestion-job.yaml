@@ -6,10 +6,31 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: demo-serviceaccount
+      initContainers:
+        - name: wait-for-nifi
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for NiFi to be created'
+              kubectl wait --for=create pod/nifi-node-default-0 --timeout=30m
+              echo 'Waiting for NiFi to be ready'
+              kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=30m
       containers:
         - name: create-nifi-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
-          command: ["bash", "-c", "curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/IngestEarthquakesToKafka.xml && python -u /tmp/script/script.py"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/IngestEarthquakesToKafka.xml
+              python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script

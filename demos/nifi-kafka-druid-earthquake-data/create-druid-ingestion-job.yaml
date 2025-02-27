@@ -6,10 +6,30 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: demo-serviceaccount
+      initContainers:
+        - name: wait-for-druid-coordinator
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for Druid Coordinator to be created'
+              kubectl wait --for=create pod/druid-coordinator-default-0
+              echo 'Waiting for Druid Coordinator to be ready'
+              kubectl wait --for=condition=Ready pod/druid-coordinator-default-0 --timeout=30m
       containers:
         - name: create-druid-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
-          command: ["bash", "-c", "curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/ingestion-job-spec.json https://druid-coordinator:8281/druid/indexer/v1/supervisor"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/ingestion-job-spec.json https://druid-coordinator:8281/druid/indexer/v1/supervisor
           volumeMounts:
             - name: ingestion-job-spec
               mountPath: /tmp/ingestion-job-spec

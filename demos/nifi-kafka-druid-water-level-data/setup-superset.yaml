@@ -6,10 +6,31 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: demo-serviceaccount
+      initContainers:
+        - name: wait-for-superset
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for Superset to be created'
+              kubectl wait --for=create pod/superset-node-default-0 --timeout=30m
+              echo 'Waiting for Superset to be ready'
+              kubectl wait --for=condition=Ready pod/superset-node-default-0 --timeout=30m
       containers:
         - name: setup-superset
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
-          command: ["bash", "-c", "curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/superset-assets.zip && python -u /tmp/script/script.py"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/superset-assets.zip
+              python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script

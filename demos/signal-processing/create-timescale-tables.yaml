@@ -10,17 +10,40 @@ spec:
       initContainers:
         - name: wait-for-timescale
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-          command: ["bash", "-c", "echo 'Waiting for timescaleDB to be ready'
-                    && kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=postgresql-timescaledb"
-                  ]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for timescaleDB to be created'
+              kubectl wait --for=create pod/postgresql-timescaledb-0 --timeout=30m
+
+              echo 'Waiting for timescaleDB to be ready'
+              kubectl wait --for=condition=ready pod/postgresql-timescaledb-0 --timeout=30m
       containers:
         - name: create-timescale-tables-job
           image: postgres
-          command: ["bash", "-c", "export PGPASSWORD=$(cat /timescale-admin-credentials/password) && \
-            echo 'Submitting DDL...' && \
-            psql -U admin -h postgresql-timescaledb.default.svc.cluster.local postgres -c '\\x' -c 'CREATE DATABASE tsdb' -c '\\c tsdb' -f /tmp/sql/timescaledb.sql -c 'select count(*) from conditions' -c '\\q' && \
-            echo 'Creating extension as superuser...' && \
-            psql -U postgres -h postgresql-timescaledb.default.svc.cluster.local postgres -c '\\x' -c '\\c tsdb' -c 'CREATE EXTENSION timescaledb_toolkit' -c '\\q'"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              export PGPASSWORD=$(cat /timescale-admin-credentials/password)
+              echo 'Submitting DDL...'
+              psql -U admin -h postgresql-timescaledb.default.svc.cluster.local postgres \
+                -c '\x' -c 'CREATE DATABASE tsdb' \
+                -c '\c tsdb' \
+                -f /tmp/sql/timescaledb.sql \
+                -c 'select count(*) from conditions' \
+                -c '\q'
+              echo 'Creating extension as superuser...'
+              psql -U postgres -h postgresql-timescaledb.default.svc.cluster.local postgres \
+                -c '\x' \
+                -c '\c tsdb' \
+                -c 'CREATE EXTENSION timescaledb_toolkit' \
+                -c '\q'
           volumeMounts:
             - name: script
               mountPath: /tmp/sql
