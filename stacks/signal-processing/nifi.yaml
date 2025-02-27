@@ -20,13 +20,6 @@ spec:
       keySecret: nifi-sensitive-property-key
       autoGenerate: true
   nodes:
-    podOverrides:
-      metadata:
-        annotations:
-          sidecar.opentelemetry.io/inject: "default/otel-collector-grpc"
-          instrumentation.opentelemetry.io/inject-java: "true"
-          # Todo: We probably want to add the following annotation by default.
-          instrumentation.opentelemetry.io/java-container-names: "nifi"
     config:
       resources:
         cpu:
