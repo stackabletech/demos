@@ -1,4 +1,4 @@
-= jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data
+= jupyterhub-keycloak
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :spark-pkg: https://spark.apache.org/docs/latest/api/python/user_guide/python_packaging.html
@@ -13,7 +13,7 @@
 
 This demo showcases the integration between {jupyter}[Jupyter] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
 {jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
-A simple notebook is provided that shows how to start a standalone Spark cluster, reading and writing data from:
+A simple notebook is provided that shows how to start a distributed Spark cluster, reading and writing data from:
 
 - an S3 instance
 - HDFS
@@ -29,9 +29,9 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install jupyterhub-keycloak
 ----
 
-WARNING: There are security issues to be aware of when running a distributed spark cluster from within a JupyterHub notebook.
+WARNING: There are security issues to be aware of when running a distributed Spark cluster from within a JupyterHub notebook.
 With distributed spark the Notebook acts as the driver and requests executors Pods from k8s.
-These Pods in turn can mount *all* volumes and Secrets in that namespaces.
+These Pods in turn can mount *all* volumes and Secrets in that namespace.
 To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to have OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
 
 [#system-requirements]
