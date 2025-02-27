@@ -10,16 +10,28 @@ spec:
       initContainers:
         - name: wait-for-timescale-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-          command: ["bash", "-c", "echo 'Waiting for timescaleDB tables to be ready'
-                    && kubectl wait --for=condition=complete job/create-timescale-tables-job"
-                  ]
+          command:
+            - bash
+            - -c
+            - -euo
+            - pipefail
+            - |
+                echo 'Waiting for timescaleDB tables and NiFi to be ready'
+                kubectl wait --for=condition=complete job/create-timescale-tables-job --timeout=300s
+                kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=300s
       containers:
         - name: create-nifi-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
-          command: ["bash", "-c", "export PGPASSWORD=$(cat /timescale-admin-credentials/password) && \
-            curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.xml && \
-            sed -i \"s/PLACEHOLDERPGPASSWORD/$PGPASSWORD/g\" DownloadAndWriteToDB.xml && \
-            python -u /tmp/script/script.py"]
+          command:
+            - bash
+            - -c
+            - -euo
+            - pipefail
+            - |
+                export PGPASSWORD=$(cat /timescale-admin-credentials/password)
+                curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.xml
+                sed -i "s/PLACEHOLDERPGPASSWORD/$PGPASSWORD/g" DownloadAndWriteToDB.xml
+                python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
@@ -70,11 +82,12 @@ data:
     nipyapi.config.nifi_config.host = f"{ENDPOINT}/nifi-api"
     nipyapi.config.nifi_config.verify_ssl = False
 
-    print("Logging in")
+    print(f"Logging in as {USERNAME}")
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
     pg_id = get_root_pg_id()
+    print(f"pgid={pg_id}")
 
     upload_template(pg_id, TEMPLATE_FILE)
 
