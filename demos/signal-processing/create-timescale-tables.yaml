@@ -12,20 +12,23 @@ spec:
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
           command:
             - bash
-            - -c
             - -euo
             - pipefail
+            - -c
             - |
+              echo 'Waiting for timescaleDB to be created'
+              kubectl wait --for=create pod/postgresql-timescaledb-0 --timeout=30m
+
               echo 'Waiting for timescaleDB to be ready'
-              kubectl wait --for=condition=ready pod -l app.kubernetes.io/name=postgresql-timescaledb --timeout=30m
+              kubectl wait --for=condition=ready pod/postgresql-timescaledb-0 --timeout=30m
       containers:
         - name: create-timescale-tables-job
           image: postgres
           command:
             - bash
-            - -c
             - -euo
             - pipefail
+            - -c
             - |
               export PGPASSWORD=$(cat /timescale-admin-credentials/password)
               echo 'Submitting DDL...'
