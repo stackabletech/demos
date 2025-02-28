@@ -111,7 +111,8 @@ A successful login will redirect you back to JupyterHub where different profiles
 image::jupyterhub-keycloak/server-options.png[]
 
 The demo includes a notebook that is already mounted.
-Double-click on the file process-s3.ipynb in the explorer window on the left:
+You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
+Double-click on the file `notebook/process-s3.ipynb` in the explorer window on the left:
 
 image::jupyterhub-keycloak/load-nb.png[]
 

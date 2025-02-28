@@ -228,7 +228,7 @@ demos:
       pvc: 16Gi
   jupyterhub-keycloak:
     description: Demo showing jupyterhub notebooks secured with keycloak
-    documentation: TODO
+    documentation: https://docs.stackable.tech/stackablectl/stable/demos/jupyterhub-keycloak.html
     stackableStack: jupyterhub-keycloak
     labels:
       - jupyterhub
@@ -237,6 +237,7 @@ demos:
       - S3
     manifests:
       - plainYaml: demos/jupyterhub-keycloak/load-gas-data.yaml
+      - plainYaml: demos/jupyterhub-keycloak/create-hdfs-dir.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6400m

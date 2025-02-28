@@ -656,6 +656,8 @@ stacks:
       - commons
       - listener
       - secret
+      - hdfs
+      - zookeeper
     labels:
       - security
       - jupyterhub
@@ -673,6 +675,8 @@ stacks:
       - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
       - plainYaml: stacks/jupyterhub-keycloak/serviceaccount.yaml
       - plainYaml: stacks/jupyterhub-keycloak/s3-connection.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/zookeeper.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/hdfs.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
