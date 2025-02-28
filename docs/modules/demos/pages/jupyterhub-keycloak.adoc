@@ -8,8 +8,6 @@
 :jupyter: https://jupyter.org
 :keycloak: https://www.keycloak.org/
 :gas-sensor: https://archive.ics.uci.edu/dataset/487/gas+sensor+array+temperature+modulation
-:jhub-foundation: https://github.com/jupyter/docker-stacks/blob/main/images/docker-stacks-foundation/Dockerfile#L6
-:spark-infra: https://github.com/apache/spark/blob/v3.5.2/dev/infra/Dockerfile
 
 This demo showcases the integration between {jupyter}[Jupyter] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
 {jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
@@ -187,6 +185,10 @@ jupyter-justin-martin---bdd3b4a1   1/1     Running     0          3h47m
 The admin user (`isla.williams`) will also have an extra Admin tab in the JupyterHub console where current users can be managed:
 
 image::jupyterhub-keycloak/admin-tab.png[]
+
+You can inspect the S3 buckets by adding a port forward on port 9001 of the minio Pod and logging in with `admin/adminadmin`:
+
+image::jupyterhub-keycloak/s3-buckets.png[]
 
 NOTE: if you attempt to re-run the notebook you will need to first remove the `_temporary folders` from the S3 buckets.
 These are created by spark jobs and are not removed from the bucket when the job has completed.

@@ -1,4 +1,7 @@
-# kind load docker-image spark:3.5.2-python311 -n stackable-data-platform
+# docker build -t oci.stackable.tech/sandbox/spark:3.5.2-python311 -f Dockerfile .
+# kind load docker-image oci.stackable.tech/sandbox/spark:3.5.2-python311 -n stackable-data-platform
+# or:
+# docker push oci.stackable.tech/sandbox/spark:3.5.2-python311
 
 FROM spark:3.5.2-scala2.12-java17-ubuntu
 
@@ -9,7 +12,6 @@ RUN set -ex; \
     # Install dependencies for Python 3.11
     apt-get install -y \
     software-properties-common \
-    && add-apt-repository ppa:deadsnakes/ppa \
     && apt-get update && apt-get install -y \
     python3.11 \
     python3.11-venv \

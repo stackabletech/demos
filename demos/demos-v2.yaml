@@ -236,6 +236,7 @@ demos:
       - spark
       - S3
     manifests:
+    # TODO: revert paths
       - plainYaml: demos/jupyterhub-keycloak/load-gas-data.yaml
       - plainYaml: demos/jupyterhub-keycloak/create-hdfs-dir.yaml
     supportedNamespaces: []
