@@ -1,0 +1,21 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-gas-data
+spec:
+  template:
+    spec:
+      containers:
+        - name: load-gas-data
+          image: "bitnami/minio:2022-debian-10"
+          command: ["bash", "-c", "cd /tmp; curl -O https://repo.stackable.tech/repository/misc/datasets/gas-sensor-data/20160930_203718.csv && mc --insecure alias set minio http://minio:9000/ $(cat /minio-s3-credentials/accessKey) $(cat /minio-s3-credentials/secretKey) && mc cp 20160930_203718.csv minio/demo/gas-sensor/raw/;"]
+          volumeMounts:
+            - name: minio-s3-credentials
+              mountPath: /minio-s3-credentials
+      volumes:
+        - name: minio-s3-credentials
+          secret:
+            secretName: minio-s3-credentials
+      restartPolicy: OnFailure
+  backoffLimit: 50

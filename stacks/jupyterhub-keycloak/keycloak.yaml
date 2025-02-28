@@ -1,0 +1,145 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: keycloak
+  template:
+    metadata:
+      labels:
+        app: keycloak
+    spec:
+      containers:
+        - name: keycloak
+          resources: {}
+          image: quay.io/keycloak/keycloak:26.0.5
+          args:
+            - start
+            - --hostname-strict=false
+            - --https-key-store-file=/tls/keystore.p12
+            - --https-key-store-password=changeit
+            - --import-realm
+          env:
+            - name: KEYCLOAK_ADMIN
+              value: admin
+            - name: KEYCLOAK_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: keycloak-admin-credentials
+                  key: admin
+          ports:
+            - name: https
+              containerPort: 8443
+          readinessProbe:
+            httpGet:
+              scheme: HTTPS
+              path: /realms/master
+              port: https
+          volumeMounts:
+            - name: data
+              mountPath: /opt/keycloak/data/
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+            - name: tls
+              mountPath: /tls/
+        - name: create-configmap
+          resources: {}
+          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              pid=
+              trap 'echo SIGINT; [[ $pid ]] && kill $pid; exit' SIGINT
+              trap 'echo SIGTERM; [[ $pid ]] && kill $pid; exit' SIGTERM
+
+              while :
+              do
+                echo "Determining Keycloak public reachable address"
+                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
+                echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
+
+                if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
+                  KEYCLOAK_HOSTNAME="$(echo $KEYCLOAK_ADDRESS | grep -oP '^[^:]+')"
+                  KEYCLOAK_PORT="$(echo $KEYCLOAK_ADDRESS | grep -oP '[0-9]+$')"
+
+                  cat << EOF | kubectl apply -f -
+                    apiVersion: v1
+                    kind: ConfigMap
+                    metadata:
+                      name: keycloak-address
+                    data:
+                      keycloakAddress: "$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT"
+                      keycloakNodeIp: "$KEYCLOAK_HOSTNAME"
+              EOF
+                fi
+
+                sleep 30 & pid=$!
+                wait
+              done
+      securityContext:
+        fsGroup: 1000
+        runAsGroup: 1000
+        runAsUser: 1000
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: keycloak-data
+        - name: realm-config
+          secret:
+            secretName: keycloak-realm-config
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/format: tls-pkcs12
+                  secrets.stackable.tech/format.compatibility.tls-pkcs12.password: changeit
+                  secrets.stackable.tech/scope: service=keycloak,node
+              spec:
+                storageClassName: secrets.stackable.tech
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+      serviceAccountName: keycloak-serviceaccount
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: keycloak
+  labels:
+    app: keycloak
+spec:
+  type: NodePort
+  selector:
+    app: keycloak
+  ports:
+    - name: https
+      port: 8443
+      targetPort: 8443
+      nodePort: 31093
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: keycloak-data
+spec:
+  accessModes: [ReadWriteOnce]
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-admin-credentials
+stringData:
+  admin: "{{ keycloakAdminPassword }}"

@@ -1,0 +1,202 @@
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: keycloak-realm-config
+stringData:
+  realm.json: |
+    {
+      "realm" : "demo",
+      "enabled" : true,
+      "groups" : [ {
+        "name" : "Compliance and Regulation",
+        "path" : "/Compliance and Regulation",
+        "subGroups" : [ {
+          "name" : "Analytics",
+          "path" : "/Compliance and Regulation/Analytics"
+        } ]
+      }, {
+        "name" : "Customer Service",
+        "path" : "/Customer Service",
+        "subGroups" : [ {
+          "name" : "Analytics",
+          "path" : "/Customer Service/Analytics"
+        } ]
+      }, {
+        "name" : "Marketing",
+        "path" : "/Marketing",
+        "subGroups" : [ ]
+      } ],
+      "users" : [ {
+        "id" : "e44a09fa-bce1-40e8-a1da-28902b79dcf0",
+        "createdTimestamp" : 1711375603780,
+        "username" : "daniel.king",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Daniel",
+        "lastName" : "King",
+        "email" : "daniel.king@knab.com",
+        "credentials" : [ {
+          "id" : "77343b9c-661e-4f04-8ea3-c4dd7f86abde",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375610955,
+          "secretData" : "{\"value\":\"jNVzthZCkPipHW1KHZCncU/G/DHc+5QqmGEKernet5E=\",\"salt\":\"7woqv8IPicuA0cpa3U6dEg==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
+      }, {
+        "id" : "68dc0996-be4a-412e-8d7b-a21cfc5b1e61",
+        "createdTimestamp" : 1711375695303,
+        "username" : "isla.williams",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Isla",
+        "lastName" : "Williams",
+        "email" : "isla.williams@knab.com",
+        "credentials" : [ {
+          "id" : "67941518-5494-4b97-af8a-458250cc1bd0",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375708463,
+          "secretData" : "{\"value\":\"OpKvnLaK7afN4vpaqhjvNg/u1phsMZUAq0y6+28UFK4=\",\"salt\":\"dSfuKvbSyumwCP6Y1JNYEg==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service/Analytics" ]
+      }, {
+        "id" : "e434ea2c-1dcc-4b00-aa98-77444d50a945",
+        "createdTimestamp" : 1711375666275,
+        "username" : "justin.martin",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Justin",
+        "lastName" : "Martin",
+        "email" : "justin.martin@knab.com",
+        "credentials" : [ {
+          "id" : "7df036b6-1cd4-48fd-920a-5e43cdb69d15",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375673501,
+          "secretData" : "{\"value\":\"MYCAP3Hl54rKbMGG16YRnchpkWJQ5EaqYiMfZN/Q3z4=\",\"salt\":\"8PieIPt7mRiJQe3kszgakg==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service/Analytics" ]
+      }, {
+        "id" : "14d21868-9f24-45e6-876c-34405ac506c8",
+        "createdTimestamp" : 1711375726932,
+        "username" : "mark.ketting",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Mark",
+        "lastName" : "Ketting",
+        "email" : "mark.ketting@knab.com",
+        "credentials" : [ {
+          "id" : "80bc0228-fd73-4011-b8d7-be382429ef80",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375733935,
+          "secretData" : "{\"value\":\"2GQKaid+G8gKIQe4a9J12/d7d4z41kqy3nuNEdEh5YI=\",\"salt\":\"DCX1lj9nYbdPkzU2BnTUjg==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Marketing" ]
+      }, {
+        "id" : "f695a4a2-b05a-4484-b49b-ea94837490e8",
+        "createdTimestamp" : 1711375638235,
+        "username" : "pamela.scott",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Pamela",
+        "lastName" : "Scott",
+        "email" : "pamela.scott@knab.com",
+        "credentials" : [ {
+          "id" : "553b96c7-849c-4655-810f-09e4569f260e",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375646251,
+          "secretData" : "{\"value\":\"IsMVP7Fw1bzIoBpjzFHl7Ey9FrfaOuzX5fTnfmw3/iw=\",\"salt\":\"G14/rEl5h6QUPrCR/XoVMw==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Customer Service/Analytics" ]
+      }, {
+        "id" : "df53f737-794c-4bc4-ab0d-2cfbdc01cc57",
+        "createdTimestamp" : 1711375573153,
+        "username" : "sophia.clarke",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Sophia",
+        "lastName" : "Clarke",
+        "email" : "sophia.clarke@knab.com",
+        "credentials" : [ {
+          "id" : "aac9b727-acfb-45b2-bc52-b89a210adbf8",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375583194,
+          "secretData" : "{\"value\":\"Q+3UJbt/cpV2G8lRcVFZ5J4BqluRqAlJols+q8NFlUc=\",\"salt\":\"jJUdiUao9UcwEJkGtBzSuw==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
+      }, {
+        "id" : "75b31f7c-aa0a-419b-930c-57969e7b6e67",
+        "createdTimestamp" : 1711375413324,
+        "username" : "william.lewis",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "William",
+        "lastName" : "Lewis",
+        "email" : "william.lewis@knab.com",
+        "credentials" : [ {
+          "id" : "4a213d68-b1f9-41e4-971f-6a7335291293",
+          "type" : "password",
+          "userLabel" : "My password",
+          "createdDate" : 1711375448461,
+          "secretData" : "{\"value\":\"oU3A3av49qx+fk2WJlvuZo2m33GygiSi8L0fugOIOq4=\",\"salt\":\"JJHpTTZNTt5k4GY9Eci5OQ==\",\"additionalParameters\":{}}",
+          "credentialData" : "{\"hashIterations\":27500,\"algorithm\":\"pbkdf2-sha256\",\"additionalParameters\":{}}"
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ "/Compliance and Regulation/Analytics" ]
+      } ],
+      "clients" : [ {
+        "clientId": "jupyterhub",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "clientAuthenticatorType": "client-secret",
+        "secret": "jupyterhubjupyterhub",
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
+        "standardFlowEnabled": true
+      } ]
+    }

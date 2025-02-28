@@ -1,0 +1,57 @@
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperZnode
+metadata:
+  name: hdfs-znode
+spec:
+  clusterRef:
+    name: zookeeper
+---
+apiVersion: hdfs.stackable.tech/v1alpha1
+kind: HdfsCluster
+metadata:
+  name: hdfs
+spec:
+  image:
+    productVersion: 3.4.0
+  clusterConfig:
+    dfsReplication: 1
+    zookeeperConfigMapName: hdfs-znode
+  nameNodes:
+    config:
+      listenerClass: external-stable
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 2
+    configOverrides: &configOverrides
+      core-site.xml:
+        # FIXME user jovyan should impersonate access-spark
+        # (jovyan=supergroup should not be necessary)
+        hadoop.user.group.static.mapping.overrides: "dr.who=;nn=;nm=;jn=;jovyan=supergroup;access-spark=;"
+        hadoop.proxyuser.jovyan.users: "*"
+        hadoop.proxyuser.jovyan.hosts: "*"
+  dataNodes:
+    config:
+      listenerClass: external-unstable
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 1
+    configOverrides: *configOverrides
+  journalNodes:
+    config:
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 1
+    configOverrides: *configOverrides

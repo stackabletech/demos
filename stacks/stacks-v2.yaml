@@ -648,3 +648,43 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  jupyterhub-keycloak:
+    description: >-
+      A stack used to demonstrate JupyterHub and Keycloak, using parts of the end-to-end security demo.
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - hdfs
+      - zookeeper
+    labels:
+      - security
+      - jupyterhub
+      - keycloak
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 3400m
+      memory: 9010Mi
+      pvc: 24Gi
+    manifests:
+    # TODO: revert paths
+      - helmChart: stacks/_templates/minio.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/keycloak.yaml
+      - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/serviceaccount.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/s3-connection.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/zookeeper.yaml
+      - plainYaml: stacks/jupyterhub-keycloak/hdfs.yaml
+    parameters:
+      - name: keycloakAdminPassword
+        description: Password of the Keycloak admin user
+        default: adminadmin
+      - name: minioAdminPassword
+        description: Password of the MinIO admin user
+        default: adminadmin
+      - name: jupyterhubClientPassword
+        description: Password of the JupyterHub client user
+        default: jupyterhubjupyterhub
