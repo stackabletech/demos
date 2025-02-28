@@ -29,10 +29,12 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install jupyterhub-keycloak
 ----
 
-WARNING: There are security issues to be aware of when running a distributed Spark cluster from within a JupyterHub notebook.
-With distributed spark the Notebook acts as the driver and requests executors Pods from k8s.
+WARNING: There are two security issues to be aware of when using this notebook.
+Firstly, when running a distributed Spark cluster from within a JupyterHub notebook, the notebook acts as the driver and requests executors Pods from k8s.
 These Pods in turn can mount *all* volumes and Secrets in that namespace.
 To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to have OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
+Secondly, this demo currently employs user impersonation for the spark job that writes to HDFS.
+In a later iteration of this demo it is planned to replace this for HDFS with OPA group mapping for authorization and Kerberos for authentication.
 
 [#system-requirements]
 == System requirements
@@ -42,11 +44,13 @@ To run this demo, your system needs at least:
 * 8 {k8s-cpu}[cpu units] (core/hyperthread)
 * 32GiB memory
 
+You may need more resources depending on how many concurrent users are logged in, and which notebook profiles they are using.
+
 == Aim / Context
 
 This demo shows how to authenticate JupyerHub users against a Keycloak backend using JupyterHub's OAuthenticator.
 The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
-The notebook offers a simple template for using spark to interact with different backends.
+The notebook offers a simple template for using spark to interact with different backends, specifically S3 and HDFS.
 
 == Overview
 
@@ -70,15 +74,22 @@ Have a look at the available Pods before logging in:
 [source,console]
 ----
 $ kubectl get pods
-NAME                        READY   STATUS      RESTARTS   AGE
-hub-7469c78668-sgzp6        1/1     Running     0          3m39s
-keycloak-544d757f57-2qgjb   2/2     Running     0          3m41s
-load-gas-data-z7qxb         0/1     Completed   0          37s
-minio-5486d7584f-whw69      1/1     Running     0          4m5s
-proxy-cd7d57d78-xjlrp       1/1     Running     0          3m39s
+NAME                         READY   STATUS      RESTARTS   AGE
+create-hdfs-dir-jw7h4        0/1     Completed   0          54m
+hdfs-datanode-default-0      1/1     Running     0          54m
+hdfs-journalnode-default-0   1/1     Running     0          54m
+hdfs-namenode-default-0      2/2     Running     0          54m
+hdfs-namenode-default-1      2/2     Running     0          50m
+hub-84f49ccbd7-29h7j         1/1     Running     0          56m
+keycloak-544d757f57-f55kr    2/2     Running     0          57m
+load-gas-data-m6z5p          0/1     Completed   0          54m
+minio-5486d7584f-x2jn8       1/1     Running     0          57m
+proxy-648bf7f45b-62vqg       1/1     Running     0          56m
+zookeeper-server-default-0   1/1     Running     0          54m
+
 ----
 
-The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed as a NodePort.
+The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed with type NodePort.
 In order to reach the JupyterHub web interface, navigate to this service.
 The node port IP can be found in the ConfigMap `keycloak-address` (written by the Keycloak deployment as it starts up).
 In the example below that would then be 172.19.0.5:31095:
@@ -110,9 +121,13 @@ A successful login will redirect you back to JupyterHub where different profiles
 
 image::jupyterhub-keycloak/server-options.png[]
 
-The demo includes a notebook that is already mounted.
-You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
-Double-click on the file `notebook/process-s3.ipynb` in the explorer window on the left:
+The explorer window on the left includes HDFS configuration files and a notebook that is already mounted.
+Open the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
+You can see how to reference the HDFS cluster when reading from it in the notebook (`hdfs://hdfs/`):
+
+image::jupyterhub-keycloak/hdfs-core-site.png[]
+
+Double-click on the file `notebook/process-s3.ipynb`:
 
 image::jupyterhub-keycloak/load-nb.png[]
 
@@ -124,8 +139,6 @@ The notebook includes some comments regarding image compatibility and uses a cus
 The java versions also match exactly.
 Python versions need to match at the `major:minor` level, which is why Python 3.11 is used in the custom image.
 
-WARNING: spark security issues
-
 Once the spark executor has been started (we have specified `spark.executor.instances` = 1) it will spin up as an extra pod.
 We have named the spark job to incorporate the current user (justin-martin).
 JupyterHub has started a pod for the user's notebook instance (`jupyter-justin-martin---bdd3b4a1`) and another one for the spark executor (`process-s3-jupyter-justin-martin-bdd3b4a1-9e9da995473f481f-exec-1`):
@@ -134,13 +147,10 @@ JupyterHub has started a pod for the user's notebook instance (`jupyter-justin-m
 ----
 12:49 $ kubectl get pods
 NAME                                   READY   STATUS      RESTARTS   AGE
-hub-7469c78668-sgzp6                   1/1     Running     0          25m
+...
 jupyter-justin-martin---bdd3b4a1       1/1     Running     0          17m
-keycloak-544d757f57-2qgjb              2/2     Running     0          25m
-load-gas-data-z7qxb                    0/1     Completed   0          22m
-minio-5486d7584f-whw69                 1/1     Running     0          26m
 process-s3-jupyter-justin-martin-...   1/1     Running     0          2m9s
-proxy-cd7d57d78-xjlrp                  1/1     Running     0          25m
+...
 ----
 
 Stop the kernel in the notebook (which will shut down the spark session and thus the executor) and log out as the current user.
@@ -167,14 +177,11 @@ You should now see user-specific pods for all three users:
 ----
 16:16 $ kubectl get pods
 NAME                               READY   STATUS      RESTARTS   AGE
-hub-7666dfd6cf-p52sn               1/1     Running     0          7m30s
+...
 jupyter-daniel-king---181a80ce     1/1     Running     0          6m17s
 jupyter-isla-williams---14730816   1/1     Running     0          4m50s
 jupyter-justin-martin---bdd3b4a1   1/1     Running     0          3h47m
-keycloak-544d757f57-2qgjb          2/2     Running     0          3h56m
-load-gas-data-z7qxb                0/1     Completed   0          3h53m
-minio-5486d7584f-whw69             1/1     Running     0          3h56m
-proxy-6c86fb64f7-422d6             1/1     Running     0          7m31s
+...
 ----
 
 The admin user (`isla.williams`) will also have an extra Admin tab in the JupyterHub console where current users can be managed:
