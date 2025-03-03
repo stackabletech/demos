@@ -71,7 +71,7 @@ proxy-648bf7f45b-62vqg       1/1     Running     0          56m
 
 ----
 
-The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed with type NodePort.
+The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed with type NodePort. The `keycloak` Pod has a Service called `keycloak` with a fixed port (31093) of type NodePort as well.
 In order to reach the JupyterHub web interface, navigate to this service.
 The node port IP can be found in the ConfigMap `keycloak-address` (written by the Keycloak Deployment as it starts up).
 In the example below that would then be 172.19.0.5:31095:
