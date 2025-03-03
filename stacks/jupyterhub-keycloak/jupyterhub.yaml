@@ -1,3 +1,4 @@
+# yamllint disable-file
 ---
 releaseName: jupyterhub
 name: jupyterhub
@@ -10,7 +11,7 @@ options:
     config:
       Authenticator:
         # don't filter here: delegate to Keycloak
-        allow_all: True
+        allow_all: true
         admin_users:
           - isla.williams
       GenericOAuthenticator:
@@ -145,8 +146,6 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-    extraEnv:
-      HADOOP_CONF_DIR: "/home/jovyan/hdfs"
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
@@ -175,9 +174,6 @@ options:
         - name: notebook
           emptyDir:
             sizeLimit: 500Mi
-        - name: hdfs-discovery-configmap
-          configMap:
-            name: hdfs
       extraVolumeMounts:
         - name: tls-ca-cert
           mountPath: /stackable/secrets/tls-ca-cert
@@ -185,8 +181,6 @@ options:
           mountPath: /minio-s3-credentials
         - name: notebook
           mountPath: /home/jovyan/notebook
-        - name: hdfs-discovery-configmap
-          mountPath: /home/jovyan/hdfs
     profileList:
       - display_name: "Default"
         description: "Default profile"
@@ -195,37 +189,29 @@ options:
           cpu:
             display_name: CPU
             choices:
-              "2":
-                display_name: "2 request, 2 limit"
+{% for cpu in ["1","2","4","8","16","32"] %}
+              "{{cpu}}":
+                display_name: "{{cpu}}"
                 kubespawner_override:
-                  cpu_guarantee: 2
-                  cpu_limit: 2
-              "1 request, 16 limit":
-                display_name: "1 request, 16 limit"
-                kubespawner_override:
-                  cpu_guarantee: 1
-                  cpu_limit: 16
-              "5 request, 16 limit":
-                display_name: "5 request, 16 limit"
-                kubespawner_override:
-                  cpu_guarantee: 5
-                  cpu_limit: 16
+                  cpu_guarantee: {{cpu}}
+                  cpu_limit: {{cpu}}
+{% endfor %}
           memory:
             display_name: Memory
             choices:
-              "8 GB":
-                display_name: "8 GB"
+{% for memory in ["1","2","4","8","16","32","64","128"] %}
+              "{{memory}} GB":
+                display_name: "{{memory}} GB"
                 kubespawner_override:
-                  mem_guarantee: "8G"
-                  mem_limit: "8G"
+                  mem_guarantee: "{{memory}}G"
+                  mem_limit: "{{memory}}G"
+{% endfor %}
           image:
             display_name: Image
             choices:
-              "quay.io/jupyter/pyspark-notebook:python-3.11.9":
-                display_name: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
+{% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
+              "{{image}}":
+                display_name: "{{image}}"
                 kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:python-3.11.9"
-              "quay.io/jupyter/pyspark-notebook:spark-3.5.2":
-                display_name: "quay.io/jupyter/pyspark-notebook:spark-3.5.2"
-                kubespawner_override:
-                  image: "quay.io/jupyter/pyspark-notebook:spark-3.5.2"
+                  image: "{{image}}"
+{% endfor %}

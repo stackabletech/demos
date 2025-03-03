@@ -235,11 +235,9 @@ demos:
       - keycloak
       - spark
       - S3
-      - HDFS
     manifests:
-    # TODO: revert paths
+      # TODO: revert paths
       - plainYaml: demos/jupyterhub-keycloak/load-gas-data.yaml
-      - plainYaml: demos/jupyterhub-keycloak/create-hdfs-dir.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6400m

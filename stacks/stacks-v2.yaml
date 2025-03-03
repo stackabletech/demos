@@ -656,8 +656,6 @@ stacks:
       - commons
       - listener
       - secret
-      - hdfs
-      - zookeeper
     labels:
       - security
       - jupyterhub
@@ -668,7 +666,7 @@ stacks:
       memory: 9010Mi
       pvc: 24Gi
     manifests:
-    # TODO: revert paths
+      # TODO: revert paths
       - helmChart: stacks/_templates/minio.yaml
       - plainYaml: stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
       - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
@@ -676,8 +674,6 @@ stacks:
       - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
       - plainYaml: stacks/jupyterhub-keycloak/serviceaccount.yaml
       - plainYaml: stacks/jupyterhub-keycloak/s3-connection.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/zookeeper.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/hdfs.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user

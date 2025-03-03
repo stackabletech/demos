@@ -11,15 +11,9 @@
 
 This demo showcases the integration between {jupyter}[JupyterHub] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) onto a Kubernetes cluster.
 {jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
-A simple notebook is provided that shows how to start a distributed Spark cluster, reading and writing data from:
+A simple notebook is provided that shows how to start a distributed Spark cluster, reading and writing data from an S3 instance.
 
-- an S3 instance
-- HDFS
-
-The SDP makes this integration easy by publishing a discovery ConfigMap for the HDFS cluster.
-This ConfigMap is then mounted in all Pods running {pyspark}[PySpark] notebooks so that these have access to HDFS data.
 For this demo a small sample of {gas-sensor}[gas sensor measurements*] is provided.
-
 Install this demo on an existing Kubernetes cluster:
 
 [source,console]
@@ -27,12 +21,9 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install jupyterhub-keycloak
 ----
 
-WARNING: There are two security issues to be aware of when using this notebook.
-Firstly, when running a distributed Spark cluster from within a JupyterHub notebook, the notebook acts as the driver and requests executors Pods from k8s.
+WARNING: When running a distributed Spark cluster from within a JupyterHub notebook, the notebook acts as the driver and requests executors Pods from k8s.
 These Pods in turn can mount *all* volumes and Secrets in that namespace.
-To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to have OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
-Secondly, this demo currently employs user impersonation for the spark job that writes to HDFS.
-In a later iteration of this demo it is planned to replace this for HDFS with OPA group mapping for authorization and Kerberos for authentication.
+To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to define OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
 
 [#system-requirements]
 == System requirements
@@ -48,7 +39,7 @@ You may need more resources depending on how many concurrent users are logged in
 
 This demo shows how to authenticate JupyerHub users against a Keycloak backend using JupyterHub's OAuthenticator.
 The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
-The notebook offers a simple template for using Spark to interact with different backends, specifically S3 and HDFS.
+The notebook offers a simple template for using Spark to interact with S3 as a storage backend.
 
 == Overview
 
@@ -59,10 +50,9 @@ This demo will:
 ** *JupyterHub*: A multi-user server for Jupyter notebooks
 ** *Keycloak*: An identity and access management product
 ** *S3*: A Minio instance for data storage
-** *Apache HDFS*: A distributed file system
 * Download a sample of the gas sensor dataset into S3
 * Install the Jupyter notebook
-* Demonstrate some basic data operations against S3 and HDFS
+* Demonstrate some basic data operations against S3
 * Illustrate multi-user usage
 
 == JupyterHub
@@ -73,17 +63,11 @@ Have a look at the available Pods before logging in:
 ----
 $ kubectl get pods
 NAME                         READY   STATUS      RESTARTS   AGE
-create-hdfs-dir-jw7h4        0/1     Completed   0          54m
-hdfs-datanode-default-0      1/1     Running     0          54m
-hdfs-journalnode-default-0   1/1     Running     0          54m
-hdfs-namenode-default-0      2/2     Running     0          54m
-hdfs-namenode-default-1      2/2     Running     0          50m
 hub-84f49ccbd7-29h7j         1/1     Running     0          56m
 keycloak-544d757f57-f55kr    2/2     Running     0          57m
 load-gas-data-m6z5p          0/1     Completed   0          54m
 minio-5486d7584f-x2jn8       1/1     Running     0          57m
 proxy-648bf7f45b-62vqg       1/1     Running     0          56m
-zookeeper-server-default-0   1/1     Running     0          54m
 
 ----
 
@@ -111,7 +95,7 @@ You should see the JupyterHub login page, which will indicate a re-direct to the
 image::jupyterhub-keycloak/oauth-login.png[]
 
 Click on the sign-in button.
-You will be redirected to the Keycloak login, where you can enter one of the aforementioned users:
+You will be redirected to the Keycloak login, where you can enter one of the aforementioned users (e.g. `justin.martin` or `isla.williams`: the password is the same as the username):
 
 image::jupyterhub-keycloak/keycloak-login.png[]
 
@@ -119,11 +103,7 @@ A successful login will redirect you back to JupyterHub where different profiles
 
 image::jupyterhub-keycloak/server-options.png[]
 
-The explorer window on the left includes HDFS configuration files and a notebook that is already mounted.
-Open the `hdfs` folder where the `core-site.xml` and `hdfs-site.xml` from the discovery ConfigMap of the HDFS cluster are located.
-You can see how to reference the HDFS cluster when reading from it in the notebook (`hdfs://hdfs/`):
-
-image::jupyterhub-keycloak/hdfs-core-site.png[]
+The explorer window on the left includes a notebook that is already mounted.
 
 Double-click on the file `notebook/process-s3.ipynb`:
 
@@ -182,11 +162,23 @@ jupyter-justin-martin---bdd3b4a1   1/1     Running     0          3h47m
 ...
 ----
 
-The admin user (`isla.williams`) will also have an extra Admin tab in the JupyterHub console where current users can be managed:
+The admin user (`isla.williams`) will also have an extra Admin tab in the JupyterHub console where current users can be managed.
+You can find this in the JupyterHub UI at http://<ip>:31095/hub/admin e.g http://172.19.0.5:31095/hub/admin:
 
 image::jupyterhub-keycloak/admin-tab.png[]
 
-You can inspect the S3 buckets by adding a port forward on port 9001 of the minio Pod and logging in with `admin/adminadmin`:
+You can inspect the S3 buckets by using stackable stacklet list to return the Minio endpoint and logging in there with `admin/adminadmin`:
+
+[source,console]
+----
+15:15 $ stackablectl stacklet list
+
+┌─────────┬───────────────┬───────────┬───────────────────────────────┬────────────┐
+│ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                     ┆ CONDITIONS │
+╞═════════╪═══════════════╪═══════════╪═══════════════════════════════╪════════════╡
+│ minio   ┆ minio-console ┆ default   ┆ http  http://172.19.0.5:32470 ┆            │
+└─────────┴───────────────┴───────────┴───────────────────────────────┴────────────┘
+----
 
 image::jupyterhub-keycloak/s3-buckets.png[]
 
