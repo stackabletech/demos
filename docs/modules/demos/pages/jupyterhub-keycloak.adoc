@@ -171,7 +171,7 @@ You can inspect the S3 buckets by using stackable stacklet list to return the Mi
 
 [source,console]
 ----
-15:15 $ stackablectl stacklet list
+$ stackablectl stacklet list
 
 ┌─────────┬───────────────┬───────────┬───────────────────────────────┬────────────┐
 │ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                     ┆ CONDITIONS │
