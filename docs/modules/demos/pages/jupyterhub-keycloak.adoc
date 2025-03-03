@@ -123,7 +123,7 @@ JupyterHub has started a pod for the user's notebook instance (`jupyter-justin-m
 
 [source,console]
 ----
-12:49 $ kubectl get pods
+$ kubectl get pods
 NAME                                   READY   STATUS      RESTARTS   AGE
 ...
 jupyter-justin-martin---bdd3b4a1       1/1     Running     0          17m
