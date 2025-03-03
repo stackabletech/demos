@@ -9,7 +9,7 @@
 :keycloak: https://www.keycloak.org/
 :gas-sensor: https://archive.ics.uci.edu/dataset/487/gas+sensor+array+temperature+modulation
 
-This demo showcases the integration between {jupyter}[Jupyter] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
+This demo showcases the integration between {jupyter}[JupyterHub] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) onto a Kubernetes cluster.
 {jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
 A simple notebook is provided that shows how to start a distributed Spark cluster, reading and writing data from:
 
@@ -48,7 +48,7 @@ You may need more resources depending on how many concurrent users are logged in
 
 This demo shows how to authenticate JupyerHub users against a Keycloak backend using JupyterHub's OAuthenticator.
 The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
-The notebook offers a simple template for using spark to interact with different backends, specifically S3 and HDFS.
+The notebook offers a simple template for using Spark to interact with different backends, specifically S3 and HDFS.
 
 == Overview
 
@@ -89,7 +89,7 @@ zookeeper-server-default-0   1/1     Running     0          54m
 
 The `proxy` Pod has an associated `proxy-public` service with a statically-defined port (31095), exposed with type NodePort.
 In order to reach the JupyterHub web interface, navigate to this service.
-The node port IP can be found in the ConfigMap `keycloak-address` (written by the Keycloak deployment as it starts up).
+The node port IP can be found in the ConfigMap `keycloak-address` (written by the Keycloak Deployment as it starts up).
 In the example below that would then be 172.19.0.5:31095:
 
 [source,yaml]
@@ -104,14 +104,14 @@ metadata:
   namespace: default
 ----
 
-NOTE: The hub may show `CreateContainerConfigError`` for a few moments on start-up as it requires the ConfigMap written by the Keycloak deployment.
+NOTE: The `hub` Pod may show a `CreateContainerConfigError` for a few moments on start-up as it requires the ConfigMap written by the Keycloak deployment.
 
 You should see the JupyterHub login page, which will indicate a re-direct to the OAuth service (Keycloak):
 
 image::jupyterhub-keycloak/oauth-login.png[]
 
 Click on the sign-in button.
-You will redirected to the Keycloak login, where you can enter one of the afore-mentioned users:
+You will be redirected to the Keycloak login, where you can enter one of the aforementioned users:
 
 image::jupyterhub-keycloak/keycloak-login.png[]
 
@@ -133,7 +133,7 @@ Run the notebook by selecting "Run All Cells" from the menu:
 
 image::jupyterhub-keycloak/run-nb.png[]
 
-The notebook includes some comments regarding image compatibility and uses a custom image built off the official Spark official that matches the Spark version used in the notebook.
+The notebook includes some comments regarding image compatibility and uses a custom image built off the official Spark image that matches the Spark version used in the notebook.
 The java versions also match exactly.
 Python versions need to match at the `major:minor` level, which is why Python 3.11 is used in the custom image.
 
@@ -152,7 +152,7 @@ process-s3-jupyter-justin-martin-...   1/1     Running     0          2m9s
 ----
 
 Stop the kernel in the notebook (which will shut down the spark session and thus the executor) and log out as the current user.
-Log in now as `daniel.king` and then again `isla.williams` (you may need so do this in a clean browser sessions so that existing login cookies are removed).
+Log in now as `daniel.king` and then again as `isla.williams` (you may need to do this in a clean browser sessions so that existing login cookies are removed).
 This user has been defined as an admin user in the jupyterhub configuration:
 
 [source,yaml]
