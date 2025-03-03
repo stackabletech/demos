@@ -153,7 +153,7 @@ You should now see user-specific pods for all three users:
 
 [source,console]
 ----
-16:16 $ kubectl get pods
+$ kubectl get pods
 NAME                               READY   STATUS      RESTARTS   AGE
 ...
 jupyter-daniel-king---181a80ce     1/1     Running     0          6m17s
