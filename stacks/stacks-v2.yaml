@@ -666,14 +666,13 @@ stacks:
       memory: 9010Mi
       pvc: 24Gi
     manifests:
-      # TODO: revert paths
-      - helmChart: stacks/_templates/minio.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/keycloak.yaml
-      - helmChart: stacks/jupyterhub-keycloak/jupyterhub.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/serviceaccount.yaml
-      - plainYaml: stacks/jupyterhub-keycloak/s3-connection.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/jupyterhub.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/s3-connection.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user

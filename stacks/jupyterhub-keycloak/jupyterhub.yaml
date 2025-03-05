@@ -149,7 +149,7 @@ options:
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/feat/keycloak-jupyterhub/stacks/jupyterhub-keycloak/process-s3.ipynb -o /notebook/process-s3.ipynb']
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/process-s3.ipynb -o /notebook/process-s3.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook

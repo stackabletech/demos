@@ -236,8 +236,7 @@ demos:
       - spark
       - S3
     manifests:
-      # TODO: revert paths
-      - plainYaml: demos/jupyterhub-keycloak/load-gas-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/jupyterhub-keycloak/load-gas-data.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6400m
