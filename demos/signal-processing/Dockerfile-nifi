@@ -1,4 +1,4 @@
-FROM oci.stackable.tech/sdp/nifi:1.28.1-stackable0.0.0-dev
+FROM oci.stackable.tech/sdp/nifi:2.2.0-stackable0.0.0-dev
 
 # This is the postgresql JDBC driver from https://jdbc.postgresql.org/download/
 # There appear to be no signatures to validate against 😬
