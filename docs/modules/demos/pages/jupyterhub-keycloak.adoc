@@ -9,21 +9,20 @@
 :keycloak: https://www.keycloak.org/
 :gas-sensor: https://archive.ics.uci.edu/dataset/487/gas+sensor+array+temperature+modulation
 
-This demo showcases the integration between {jupyter}[JupyterHub] and {keycloak}[Keycloak] deployed on the Stackable Data Platform (SDP) onto a Kubernetes cluster.
-{jupyterlab}[JupyterLab] is deployed using the {jupyterhub-k8s}[pyspark-notebook stack] provided by the Jupyter community.
-A simple notebook is provided that shows how to start a distributed Spark cluster, reading and writing data from an S3 instance.
+== Installation
 
-For this demo a small sample of {gas-sensor}[gas sensor measurements*] is provided.
-Install this demo on an existing Kubernetes cluster:
+To install the demo on an existing Kubernetes cluster, use the following command:
 
 [source,console]
 ----
 $ stackablectl demo install jupyterhub-keycloak
 ----
 
-WARNING: When running a distributed Spark cluster from within a JupyterHub notebook, the notebook acts as the driver and requests executors Pods from k8s.
-These Pods in turn can mount *all* volumes and Secrets in that namespace.
-To prevent this from breaking user separation, it is planned to use an OPA gatekeeper to define OPA rules that restrict what the created executor Pods can mount. This is not yet implemented in this demo.
+== Accessing the JupyterHub Interface
+
+* Navigate to the {jupyter}[JupyterHub] web interface using the NodePort IP and port (e.g., http://<ip>:31095)
+* Log in using the predefined user credentials (e.g., `justin.martin` or `isla.williams` with the password matching the username)
+* Select a {jupyterhub-k8s}[notebook] (provided by the Jupyter community) profile and start processing data using the provided notebook
 
 [#system-requirements]
 == System requirements
@@ -33,27 +32,103 @@ To run this demo, your system needs at least:
 * 8 {k8s-cpu}[cpu units] (core/hyperthread)
 * 32GiB memory
 
-You may need more resources depending on how many concurrent users are logged in, and which notebook profiles they are using.
-
-== Aim / Context
-
-This demo shows how to authenticate JupyerHub users against a Keycloak backend using JupyterHub's OAuthenticator.
-The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
-The notebook offers a simple template for using Spark to interact with S3 as a storage backend.
+Additional resources may be required depending on the number of concurrent users and their selected notebook profiles.
 
 == Overview
+
+The JupyterHub-Keycloak integration demo offers a comprehensive and secure multi-user data science environment on Kubernetes.
+This demo highlights several key features:
+
+* Secure Authentication: Utilizes {keycloak}[Keycloak] for robust user authentication and identity management
+* Dynamic Spark Integration: Demonstrates how to start a distributed Spark cluster directly from a Jupyter notebook, with dynamic resource allocation
+* S3 Storage Interaction: Illustrates reading from and writing to an S3-compatible storage (MinIO) using Spark, with secure credential management
+* Scalable and Flexible: Leverages Kubernetes for scalable resource management, allowing users to select from predefined resource profiles
+* User-Friendly: Provides an intuitive interface for data scientists to perform common data operations with ease
 
 This demo will:
 
 * Install the required Stackable Data Platform operators
 * Spin up the following data products:
-** *JupyterHub*: A multi-user server for Jupyter notebooks
-** *Keycloak*: An identity and access management product
-** *S3*: A Minio instance for data storage
-* Download a sample of the gas sensor dataset into S3
+** JupyterHub: A multi-user server for Jupyter notebooks
+** Keycloak: An identity and access management product
+** S3: A Minio instance for data storage
+* Download a sample of {gas-sensor}[gas sensor measurements*] into S3
 * Install the Jupyter notebook
 * Demonstrate some basic data operations against S3
-* Illustrate multi-user usage
+* Enable multi-user usage
+
+== Introduction to the Demo
+
+The JupyterHub-Keycloak demo is designed to provide data scientists with a typical environment for data analysis and processing.
+This demo integrates JupyterHub with Keycloak for secure user management and utilizes Apache Spark for distributed data processing.
+The environment is deployed on a Kubernetes cluster, ensuring scalability and efficient resource utilization.
+
+NOTE: There are some security considerations to be aware of if using distributed Spark.
+Each Spark cluster runs using the same service account, and it is possible for an executor pod to mount any secret in the namespace.
+It is planned to implement OPA gatekeeper rules in later versions of this demo to restrict this.
+This feature is not yet implemented and in the meantime, users' environments are kept separate but not private.
+
+== Showcased Features of the Demo
+
+=== Secure User Authentication with Keycloak
+
+* **OAuthenticator**: JupyterHub is configured to use Keycloak for user authentication, ensuring secure and manageable access control.
+* **Admin Users**: Certain users (e.g. for this demo: `isla.williams`) are configured as admin users with access to user management features in the JupyterHub admin console.
+
+=== Dynamic Spark Configuration
+
+* **Client Mode**: Spark is configured to run in client mode, with the notebook acting as the driver.
+This setup is ideal for interactive data processing.
+* **Executor Management**: Spark executors are dynamically spawned as Kubernetes pods, with executor resources being defined by each user's Spark session.
+* **Compatibility**: Ensures compatibility between the driver and executor by matching Spark, Python, and Java versions.
+
+=== S3 Storage Integration
+
+* **MinIO**: Utilizes MinIO as an S3-compatible storage solution for storing and retrieving data.
+* **Secure Credential Management**: MinIO credentials are managed using Kubernetes secrets, keeping them separate from notebook code.
+* **Data Operations**: Demonstrates reading from and writing to S3 storage using Spark, with support for CSV and Parquet formats.
+
+== Configuration Settings Overview
+
+=== Keycloak Configuration
+
+* **Deployment**: Keycloak is deployed using a Kubernetes Deployment with a ConfigMap for realm configuration.
+* **Services**: Keycloak and JupyterHub services use fixed NodePorts (31093 for Keycloak and 31095 for JupyterHub).
+
+=== JupyterHub Configuration
+
+* **Authentication**: Configured to use GenericOAuthenticator for authenticating against Keycloak.
+* **Certificates**: Utilizes self-signed certificates for secure communication between JupyterHub and Keycloak.
+* **Endpoints**: Endpoints for OAuth callback, authorization, token- and user-data are dynamically set using environment variables and a ConfigMap.
+
+=== Spark Configuration
+
+* **Executor Image**: Uses a custom image `oci.stackable.tech/sandbox/spark:3.5.2-python311` (built on the standard Spark image) for the executors, matching the Python version of the notebook.
+* **Resource Allocation**: Configures Spark executor instances, memory, and cores through settings defined in the notebook.
+* **Hadoop and AWS Libraries**: Includes necessary Hadoop and AWS libraries for S3 operations, matching the notebook image version.
+
+For more details, see the https://docs.stackable.tech/home/stable/tutorials/jupyterhub/[tutorial].
+
+== Detailed Demo/Notebook Walkthrough
+
+The demo begins by outputting the versions of Python, Java, and PySpark being used.
+It reads MinIO credentials from a mounted secret to access the S3 storage.
+This ensures that the environment is correctly set up and that the necessary credentials are available for S3 operations.
+The notebook configures Spark to interact with an S3 bucket hosted on MinIO.
+It includes necessary Hadoop and AWS libraries to facilitate S3 operations.
+The Spark session is configured with various settings, including executor instances, memory, and cores, to ensure optimal performance.
+
+The demo then performs various data processing tasks, including:
+
+* **Creating an In-Memory DataFrame**: Verifies compatibility between the driver and executor libraries.
+* **Inspecting S3 Buckets with PyArrow**: Lists files in the S3 bucket using the PyArrow library.
+* **Read/Write Operations**: Demonstrates reading CSV data from S3, performing basic transformations, and writing the results back to S3 in CSV and Parquet formats.
+* **Data Aggregation**: Aggregates data by hour and writes the aggregated results back to S3.
+* **DataFrame Conversion**: Shows how to convert between Spark and Pandas DataFrames for further analysis or visualization.
+
+== Users
+
+The same users as in the xref:end-to-end-security.adoc[End-to-end-security] demo are configured in Keycloak and these will be used as examples.
 
 == JupyterHub
 
@@ -188,6 +263,30 @@ image::jupyterhub-keycloak/s3-buckets.png[]
 
 NOTE: if you attempt to re-run the notebook you will need to first remove the `_temporary folders` from the S3 buckets.
 These are created by spark jobs and are not removed from the bucket when the job has completed.
+
+== Where to go from here
+
+=== Add your own data
+
+You can augment the demo dataset with your own data by creating new buckets and folders and uploading your own data via the MinIO UI.
+
+=== Scale up and out
+
+There are several possibilities here (all of which will depend to some degree on resources available to the cluster):
+
+* Allocate more CPU and memory resources to the JupyterHub notebooks or change notebook profiles by modifying the `singleuser.profileList` in the Helm chart values
+* add concurrent users
+* alter Spark session settings by changing `spark.executor.instances`, `spark.executor.memory` or `spark.executor.cores`
+
+
+Integrate with Trino for other SQL-Datasources… → link to end-to-end-security-demo
+
+
+== Conclusion
+
+The JupyterHub-Keycloak integration demo, with its dynamic Spark integration and S3 storage interaction, is a great starting point for data scientists to begin building complex data operations.
+
+For further details and customization options, refer to the demo notebook and configuration files provided in the repository. This environment is ideal for data scientists with a platform engineering background, offering a template solution for secure and efficient data processing.
 
 *See: Burgués, Javier, Juan Manuel Jiménez-Soto, and Santiago Marco. "Estimation of the limit of detection in semiconductor gas sensors through linearized calibration models." Analytica chimica acta 1013 (2018): 13-25
 Burgués, Javier, and Santiago Marco. "Multivariate estimation of the limit of detection by orthogonal partial least squares in temperature-modulated MOX sensors." Analytica chimica acta 1019 (2018): 49-64.
