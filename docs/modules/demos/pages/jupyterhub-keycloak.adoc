@@ -277,10 +277,7 @@ There are several possibilities here (all of which will depend to some degree on
 * Allocate more CPU and memory resources to the JupyterHub notebooks or change notebook profiles by modifying the `singleuser.profileList` in the Helm chart values
 * add concurrent users
 * alter Spark session settings by changing `spark.executor.instances`, `spark.executor.memory` or `spark.executor.cores`
-
-
-Integrate with Trino for other SQL-Datasources… → link to end-to-end-security-demo
-
+* Integrate other data sources, for example HDFS (see the https://docs.stackable.tech/home/nightly/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/[JupyterHub-Pyspark] demo)
 
 == Conclusion
 
