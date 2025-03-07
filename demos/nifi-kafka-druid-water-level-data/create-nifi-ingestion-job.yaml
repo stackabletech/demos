@@ -28,9 +28,7 @@ spec:
             - -euo
             - pipefail
             - -c
-            - |
-              curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/IngestWaterLevelsToKafka.xml
-              python -u /tmp/script/script.py
+            - python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
@@ -57,37 +55,81 @@ metadata:
   name: create-nifi-ingestion-job-script
 data:
   script.py: |
-    from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller
-    from nipyapi.security import service_login
-    from nipyapi.templates import get_template, upload_template, deploy_template
-    import nipyapi
     import os
     import urllib3
+    import nipyapi
+    from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller
+    from nipyapi.security import service_login
 
     # As of 2022-08-29 we cant use "https://nifi:8443" here because <h2>The request contained an invalid host header [<code>nifi:8443</code>] in the request [<code>/nifi-api</code>]. Check for request manipulation or third-party intercept.</h2>
     ENDPOINT = f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443" # For local testing / developing replace it, afterwards change back to f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443"
     USERNAME = "admin"
     PASSWORD = open("/nifi-admin-credentials-secret/admin").read()
-    TEMPLATE_NAME = "IngestWaterLevelsToKafka"
-    TEMPLATE_FILE = f"{TEMPLATE_NAME}.xml"
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     nipyapi.config.nifi_config.host = f"{ENDPOINT}/nifi-api"
     nipyapi.config.nifi_config.verify_ssl = False
 
-    print("Logging in")
+    print(f"Logging in as {USERNAME}")
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
+    organization = "stackabletech"
+    repository = "demos"
+    branch = "bump/nifi-2.2.0-git-registry-client"
+    version = "8b85f52c57fd29d089dc89c1190001f5823172b6"
+    directory = "demos/nifi-kafka-druid-water-level-data"
+    flow_name = "IngestWaterLevelsToKafka"
+
+    # Register the flow registry client
+    response = nipyapi.nifi.ControllerApi().create_flow_registry_client(
+        body={
+            "revision": {"version": 0},
+            "component": {
+                "name": "GitHubFlowRegistryClient",
+                "type": "org.apache.nifi.github.GitHubFlowRegistryClient",
+                "properties": {
+                    "Repository Owner": organization,
+                    "Repository Name": repository,
+                },
+                "bundle": {
+                    "group": "org.apache.nifi",
+                    "artifact": "nifi-github-nar",
+                    "version": "2.2.0",
+                },
+            },
+        }
+    )
+
     pg_id = get_root_pg_id()
 
-    upload_template(pg_id, TEMPLATE_FILE)
+    try:
+        # Create process group from the file in the Git repo
+        nipyapi.nifi.ProcessGroupsApi().create_process_group(
+            id=pg_id,
+            body={
+                "revision": {"version": 0},
+                "component": {
+                    "position": {"x": 300, "y": 10},
+                    "versionControlInformation": {
+                        "registryId": response.component.id,
+                        "flowId": flow_name,
+                        "bucketId": directory,
+                        "branch": branch,
+                        "version": version,
+                    },
+                },
+            },
+        )
+    except ValueError as e:
+        # Ignore, because nipyapi can't handle non-int versions yet
+        if "invalid literal for int() with base 10" in str(e):
+            print("Ignoring ValueError")
+        else:
+            raise e
 
-    template_id = get_template(TEMPLATE_NAME).id
-    deploy_template(pg_id, template_id, 200, 0)
-
-    for controller in list_all_controllers():
+    for controller in list_all_controllers(pg_id):
         schedule_controller(controller, scheduled=True)
 
     schedule_process_group(pg_id, scheduled=True)
