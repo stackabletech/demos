@@ -92,7 +92,7 @@ data:
     organization = "stackabletech"
     repository = "demos"
     branch = "bump/nifi-2.2.0-git-registry-client"
-    version = "477af309ce05e072c696dbf1cc78794bf5e7bc69"
+    version = "8b85f52c57fd29d089dc89c1190001f5823172b6"
     directory = "demos/signal-processing"
     flow_name = "DownloadAndWriteToDB"
 
