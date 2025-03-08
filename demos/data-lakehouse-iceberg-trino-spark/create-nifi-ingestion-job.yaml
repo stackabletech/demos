@@ -42,7 +42,7 @@ metadata:
 data:
   script.py: |
     branch = "bump/nifi-2.2.0-git-registry-client"
-    version = "8b85f52c57fd29d089dc89c1190001f5823172b6"
+    version = "af82cffd165b6f58ca3609a194ac237b1108d304"
     directory = "demos/data-lakehouse-iceberg-trino-spark"
     flow_name = "LakehouseKafkaIngest"
 
