@@ -56,7 +56,7 @@ metadata:
 data:
   script.py: |
     branch = "bump/nifi-2.2.0-git-registry-client"
-    version = "af82cffd165b6f58ca3609a194ac237b1108d304"
+    version = "53a6621f0624e603c5b87d09f4e4cf1fd299a096"
     directory = "demos/nifi-kafka-druid-earthquake-data"
     flow_name = "IngestEarthquakesToKafka"
 
