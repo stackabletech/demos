@@ -46,6 +46,30 @@ metadata:
   name: create-nifi-ingestion-job-script
 data:
   script.py: |
+    import os
+    import urllib3
+    import nipyapi
+    from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller, update_controller
+    from nipyapi.security import service_login
+    nipyapi.config.long_retry_delay = 20
+    nipyapi.config.long_max_wait = 240
+
+    # As of 2022-08-29 we cant use "https://nifi:8443" here because <h2>The request contained an invalid host header [<code>nifi:8443</code>] in the request [<code>/nifi-api</code>]. Check for request manipulation or third-party intercept.</h2>
+    ENDPOINT = f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443" # For local testing / developing replace it, afterwards change back to f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443"
+    USERNAME = "admin"
+    PASSWORD = open("/nifi-admin-credentials/admin").read()
+
+    urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
+
+    nipyapi.config.nifi_config.host = f"{ENDPOINT}/nifi-api"
+    nipyapi.config.nifi_config.verify_ssl = False
+
+    print(f"Logging in as {USERNAME}")
+    service_login(username=USERNAME, password=PASSWORD)
+    print("Logged in")
+
+    organization = "stackabletech"
+    repository = "demos"
     branch = "bump/nifi-2.2.0-git-registry-client"
     version = "53a6621f0624e603c5b87d09f4e4cf1fd299a096"
     directory = "demos/data-lakehouse-iceberg-trino-spark"
