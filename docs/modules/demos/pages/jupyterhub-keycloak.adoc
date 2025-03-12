@@ -111,7 +111,7 @@ For more details, see the https://docs.stackable.tech/home/stable/tutorials/jupy
 
 == Detailed Demo/Notebook Walkthrough
 
-The demo showcases an ipython notebook that begins by outputting the versions of Python, Java, and PySpark being used.
+The demo showcases an https://github.com/stackabletech/demos/blob/main/stacks/jupyterhub-keycloak/process-s3.ipynb[ipython notebook] that begins by outputting the versions of Python, Java, and PySpark being used.
 It reads MinIO credentials from a mounted secret to access the S3 storage.
 This ensures that the environment is correctly set up and that the necessary credentials are available for S3 operations.
 The notebook configures Spark to interact with an S3 bucket hosted on MinIO.
