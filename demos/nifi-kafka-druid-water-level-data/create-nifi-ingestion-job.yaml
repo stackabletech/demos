@@ -28,9 +28,7 @@ spec:
             - -euo
             - pipefail
             - -c
-            - |
-              curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/IngestWaterLevelsToKafka.xml
-              python -u /tmp/script/script.py
+            - python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
@@ -59,7 +57,6 @@ data:
   script.py: |
     from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller
     from nipyapi.security import service_login
-    from nipyapi.templates import get_template, upload_template, deploy_template
     import nipyapi
     import os
     import urllib3
@@ -68,26 +65,94 @@ data:
     ENDPOINT = f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443" # For local testing / developing replace it, afterwards change back to f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443"
     USERNAME = "admin"
     PASSWORD = open("/nifi-admin-credentials-secret/admin").read()
-    TEMPLATE_NAME = "IngestWaterLevelsToKafka"
-    TEMPLATE_FILE = f"{TEMPLATE_NAME}.xml"
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
     nipyapi.config.nifi_config.host = f"{ENDPOINT}/nifi-api"
     nipyapi.config.nifi_config.verify_ssl = False
 
-    print("Logging in")
+    print(f"Logging in as {USERNAME}")
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
+    organization = "stackabletech"
+    repository = "demos"
+    branch = "release-25.3"
+    version = "release-25.3"
+    directory = "demos/nifi-kafka-druid-water-level-data"
+    flow_name = "IngestWaterLevelsToKafka"
+
+    # Check if the GitHub flow registry client already exists
+    flow_registry_clients = nipyapi.nifi.ControllerApi().get_flow_registry_clients().registries
+
+    github_client = None
+    for client in flow_registry_clients:
+        if client.component.name == "GitHubFlowRegistryClient":
+            github_client = client
+            print("Found existing GitHub flow registry client")
+            break
+
+    if not github_client:
+        print("Creating new GitHub flow registry client")
+        github_client = nipyapi.nifi.ControllerApi().create_flow_registry_client(
+            body={
+                "revision": {"version": 0},
+                "component": {
+                    "name": "GitHubFlowRegistryClient",
+                    "type": "org.apache.nifi.github.GitHubFlowRegistryClient",
+                    "properties": {
+                        "Repository Owner": organization,
+                        "Repository Name": repository,
+                    },
+                    "bundle": {
+                        "group": "org.apache.nifi",
+                        "artifact": "nifi-github-nar",
+                        "version": "2.2.0",
+                    },
+                },
+            }
+        )
+
     pg_id = get_root_pg_id()
 
-    upload_template(pg_id, TEMPLATE_FILE)
+    try:
+        # Create process group from the file in the Git repo
+        nipyapi.nifi.ProcessGroupsApi().create_process_group(
+            id=pg_id,
+            body={
+                "revision": {"version": 0},
+                "component": {
+                    "position": {"x": 300, "y": 10},
+                    "versionControlInformation": {
+                        "registryId": github_client.component.id,
+                        "flowId": flow_name,
+                        "bucketId": directory,
+                        "branch": branch,
+                        "version": version,
+                    },
+                },
+            },
+        )
+    except ValueError as e:
+        # Ignore, because nipyapi can't handle non-int versions yet
+        if "invalid literal for int() with base 10" in str(e):
+            print("Ignoring ValueError")
+        else:
+            raise e
 
-    template_id = get_template(TEMPLATE_NAME).id
-    deploy_template(pg_id, template_id, 200, 0)
-
-    for controller in list_all_controllers():
-        schedule_controller(controller, scheduled=True)
+    # Scheduling the `Kafka3ConnectionService` fails, if it is started before `StandardRestrictedSSLContextService`, since it depends on it
+    # To work around this, we try to schedule the controllers multiple times
+    # If `Kafka3ConnectionService` is started before `StandardRestrictedSSLContextService`, scheduling it will fail in the first iteration
+    # But it should succeed in the second attempt, since by then `StandardRestrictedSSLContextService` is started
+    max_retries = 2
+    for _ in range(max_retries):
+        controllers = list_all_controllers(pg_id)
+        for controller in controllers:
+            if controller.component.state != "ENABLED":
+                try:
+                    schedule_controller(controller, scheduled=True)
+                    print(f"Scheduled controller: {controller.component.name}")
+                except Exception as e:
+                    print(f"Failed to schedule controller {controller.component.name}: {e}")
 
     schedule_process_group(pg_id, scheduled=True)
