@@ -64,6 +64,7 @@ demos:
       - s3
       - earthquakes
     manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/create-nifi-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/create-druid-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/setup-superset.yaml
@@ -85,6 +86,7 @@ demos:
       - s3
       - water-levels
     manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-nifi-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-druid-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/setup-superset.yaml

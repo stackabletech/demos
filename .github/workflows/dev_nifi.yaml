@@ -5,7 +5,7 @@ env:
   IMAGE_NAME: nifi
   # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
   # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-  IMAGE_VERSION: 1.27.0-postgresql
+  IMAGE_VERSION: 1.28.1-postgresql
   REGISTRY_PATH: stackable
   DOCKERFILE_PATH: "demos/signal-processing/Dockerfile-nifi"
 

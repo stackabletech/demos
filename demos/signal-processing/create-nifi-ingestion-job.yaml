@@ -8,18 +8,37 @@ spec:
     spec:
       serviceAccountName: demo-serviceaccount
       initContainers:
-        - name: wait-for-timescale-job
+        - name: wait-for-timescale-job-and-nifi
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-          command: ["bash", "-c", "echo 'Waiting for timescaleDB tables to be ready'
-                    && kubectl wait --for=condition=complete job/create-timescale-tables-job"
-                  ]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for timescaleDB job to be created'
+              until kubectl get job create-timescale-tables-job 2>/dev/null; do sleep 5; done
+              kubectl wait --for=create job/create-timescale-tables-job --timeout=30m
+              echo 'Waiting for timescaleDB job to be completed'
+              kubectl wait --for=condition=complete job/create-timescale-tables-job --timeout=30m
+
+              echo 'Waiting for NiFi to be created'
+              kubectl wait --for=create pod/nifi-node-default-0 --timeout=30m
+              echo 'Waiting for NiFi to be ready'
+              kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=30m
       containers:
         - name: create-nifi-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
-          command: ["bash", "-c", "export PGPASSWORD=$(cat /timescale-admin-credentials/password) && \
-            curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.xml && \
-            sed -i \"s/PLACEHOLDERPGPASSWORD/$PGPASSWORD/g\" DownloadAndWriteToDB.xml && \
-            python -u /tmp/script/script.py"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              export PGPASSWORD=$(cat /timescale-admin-credentials/password)
+              curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.xml
+              sed -i "s/PLACEHOLDERPGPASSWORD/$PGPASSWORD/g" DownloadAndWriteToDB.xml
+              python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
@@ -70,11 +89,12 @@ data:
     nipyapi.config.nifi_config.host = f"{ENDPOINT}/nifi-api"
     nipyapi.config.nifi_config.verify_ssl = False
 
-    print("Logging in")
+    print(f"Logging in as {USERNAME}")
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
     pg_id = get_root_pg_id()
+    print(f"pgid={pg_id}")
 
     upload_template(pg_id, TEMPLATE_FILE)
 

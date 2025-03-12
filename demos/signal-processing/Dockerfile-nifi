@@ -1,3 +1,13 @@
-FROM oci.stackable.tech/sdp/nifi:1.27.0-stackable0.0.0-dev
+FROM oci.stackable.tech/sdp/nifi:1.28.1-stackable0.0.0-dev
 
-RUN curl --fail -o /stackable/nifi/postgresql-42.6.0.jar "https://repo.stackable.tech/repository/misc/postgresql-timescaledb/postgresql-42.6.0.jar"
+# This is the postgresql JDBC driver from https://jdbc.postgresql.org/download/
+# There appear to be no signatures to validate against 😬
+#
+# VERSION="42.7.5"
+# curl -O "https://jdbc.postgresql.org/download/postgresql-$VERSION.jar"
+# curl --fail -u "your_username" --upload-file "postgresql-$VERSION.jar" 'https://repo.stackable.tech/repository/misc/jdbc/'
+# rm "postgresql-$VERSION.jar"
+
+# IMPORTANT (@NickLarsenNZ): Changing this version requires a change in the NiFi template (DownloadAndWriteToDB.xml)
+ARG DRIVER_VERSION="42.7.5"
+RUN curl --fail -o "/stackable/nifi/postgresql-$DRIVER_VERSION.jar" "https://repo.stackable.tech/repository/misc/jdbc/postgresql-$DRIVER_VERSION.jar"

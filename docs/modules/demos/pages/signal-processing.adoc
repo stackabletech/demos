@@ -138,14 +138,14 @@ There are two located in the "Stackable Data Platform" folder.
 
 === Measurements
 
-This is the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
+The _Gas measurements_ dashboard shows the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
 These are superimposed on each other for ease of comparison.
 
 image::signal-processing/measurements.png[]
 
 === Predictions
 
-In this second dashboard the predictions for all r-values are plotted: the top graph takes an average across all measurements, with a threshold marked as a red line across the top.
+The _Spectral Residuals_ dashboard shows the predictions for all r-values are plotted: the top graph takes an average across all measurements, with a threshold marked as a red line across the top.
 This can be used for triggering email alerts.
 Underneath the individual r-values are plotted, firstly as raw data and then the same using downsampling.
 Downsampling uses a built-in Timescale extension to significantly reduce the number of data plotted while retaining the same overall shape.
