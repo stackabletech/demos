@@ -34,11 +34,7 @@ spec:
             - -euo
             - pipefail
             - -c
-            - |
-              export PGPASSWORD=$(cat /timescale-admin-credentials/password)
-              curl -O https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.xml
-              sed -i "s/PLACEHOLDERPGPASSWORD/$PGPASSWORD/g" DownloadAndWriteToDB.xml
-              python -u /tmp/script/script.py
+            - python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
@@ -70,9 +66,8 @@ metadata:
   name: create-nifi-ingestion-job-script
 data:
   script.py: |
-    from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller
+    from nipyapi.canvas import get_root_pg_id, schedule_process_group, list_all_controllers, schedule_controller, update_controller
     from nipyapi.security import service_login
-    from nipyapi.templates import get_template, upload_template, deploy_template
     import nipyapi
     import os
     import urllib3
@@ -81,8 +76,6 @@ data:
     ENDPOINT = f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443" # For local testing / developing replace it, afterwards change back to f"https://nifi-node-default-0.nifi-node-default.{os.environ['NAMESPACE']}.svc.cluster.local:8443"
     USERNAME = "admin"
     PASSWORD = open("/nifi-admin-credentials/admin").read()
-    TEMPLATE_NAME = "DownloadAndWriteToDB"
-    TEMPLATE_FILE = f"{TEMPLATE_NAME}.xml"
 
     urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -93,16 +86,66 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
+    organization = "stackabletech"
+    repository = "demos"
+    branch = "release-25.3"
+    version = "release-25.3"
+    directory = "demos/signal-processing"
+    flow_name = "DownloadAndWriteToDB"
+
+    # Register the flow registry client
+    response = nipyapi.nifi.ControllerApi().create_flow_registry_client(
+        body={
+            "revision": {"version": 0},
+            "component": {
+                "name": "GitHubFlowRegistryClient",
+                "type": "org.apache.nifi.github.GitHubFlowRegistryClient",
+                "properties": {
+                    "Repository Owner": organization,
+                    "Repository Name": repository,
+                },
+                "bundle": {
+                    "group": "org.apache.nifi",
+                    "artifact": "nifi-github-nar",
+                    "version": "2.2.0",
+                },
+            },
+        }
+    )
+
     pg_id = get_root_pg_id()
     print(f"pgid={pg_id}")
 
-    upload_template(pg_id, TEMPLATE_FILE)
+    try:
+        # Create process group from the file in the Git repo
+        nipyapi.nifi.ProcessGroupsApi().create_process_group(
+            id=pg_id,
+            body={
+                "revision": {"version": 0},
+                "component": {
+                    "position": {"x": 300, "y": 10},
+                    "versionControlInformation": {
+                        "registryId": response.component.id,
+                        "flowId": flow_name,
+                        "bucketId": directory,
+                        "branch": branch,
+                        "version": version,
+                    },
+                },
+            },
+        )
+    except ValueError as e:
+        # Ignore, because nipyapi can't handle non-int versions yet
+        if "invalid literal for int() with base 10" in str(e):
+            print("Ignoring ValueError")
+        else:
+            raise e
 
-    template_id = get_template(TEMPLATE_NAME).id
-    deploy_template(pg_id, template_id, 200, 0)
-
-    for controller in list_all_controllers():
+    # Update the controller services with the correct password
+    for controller in list_all_controllers(pg_id):
+        if "Database User" in controller.component.properties:
+            controller.component.properties["Password"] = open("/timescale-admin-credentials/password").read()
+            controller = update_controller(controller, controller.component)
         schedule_controller(controller, scheduled=True)
-
 
     schedule_process_group(pg_id, scheduled=True)

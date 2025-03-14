@@ -5,11 +5,10 @@ metadata:
   name: nifi
 spec:
   image:
-    productVersion: 1.28.1
+    productVersion: 2.2.0
     # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
     # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-    # custom: oci.stackable.tech/stackable/nifi:2.2.0-postgresql
-    custom: oci.stackable.tech/stackable/nifi:1.28.1-postgresql
+    custom: oci.stackable.tech/stackable/nifi:2.2.0-postgresql
     # pullPolicy: IfNotPresent
   clusterConfig:
     listenerClass: external-unstable
