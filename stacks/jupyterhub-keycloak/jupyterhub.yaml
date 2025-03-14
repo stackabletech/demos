@@ -5,7 +5,7 @@ name: jupyterhub
 repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
-version: 4.0.0
+version: 4.1.0 # 5.2.1
 options:
   hub:
     config:
