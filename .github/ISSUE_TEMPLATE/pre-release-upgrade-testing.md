@@ -57,6 +57,7 @@ Replace the items in the task lists below with the applicable Pull Requests (if 
 - [ ] [data-lakehouse-iceberg-trino-spark](https://docs.stackable.tech/home/nightly/demos/data-lakehouse-iceberg-trino-spark)
 - [ ] [end-to-end-security](https://docs.stackable.tech/home/nightly/demos/end-to-end-security)
 - [ ] [hbase-hdfs-load-cycling-data](https://docs.stackable.tech/home/nightly/demos/hbase-hdfs-load-cycling-data)
+- [ ] [jupyterhub-keycloak](https://docs.stackable.tech/home/nightly/demos/jupyterhub-keycloak)
 - [ ] [jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data](https://docs.stackable.tech/home/nightly/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data)
 - [ ] [logging](https://docs.stackable.tech/home/nightly/demos/logging)
 - [ ] [nifi-kafka-druid-earthquake-data](https://docs.stackable.tech/home/nightly/demos/nifi-kafka-druid-earthquake-data)
