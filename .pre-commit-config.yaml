@@ -2,6 +2,8 @@
 default_language_version:
   node: system
 
+exclude: '^stacks/_templates/minio-tls/rendered-chart\.yaml$'
+
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: 2c9f875913ee60ca25ce70243dc24d5b6415598c # 4.6.0
