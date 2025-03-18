@@ -107,7 +107,8 @@ demos:
       - ny-taxi-data
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/load-test-data.yaml
+      # - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/load-test-data.yaml
+      - plainYaml: demos/spark-k8s-anomaly-detection-taxi-data/load-test-data.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/create-spark-anomaly-detection-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/setup-superset.yaml
     supportedNamespaces: []
