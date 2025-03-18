@@ -43,13 +43,13 @@ data:
         stackable.tech/vendor: Stackable
     spec:
       sparkImage:
-        productVersion: 3.5.2
+        productVersion: 3.5.5
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0
-          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.2
+          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.8.1
+          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5
       s3connection:
         reference: minio
       sparkConf:

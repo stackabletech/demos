@@ -19,7 +19,7 @@ This demo should not be run alongside other demos.
 To run this demo, your system needs at least:
 
 * 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
-* 9GiB memory
+* 10GiB memory
 * 24GiB disk storage
 
 == Overview

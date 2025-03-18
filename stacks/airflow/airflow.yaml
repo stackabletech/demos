@@ -33,7 +33,7 @@ spec:
           min: 400m
           max: "1"
         memory:
-          limit: 1Gi
+          limit: 2Gi
       gracefulShutdownTimeout: 30s
     roleGroups:
       default:

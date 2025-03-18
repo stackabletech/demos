@@ -4,7 +4,7 @@ name: opensearch-dashboards
 repo:
   name: opensearch-dashboards
   url: https://opensearch-project.github.io/helm-charts
-version: 2.25.0
+version: 2.28.0 # 2.19.1
 options:
   labels:
     stackable.tech/vendor: Stackable

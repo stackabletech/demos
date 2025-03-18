@@ -4,7 +4,7 @@ name: postgresql
 repo:
   name: bitnami
   url: https://charts.bitnami.com/bitnami/
-version: 16.1.2
+version: 16.5.0 # 17.4.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
