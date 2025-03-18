@@ -531,7 +531,13 @@ spec:
           command:
             - "/bin/sh"
             - "-ce"
-            - "/usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001"
+            - |
+              # minio requires the TLS key pair to be specially named
+              # mkdir -p /etc/minio/certs
+              cp -v /etc/minio/original_certs/tls.crt /etc/minio/certs/public.crt
+              cp -v /etc/minio/original_certs/tls.key /etc/minio/certs/private.key
+
+              /usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001
           volumeMounts:
             - name: minio-user
               mountPath: "/tmp/credentials"
