@@ -65,6 +65,9 @@ image::signal-processing/notebook.png[]
 
 The notebook reads the measurement data in windowed batches using a loop, computes some predictions for each batch and persists the scores in a separate timescale table.
 
+NOTE: Re-running the notebook *will* result in errors, due to collisions in indexed data created by these batch scores.
+Nifi is used to simulate the ingestion of streamed data by performing a one-off import and then re-calibrating the timestamps so that each batch created by the notebook will always "find" new data. Re-running the notebook will mean that batched (but *not* aggregated i.e. the timestamps are not altered) data will be written to the database a second time, resulting in a violation of a unique index constraint.
+
 === Adding libraries
 
 There are two ways of doing this:
