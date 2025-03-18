@@ -88,8 +88,8 @@ data:
 
     organization = "stackabletech"
     repository = "demos"
-    branch = "bump/nifi-2.2.0-git-registry-client"
-    version = "bump/nifi-2.2.0-git-registry-client"
+    branch = "release-25.3"
+    version = "release-25.3"
     directory = "demos/signal-processing"
     flow_name = "DownloadAndWriteToDB"
 
