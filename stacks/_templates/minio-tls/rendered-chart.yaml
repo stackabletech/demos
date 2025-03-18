@@ -135,7 +135,7 @@ data:
     }
     
     # Try connecting to MinIO instance
-    scheme=http
+    scheme=https
     connectToMinio $scheme
     
     
@@ -223,7 +223,7 @@ data:
     }
     
     # Try connecting to MinIO instance
-    scheme=http
+    scheme=https
     connectToMinio $scheme
     
     
@@ -291,7 +291,7 @@ data:
     }
     
     # Try connecting to MinIO instance
-    scheme=http
+    scheme=https
     connectToMinio $scheme
     
     
@@ -372,7 +372,7 @@ data:
     }
     
     # Try connecting to MinIO instance
-    scheme=http
+    scheme=https
     connectToMinio $scheme
     
     
@@ -418,7 +418,7 @@ data:
     }
     
     # Try connecting to MinIO instance
-    scheme=http
+    scheme=https
     connectToMinio $scheme
 ---
 # Source: minio/templates/pvc.yaml
@@ -452,7 +452,7 @@ spec:
   type: NodePort
   externalTrafficPolicy: "Cluster"
   ports:
-    - name: http
+    - name: https
       port: 9001
       protocol: TCP
       targetPort: 9001
@@ -475,7 +475,7 @@ spec:
   type: NodePort
   externalTrafficPolicy: "Cluster"
   ports:
-    - name: http
+    - name: https
       port: 9000
       protocol: TCP
       targetPort: 9000
@@ -514,7 +514,7 @@ spec:
         stackable.tech/vendor: Stackable
       annotations:
         checksum/secrets: fa63e34a92c817c84057e2d452fa683e66462a57b0529388fb96a57e05f38e57
-        checksum/config: 2b1e6b6d0485236a84032ab7e9eeee4a7bac29d2b63d3b0260bde76e84626730
+        checksum/config: ebea49cc4c1bfbd1b156a58bf770a776ff87fe199f642d31c2816b5515112e72
     spec:
       securityContext:
         
@@ -531,27 +531,25 @@ spec:
           command:
             - "/bin/sh"
             - "-ce"
-            - |
-              # minio requires the TLS key pair to be specially named
-              # mkdir -p /etc/minio/certs
-              cp -v /etc/minio/original_certs/tls.crt /etc/minio/certs/public.crt
-              cp -v /etc/minio/original_certs/tls.key /etc/minio/certs/private.key
-
-              /usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001
+            - "/usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001"
           volumeMounts:
             - name: minio-user
               mountPath: "/tmp/credentials"
               readOnly: true
             - name: export
               mountPath: /export            
+            - name: cert-secret-volume
+              mountPath: /etc/minio/certs/
+            - name: trusted-cert-secret-volume
+              mountPath: /etc/minio/certs/CAs
             - mountPath: /etc/minio/original_certs
               name: tls
             - mountPath: /etc/minio/certs
               name: certs
           ports:
-            - name: http
+            - name: https
               containerPort: 9000
-            - name: http-console
+            - name: https-console
               containerPort: 9001
           env:
             - name: MINIO_ROOT_USER
@@ -579,6 +577,20 @@ spec:
         - name: minio-user
           secret:
             secretName: minio        
+        - name: cert-secret-volume
+          secret:
+            secretName: 
+            items:
+            - key: public.crt
+              path: public.crt
+            - key: private.key
+              path: private.key
+        - name: trusted-cert-secret-volume
+          secret:
+            secretName: 
+            items:
+            - key: public.crt
+              path: public.crt
           
         - ephemeral:
             volumeClaimTemplate:
@@ -633,6 +645,30 @@ spec:
                   name: minio
               - secret:
                   name: minio
+        - name: cert-secret-volume-mc
+          secret:
+            secretName: 
+            items:
+              - key: public.crt
+                path: CAs/public.crt
+        - ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: service=minio
+              spec:
+                accessModes:
+                - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1
+                storageClassName: secrets.stackable.tech
+          name: tls
+        - emptyDir:
+            medium: Memory
+            sizeLimit: 5Mi
+          name: certs
       serviceAccountName: minio-sa
       containers:
         - name: minio-make-bucket
@@ -651,6 +687,8 @@ spec:
               mountPath: /tmp
             - name: minio-configuration
               mountPath: /config
+            - name: cert-secret-volume-mc
+              mountPath: /etc/minio/mc/certs
           resources:
             requests:
               memory: 128Mi
@@ -670,6 +708,8 @@ spec:
               mountPath: /tmp
             - name: minio-configuration
               mountPath: /config
+            - name: cert-secret-volume-mc
+              mountPath: /etc/minio/mc/certs
           resources:
             requests:
               memory: 128Mi
