@@ -546,7 +546,7 @@ spec:
             - name: export
               mountPath: /export
             - mountPath: /etc/minio/original_certs
-              name: tls
+              name: minio-tls
             - mountPath: /etc/minio/certs
               name: certs
           ports:
@@ -590,7 +590,7 @@ spec:
                   requests:
                     storage: "1"
                 storageClassName: secrets.stackable.tech
-          name: tls
+          name: minio-tls
         - emptyDir:
             medium: Memory
             sizeLimit: 5Mi
@@ -653,7 +653,7 @@ spec:
                   requests:
                     storage: "1"
                 storageClassName: secrets.stackable.tech
-          name: tls
+          name: minio-tls
         - emptyDir:
             medium: Memory
             sizeLimit: 5Mi
@@ -682,7 +682,7 @@ spec:
               mountPath: /tmp
             - name: minio-configuration
               mountPath: /config
-            - name: tls
+            - name: minio-tls
               mountPath: /etc/minio/mc/original_certs
             - name: certs
               mountPath: /etc/minio/mc/certs/CAs
@@ -705,7 +705,7 @@ spec:
               mountPath: /tmp
             - name: minio-configuration
               mountPath: /config
-            - name: tls
+            - name: minio-tls
               mountPath: /etc/minio/mc/original_certs
             - name: certs
               mountPath: /etc/minio/mc/certs/CAs
