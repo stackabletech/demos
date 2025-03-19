@@ -68,8 +68,8 @@ data:
 
     organization = "stackabletech"
     repository = "demos"
-    branch = "release-25.3"
-    version = "release-25.3"
+    branch = "main"
+    version = "main"
     directory = "demos/data-lakehouse-iceberg-trino-spark"
     flow_name = "LakehouseKafkaIngest"
 
