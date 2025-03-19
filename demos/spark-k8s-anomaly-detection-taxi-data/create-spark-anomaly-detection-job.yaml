@@ -43,7 +43,6 @@ data:
       deps:
         packages:
           - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.8.1
-          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.5
         requirements:
           - scikit-learn==1.4.0
       s3connection:

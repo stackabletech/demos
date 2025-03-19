@@ -258,7 +258,7 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/hive-metastore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
@@ -340,15 +340,15 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small-tls/rendered-chart.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
-    supportedNamespaces: []
+    supportedNamespaces: ["default"] # until namespace can be templates, the minio FQDN hard-codes the namespace
     resourceRequests:
       cpu: 6000m # Measured 5600m
-      memory: 15Gi # Measured 13986Mi
+      memory: 21Gi
       pvc: 110Gi # 100Gi for MinIO
     parameters:
       - name: trinoAdminPassword
