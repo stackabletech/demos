@@ -32,7 +32,7 @@ extraVolumes:
           annotations:
             secrets.stackable.tech/class: tls
             secrets.stackable.tech/scope: |-
-              service=minio
+              service=minio,pod
         spec:
           storageClassName: secrets.stackable.tech
           accessModes:
@@ -63,7 +63,7 @@ customCommandJob:
             annotations:
               secrets.stackable.tech/class: tls
               secrets.stackable.tech/scope: |-
-                service=minio
+                service=minio,pod
           spec:
             storageClassName: secrets.stackable.tech
             accessModes:

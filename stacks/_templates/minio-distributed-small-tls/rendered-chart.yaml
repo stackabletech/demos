@@ -580,7 +580,7 @@ spec:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
-                  secrets.stackable.tech/scope: service=minio
+                  secrets.stackable.tech/scope: service=minio,pod
               spec:
                 accessModes:
                 - ReadWriteOnce
@@ -643,7 +643,7 @@ spec:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
-                  secrets.stackable.tech/scope: service=minio
+                  secrets.stackable.tech/scope: service=minio,pod
               spec:
                 accessModes:
                 - ReadWriteOnce
