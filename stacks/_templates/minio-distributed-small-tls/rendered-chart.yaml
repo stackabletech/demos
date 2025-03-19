@@ -539,6 +539,10 @@ spec:
               cp -v /etc/minio/original_certs/tls.crt /etc/minio/certs/public.crt
               cp -v /etc/minio/original_certs/tls.key /etc/minio/certs/private.key
 
+              # Copy the CA cert from the "tls" SecretClass
+              mkdir -p /etc/minio/certs/CAs
+              cp -v /etc/minio/original_certs/ca.crt /etc/minio/certs/CAs/public.crt
+
               /usr/bin/docker-entrypoint.sh minio server https://minio-{0...1}.minio-svc.default.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001
           volumeMounts:
             - name: export
