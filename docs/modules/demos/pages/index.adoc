@@ -39,7 +39,7 @@ The manifests and code used by the demos, can be found in the https://github.com
   ** `stackableStack` references the stack belonging to this demo
   ** `manifests` includes a list of additional manifests for the demo, mostly jobs to create tables or ingest example data
   ** `resourceRequests` specifying the needed resources for the demo to run
-* `stacks/stacks-v2.yaml` file: lists the available stacks, which are referenced by the `demos/demos-v2.yaml` file, and uses additional parameters to build up the demo, e.g.
+* `stacks/stacks-v2.yaml` file: lists the available stacks, which are referenced by the `demos/demos-v2.yaml` file, and uses additional parameters to build up the underlying stack, e.g.
   ** `stackableOperators` are all the operators that are installed as part of the demo
   ** `manifests` contains all the manifests needed to setup the products and third-party tools
   ** `parameters` is a list of values used in the manifest files, for example as credentials or other settings
