@@ -305,7 +305,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
-    supportedNamespaces: []
+    supportedNamespaces: [default] # until namespace can be templates, the minio FQDN hard-codes the namespace
     resourceRequests:
       cpu: 6800m
       memory: 15822Mi
