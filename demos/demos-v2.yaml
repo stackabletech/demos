@@ -128,7 +128,7 @@ demos:
     supportedNamespaces: []
     resourceRequests:
       cpu: 6000m # Measured 5600m
-      memory: 15Gi # Measured 13986Mi
+      memory: 21Gi
       pvc: 110Gi # 100Gi for MinIO
   trino-taxi-data:
     description: Demo loading 2.5 years of New York taxi data into S3 bucket, creating a Trino table and a Superset dashboard
