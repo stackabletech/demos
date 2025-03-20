@@ -10,15 +10,17 @@ include::partial$demos.adoc[]
 [IMPORTANT]
 .External Components in these demos
 ====
-These demos are provided by Stackable as showcases to demonstrate potential architectures that could be built with the Stackable Data Platform.
-As such they may include components that are not supported by Stackable as part of our commercial offering.
+The demos provided by Stackable serve as showcases to illustrate potential architectures that can be built using the Stackable Data Platform.
+Please note that these demos may include components that are not supported by Stackable as part of our commercial offering.
 
-If you are evaluating one or more of these demos with the intention of purchasing a subscription, make sure to double-check the list of supported operators; anything that is not mentioned on there is not part of our commercial offering.
+If you are evaluating these demos with the intention of purchasing a subscription, please ensure that you review the xref:operators:index.adoc[list of supported operators].
+Any components not listed there are not part of our commercial offering.
 
-Below you can find a list of components that are currently contained in one or more of the demos for reference, if something is missing from this list and also not mentioned on our operators list, then this component is not supported:
+Below is an incomplete list of third-party components referenced in these demos:
 
 * Grafana
 * JupyterHub
+* Keycloak
 * MinIO
 * OpenLDAP
 * OpenSearch
@@ -26,6 +28,7 @@ Below you can find a list of components that are currently contained in one or m
 * PostgreSQL
 * Prometheus
 * Redis
+* Vector Aggregator
 ====
 
 == Demo Code
