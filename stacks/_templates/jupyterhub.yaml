@@ -51,7 +51,7 @@ options:
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable25.3.0
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/release-25.3/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook
