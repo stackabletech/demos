@@ -45,4 +45,4 @@ Each demo is constructed in the following way:
   ** `manifests` contains all the manifests needed to setup the products and third-party tools
   ** `parameters` is a list of values used in the manifest files, for example as credentials or other settings
 
-For more information on how to add custom demos/stacks, refer to the xref:management:stackablectl:customization/index.adoc[Customization section of SDP Management,window=_blank].
+For more information on how to add custom demos/stacks, refer to the xref:management:stackablectl:customization/index.adoc[Customization section of stackablectl,window=_blank].
