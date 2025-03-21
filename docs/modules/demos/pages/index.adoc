@@ -33,7 +33,8 @@ Below is an incomplete list of third-party components referenced in these demos:
 
 == Demo Code
 
-The manifests and code used by the demos, can be found in the https://github.com/stackabletech/demos[demo repository,window=_blank]. Each demo is constructed in the following way:
+The manifests and code used by the demos, can be found in the https://github.com/stackabletech/demos[demo repository,window=_blank].
+Each demo is constructed in the following way:
 
 * `demos/demos-v2.yaml` file: lists the available demos and uses additional parameters to build up the demo, e.g.
   ** `stackableStack` references the stack belonging to this demo
