@@ -48,7 +48,7 @@ spec:
             - name: tls
               mountPath: /tls/
         - name: create-auth-class
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable25.3.0
           command: ["/bin/bash", "-c"]
           args:
             - |

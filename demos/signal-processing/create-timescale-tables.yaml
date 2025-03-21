@@ -9,7 +9,7 @@ spec:
       serviceAccountName: demo-serviceaccount
       initContainers:
         - name: wait-for-timescale
-          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable25.3.0
           command:
             - bash
             - -euo
