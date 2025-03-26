@@ -10,6 +10,11 @@ spec:
   accessStyle: Path
   credentials:
     secretClass: minio-s3-credentials
+  tls:
+    verification:
+      server:
+        caCert:
+          secretClass: tls
 ---
 apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
