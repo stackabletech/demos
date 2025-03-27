@@ -292,9 +292,14 @@ image::nifi-kafka-druid-water-level-data/nifi_1.png[]
 
 Log in with the username `admin` and password `adminadmin`.
 
+image::nifi-kafka-druid-water-level-data/nifi_13.png[]
+
+The NiFi workflow contains the `IngestWaterLevelsToKafka` Process Group. Enter the Process Group by double-clicking on it or
+right-clicking and selecting `Enter Group`.
+
 image::nifi-kafka-druid-water-level-data/nifi_2.png[]
 
-As you can see, the NiFi workflow consists of lots of components. It is split into three main components:
+As you can see, the Process Group consists of lots of components. It is split into three main components:
 
 . On the left is the first part bulk-loading all the known stations
 . In the middle is the second part bulk-loading the historical data for the last 30 days
@@ -318,19 +323,19 @@ The left workflows works as follows:
   measurements of the last 30 days.
 . `Add station_uuid` will add the attribute `station_uuid` to the JSON list of measurements returned from the
   {pegelonline}[PEGELONLINE web service], which is missing.
-. `PublishKafkaRecord_2_6` finally emits every measurement as a Kafka record to the topic `measurements`.
+. `PublishKafka` finally emits every measurement as a Kafka record to the topic `measurements`.
 
 The right side works similarly but is executed in an endless loop to stream the data in near-realtime. Double-click on
 the `Get station list` processor to show the processor details.
 
 image::nifi-kafka-druid-water-level-data/nifi_5.png[]
 
-Head over to the tab `PROPERTIES`.
+Head over to the `Properties` tab.
 
 image::nifi-kafka-druid-water-level-data/nifi_6.png[]
 
 Here, you can see the setting `HTTP URL`, which specifies the download URL from where the JSON file containing the
-stations is retrieved. Close the processor details popup by clicking `OK`. You can also have a detailed view of the
+stations is retrieved. Close the processor details popup by clicking `Close`. You can also have a detailed view of the
 `Produce station records` processor by double-clicking it.
 
 image::nifi-kafka-druid-water-level-data/nifi_7.png[]
@@ -347,11 +352,11 @@ image::nifi-kafka-druid-water-level-data/nifi_9.png[]
 
 The `HTTP URL` does contain the `$\{station_uuid\}` placeholder, which gets replaced for every station.
 
-Double-click the `PublishKafkaRecord_2_6` processor.
+Double-click the `PublishKafka` processor.
 
 image::nifi-kafka-druid-water-level-data/nifi_10.png[]
 
-You can also see the number of produced records by right-clicking on `PublishKafkaRecord_2_6` and selecting
+You can also see the number of produced records by right-clicking on `PublishKafka` and selecting
 `View status history`.
 
 image::nifi-kafka-druid-water-level-data/nifi_11.png[]
@@ -385,13 +390,14 @@ By clicking on `Supervisors` at the top you can see the running ingestion jobs.
 image::nifi-kafka-druid-water-level-data/druid_2.png[]
 
 After clicking on the magnification glass to the right side of the `RUNNING` supervisor, you can see additional
-information (here, the supervisor `measurements` was chosen). On the tab `Statistics` on the left, you can see the
+information (here, the supervisor `measurements` was chosen). On the tab `Task stats` on the left, you can see the
 number of processed records as well as the number of errors.
 
 image::nifi-kafka-druid-water-level-data/druid_3.png[]
 
-The statistics show that Druid ingested `2435` records during the last minute and has already ingested ~30 million records in total. All records
-have been ingested successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable` records.
+The statistics show that Druid ingested `594` records during the last minute and has already ingested ~1,3 million records in total. All records
+have been ingested successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable` records in the output of the `View raw`
+button at the top right.
 
 === Query the Data Source
 
