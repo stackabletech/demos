@@ -209,25 +209,26 @@ Log in with the username `admin` and password `adminadmin`.
 
 image::nifi-kafka-druid-earthquake-data/nifi_2.png[]
 
-You can see the started ProcessGroup consisting of two processors.
+You can see the started ProcessGroup consisting of three processors.
 The first one - `InvokeHTTP`, fetches the CSV file from the Internet and puts it into the queue of the next processor.
-The second processor - `PublishKafkaRecord_2_6`, parses the CSV file, converts it to JSON records and writes them out into Kafka.
+The second processor - `SplitRecords`, takes the single FlowFile (NiFi Record) which contains all CSV records and splits it into chunks of 2000 records, which are then separately put into the queue of the next processor.
+The third one - `PublishKafkaRecord`, parses the CSV chunk, converts it to JSON records and writes them out into Kafka.
 
 Double-click on the `InvokeHTTP` processor to show the processor details.
 
 image::nifi-kafka-druid-earthquake-data/nifi_3.png[]
 
-Head over to the tab `PROPERTIES`.
+Head over to the `Properties` tab.
 
 image::nifi-kafka-druid-earthquake-data/nifi_4.png[]
 
 Here, you can see the setting `HTTP URL`, which specifies the download URL from where the CSV file is retrieved.
-Close the processor details popup by clicking `OK`.
-Afterwards, double-click on the processor `PublishKafkaRecord_2_6`.
+Close the processor details popup by clicking `Close`.
+Afterwards, double-click on the processor `PublishKafkaRecord`.
 
 image::nifi-kafka-druid-earthquake-data/nifi_5.png[]
 
-The Kafka connection details within this processor - like broker addresses and topic names - are specified.
+The Kafka connection service, which contains the connection details, and the topic name is specified.
 It uses the `CSVReader` to parse the downloaded CSV and the `JsonRecordSetWriter` to split it into individual JSON records before writing it out.
 
 == Druid
@@ -247,12 +248,13 @@ By clicking on `Supervisors` at the top, you can see the running ingestion jobs.
 image::nifi-kafka-druid-earthquake-data/druid_2.png[]
 
 You can see additional information after clicking on the magnification glass to the right side of the `RUNNING` supervisor.
-On the tab `Statistics` on the left, you can see the number of processed records as well as the number of errors.
+On the tab `Task stats` on the left, you can see the number of processed records as well as the number of errors.
 
 image::nifi-kafka-druid-earthquake-data/druid_3.png[]
 
-The statistics show that Druid ingested `5074` records during the last minute and has ingested 3 million records already.
-All entries have been consumed successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable` records.
+The statistics show that Druid ingested `13279` records per second within the last minute and has ingested around 600,000 records already.
+All entries have been consumed successfully, indicated by having no `processWithError`, `thrownAway` or `unparseable` records in the output of the `View raw`
+button at the top right.
 
 === Query the Data Source
 
