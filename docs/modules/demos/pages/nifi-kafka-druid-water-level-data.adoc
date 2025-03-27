@@ -330,7 +330,7 @@ the `Get station list` processor to show the processor details.
 
 image::nifi-kafka-druid-water-level-data/nifi_5.png[]
 
-Head over to the tab `Properties`.
+Head over to the `Properties` tab.
 
 image::nifi-kafka-druid-water-level-data/nifi_6.png[]
 
