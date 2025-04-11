@@ -3,31 +3,35 @@ stacks:
   argocd:
     description: TODO
     stackableRelease: dev
-    # we dont not want to install operators...
+    # TODO: We actually want to deploy all operators via ArgoCD, but we currently *have to* install
+    # operators with stackablectl. Therefore we install the internal operators via stackablectl.
+    # stackableOperators: []
     stackableOperators:
       - listener
+      - commons
+      - secret
     labels:
       - argocd
     manifests:
-      #- helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/argocd.yaml
       - helmChart: stacks/_templates/argo-cd.yaml
       # projects
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
       - plainYaml: stacks/argo-cd/projects/airflow.yaml
       # operators
-      - plainYaml: stacks/argo-cd/applicationsets/commons-operator.yaml
-      # listener is currently deployed via stackablectl since it complains if no operators are deployed...
+      # currently deployed via stackablectl since it complains if no operators are deployed...
+      #- plainYaml: stacks/argo-cd/applicationsets/commons-operator.yaml
       #- plainYaml: stacks/argo-cd/applicationsets/listener-operator.yaml
-      - plainYaml: stacks/argo-cd/applicationsets/secret-operator.yaml
+      #- plainYaml: stacks/argo-cd/applicationsets/secret-operator.yaml
       - plainYaml: stacks/argo-cd/applicationsets/airflow-operator.yaml
+      - plainYaml: stacks/argo-cd/applicationsets/spark-k8s-operator.yaml
       # products
       - plainYaml: stacks/argo-cd/applications/airflow-postgres.yaml
       - plainYaml: stacks/argo-cd/applications/airflow.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:
-      memory: 2000Mi
-      cpu: 2000m
+      memory: 10000Mi
+      cpu: 8000m
       pvc: 20Gi
     parameters:
       - name: stackableReleaseVersion
