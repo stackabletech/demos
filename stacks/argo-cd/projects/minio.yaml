@@ -1,0 +1,14 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: minio
+spec:
+  description: Project to manage Minio via Helm
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: minio
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

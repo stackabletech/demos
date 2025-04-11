@@ -13,6 +13,7 @@ stacks:
     labels:
       - argocd
       - sealed secrets
+      - airflow
     manifests:
       - helmChart: stacks/_templates/argo-cd.yaml
       ################################
@@ -20,6 +21,7 @@ stacks:
       ################################
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
       - plainYaml: stacks/argo-cd/projects/airflow.yaml
+      - plainYaml: stacks/argo-cd/projects/minio.yaml
       ################################
       # operators
       ################################
@@ -34,10 +36,10 @@ stacks:
       ################################
       - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
       - plainYaml: stacks/argo-cd/applications/airflow-postgres.yaml
+      - plainYaml: stacks/argo-cd/applications/minio.yaml
       ################################
       # products
       ################################
-      # via argo
       - plainYaml: stacks/argo-cd/applications/airflow.yaml
     supportedNamespaces:
       - argo-cd
