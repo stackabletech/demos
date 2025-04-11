@@ -1,0 +1,42 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: commons-operator
+spec:
+  # this interferes with stackablectl's templating and
+  # cannot really be used here properly but must be provided.
+  generators:
+    - list:
+        elements:
+          - cluster: development
+  template:
+    metadata:
+      name: commons-operator
+    spec:
+      project: stackable-operators
+      ignoreDifferences:
+        # mitigating: https://github.com/stackabletech/hdfs-operator/issues/626
+        - group: "apiextensions.k8s.io"
+          kind: "CustomResourceDefinition"
+          jqPathExpressions:
+            - .spec.names.categories | select(. == [])
+            - .spec.names.shortNames | select(. == [])
+            - .spec.versions[].additionalPrinterColumns | select(. == [])
+      source:
+        repoURL: https://repo.stackable.tech/repository/helm-stable/
+        targetRevision: "{{ stackableVersion }}"
+        chart: commons-operator
+        helm:
+          releaseName: commons-operator
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: "{{ stackableOperatorNamespace }}"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+        automated:
+          selfHeal: true
+          prune: true

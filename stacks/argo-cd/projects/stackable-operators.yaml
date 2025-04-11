@@ -1,0 +1,19 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: stackable-operators
+spec:
+  description: Stackable operators ArgoCD Project
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: argo-cd
+      server: https://kubernetes.default.svc
+    - namespace: stackable-operators
+      server: https://kubernetes.default.svc
+    - namespace: stackable-products
+      server: https://kubernetes.default.svc
+  # required to deploy clusterwide resources like clusteroles etc.
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

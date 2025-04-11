@@ -1,5 +1,35 @@
 ---
 stacks:
+  argocd:
+    description: TODO
+    stackableRelease: dev
+    # we dont not want to install operators...
+    stackableOperators:
+      - listener
+    labels:
+      - argocd
+    manifests:
+      #- helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/argocd.yaml
+      - helmChart: stacks/_templates/argo-cd.yaml
+      - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
+      - plainYaml: stacks/argo-cd/applications/commons-operator.yaml
+    supportedNamespaces:
+      - argo-cd
+    resourceRequests:
+      memory: 2000Mi
+      cpu: 2000m
+      pvc: 20Gi
+    parameters:
+      - name: stackableVersion
+        description: Stackable release to be installed via Argo
+        default: 25.3.0
+      - name: stackableOperatorNamespace
+        description: Stackable namespace for the operators
+        default: stackable-operators
+      - name: argocdAdminPassword
+        description: Password of the ArgoCD admin user
+        # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
+        default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: dev
