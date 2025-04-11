@@ -49,7 +49,7 @@ stacks:
       - name: stackableReleaseVersion
         description: Stackable release to be installed via Argo
         default: 25.3.0
-      - name: demoTargetRevision
+      - name: demoReleaseVersion
         description: The target revision, HEAD or e.g. release-25.3
         #default: release-25.3
         default: spike/argocd-demo

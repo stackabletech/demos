@@ -9,7 +9,7 @@ spec:
     server: https://kubernetes.default.svc
   source:
     repoURL: https://github.com/stackabletech/demos.git
-    targetRevision: "{{ demoTargetRevision }}"
+    targetRevision: "{{ demoReleaseVersion }}"
     path: stacks/argo-cd/manifests/airflow/
   syncPolicy:
     syncOptions:
