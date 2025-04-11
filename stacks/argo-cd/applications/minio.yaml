@@ -36,9 +36,9 @@ spec:
         consoleService:
           type: NodePort
           nodePort: null
-        syncPolicy:
-          syncOptions:
-            - CreateNamespace=true
-          automated:
-            selfHeal: true
-            prune: true
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
