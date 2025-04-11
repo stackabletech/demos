@@ -51,7 +51,8 @@ stacks:
         default: 25.3.0
       - name: demoTargetRevision
         description: The target revision, HEAD or e.g. release-25.3
-        default: release-25.3
+        #default: release-25.3
+        default: spike/argocd-demo
       - name: stackableOperatorNamespace
         description: Stackable namespace for the operators
         default: stackable-operators
