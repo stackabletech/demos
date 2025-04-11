@@ -2,7 +2,7 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: commons-operator
+  name: airflow-operator
 spec:
   # this interferes with stackablectl's templating and
   # cannot really be used here properly but must be provided.
@@ -12,7 +12,7 @@ spec:
           - cluster: development
   template:
     metadata:
-      name: commons-operator
+      name: airflow-operator
     spec:
       project: stackable-operators
       ignoreDifferences:
@@ -25,10 +25,10 @@ spec:
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
         repoURL: https://repo.stackable.tech/repository/helm-stable/
-        targetRevision: "{{ stackableVersion }}"
-        chart: commons-operator
+        targetRevision: "{{ stackableReleaseVersion }}"
+        chart: airflow-operator
         helm:
-          releaseName: commons-operator
+          releaseName: airflow-operator
       destination:
         server: https://kubernetes.default.svc
         namespace: "{{ stackableOperatorNamespace }}"

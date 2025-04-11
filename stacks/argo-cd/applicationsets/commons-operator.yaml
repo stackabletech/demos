@@ -2,18 +2,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: secret-operator
+  name: commons-operator
 spec:
+  # this interferes with stackablectl's templating and
+  # cannot really be used here properly but must be provided.
   generators:
     - list:
         elements:
           - cluster: development
-            url: https://kubernetes.default.svc
-            helmChartRevision: 25.3.0
-            targetRevision: HEAD
   template:
     metadata:
-      name: secret-operator
+      name: commons-operator
     spec:
       project: stackable-operators
       ignoreDifferences:
@@ -26,13 +25,13 @@ spec:
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
         repoURL: https://repo.stackable.tech/repository/helm-stable/
-        targetRevision: 25.3.0
-        chart: secret-operator
+        targetRevision: "{{ stackableReleaseVersion }}"
+        chart: commons-operator
         helm:
-          releaseName: secret-operator
+          releaseName: commons-operator
       destination:
-        server: "{{url}}"
-        namespace: stackable-operators
+        server: https://kubernetes.default.svc
+        namespace: "{{ stackableOperatorNamespace }}"
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

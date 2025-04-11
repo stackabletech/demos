@@ -1,15 +1,14 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: stackable-operators
+  name: airflow
 spec:
-  description: Project to manage Stackable Operators via Helm
+  description: Project to manage Stackable Airflow via Git
   sourceRepos:
     - "*"
   destinations:
-    - namespace: stackable-operators
+    - namespace: stackable-airflow
       server: https://kubernetes.default.svc
-  # required to deploy clusterwide resources like clusteroles etc.
   clusterResourceWhitelist:
     - group: "*"
       kind: "*"
