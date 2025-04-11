@@ -1,7 +1,7 @@
 ---
 stacks:
   argocd:
-    description: TODO
+    description: Deploying Stackable Demos with ArgoCD
     stackableRelease: dev
     # TODO: We actually want to deploy all operators via ArgoCD, but we currently *have to* install
     # operators with stackablectl. Therefore we install the internal operators via stackablectl.
@@ -12,20 +12,32 @@ stacks:
       - secret
     labels:
       - argocd
+      - sealed secrets
     manifests:
       - helmChart: stacks/_templates/argo-cd.yaml
+      ################################
       # projects
+      ################################
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
       - plainYaml: stacks/argo-cd/projects/airflow.yaml
+      ################################
       # operators
+      ################################
       # currently deployed via stackablectl since it complains if no operators are deployed...
       #- plainYaml: stacks/argo-cd/applicationsets/commons-operator.yaml
       #- plainYaml: stacks/argo-cd/applicationsets/listener-operator.yaml
       #- plainYaml: stacks/argo-cd/applicationsets/secret-operator.yaml
       - plainYaml: stacks/argo-cd/applicationsets/airflow-operator.yaml
       - plainYaml: stacks/argo-cd/applicationsets/spark-k8s-operator.yaml
-      # products
+      ################################
+      # prerequisites
+      ################################
+      - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
       - plainYaml: stacks/argo-cd/applications/airflow-postgres.yaml
+      ################################
+      # products
+      ################################
+      # via argo
       - plainYaml: stacks/argo-cd/applications/airflow.yaml
     supportedNamespaces:
       - argo-cd
@@ -47,12 +59,6 @@ stacks:
         description: Password of the ArgoCD admin user
         # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
         default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
-      - name: airflowAdminPassword
-        description: Password of the Airflow admin user
-        default: adminadmin
-      - name: airflowSecretKey
-        description: Airflow's secret key used to generate e.g. user session tokens
-        default: airflowSecretKey
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: dev

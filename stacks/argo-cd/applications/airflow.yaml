@@ -10,8 +10,7 @@ spec:
   source:
     repoURL: https://github.com/stackabletech/demos.git
     targetRevision: "{{ demoTargetRevision }}"
-    # TODO: change to other directory
-    path: stacks/airflow/
+    path: stacks/argo-cd/manifests/airflow/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
