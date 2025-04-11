@@ -40,7 +40,7 @@ spec:
         envOverrides: &envOverrides
           AIRFLOW__CORE__DAGS_FOLDER: "/dags"
           AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
-          AIRFLOW_CONN_MINIO_DEFAULT: "s3://admin:adminadmin@minio.minio.svc.cluster.local:9000?extra=%7B%22aws_access_key_id%22%3A%22admin%22%2C%22aws_secret_access_key%22%3A%22adminadmin%22%2C%22endpoint_url%22%3A%22https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000%22%7D"
+          AIRFLOW_CONN_MINIO_DEFAULT: "s3://admin:adminadmin@minio.minio.svc.cluster.local:9000?extra=%7B%22endpoint_url%22%3A%22https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000%22%7D"
           AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
           AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
           AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio_default

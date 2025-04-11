@@ -8,34 +8,9 @@ spec:
     server: https://kubernetes.default.svc
     namespace: minio
   source:
-    repoURL: https://charts.min.io/
-    targetRevision: 5.4.0 # RELEASE.2024-12-18T13-15-44Z
-    chart: minio
-    helm:
-      releaseName: minio
-      valuesObject:
-        additionalLabels:
-          stackable.tech/vendor: Stackable
-        podLabels:
-          stackable.tech/vendor: Stackable
-        rootUser: admin
-        rootPassword: adminadmin
-        mode: standalone
-        persistence:
-          size: 10Gi
-        buckets:
-          - name: demo
-            policy: public
-        resources:
-          requests:
-            cpu: 1
-            memory: 2Gi
-        service:
-          type: NodePort
-          nodePort: null
-        consoleService:
-          type: NodePort
-          nodePort: null
+    repoURL: https://github.com/stackabletech/demos.git
+    targetRevision: "{{ demoReleaseVersion }}"
+    path: stacks/argo-cd/manifests/minio/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
