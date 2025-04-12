@@ -3,7 +3,7 @@ kind: AppProject
 metadata:
   name: minio
 spec:
-  description: Project to manage Minio via Helm
+  description: Project to manage Minio
   sourceRepos:
     - "*"
   destinations:

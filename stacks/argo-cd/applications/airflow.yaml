@@ -5,8 +5,8 @@ metadata:
 spec:
   project: airflow
   destination:
-    namespace: stackable-airflow
     server: https://kubernetes.default.svc
+    namespace: stackable-airflow
   source:
     repoURL: https://github.com/stackabletech/demos.git
     targetRevision: "{{ demoReleaseVersion }}"
