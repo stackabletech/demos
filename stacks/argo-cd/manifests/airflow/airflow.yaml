@@ -16,6 +16,20 @@ spec:
       - name: airflow-dags
         configMap:
           name: airflow-dags
+      - name: minio-tls
+        ephemeral:
+          volumeClaimTemplate:
+            metadata:
+              annotations:
+                secrets.stackable.tech/class: tls
+                secrets.stackable.tech/scope: pod,node
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: "1"
+              storageClassName: secrets.stackable.tech
     volumeMounts:
       - name: airflow-dags
         mountPath: /dags/date_demo.py
@@ -26,6 +40,8 @@ spec:
       - name: airflow-dags
         mountPath: /dags/pyspark_pi.yaml
         subPath: pyspark_pi.yaml
+      - name: minio-tls
+        mountPath: /stackable/minio-tls
   webservers:
     config:
       resources:
@@ -40,10 +56,11 @@ spec:
         envOverrides: &envOverrides
           AIRFLOW__CORE__DAGS_FOLDER: "/dags"
           AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
-          AIRFLOW_CONN_MINIO_DEFAULT: "s3://admin:adminadmin@minio.minio.svc.cluster.local:9000?extra=%7B%22endpoint_url%22%3A%22https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000%22%7D"
+          AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
+          AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
           AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
           AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
-          AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio_default
+          AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
