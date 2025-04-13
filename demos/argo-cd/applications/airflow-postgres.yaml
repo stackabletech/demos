@@ -25,7 +25,7 @@ spec:
     - repoURL: https://github.com/stackabletech/demos.git
       # TODO: adapt to release-25.3
       targetRevision: "spike/argocd-demo"
-      path: demo/argo-cd/manifests/airflow-postgres
+      path: demos/argo-cd/manifests/airflow-postgres
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
