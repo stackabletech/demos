@@ -65,6 +65,7 @@ spec:
   kubernetesExecutors:
     envOverrides: *envOverrides
   schedulers:
+    envOverrides: *envOverrides
     config:
       gracefulShutdownTimeout: 30s
       resources:
@@ -75,7 +76,6 @@ spec:
           limit: 1Gi
     roleGroups:
       default:
-        envOverrides: *envOverrides
         replicas: 1
 ---
 apiVersion: v1
