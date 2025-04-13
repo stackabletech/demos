@@ -20,12 +20,14 @@ spec:
           commonLabels:
             stackable.tech/vendor: Stackable
           auth:
+            username: airflow
+            password: airflow
             database: airflow
-            existingSecret: postgresql-credentials
-    - repoURL: https://github.com/stackabletech/demos.git
-      # TODO: adapt to release-25.3
-      targetRevision: "spike/argocd-demo"
-      path: demos/argo-cd/manifests/airflow-postgres/
+      #       existingSecret: postgresql-credentials
+    # - repoURL: https://github.com/stackabletech/demos.git
+    #   # TODO: adapt to release-25.3
+    #   targetRevision: "spike/argocd-demo"
+    #   path: demos/argo-cd/manifests/airflow-postgres/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

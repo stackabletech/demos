@@ -43,6 +43,25 @@ spec:
       - name: minio-tls
         mountPath: /stackable/minio-tls
   webservers:
+    envOverrides: &envOverrides
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+      # Via sealed secrets, just kept for reference here
+      #AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
+      AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
+      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
+    podOverrides: &podOverrides
+      spec:
+        container:
+          - name: airflow
+        env:
+          - name: AIRFLOW_CONN_MINIO
+            valueFrom:
+              secretKeyRef:
+                name: airflow-minio-connection
+                key: airflow-minio-connection
     config:
       resources:
         cpu:
@@ -53,19 +72,13 @@ spec:
       gracefulShutdownTimeout: 30s
     roleGroups:
       default:
-        envOverrides: &envOverrides
-          AIRFLOW__CORE__DAGS_FOLDER: "/dags"
-          AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
-          AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
-          AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
-          AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
-          AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
-          AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
+    podOverrides: *podOverrides
   schedulers:
     envOverrides: *envOverrides
+    podOverrides: *podOverrides
     config:
       gracefulShutdownTimeout: 30s
       resources:
