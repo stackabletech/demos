@@ -2,17 +2,31 @@
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
-  name: airflow-operator
+  name: stackable-operators
 spec:
-  # this interferes with stackablectl's templating and
-  # cannot really be used here properly but must be provided.
   generators:
     - list:
         elements:
-          - cluster: development
+          # Left out as currently installed via stackablectl
+          # operator: commons
+          # operator: listener
+          # operator: secret
+          - operator: airflow
+          - operator: druid
+          - operator: hbase
+          - operator: hdfs
+          - operator: hive
+          - operator: kafka
+          - operator: nifi
+          - operator: opa
+          - operator: spark-k8s
+          - operator: superset
+          - operator: trino
   template:
     metadata:
-      name: airflow-operator
+      # {% raw %}
+      name: "{{ operator }}-operator"
+      # {% endraw %}
     spec:
       project: stackable-operators
       ignoreDifferences:
@@ -25,13 +39,17 @@ spec:
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
         repoURL: https://repo.stackable.tech/repository/helm-stable/
-        targetRevision: "{{ stackableReleaseVersion }}"
-        chart: airflow-operator
+        targetRevision: "25.3.0"
+        # {% raw %}
+        chart: "{{ operator }}-operator"
+        # {% endraw %}
         helm:
-          releaseName: airflow-operator
+          # {% raw %}
+          releaseName: "{{ operator }}-operator"
+          # {% endraw %}
       destination:
         server: https://kubernetes.default.svc
-        namespace: "{{ stackableOperatorNamespace }}"
+        namespace: stackable-operators
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

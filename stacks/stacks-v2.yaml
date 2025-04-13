@@ -23,12 +23,7 @@ stacks:
       ################################
       # operators
       ################################
-      # currently deployed via stackablectl since it complains if no operators are deployed...
-      #- plainYaml: stacks/argo-cd/applicationsets/commons-operator.yaml
-      #- plainYaml: stacks/argo-cd/applicationsets/listener-operator.yaml
-      #- plainYaml: stacks/argo-cd/applicationsets/secret-operator.yaml
-      - plainYaml: stacks/argo-cd/applicationsets/airflow-operator.yaml
-      - plainYaml: stacks/argo-cd/applicationsets/spark-k8s-operator.yaml
+      - plainYaml: stacks/argo-cd/applicationsets/stackable-operators.yaml
       ################################
       # prerequisites
       ################################
@@ -43,9 +38,6 @@ stacks:
       - name: stackableReleaseVersion
         description: Stackable release to be installed via Argo
         default: 25.3.0
-      - name: stackableOperatorNamespace
-        description: Stackable namespace for the operators
-        default: stackable-operators
       - name: argocdAdminPassword
         description: Password of the ArgoCD admin user
         # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
