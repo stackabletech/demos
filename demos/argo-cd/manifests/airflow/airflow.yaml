@@ -53,6 +53,14 @@ spec:
                   secretKeyRef:
                     name: airflow-minio-connection
                     key: airflow-minio-connection
+    config:
+      gracefulShutdownTimeout: 30s
+      resources:
+        cpu:
+          min: 400m
+          max: "1"
+        memory:
+          limit: 1Gi
     roleGroups:
       default:
         replicas: 1
@@ -71,6 +79,14 @@ spec:
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
+    config:
+      gracefulShutdownTimeout: 30s
+      resources:
+        cpu:
+          min: 400m
+          max: "1"
+        memory:
+          limit: 1Gi
     roleGroups:
       default:
         replicas: 1
