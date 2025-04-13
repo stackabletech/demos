@@ -67,7 +67,7 @@ spec:
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
-    podOverrides: &podOverrides
+    podOverrides:
       spec:
         containers:
           - name: base
