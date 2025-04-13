@@ -67,7 +67,16 @@ spec:
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
-    podOverrides: *podOverrides
+    podOverrides: &podOverrides
+      spec:
+        containers:
+          - name: base
+            env:
+              - name: AIRFLOW_CONN_MINIO
+                valueFrom:
+                  secretKeyRef:
+                    name: airflow-minio-connection
+                    key: airflow-minio-connection
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
