@@ -31,11 +31,11 @@ spec:
                 requests:
                   storage: "1"
               storageClassName: secrets.stackable.tech
+    volumeMounts:
       - name: minio-tls
         mountPath: /stackable/minio-tls
   webservers:
     envOverrides: &envOverrides
-      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       # Via sealed secrets, just kept for reference here
       #AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
