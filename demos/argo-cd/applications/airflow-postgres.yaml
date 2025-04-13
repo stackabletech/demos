@@ -21,7 +21,7 @@ spec:
             stackable.tech/vendor: Stackable
           auth:
             database: airflow
-            existingSecret: postgres-credentials
+            existingSecret: postgresql-credentials
     - repoURL: https://github.com/stackabletech/demos.git
       # TODO: adapt to release-25.3
       targetRevision: "spike/argocd-demo"
