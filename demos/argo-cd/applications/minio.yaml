@@ -11,7 +11,7 @@ spec:
     repoURL: https://github.com/stackabletech/demos.git
     # TODO: adapt to release-25.3
     targetRevision: "spike/argocd-demo"
-    path: stacks/argo-cd/manifests/minio/
+    path: demos/argo-cd/manifests/minio/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
