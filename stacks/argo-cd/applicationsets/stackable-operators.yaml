@@ -22,6 +22,7 @@ spec:
           - operator: spark-k8s
           - operator: superset
           - operator: trino
+          - operator: zookeeper
   template:
     metadata:
       # {% raw %}
