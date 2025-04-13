@@ -7,22 +7,25 @@ spec:
   destination:
     server: https://kubernetes.default.svc
     namespace: stackable-airflow
-  source:
-    repoURL: "registry-1.docker.io/bitnamicharts"
-    path: postgresql
-    # helm inspect chart oci://registry-1.docker.io/bitnamicharts/postgresql
-    targetRevision: 16.6.3 # 17.4.0
-    chart: postgresql
-    helm:
-      # TODO this breaks naming as long as we use the airflow stack yaml which needs this svc name
-      releaseName: postgresql-airflow
-      valuesObject:
-        commonLabels:
-          stackable.tech/vendor: Stackable
-        auth:
-          username: airflow
-          password: airflow
-          database: airflow
+  sources:
+    - repoURL: "registry-1.docker.io/bitnamicharts"
+      path: postgresql
+      # helm inspect chart oci://registry-1.docker.io/bitnamicharts/postgresql
+      targetRevision: 16.6.3 # 17.4.0
+      chart: postgresql
+      helm:
+        # TODO this breaks naming as long as we use the airflow stack yaml which needs this svc name
+        releaseName: postgresql-airflow
+        valuesObject:
+          commonLabels:
+            stackable.tech/vendor: Stackable
+          auth:
+            database: airflow
+            existingSecret: postgres-credentials
+    - repoURL: https://github.com/stackabletech/demos.git
+      # TODO: adapt to release-25.3
+      targetRevision: "spike/argocd-demo"
+      path: demo/argo-cd/manifests/airflow-postgres
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
