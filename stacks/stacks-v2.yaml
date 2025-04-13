@@ -20,8 +20,6 @@ stacks:
       # projects
       ################################
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
-      - plainYaml: stacks/argo-cd/projects/airflow.yaml
-      - plainYaml: stacks/argo-cd/projects/minio.yaml
       ################################
       # operators
       ################################
@@ -35,12 +33,6 @@ stacks:
       # prerequisites
       ################################
       - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
-      - plainYaml: stacks/argo-cd/applications/airflow-postgres.yaml
-      - plainYaml: stacks/argo-cd/applications/minio.yaml
-      ################################
-      # products
-      ################################
-      - plainYaml: stacks/argo-cd/applications/airflow.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:
@@ -51,10 +43,6 @@ stacks:
       - name: stackableReleaseVersion
         description: Stackable release to be installed via Argo
         default: 25.3.0
-      - name: demoReleaseVersion
-        description: The target revision, HEAD or e.g. release-25.3
-        #default: release-25.3
-        default: spike/argocd-demo
       - name: stackableOperatorNamespace
         description: Stackable namespace for the operators
         default: stackable-operators

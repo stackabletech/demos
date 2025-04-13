@@ -1,16 +1,17 @@
 apiVersion: argoproj.io/v1alpha1
 kind: Application
 metadata:
-  name: minio
+  name: airflow
 spec:
-  project: minio
+  project: airflow
   destination:
     server: https://kubernetes.default.svc
-    namespace: minio
+    namespace: stackable-airflow
   source:
     repoURL: https://github.com/stackabletech/demos.git
-    targetRevision: "{{ demoReleaseVersion }}"
-    path: stacks/argo-cd/manifests/minio/
+    # TODO: adapt to release-25.3
+    targetRevision: "spike/argocd-demo"
+    path: stacks/argo-cd/manifests/airflow/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
