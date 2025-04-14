@@ -8,6 +8,9 @@ demos:
       - git ops
       - airflow
       - job-scheduling
+      - git sync
+      - kubernetes executor
+      - sealed secrets
     manifests:
       ################################
       # projects

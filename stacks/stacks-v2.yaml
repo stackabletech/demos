@@ -1,7 +1,7 @@
 ---
 stacks:
   argocd:
-    description: Deploying Stackable Demos with ArgoCD
+    description: Deploying Stackable Operators with ArgoCD
     stackableRelease: dev
     stackableOperators: ["argo-deploys-operators"]
     labels:
