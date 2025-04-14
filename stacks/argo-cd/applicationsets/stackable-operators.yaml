@@ -7,10 +7,9 @@ spec:
   generators:
     - list:
         elements:
-          # Left out as currently installed via stackablectl
-          # operator: commons
-          # operator: listener
-          # operator: secret
+          - operator: commons
+          - operator: listener
+          - operator: secret
           - operator: airflow
           - operator: druid
           - operator: hbase

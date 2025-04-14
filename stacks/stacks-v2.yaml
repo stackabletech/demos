@@ -3,17 +3,11 @@ stacks:
   argocd:
     description: Deploying Stackable Demos with ArgoCD
     stackableRelease: dev
-    # TODO: We actually want to deploy all operators via ArgoCD, but we currently *have to* install
-    # operators with stackablectl. Therefore we install the internal operators via stackablectl.
-    # stackableOperators: []
-    stackableOperators:
-      - listener
-      - commons
-      - secret
+    stackableOperators: ["argo-deploys-operators"]
     labels:
       - argocd
       - sealed secrets
-      - airflow
+      - git ops
     manifests:
       - helmChart: stacks/_templates/argo-cd.yaml
       ################################

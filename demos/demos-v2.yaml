@@ -5,6 +5,7 @@ demos:
     stackableStack: argocd
     labels:
       - argocd
+      - git ops
       - airflow
       - job-scheduling
     manifests:
