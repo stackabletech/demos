@@ -13,14 +13,6 @@ rules:
       - get
       - list
   - apiGroups:
-      - airflow.stackable.tech
-    resources:
-      - airflowdbs
-    verbs:
-      - create
-      - get
-      - list
-  - apiGroups:
       - apps
     resources:
       - statefulsets
