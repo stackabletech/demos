@@ -1,0 +1,40 @@
+---
+apiVersion: spark.stackable.tech/v1alpha1
+kind: SparkConnectServer
+metadata:
+  name: spark-connect
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  image:
+    productVersion: 3.5.5
+    pullPolicy: IfNotPresent
+  args:
+  server:
+    configOverrides:
+      spark-defaults.conf:
+        spark.jars.ivy: /tmp/ivy2
+    #     spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+    #     spark.sql.catalog.local: org.apache.iceberg.spark.SparkCatalog
+    #     spark.sql.catalog.local.type: hadoop
+    #     spark.sql.catalog.local.warehouse: /tmp/warehouse
+    #     spark.sql.defaultCatalog: local
+    podOverrides:
+      spec:
+        containers:
+          - name: spark
+            env:
+              - name: HADOOP_CONF_DIR
+                value: /stackable/config/hdfs-config
+            volumeMounts:
+              - name: hdfs-config
+                mountPath: /stackable/config/hdfs-config
+        volumes:
+          - name: hdfs-config
+            configMap:
+              name: hdfs
+  executor:
+    configOverrides:
+      spark-defaults.conf:
+        spark.executor.instances: "1"
+        spark.executor.memoryOverhead: "1m"

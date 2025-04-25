@@ -387,6 +387,34 @@ stacks:
       - name: jupyterHubAdminPassword
         description: Password of the JupyterHub admin user
         default: adminadmin
+  spark-connect-notebook:
+    description: Python notebook client for Spark connect processing data from HDFS
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - zookeeper
+      - hdfs
+      - spark-k8s
+    labels:
+      - jupyterlab
+      - hdfs
+      - spark-connect
+    manifests:
+      - plainYaml: stacks/spark-connect-notebook/jupyterlab.yaml
+      - plainYaml: stacks/spark-connect-notebook/spark_connect.yaml
+      - plainYaml: stacks/spark-connect-notebook/zookeeper.yaml
+      - plainYaml: stacks/spark-connect-notebook/hdfs.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 3350m
+      memory: 7174Mi
+      pvc: 110Gi
+    parameters:
+      - name: jupyterHubAdminPassword
+        description: Password of the JupyterHub admin user
+        default: adminadmin
   dual-hive-hdfs-s3:
     description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
     stackableRelease: dev

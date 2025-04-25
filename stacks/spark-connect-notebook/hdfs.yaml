@@ -1,0 +1,52 @@
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperZnode
+metadata:
+  name: hdfs-znode
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  clusterRef:
+    name: zookeeper
+---
+apiVersion: hdfs.stackable.tech/v1alpha1
+kind: HdfsCluster
+metadata:
+  name: hdfs
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  image:
+    productVersion: 3.4.1
+  clusterConfig:
+    dfsReplication: 1
+    zookeeperConfigMapName: hdfs-znode
+  nameNodes:
+    config:
+      listenerClass: external-stable
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 2
+  dataNodes:
+    config:
+      listenerClass: external-unstable
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 1
+  journalNodes:
+    config:
+      resources:
+        storage:
+          data:
+            capacity: 5Gi
+    roleGroups:
+      default:
+        replicas: 1

@@ -1,0 +1,57 @@
+#
+# In this single user demo we use a straight JupyterLab image without any of the JupyterHub bloat.
+#
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyterlab
+  labels:
+    app: jupyterlab
+    stackable.tech/vendor: Stackable
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyterlab
+      stackable.tech/vendor: Stackable
+  template:
+    metadata:
+      labels:
+        app: jupyterlab
+        stackable.tech/vendor: Stackable
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: jupyterlab
+          # ubuntu 24.04
+          # python 3.12
+          # lab 4.4.1
+          # mamba 2.0.1
+          image: quay.io/jupyter/base-notebook@sha256:ecf194d38c7c5603efa2b18cbe2dad5130b66e38161db6c11406f9f05d972a73
+          args:
+            - start-notebook.py
+            - --NotebookApp.token='admin-token'
+          env:
+            - name: JUPYTER_PORT
+              value: "8888"
+          ports:
+            - name: http
+              containerPort: 8888
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyterlab
+  labels:
+    app: jupyterlab
+    stackable.tech/vendor: Stackable
+spec:
+  type: NodePort
+  selector:
+    app: jupyterlab
+    stackable.tech/vendor: Stackable
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888
