@@ -24,14 +24,13 @@ spec:
       serviceAccountName: default
       containers:
         - name: jupyterlab
-          # ubuntu 24.04
-          # python 3.12
-          # lab 4.4.1
-          # mamba 2.0.1
-          image: quay.io/jupyter/base-notebook@sha256:ecf194d38c7c5603efa2b18cbe2dad5130b66e38161db6c11406f9f05d972a73
+          image: oci.stackable.tech/sdp/spark-connect-client:3.5.5-stackable0.0.0-dev
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
           args:
-            - start-notebook.py
-            - --NotebookApp.token='admin-token'
+            - -c
+            - /stackable/.local/bin/jupyter lab --ServerApp.token='token' --no-browser
           env:
             - name: JUPYTER_PORT
               value: "8888"
