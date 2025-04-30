@@ -368,16 +368,15 @@ stacks:
       - hdfs
       - spark-k8s
     labels:
-      - jupyterhub
+      - jupyterlab
       - hdfs
       - pyspark
+      - spark-connect
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/jupyterhub.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
-      # TODO Use patched JHub that created service for us from customer setup (ask Sebastian)
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - helmChart: stacks/jupyterhub-pyspark-hdfs/jupyterlab.yaml
+      - plainYaml: stacks/jupyterhub-pyspark-hdfs/spark_connect.yaml
+      - plainYaml: stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
+      - plainYaml: stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3350m
