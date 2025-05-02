@@ -63,5 +63,5 @@ spec:
     stackable.tech/vendor: Stackable
   ports:
     - name: http
-      port: 8888
-      targetPort: 8888
+      port: 8080
+      targetPort: 8080
