@@ -27,13 +27,13 @@ spec:
             - bash
           args:
             - -c
-            - /stackable/.local/bin/jupyter lab --ServerApp.token='token' --no-browser
+            - /stackable/.local/bin/jupyter lab --ServerApp.token='{{ jupyterLabToken }}' --ServerApp.port=8080 --no-browser --notebook-dir /notebook
           env:
             - name: JUPYTER_PORT
-              value: "8888"
+              value: "8080"
           ports:
             - name: http
-              containerPort: 8888
+              containerPort: 8080
           volumeMounts:
             - mountPath: /notebook
               name: notebook
