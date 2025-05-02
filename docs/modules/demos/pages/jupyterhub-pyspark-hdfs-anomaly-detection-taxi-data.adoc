@@ -104,7 +104,7 @@ In order to reach the JupyterLab web interface, create a port-forward:
 $ kubectl port-forward service/jupyterlab 8080:http
 ----
 
-The `jupyterlab` service is created along side the deployment of rhe JupyterLab deployment.
+The `jupyterlab` service is created along side the the JupyterLab deployment.
 
 Now access the JupyterHub web interface via http://localhost:8080
 
