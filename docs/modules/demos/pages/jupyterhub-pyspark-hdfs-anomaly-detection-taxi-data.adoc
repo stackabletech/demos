@@ -39,7 +39,7 @@ To run this demo, your system needs at least:
 
 == Aim / Context
 
-This demo uses stackable operators to deploy a Spark Connect server and a HDFS cluster.
+This demo uses stackable operators to deploy a Spark Connect server and an HDFS cluster.
 The intention is to demonstrate how clients, in this case a JupyterLab notebook, can interact with SDP components.
 The notebook creates a SparkSession, that delegates the data analysis and model training to a Spark Connect service thus offloading resources into the Kubernetes cluster.
 The notebook can thus be used as a sandbox for writing, testing and benchmarking Spark jobs before they are moved into production.
