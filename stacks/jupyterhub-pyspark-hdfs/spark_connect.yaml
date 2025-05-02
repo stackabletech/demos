@@ -79,4 +79,3 @@ spec:
           spark:
             custom:
               configMap: spark-connect-log-config
-
