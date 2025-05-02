@@ -132,7 +132,7 @@ In practice, clients of Spark Connect do not need a full-blown Spark installatio
 == Model details
 
 The job uses an implementation of the Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn {scikit-lib}[library]:
-the model is trained and then invoked by a user-defined function (see {forest-article}[this article] for how to call the sklearn library with a pyspark UDF), all of which is run using the Spark connect executors.
+the model is trained and then invoked by a user-defined function (see {forest-article}[this article] for how to call the sklearn library with a pyspark UDF), all of which is run using the Spark Connect executors.
 This type of model attempts to isolate each data point by continually partitioning the data.
 Data closely packed together will require more partitions to separate data points.
 In contrast, any outliers will require less: the number of partitions needed for a particular data point is thus inversely proportional to the anomaly "score".
