@@ -12,6 +12,7 @@
 :hadoop: https://hadoop.apache.org/
 :jupyter: https://jupyter.org
 :spark-connect: https://spark.apache.org/docs/latest/spark-connect-overview.html
+:spark-connect-client: https://github.com/stackabletech/docker-images/blob/main/spark-connect-client/Dockerfile
 
 This demo showcases the integration between {jupyterlab}[JupyterLab], {spark-connect}[Spark Connect] and {hadoop}[Apache Hadoop] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
 The SDP makes this integration easy by publishing a discovery ConfigMap for the HDFS cluster and a Spark Connect service.
@@ -127,6 +128,8 @@ You can also inspect the `hdfs` folder where the `core-site.xml` and `hdfs-site.
 The Python notebook uses libraries such as `pandas` and `scikit-learn` to analyze the data.
 In addition, since the model training is delegated to a Spark Connect server, some of these dependencies, most notably `scikit-learn`, must also be made available on the Spark Connect pods.
 For convenience, a custom image is used in this demo that bundles all the required libraries for both the notebook and the Spark Connect server.
+The source of the image is available {spark-connect-client}[here].
+
 In practice, clients of Spark Connect do not need a full-blown Spark installation available locally, but only the libraries that are used in the notebook.
 
 == Model details
