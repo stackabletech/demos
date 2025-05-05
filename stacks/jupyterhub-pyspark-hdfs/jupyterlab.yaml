@@ -39,7 +39,7 @@ spec:
               name: notebook
       initContainers:
         - name: download-notebook
-          image: oci.stackable.tech/sdp/spark-connect-client:3.5.5-stackable0.0.0-dev
+          image: oci.stackable.tech/stackable/spark-connect-client:3.5.5-stackable0.0.0-dev
           command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
           volumeMounts:
             - mountPath: /notebook
