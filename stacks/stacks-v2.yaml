@@ -373,10 +373,10 @@ stacks:
       - pyspark
       - spark-connect
     manifests:
-      - plainYaml: stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
-      - plainYaml: stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
-      - plainYaml: stacks/jupyterhub-pyspark-hdfs/jupyterlab.yaml
-      - plainYaml: stacks/jupyterhub-pyspark-hdfs/spark_connect.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/hdfs.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/jupyterlab.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_connect.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3350m
