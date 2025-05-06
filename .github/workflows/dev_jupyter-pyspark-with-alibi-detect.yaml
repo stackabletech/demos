@@ -35,6 +35,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Build image
         id: build
@@ -63,6 +65,8 @@ jobs:
     steps:
       - name: Checkout Repository
         uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
 
       - name: Publish and Sign Image Index Manifest to oci.stackable.tech
         uses: stackabletech/actions/publish-index-manifest@4bfd3b65f22af597fe784599c077dc34bf5894a7 # v0.8.0
