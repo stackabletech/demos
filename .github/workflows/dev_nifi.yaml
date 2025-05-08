@@ -1,14 +1,6 @@
 ---
 name: Build and publish NiFi for signal-processing demo
 
-env:
-  IMAGE_NAME: nifi
-  # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
-  # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-  IMAGE_VERSION: 2.2.0-postgresql
-  REGISTRY_PATH: stackable
-  DOCKERFILE_PATH: "demos/signal-processing/Dockerfile-nifi"
-
 on:
   workflow_dispatch:
   push:
@@ -21,53 +13,14 @@ on:
       - .github/workflows/dev_nifi.yaml
 
 jobs:
-  build:
-    name: Build/Publish ${{ matrix.runner.arch }} Image
-    permissions:
-      id-token: write
-    runs-on: ${{ matrix.runner.name }}
-    strategy:
-      matrix:
-        runner:
-          - {name: "ubuntu-latest", arch: "amd64"}
-          - {name: "ubicloud-standard-8-arm", arch: "arm64"}
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-
-      - name: Build image
-        id: build
-        uses: stackabletech/actions/build-container-image@013e6482fbc0edf2d38cf9220fc931f6a81336fb # v0.0.6
-        with:
-          image-name: ${{ env.IMAGE_NAME }}
-          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
-          container-file: ${{ env.DOCKERFILE_PATH }}
-
-      - name: Publish Container Image on oci.stackable.tech
-        uses: stackabletech/actions/publish-image@013e6482fbc0edf2d38cf9220fc931f6a81336fb # v0.0.6
-        with:
-          image-registry-uri: oci.stackable.tech
-          image-registry-username: robot$stackable+github-action-build
-          image-registry-password: ${{ secrets.HARBOR_ROBOT_STACKABLE_GITHUB_ACTION_BUILD_SECRET }}
-          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
-          image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
-          source-image-uri: ${{ steps.build.outputs.image-manifest-uri }}
-
-  publish_manifests:
-    name: Build/Publish Manifest
-    needs: [build]
-    permissions:
-      id-token: write
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@692973e3d937129bcbf40652eb9f2f61becf3332 # v4.1.7
-
-      - name: Publish and Sign Image Index Manifest to oci.stackable.tech
-        uses: stackabletech/actions/publish-index-manifest@013e6482fbc0edf2d38cf9220fc931f6a81336fb # v0.0.6
-        with:
-          image-registry-uri: oci.stackable.tech
-          image-registry-username: robot$stackable+github-action-build
-          image-registry-password: ${{ secrets.HARBOR_ROBOT_STACKABLE_GITHUB_ACTION_BUILD_SECRET }}
-          image-repository: ${{ env.REGISTRY_PATH }}/${{ env.IMAGE_NAME }}
-          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+  build_image:
+    name: Reusable Workflow
+    uses: ./.github/workflows/reusable_build_image.yaml
+    secrets:
+      harbor-robot-secret: ${{ secrets.HARBOR_ROBOT_DEMOS_GITHUB_ACTION_BUILD_SECRET }}
+    with:
+      image-name: nifi
+      # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+      # the demo is reproducable for the release and it will be automatically replaced for the release branch.
+      image-version: 2.2.0-postgresql
+      containerfile-path: demos/signal-processing/Dockerfile-nifi
