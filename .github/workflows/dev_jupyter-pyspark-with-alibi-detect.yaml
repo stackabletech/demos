@@ -19,6 +19,7 @@ jobs:
     uses: ./.github/workflows/reusable_build_image.yaml
     secrets:
       harbor-robot-secret: ${{ secrets.HARBOR_ROBOT_DEMOS_GITHUB_ACTION_BUILD_SECRET }}
+      slack-token: ${{ secrets.SLACK_CONTAINER_IMAGE_TOKEN }}
     with:
       image-name: jupyter-pyspark-with-alibi-detect
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
