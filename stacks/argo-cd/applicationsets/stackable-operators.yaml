@@ -1,0 +1,61 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: stackable-operators
+spec:
+  generators:
+    - list:
+        elements:
+          # Left out as currently installed via stackablectl
+          # operator: commons
+          # operator: listener
+          # operator: secret
+          - operator: airflow
+          - operator: druid
+          - operator: hbase
+          - operator: hdfs
+          - operator: hive
+          - operator: kafka
+          - operator: nifi
+          - operator: opa
+          - operator: spark-k8s
+          - operator: superset
+          - operator: trino
+          - operator: zookeeper
+  template:
+    metadata:
+      # {% raw %}
+      name: "{{ operator }}-operator"
+      # {% endraw %}
+    spec:
+      project: stackable-operators
+      ignoreDifferences:
+        # mitigating: https://github.com/stackabletech/hdfs-operator/issues/626
+        - group: "apiextensions.k8s.io"
+          kind: "CustomResourceDefinition"
+          jqPathExpressions:
+            - .spec.names.categories | select(. == [])
+            - .spec.names.shortNames | select(. == [])
+            - .spec.versions[].additionalPrinterColumns | select(. == [])
+      source:
+        repoURL: https://repo.stackable.tech/repository/helm-stable/
+        targetRevision: "25.3.0"
+        # {% raw %}
+        chart: "{{ operator }}-operator"
+        # {% endraw %}
+        helm:
+          # {% raw %}
+          releaseName: "{{ operator }}-operator"
+          # {% endraw %}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: stackable-operators
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+        automated:
+          selfHeal: true
+          prune: true

@@ -1,5 +1,33 @@
 ---
 demos:
+  argocd:
+    description: Deploy Stackable operators and Airflow via ArgoCD and activate a simple Airflow DAG.
+    stackableStack: argocd
+    labels:
+      - argocd
+      - airflow
+      - job-scheduling
+    manifests:
+      ################################
+      # projects
+      ################################
+      - plainYaml: demos/argo-cd/projects/airflow.yaml
+      - plainYaml: demos/argo-cd/projects/minio.yaml
+      ################################
+      # prerequisites
+      ################################
+      - plainYaml: demos/argo-cd/applications/airflow-postgres.yaml
+      - plainYaml: demos/argo-cd/applications/minio.yaml
+      ################################
+      # products
+      ################################
+      - plainYaml: demos/argo-cd/applications/airflow.yaml
+    supportedNamespaces:
+      - argo-cd
+    resourceRequests:
+      cpu: 2401m
+      memory: 9010Mi
+      pvc: 24Gi
   airflow-scheduled-job:
     description: Activate a simple Airflow DAG to run continuously at a set interval
     stackableStack: airflow
