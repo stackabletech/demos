@@ -1,0 +1,125 @@
+on:
+  workflow_call:
+    inputs:
+      image-name:
+        required: true
+        type: string
+      image-version:
+        required: true
+        type: string
+      containerfile-path:
+        required: true
+        type: string
+    secrets:
+      harbor-robot-secret:
+        description: The secret for the Harbor robot user used to push images and manifest
+        required: true
+      slack-token:
+        description: The Slack token used to post failure notifications
+        required: true
+
+jobs:
+  build:
+    name: Build/Publish ${{ inputs.image-version }}-${{ matrix.runner.arch }} Image
+    permissions:
+      id-token: write
+    runs-on: ${{ matrix.runner.name }}
+    strategy:
+      matrix:
+        runner:
+          - {name: "ubuntu-latest", arch: "amd64"}
+          - {name: "ubicloud-standard-8-arm", arch: "arm64"}
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Build image
+        id: build
+        env:
+          CONTAINERFILE_PATH: ${{ inputs.containerfile-path }}
+          IMAGE_VERSION: ${{ inputs.image-version }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+        uses: stackabletech/actions/build-container-image@4bfd3b65f22af597fe784599c077dc34bf5894a7 # v0.8.0
+        with:
+          image-name: ${{ env.IMAGE_NAME }}
+          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+          container-file: ${{ env.CONTAINERFILE_PATH }}
+
+      - name: Publish Container Image on oci.stackable.tech
+        env:
+          IMAGE_NAME: ${{ inputs.image-name }}
+        uses: stackabletech/actions/publish-image@4bfd3b65f22af597fe784599c077dc34bf5894a7 # v0.8.0
+        with:
+          image-registry-uri: oci.stackable.tech
+          image-registry-username: robot$demos+github-action-build
+          image-registry-password: ${{ secrets.harbor-robot-secret }}
+          image-repository: demos/${{ env.IMAGE_NAME }}
+          image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
+          source-image-uri: ${{ steps.build.outputs.image-manifest-uri }}
+
+  publish_manifests:
+    name: Build/Publish Manifest
+    needs: [build]
+    permissions:
+      id-token: write
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Publish and Sign Image Index Manifest to oci.stackable.tech
+        env:
+          IMAGE_VERSION: ${{ inputs.image-version }}
+          IMAGE_NAME: ${{ inputs.image-name }}
+        uses: stackabletech/actions/publish-index-manifest@4bfd3b65f22af597fe784599c077dc34bf5894a7 # v0.8.0
+        with:
+          image-registry-uri: oci.stackable.tech
+          image-registry-username: robot$demos+github-action-build
+          image-registry-password: ${{ secrets.harbor-robot-secret }}
+          image-repository: demos/${{ env.IMAGE_NAME }}
+          image-index-manifest-tag: ${{ env.IMAGE_VERSION }}
+
+  notify:
+    name: Failure Notification
+    needs: [build, publish_manifests]
+    runs-on: ubuntu-latest
+    if: failure()
+    steps:
+      - uses: slackapi/slack-github-action@37ebaef184d7626c5f204ab8d3baff4262dd30f0 # v1.27.0
+        with:
+          channel-id: "C07UG6JH44F" # notifications-container-images
+          payload: |
+            {
+              "text": "*${{ github.workflow }}* failed (attempt ${{ github.run_attempt }})",
+              "attachments": [
+                {
+                  "pretext": "See the details below for a summary of which job(s) failed.",
+                  "color": "#aa0000",
+                  "fields": [
+                    {
+                      "title": "Build/Publish Image",
+                      "short": true,
+                      "value": "${{ needs.build.result }}"
+                    },
+                    {
+                      "title": "Build/Publish Manifests",
+                      "short": true,
+                      "value": "${{ needs.publish_manifests.result }}"
+                    }
+                  ],
+                  "actions": [
+                    {
+                      "type": "button",
+                      "text": "Go to workflow run",
+                      "url": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}/attempts/${{ github.run_attempt }}"
+                    }
+                  ]
+                }
+              ]
+            }
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.slack-token }}
