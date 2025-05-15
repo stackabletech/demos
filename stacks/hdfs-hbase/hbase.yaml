@@ -5,7 +5,7 @@ metadata:
   name: hbase
 spec:
   image:
-    productVersion: 2.6.1
+    productVersion: 2.6.2
   clusterConfig:
     listenerClass: external-unstable
     hdfsConfigMapName: hdfs
