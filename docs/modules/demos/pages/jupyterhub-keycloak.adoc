@@ -103,7 +103,7 @@ This setup is ideal for interactive data processing.
 
 === Spark Configuration
 
-* **Executor Image**: Uses a custom image `oci.stackable.tech/sandbox/spark:3.5.2-python311` (built on the standard Spark image) for the executors, matching the Python version of the notebook.
+* **Executor Image**: Uses a custom image `oci.stackable.tech/sandbox/spark:3.5.5-python311` (built on the standard Spark image) for the executors, matching the Python version of the notebook.
 * **Resource Allocation**: Configures Spark executor instances, memory, and cores through settings defined in the notebook.
 * **Hadoop and AWS Libraries**: Includes necessary Hadoop and AWS libraries for S3 operations, matching the notebook image version.
 
