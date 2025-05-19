@@ -9,13 +9,16 @@ stacks:
       - sealed secrets
       - git ops
     manifests:
+      ################################
+      # bootstrap argo
+      ################################
       - helmChart: stacks/_templates/argo-cd.yaml
       ################################
-      # projects
+      # project - operators
       ################################
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
       ################################
-      # operators
+      # applicationset - operators
       ################################
       - plainYaml: stacks/argo-cd/applicationsets/stackable-operators.yaml
       ################################
