@@ -209,7 +209,7 @@ options:
           image:
             display_name: Image
             choices:
-{% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
+{% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.5"] %}
               "{{image}}":
                 display_name: "{{image}}"
                 kubespawner_override:
