@@ -17,9 +17,10 @@ spec:
             kubectl rollout status --watch statefulset/airflow-webserver-default
             && kubectl rollout status --watch statefulset/airflow-scheduler-default
             && export AIRFLOW_ADMIN_PASSWORD=$(cat /airflow-credentials/adminUser.password)
-            && curl -i -s --user admin:$AIRFLOW_ADMIN_PASSWORD http://airflow-webserver-default:8080/api/v1/dags/date_demo
-            && curl -i -s --user admin:$AIRFLOW_ADMIN_PASSWORD -H 'Content-Type:application/json' -XPATCH http://airflow-webserver-default:8080/api/v1/dags/date_demo -d '{\"is_paused\": false}'
-            && curl -i -s --user admin:$AIRFLOW_ADMIN_PASSWORD -H 'Content-Type:application/json' -XPOST http://airflow-webserver-default:8080/api/v1/dags/date_demo/dagRuns -d '{}'
+            && export ACCESS_TOKEN=$(curl -XPOST http://airflow-webserver-default:8080/auth/token -H 'Content-Type: application/json' -d '{\"username\": \"admin\", \"password\": \"'$AIRFLOW_ADMIN_PASSWORD'\"}' | jq '.access_token' | tr -d '\"')
+            && echo $ACCESS_TOKEN
+            && curl -H \"Authorization: Bearer $ACCESS_TOKEN\" -H 'Content-Type: application/json' -XPATCH http://airflow-webserver-default:8080/api/v2/dags/date_demo -d '{\"is_paused\": false}' | jq
+            && curl -H \"Authorization: Bearer $ACCESS_TOKEN\" -H 'Content-Type: application/json' -XPOST http://airflow-webserver-default:8080/api/v2/dags/date_demo/dagRuns -d '{\"logical_date\": null}' | jq
           "]
           volumeMounts:
             - name: airflow-credentials
