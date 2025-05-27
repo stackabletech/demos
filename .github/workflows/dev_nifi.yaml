@@ -6,7 +6,9 @@ on:
   push:
     branches:
       - main
-      # TODO (@NickLarsenNZ): Also build on release branches, but with a stackable0.0.0-dev or stackableXX.X.X tag.
+      # TODO (@NickLarsenNZ): Also build on release branches, but with a stackable0.0.0-dev or stackableYY.M.X tag.
+      # The current problem is that we don't know the patch level, so do we always build for `.0`, or just drop that
+      # (eg: stackableYY.M), but then do we do the same for main (eg: 0.0-dev)?
       # - release-*
     paths:
       - demos/signal-processing/Dockerfile-nifi
@@ -23,5 +25,5 @@ jobs:
       image-name: nifi
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-      image-version: 2.2.0-postgresql
+      image-version: 2.4.0-postgresql
       containerfile-path: demos/signal-processing/Dockerfile-nifi
