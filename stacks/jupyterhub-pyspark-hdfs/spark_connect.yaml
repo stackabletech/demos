@@ -54,6 +54,7 @@ spec:
             configMap:
               name: hdfs
     config:
+      listenerClass: external-unstable
       resources:
         memory:
           limit: "2Gi"
