@@ -13,7 +13,6 @@ spec:
     sensitiveProperties:
       keySecret: nifi-sensitive-property-key
       autoGenerate: true
-    zookeeperConfigMapName: nifi-znode
   nodes:
     config:
       resources:
@@ -53,11 +52,3 @@ metadata:
   name: nifi-admin-credentials-secret
 stringData:
   admin: {{ nifiAdminPassword }}
----
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: nifi-znode
-spec:
-  clusterRef:
-    name: zookeeper

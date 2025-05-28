@@ -12,7 +12,6 @@ spec:
     # pullPolicy: IfNotPresent
   clusterConfig:
     listenerClass: external-unstable
-    zookeeperConfigMapName: nifi-znode
     authentication:
       - authenticationClass: nifi-users
     sensitiveProperties:
@@ -57,11 +56,3 @@ metadata:
   name: nifi-admin-credentials
 stringData:
   admin: {{ nifiAdminPassword }}
----
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: nifi-znode
-spec:
-  clusterRef:
-    name: zookeeper
