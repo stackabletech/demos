@@ -7,7 +7,6 @@ spec:
   image:
     productVersion: 4.1.2
   clusterConfig:
-    listenerClass: external-unstable
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
     authentication:
@@ -16,6 +15,8 @@ spec:
           clientCredentialsSecret: superset-keycloak-client
         userRegistrationRole: Gamma_extended
   nodes:
+    config:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1

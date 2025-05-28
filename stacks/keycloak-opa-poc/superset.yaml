@@ -22,11 +22,12 @@ spec:
     productVersion: 4.1.2
   clusterConfig:
     credentialsSecret: superset-credentials
-    listenerClass: external-unstable
   nodes:
     roleGroups:
       default:
         replicas: 1
+    config:
+      listenerClass: external-unstable
     configOverrides:
       superset_config.py:
         AUTH_TYPE: AUTH_OAUTH
