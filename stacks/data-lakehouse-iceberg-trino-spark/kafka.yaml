@@ -1,12 +1,4 @@
 ---
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: kafka-znode
-spec:
-  clusterRef:
-    name: zookeeper
----
 apiVersion: kafka.stackable.tech/v1alpha1
 kind: KafkaCluster
 metadata:
@@ -46,3 +38,11 @@ spec:
   provider:
     tls:
       clientCertSecretClass: tls
+---
+apiVersion: zookeeper.stackable.tech/v1alpha1
+kind: ZookeeperZnode
+metadata:
+  name: kafka-znode
+spec:
+  clusterRef:
+    name: zookeeper

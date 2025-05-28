@@ -7,10 +7,11 @@ spec:
   image:
     productVersion: 4.1.2
   clusterConfig:
-    listenerClass: external-unstable
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
   nodes:
+    config:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1
