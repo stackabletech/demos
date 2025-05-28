@@ -46,11 +46,11 @@ To list the installed Stackable services run the following command:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌──────────┬───────────────┬───────────┬───────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                 ┆ CONDITIONS                      │
-╞══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════╪═════════════════════════════════╡
-│ airflow  ┆ airflow       ┆ default   ┆ webserver-airflow http://172.18.0.2:31979 ┆ Available, Reconciling, Running │
-└──────────┴───────────────┴───────────┴───────────────────────────────────────────┴─────────────────────────────────┘
+┌─────────┬─────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME    ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
+╞═════════╪═════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow ┆ default   ┆ webserver-default-http  http://172.19.0.5:30913 ┆ Available, Reconciling, Running │
+└─────────┴─────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -58,47 +58,47 @@ include::partial$instance-hint.adoc[]
 == Airflow Webserver UI
 
 Superset gives the ability to execute SQL queries and build dashboards. Open the `airflow` endpoint `webserver-airflow`
-in your browser (`http://172.18.0.2:31979` in this case).
+in your browser (`http://172.19.0.5:30913` in this case).
 
 image::airflow-scheduled-job/airflow_1.png[]
 
-Log in with the username `admin` and password `adminadmin`. The overview screen shows the DAGs mounted during the demo
-setup (`date_demo`).
+Log in with the username `admin` and password `adminadmin`.
+Click in 'Active DAGs' at the top and you will see an overview showing the DAGs mounted during the demo
+setup (`date_demo` and `sparkapp_dag`).
 
 image::airflow-scheduled-job/airflow_2.png[]
 
-There are two things to notice here. Both DAGs have been enabled, as shown by the slider to the left of the DAG name
-(DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for
-this demo):
+There are two things to notice here.
+Both DAGs have been enabled, as shown by the slider on the far right of the screen for each DAG
+(DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for this demo):
 
 image::airflow-scheduled-job/airflow_3.png[]
 
-Secondly, the `date_demo` job has been busy, with several runs already logged. The `sparkapp_dag` has only been run
-once because they have been defined with different schedules.
+Secondly, the `date_demo` job has been busy, with several runs already logged.
+The `sparkapp_dag` has only been run once because they have been defined with different schedules.
 
 image::airflow-scheduled-job/airflow_4.png[]
 
-Clicking on the number under `Runs` will display the individual job runs:
+Clicking on the DAG name and then on `Runs` will display the individual job runs:
 
 image::airflow-scheduled-job/airflow_5.png[]
 
-The `demo_date` job is running every minute. With Airflow, DAGs can be started manually or scheduled to run when certain
-conditions are fulfilled- In this case, the DAG has been set up to run using a cron table, which is part of the DAG
-definition.
+The `demo_date` job is running every minute.
+With Airflow, DAGs can be started manually or scheduled to run when certain conditions are fulfilled - in this case, the DAG has been set up to run using a cron table, which is part of the DAG definition.
 
 === `demo_date` DAG
 
-Let's drill down a bit deeper into this DAG. Click on one of the job runs shown in the previous step to display the
-details. The DAG is displayed as a graph (this job is so simple that it only has one step, called `run_every_minute`).
+Let's drill down a bit deeper into this DAG.
+At the top under the DAG name there is some scheduling information, which tells us that this job will run every minute continuously:
 
 image::airflow-scheduled-job/airflow_6.png[]
 
-In the top right-hand corner there is some scheduling information, which tells us that this job will run every minute
-continuously:
+Click on one of the job runs in the list to display the details for the task instances.
+In the left-side pane the DAG is displayed either as a graph (this job is so simple that it only has one step, called `run_every_minute`), or as a "bar chart" showing each run.
 
 image::airflow-scheduled-job/airflow_7.png[]
 
-Click on the `run_every_minute` box in the centre of the page and then select `Logs`:
+Click on the `run_every_minute` box in the centre of the page to select the logs:
 
 [WARNING]
 ====
@@ -108,26 +108,27 @@ See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/exec
 If you are interested in persisting the logs, take a look at the xref:logging.adoc[] demo.
 ====
 
+image::airflow-scheduled-job/airflow_8.png[]
+
+To look at the actual DAG code click on `Code`.
+Here we can see the crontab information used to schedule the job as well the `bash` command that provides the output:
+
 image::airflow-scheduled-job/airflow_9.png[]
-
-To look at the actual DAG code click on `Code`. Here we can see the crontab information used to schedule the job as well
-the `bash` command that provides the output:
-
-image::airflow-scheduled-job/airflow_10.png[]
 
 === `sparkapp_dag` DAG
 
-Go back to DAG overview screen. The `sparkapp_dag` job has a scheduled entry of `None` and a last-execution time
-(`2022-09-19, 07:36:55`). This allows a DAG to be executed exactly once, with neither schedule-based runs nor any
-https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill[backfill]. The DAG can
-always be triggered manually again via REST or from within the Webserver UI.
+Go back to DAG overview screen.
+The `sparkapp_dag` job has a scheduled entry of `None` and a last-execution time.
+This allows a DAG to be executed exactly once, with neither schedule-based runs nor any
+https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill[backfill].
+The DAG can always be triggered manually again via REST or from within the Webserver UI.
 
-image::airflow-scheduled-job/airflow_11.png[]
+image::airflow-scheduled-job/airflow_10.png[]
 
 By navigating to the graphical overview of the job we can see that DAG has two steps, one to start the job - which runs
 asynchronously - and another to poll the running job to report on its status.
 
-image::airflow-scheduled-job/airflow_12.png[]
+image::airflow-scheduled-job/airflow_11.png[]
 
 == Summary
 
