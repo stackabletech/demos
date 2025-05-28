@@ -631,8 +631,8 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-timescaledb.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/nifi.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/spark_driver_service.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/spark_driver_service.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
     parameters:
       - name: nifiAdminPassword
