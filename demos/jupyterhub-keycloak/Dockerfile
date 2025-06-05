@@ -1,9 +1,9 @@
-# docker build -t oci.stackable.tech/sandbox/spark:3.5.5-python311 -f Dockerfile .
-# kind load docker-image oci.stackable.tech/sandbox/spark:3.5.5-python311 -n stackable-data-platform
+# docker build -t oci.stackable.tech/demos/spark:3.5.2-python311 -f Dockerfile .
+# kind load docker-image oci.stackable.tech/demos/spark:3.5.2-python311 -n stackable-data-platform
 # or:
-# docker push oci.stackable.tech/sandbox/spark:3.5.5-python311
+# docker push oci.stackable.tech/demos/spark:3.5.2-python311
 
-FROM spark:3.5.5-scala2.12-java17-ubuntu
+FROM spark:3.5.2-scala2.12-java17-ubuntu
 
 USER root
 
