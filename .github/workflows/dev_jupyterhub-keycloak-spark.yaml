@@ -2,6 +2,7 @@
 name: Build and publish Spark for jupyterhub-keycloak demo
 
 on:
+  pull_request:
   workflow_dispatch:
   push:
     branches:
