@@ -26,5 +26,5 @@ jobs:
       image-name: spark
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-      image-version: 3.5.5-python311
+      image-version: 3.5.2-python311
       containerfile-path: demos/jupyterhub-keycloak/Dockerfile
