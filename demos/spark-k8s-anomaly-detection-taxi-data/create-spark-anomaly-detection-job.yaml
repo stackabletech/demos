@@ -37,7 +37,7 @@ data:
       name: spark-ad
     spec:
       sparkImage:
-        productVersion: 3.5.5
+        productVersion: 3.5.6
       mode: cluster
       mainApplicationFile: local:///spark-scripts/spark-ad.py
       deps:
