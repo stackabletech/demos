@@ -1,0 +1,21 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+spec:
+  project: airflow
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: stackable-airflow
+  source:
+    repoURL: https://github.com/stackabletech/demos.git
+    # TODO: adapt to release-25.3
+    targetRevision: "spike/argocd-demo"
+    path: demos/argo-cd/manifests/airflow/
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true
