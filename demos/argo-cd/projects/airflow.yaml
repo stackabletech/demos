@@ -1,0 +1,15 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: airflow
+spec:
+  description: Project to manage Stackable Airflow via Git
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: stackable-airflow
+      server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"

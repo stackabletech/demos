@@ -1,5 +1,44 @@
 ---
 stacks:
+  argocd:
+    description: Deploying Stackable Operators with ArgoCD
+    stackableRelease: dev
+    stackableOperators: ["argo-deploys-operators"]
+    labels:
+      - argocd
+      - sealed secrets
+      - git ops
+    manifests:
+      ################################
+      # bootstrap argo
+      ################################
+      - helmChart: stacks/_templates/argo-cd.yaml
+      ################################
+      # project - operators
+      ################################
+      - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
+      ################################
+      # applicationset - operators
+      ################################
+      - plainYaml: stacks/argo-cd/applicationsets/stackable-operators.yaml
+      ################################
+      # prerequisites
+      ################################
+      - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
+    supportedNamespaces:
+      - argo-cd
+    resourceRequests:
+      memory: 10000Mi
+      cpu: 8000m
+      pvc: 20Gi
+    parameters:
+      - name: stackableReleaseVersion
+        description: Stackable release to be installed via Argo
+        default: 25.3.0
+      - name: argocdAdminPassword
+        description: Password of the ArgoCD admin user
+        # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
+        default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: dev
