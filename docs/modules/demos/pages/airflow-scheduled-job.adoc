@@ -57,8 +57,7 @@ include::partial$instance-hint.adoc[]
 
 == Airflow Webserver UI
 
-Superset gives the ability to execute SQL queries and build dashboards. Open the `airflow` endpoint `webserver-airflow`
-in your browser (`http://172.19.0.5:30913` in this case).
+Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.0.5:30913` in this case).
 
 image::airflow-scheduled-job/airflow_1.png[]
 
