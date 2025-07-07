@@ -6,7 +6,6 @@ metadata:
 spec:
   image:
     productVersion: 2.6.2
-    pullPolicy: IfNotPresent
   clusterConfig:
     hdfsConfigMapName: hdfs
     zookeeperConfigMapName: hbase-znode
