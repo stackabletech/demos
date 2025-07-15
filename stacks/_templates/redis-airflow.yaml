@@ -4,7 +4,7 @@ name: redis
 repo:
   name: bitnami
   url: https://charts.bitnami.com/bitnami/
-version: 20.11.3 # 7.4.2
+version: 21.2.10 # 8.0.3
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
