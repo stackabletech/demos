@@ -23,8 +23,13 @@ and products do not negatively impact the products.
 > Eg:
 >
 > ```md
-> :green_circle: **airflow-scheduled-job**
+> ## :green_circle: airflow-scheduled-job
 >
+>
+> - :hourglass: current stable (25.3.0)
+> - :hourglass: upgrade to nightly (pending external dep bumps)
+>
+> Notes can be left here, for example:
 > The CRD had been updated and I needed to change the following in the manifest:
 > ...
 > ```
@@ -51,8 +56,6 @@ GitHub handle next to the demo to indicate a particular demo was picked up for t
     | xargs -I {} echo "- [ ] [{}](https://docs.stackable.tech/home/stable/demos/{})"
 -->
 
-<!-- TODO (@Techassi): Test stacks which don't have a demo -->
-
 - [ ] [airflow-scheduled-job](https://docs.stackable.tech/home/stable/demos/airflow-scheduled-job)
 - [ ] [data-lakehouse-iceberg-trino-spark](https://docs.stackable.tech/home/stable/demos/data-lakehouse-iceberg-trino-spark)
 - [ ] [end-to-end-security](https://docs.stackable.tech/home/stable/demos/end-to-end-security)
@@ -66,6 +69,17 @@ GitHub handle next to the demo to indicate a particular demo was picked up for t
 - [ ] [spark-k8s-anomaly-detection-taxi-data](https://docs.stackable.tech/home/stable/demos/spark-k8s-anomaly-detection-taxi-data)
 - [ ] [trino-iceberg](https://docs.stackable.tech/home/stable/demos/trino-iceberg)
 - [ ] [trino-taxi-data](https://docs.stackable.tech/home/stable/demos/trino-taxi-data)
+
+### Additional stacks
+
+If we have time (otherwise they can be tested and patched after the release)
+
+- [ ] monitoring
+- [ ] logging
+- [ ] dual-hive-hdfs-s3
+- [ ] observability @NickLarsenNZ
+- [ ] tutorial-openldap
+- [ ] openldap
 
 ## Stable to Nightly Upgrade Testing Instructions
 
