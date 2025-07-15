@@ -89,7 +89,7 @@ spec:
     hive.hdfs.wire-encryption.enabled: "true"
     # HMS configuration
     hive.metastore.authentication.type: KERBEROS
-    hive.metastore.client.principal: trino/trino-coordinator.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
     hive.metastore.client.keytab: /stackable/kerberos/keytab
     hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
     hive.metastore.thrift.impersonation.enabled: "false"
