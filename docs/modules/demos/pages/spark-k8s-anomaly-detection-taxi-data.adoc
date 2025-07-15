@@ -148,7 +148,7 @@ image::spark-k8s-anomaly-detection-taxi-data/spark_job.png[]
 == Dashboard
 
 Open the `external-http` Superset endpoint found in the output of the `stackablectl stacklet list` command.
-Alternativly create a port-forward to the Superset service and point your browser to http://localhost:8088:
+Alternatively, create a port-forward to the Superset service and point your browser to http://localhost:8088:
 
 [source,console]
 ----
