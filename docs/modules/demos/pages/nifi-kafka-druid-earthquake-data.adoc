@@ -62,32 +62,26 @@ To list the installed Stackable services run the following command:
 ----
 $ stackablectl stacklet list
 
-┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                       ┆ CONDITIONS                      │
-╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════╪═════════════════════════════════╡
-│ druid     ┆ druid         ┆ default   ┆ broker-metrics         172.18.0.2:32001         ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ broker-https           https://172.18.0.2:32141 ┆                                 │
-│           ┆               ┆           ┆ coordinator-metrics    172.18.0.2:32353         ┆                                 │
-│           ┆               ┆           ┆ coordinator-https      https://172.18.0.2:30738 ┆                                 │
-│           ┆               ┆           ┆ historical-metrics     172.18.0.2:32009         ┆                                 │
-│           ┆               ┆           ┆ historical-https       https://172.18.0.2:32145 ┆                                 │
-│           ┆               ┆           ┆ middlemanager-metrics  172.18.0.2:32603         ┆                                 │
-│           ┆               ┆           ┆ middlemanager-https    https://172.18.0.2:30162 ┆                                 │
-│           ┆               ┆           ┆ router-metrics         172.18.0.2:32763         ┆                                 │
-│           ┆               ┆           ┆ router-https           https://172.18.0.2:31642 ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka         ┆ default   ┆ metrics                172.18.0.2:30429         ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ kafka-tls              172.18.0.2:32602         ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi          ┆ default   ┆ https                  https://172.18.0.2:30596 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset      ┆ default   ┆ external-http          http://172.18.0.2:32569  ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper     ┆ default   ┆                                                 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-console ┆ default   ┆ http                   http://172.18.0.2:30902  ┆                                 │
-└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────┴─────────────────────────────────┘
-
+┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                   ┆ CONDITIONS                      │
+╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid         ┆ default   ┆ broker-https                                https://172.19.0.3:32293                        ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ coordinator-https                           https://172.19.0.4:31283                        ┆                                 │
+│           ┆               ┆           ┆ router-https                                https://172.19.0.3:32286                        ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.4:32321                                ┆ Available, Reconciling, Running │
+│           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    172.19.0.4:30556                                ┆                                 │
+│           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          172.19.0.4:31352                                ┆                                 │
+│           ┆               ┆           ┆ broker-default-bootstrap-metrics            172.19.0.4:30241                                ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi          ┆ default   ┆ node-https                                  https://172.19.0.2:32348                        ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset      ┆ default   ┆ node-http                                   http://172.19.0.4:30769                         ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper     ┆ default   ┆ server-zk                                   zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio     ┆ minio-console ┆ default   ┆ http                                        http://172.19.0.3:32007                         ┆                                 │
+└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -116,7 +110,7 @@ You can execute a command on the Kafka broker to list the available topics as fo
 $ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -L"
 Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
  1 brokers:
-  broker 1001 at 172.18.0.2:32175 (controller)
+  broker 1001 at 172.19.0.4:32321 (controller)
  1 topics:
   topic "earthquakes" with 8 partitions:
     partition 0, leader 1001, replicas: 1001, isrs: 1001
@@ -142,29 +136,29 @@ Below is an example of the output of one record:
 
 [source,json]
 ----
-{
-  "time": "1950-01-09T13:29:32.340Z",
-  "latitude": 35.033,
-  "longitude": -116.8816667,
-  "depth": 6,
-  "mag": 2.42,
-  "magType": "ml",
-  "nst": 5,
-  "gap": 238,
-  "dmin": 0.848,
-  "rms": 0.48,
-  "net": "ci",
-  "id": "ci3361965",
-  "updated": "2016-01-28T18:07:12.280Z",
-  "place": "20km NE of Barstow, CA",
-  "type": "earthquake",
-  "horizontalError": 3.29,
-  "depthError": 31.61,
-  "magError": 0.181,
-  "magNst": 6,
-  "status": "reviewed",
-  "locationSource": "ci",
-  "magSource": "ci"
+ {
+   "time":"1950-02-07T10:37:29.240Z",
+   "latitude":45.949,
+   "longitude":151.59,
+   "depth":35.0,
+   "mag":5.94,
+   "magType":"mw",
+   "nst":null,
+   "gap":null,
+   "dmin":null,
+   "rms":null,
+   "net":"iscgem",
+   "id":"iscgem895202",
+   "updated":"2022-04-26T18:23:38.377Z",
+   "place":"Kuril Islands",
+   "type":"earthquake",
+   "horizontalError":null,
+   "depthError":12.6,
+   "magError":0.55,
+   "magNst":null,
+   "status":"reviewed",
+   "locationSource":"iscgem",
+   "magSource":"iscgem"
 }
 ----
 
@@ -175,19 +169,19 @@ The given pattern will print some metadata of the record.
 [source,console]
 ----
 $ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t earthquakes -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
-Topic earthquakes / Partition 0 / Offset: 385011 / Timestamp: 1680607795568
-Topic earthquakes / Partition 0 / Offset: 385012 / Timestamp: 1680607795568
-Topic earthquakes / Partition 0 / Offset: 385013 / Timestamp: 1680607795570
-Topic earthquakes / Partition 0 / Offset: 385014 / Timestamp: 1680607795570
-Topic earthquakes / Partition 0 / Offset: 385015 / Timestamp: 1680607795571
-Topic earthquakes / Partition 0 / Offset: 385016 / Timestamp: 1680607795571
-Topic earthquakes / Partition 0 / Offset: 385017 / Timestamp: 1680607795571
-Topic earthquakes / Partition 0 / Offset: 385018 / Timestamp: 1680607795571
+Topic earthquakes / Partition 0 / Offset: 378859 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378860 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378861 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378862 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378863 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378864 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378865 / Timestamp: 1752584024936
+Topic earthquakes / Partition 0 / Offset: 378866 / Timestamp: 1752584024936
 ----
 
-If you calculate `385,011` records * `8` partitions, you end up with ~ 3,080,088 records.
-The output also shows that the last measurement record was produced at the timestamp `1680607795568`, which translates to `Di 4. Apr 13:29:55 CEST 2023`
-(using the command `date -d @1680607795`).
+If you calculate `379,000` records * `8` partitions, you end up with ~ 3,032,000 records.
+The output also shows that the last measurement record was produced at the timestamp `1752584024936`, which translates to `Tuesday, 15 July 2025 14:53:44.936 GMT+02:00`
+(using e.g. the command `date -d @1752584024`).
 
 == NiFi
 
@@ -198,7 +192,7 @@ This demo includes a workflow ("process group") that downloads a large CSV file,
 
 You can have a look at the ingestion job running in NiFi by opening the endpoint `https` from your
 `stackablectl stacklet list` command output.
-In this case, it is https://172.18.0.2:30596.
+In this case, it is https://172.19.0.2:32348.
 Open it with your favourite browser.
 Suppose you get a warning regarding the self-signed certificate generated by the xref:home:secret-operator:index.adoc[Secret Operator] (e.g. Warning: Potential Security Risk Ahead).
 In that case, you must tell your browser to trust the website and continue.
@@ -224,7 +218,7 @@ image::nifi-kafka-druid-earthquake-data/nifi_4.png[]
 
 Here, you can see the setting `HTTP URL`, which specifies the download URL from where the CSV file is retrieved.
 Close the processor details popup by clicking `Close`.
-Afterwards, double-click on the processor `PublishKafkaRecord`.
+Afterwards, double-click on the processor `PublishKafka`.
 
 image::nifi-kafka-druid-earthquake-data/nifi_5.png[]
 
@@ -239,7 +233,7 @@ The Druid deep storage is based on the S3 store provided by MinIO.
 
 === View the Ingestion job
 
-You can have a look at the ingestion job running in Druid by opening the endpoint `router-https` from your `stackablectl stacklet list` command output (http://172.18.0.2:31642 in this case).
+You can have a look at the ingestion job running in Druid by opening the endpoint `router-https` from your `stackablectl stacklet list` command output (https://172.19.0.3:32286  in this case).
 
 image::nifi-kafka-druid-earthquake-data/druid_1.png[]
 
@@ -299,7 +293,7 @@ image::nifi-kafka-druid-earthquake-data/druid_8.png[]
 == Superset
 
 Superset provides the ability to execute SQL queries and build dashboards.
-Open the endpoint `external-http` in your browser (http://172.18.0.2:32569  in this case).
+Open the endpoint `node-http` in your browser (http://172.19.0.4:30769 in this case).
 
 image::nifi-kafka-druid-earthquake-data/superset_1.png[]
 
@@ -336,20 +330,27 @@ image::nifi-kafka-druid-earthquake-data/superset_6.png[]
 To look at the geographical distribution of the earthquakes you have to click on the tab `Charts` at the top again.
 Afterwards click on the chart `Earthquake distribution`.
 
-image::nifi-kafka-druid-earthquake-data/superset_7.png[]
+image::nifi-kafka-druid-earthquake-data/superset_7a.png[]
 
 The distribution of the earthquakes matches the continental plate margins.
 This is the expected distribution from the {wikipedia}[Wikipedia article on Earthquakes].
 
-You can move and zoom the map with your mouse to interactively explore the map.
-You can e.g. have a detailed look at the detected earthquakes in Germany.
+NOTE: The earthquakes are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
 
-image::nifi-kafka-druid-earthquake-data/superset_8.png[]
+image::nifi-kafka-druid-earthquake-data/superset_7b.png[]
 
-You can also click on the magnitudes in the legend on the top right side to enable/disable printing the earthquakes of that magnitude.
-By only enabling magnitudes greater or equal to 8 you can plot only the most severe earthquakes.
+// N.B. the next 2 screenshots and their explanation do not make sense until a mapbox key is activated,
+// hence commented out.
 
-image::nifi-kafka-druid-earthquake-data/superset_9.png[]
+// You can move and zoom the map with your mouse to interactively explore the map.
+// You can e.g. have a detailed look at the detected earthquakes in Germany.
+
+// image::nifi-kafka-druid-earthquake-data/superset_8.png[]
+
+// You can also click on the magnitudes in the legend on the top right side to enable/disable printing the earthquakes of that magnitude.
+// By only enabling magnitudes greater or equal to 8 you can plot only the most severe earthquakes.
+
+// image::nifi-kafka-druid-earthquake-data/superset_9.png[]
 
 === Execute arbitrary SQL statements
 
@@ -380,7 +381,7 @@ image::nifi-kafka-druid-earthquake-data/superset_12.png[]
 == MinIO
 
 The S3 provided by MinIO is used as a persistent deep storage for Druid to store all the data used.
-Open the `minio` endpoint `http` in your browser (http://172.18.0.2:30902 in this case).
+Open the `minio` endpoint `http` in your browser (http://172.19.0.3:32007 in this case).
 
 image::nifi-kafka-druid-earthquake-data/minio_1.png[]
 
