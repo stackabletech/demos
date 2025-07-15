@@ -7,7 +7,6 @@ spec:
   image:
     productVersion: "476"
   clusterConfig:
-    listenerClass: external-unstable
     tls:
       serverSecretClass: tls
     catalogLabelSelector:
@@ -23,6 +22,8 @@ spec:
         configMapName: opa
         package: trino
   coordinators:
+    roleConfig:
+      listenerClass: external-unstable
     podOverrides: &podOverrides
       spec:
         containers:
@@ -88,7 +89,7 @@ spec:
     hive.hdfs.wire-encryption.enabled: "true"
     # HMS configuration
     hive.metastore.authentication.type: KERBEROS
-    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.principal: trino/trino-coordinator.default.svc.cluster.local@KNAB.COM
     hive.metastore.client.keytab: /stackable/kerberos/keytab
     hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
     hive.metastore.thrift.impersonation.enabled: "false"
