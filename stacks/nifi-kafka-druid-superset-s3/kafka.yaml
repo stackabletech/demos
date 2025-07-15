@@ -20,6 +20,8 @@ spec:
       - authenticationClass: kafka-client-tls
   brokers:
     config:
+      bootstrapListenerClass: external-stable
+      brokerListenerClass: external-stable
       resources:
         storage:
           logDirs:
