@@ -70,7 +70,7 @@ data:
         spark.kerberos.principal: spark/spark.default.svc.cluster.local@KNAB.COM
         spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
         spark.sql.catalog.lakehouse.type: hive
-        spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg:9083
+        spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg-metastore:9083
         spark.sql.defaultCatalog: lakehouse
         spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
       job:
