@@ -24,10 +24,6 @@ This is testing that the new release demos work as documented from scratch.
 > ```md
 > ## :green_circle: airflow-scheduled-job
 >
->
-> - :hourglass: current stable (25.3.0)
-> - :hourglass: upgrade to nightly (pending external dep bumps)
->
 > Notes can be left here, for example:
 > The CRD had been updated and I needed to change the following in the manifest:
 > ...

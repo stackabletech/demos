@@ -26,7 +26,7 @@ and products do not negatively impact the products.
 > ## :green_circle: airflow-scheduled-job
 >
 >
-> - :hourglass: current stable (25.3.0)
+> - :hourglass: current stable (OO.M.X)
 > - :hourglass: upgrade to nightly (pending external dep bumps)
 >
 > Notes can be left here, for example:
