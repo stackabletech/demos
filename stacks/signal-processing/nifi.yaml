@@ -11,7 +11,6 @@ spec:
     custom: oci.stackable.tech/demos/nifi:2.4.0-postgresql
     # pullPolicy: IfNotPresent
   clusterConfig:
-    listenerClass: external-unstable
     authentication:
       - authenticationClass: nifi-users
     sensitiveProperties:
@@ -36,6 +35,8 @@ spec:
             capacity: "4Gi"
           stateRepo:
             capacity: "1Gi"
+    roleConfig:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1
