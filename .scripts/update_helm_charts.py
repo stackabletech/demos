@@ -5,7 +5,6 @@ import subprocess
 import yaml
 from typing import Tuple, Set
 
-
 def run_helm_repo_add(repo_name: str, repo_url: str) -> None:
     try:
         subprocess.run(["helm", "repo", "add", repo_name, repo_url], check=True)
@@ -16,8 +15,8 @@ def run_helm_repo_add(repo_name: str, repo_url: str) -> None:
             raise
 
 
-def run_helm_repo_update() -> None:
-    subprocess.run(["helm", "repo", "update"], check=True)
+def run_helm_repo_update(repo_name: str) -> None:
+    subprocess.run(["helm", "repo", "update", repo_name], check=True)
 
 
 def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str]:
@@ -76,6 +75,8 @@ def process_yaml_files(top_dir: str) -> None:
                 if repo_name not in seen_repos:
                     run_helm_repo_add(repo_name, repo_url)
                     seen_repos.add(repo_name)
+
+                run_helm_repo_update(repo_name)
 
                 # print(f"📦 Updating {filepath} -> {repo_name}/{chart_name}")
                 new_chart_version, new_app_version = get_chart_and_app_version(repo_name, chart_name)
