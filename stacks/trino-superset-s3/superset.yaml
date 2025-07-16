@@ -5,7 +5,7 @@ metadata:
   name: superset
 spec:
   image:
-    productVersion: 4.1.2
+    productVersion: 4.0.2
   clusterConfig:
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
@@ -26,8 +26,8 @@ stringData:
   adminUser.firstname: Superset
   adminUser.lastname: Admin
   adminUser.email: admin@superset.com
-  adminUser.password: {{ supersetAdminPassword }}
-  connections.secretKey: {{ supersetSecretKey }}
+  adminUser.password: "{{ supersetAdminPassword }}"
+  connections.secretKey: "{{ supersetSecretKey }}"
   connections.sqlalchemyDatabaseUri: postgresql://superset:superset@postgresql-superset/superset
 ---
 apiVersion: v1
