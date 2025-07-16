@@ -45,7 +45,7 @@ This demo will
    This demo uses it as the authorizer for Trino, which decides which user can query which data.
 ** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from
    Trino via SQL queries and build dashboards on top of that data.
-* Copy the taxi data in parquet format into the S3 staging area.
+* Create a Kubernetes job to upload the taxi data to the S3 staging area. The data is stored in parquet format.
 * A Spark batch job is started, which fetches the raw data, trains and scores a model, writing out the results to
   Trino/S3 for use by Superset.
 * Create Superset dashboards for visualization of the anomaly detection scores.
@@ -62,22 +62,21 @@ To list the installed Stackable services run the following command:
 ----
 $ stackablectl stacklet list
 
-┌──────────┬───────────────┬───────────┬──────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                    ┆ CONDITIONS                      │
-╞══════════╪═══════════════╪═══════════╪══════════════════════════════════════════════╪═════════════════════════════════╡
-│ hive     ┆ hive          ┆ default   ┆                                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive     ┆ hive-iceberg  ┆ default   ┆                                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa      ┆ opa           ┆ default   ┆                                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset ┆ superset      ┆ default   ┆ external-http        http://10.0.0.12:30171  ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino    ┆ trino         ┆ default   ┆ coordinator-metrics  10.0.0.12:30334         ┆ Available, Reconciling, Running │
-│          ┆               ┆           ┆ coordinator-https    https://10.0.0.12:32663 ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio    ┆ minio-console ┆ default   ┆ https                https://10.0.0.11:31142 ┆                                 │
-└──────────┴───────────────┴───────────┴──────────────────────────────────────────────┴─────────────────────────────────┘
+┌──────────┬───────────────┬───────────┬─────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                   ┆ CONDITIONS                      │
+╞══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive     ┆ hive          ┆ default   ┆ metastore-hive     hive-metastore.default.svc.cluster.local:9083            ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive     ┆ hive-iceberg  ┆ default   ┆ metastore-hive     hive-iceberg-metastore.default.svc.cluster.local:9083    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa      ┆ opa           ┆ default   ┆                                                                             ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset ┆ superset      ┆ default   ┆ node-http          http://superset-node.default.svc.cluster.local:8088      ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino    ┆ trino         ┆ default   ┆ coordinator-https  https://trino-coordinator.default.svc.cluster.local:8443 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio    ┆ minio-console ┆ default   ┆ https              https://10.0.0.11:31142                                  ┆                                 │
+└──────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -152,7 +151,7 @@ Alternatively, create a port-forward to the Superset service and point your brow
 
 [source,console]
 ----
-$ kubectl port-forward service/superset-external 8088:http
+$ kubectl port-forward service/superset-node 8088:http
 ----
 
 The anomaly detection dashboard is pre-defined and accessible under the `Dashboards` tab when logged in to Superset using the username `admin` password `adminadmin`:
