@@ -10,11 +10,13 @@ spec:
         - name: setup-superset
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-            [
-              "bash",
-              "-c",
-              "curl -L -o superset-assets.zip sets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/superset-assets.zip && python -u /tmp/script/script.py",
-            ]
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              curl -L -o superset-assets.zip sets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/superset-assets.zip
+              python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
