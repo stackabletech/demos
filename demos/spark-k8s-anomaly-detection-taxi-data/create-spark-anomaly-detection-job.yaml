@@ -10,20 +10,24 @@ spec:
         - name: wait-for-testdata
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-            [
-              "bash",
-              "-c",
-              "echo 'Waiting for job load-ny-taxi-data to finish' && kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data",
-            ]
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              echo 'Waiting for job load-ny-taxi-data to finish'
+              kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data
       containers:
         - name: create-spark-anomaly-detection-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-            [
-              "bash",
-              "-c",
-              "echo 'Submitting Spark job' && kubectl apply -f /tmp/manifest/spark-ad-job.yaml",
-            ]
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              echo 'Submitting Spark job'
+              kubectl apply -f /tmp/manifest/spark-ad-job.yaml
           volumeMounts:
             - name: manifest
               mountPath: /tmp/manifest
