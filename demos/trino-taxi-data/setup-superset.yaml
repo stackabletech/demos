@@ -39,7 +39,7 @@ data:
     import logging
     import requests
 
-    base_url = "http://superset-node-default:8088" # For local testing / developing replace it, afterwards change back to http://superset-node-default:8088
+    base_url = "http://superset-node:8088" # You can change this while running locally, but remember not to commit the change.
     superset_username = open("/superset-credentials/adminUser.username").read()
     superset_password =  open("/superset-credentials/adminUser.password").read()
     trino_username = "admin"
