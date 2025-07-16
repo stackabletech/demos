@@ -13,14 +13,18 @@ spec:
           # restarted. Additionally, the db-init job takes a few minutes to complete before the cluster is deployed. The wait/watch steps
           # below are not "water-tight" but add a layer of stability by at least ensuring that the db is initialized and ready and that
           # all pods are reachable (albeit independent of each other).
-          command: ["bash", "-c", "
-            kubectl rollout status --watch statefulset/airflow-webserver-default
-            && kubectl rollout status --watch statefulset/airflow-scheduler-default
-            && export AIRFLOW_ADMIN_PASSWORD=$(cat /airflow-credentials/adminUser.password)
-            && export ACCESS_TOKEN=$(curl -XPOST http://airflow-webserver-default:8080/auth/token -H 'Content-Type: application/json' -d '{\"username\": \"admin\", \"password\": \"'$AIRFLOW_ADMIN_PASSWORD'\"}' | jq '.access_token' | tr -d '\"')
-            && curl -H \"Authorization: Bearer $ACCESS_TOKEN\" -H 'Content-Type: application/json' -XPATCH http://airflow-webserver-default:8080/api/v2/dags/sparkapp_dag -d '{\"is_paused\": false}' | jq
-            && curl -H \"Authorization: Bearer $ACCESS_TOKEN\" -H 'Content-Type: application/json' -XPOST http://airflow-webserver-default:8080/api/v2/dags/sparkapp_dag/dagRuns -d '{\"logical_date\": null}' | jq
-          "]
+          command:
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              kubectl rollout status --watch statefulset/airflow-webserver-default
+              kubectl rollout status --watch statefulset/airflow-scheduler-default
+              AIRFLOW_ADMIN_PASSWORD=$(cat /airflow-credentials/adminUser.password)
+              ACCESS_TOKEN=$(curl -XPOST http://airflow-webserver-default-headless:8080/auth/token -H 'Content-Type: application/json' -d '{"username": "admin", "password": "'$AIRFLOW_ADMIN_PASSWORD'"}' | jq -r .access_token)
+              curl -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Content-Type: application/json' -XPATCH http://airflow-webserver-default-headless:8080/api/v2/dags/sparkapp_dag -d '{"is_paused": false}' | jq
+              curl -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Content-Type: application/json' -XPOST http://airflow-webserver-default-headless:8080/api/v2/dags/sparkapp_dag/dagRuns -d '{"logical_date": null}' | jq
           volumeMounts:
             - name: airflow-credentials
               mountPath: /airflow-credentials
