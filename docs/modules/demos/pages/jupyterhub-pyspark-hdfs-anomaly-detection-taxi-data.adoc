@@ -3,7 +3,6 @@
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :spark-pkg: https://spark.apache.org/docs/latest/api/python/user_guide/python_packaging.html
-:forest-article: https://towardsdatascience.com/isolation-forest-and-spark-b88ade6c63ff
 :pyspark: https://spark.apache.org/docs/latest/api/python/getting_started/index.html
 :forest-algo: https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
 :nyc-taxi: https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page
@@ -133,7 +132,7 @@ In practice, clients of Spark Connect do not need a full-blown Spark installatio
 == Model details
 
 The job uses an implementation of the Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn {scikit-lib}[library]:
-the model is trained and then invoked by a user-defined function (see {forest-article}[this article] for how to call the sklearn library with a pyspark UDF), all of which is run using the Spark Connect executors.
+the model is trained and then invoked by a user-defined function running on the Spark Connect executors.
 This type of model attempts to isolate each data point by continually partitioning the data.
 Data closely packed together will require more partitions to separate data points.
 In contrast, any outliers will require less: the number of partitions needed for a particular data point is thus inversely proportional to the anomaly "score".
