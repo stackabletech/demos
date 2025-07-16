@@ -5,7 +5,7 @@ name: opentelemetry-operator
 repo:
   name: opentelemetry-operator
   url: https://open-telemetry.github.io/opentelemetry-helm-charts
-version: 0.91.0 # 0.127.0
+version: 0.91.1 # 0.127.0
 options:
   admissionWebhooks:
     certManager:
