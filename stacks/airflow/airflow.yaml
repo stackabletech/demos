@@ -26,6 +26,8 @@ spec:
         mountPath: /dags/pyspark_pi.yaml
         subPath: pyspark_pi.yaml
   webservers:
+    roleConfig:
+      listenerClass: external-unstable
     config:
       resources:
         cpu:
@@ -34,7 +36,6 @@ spec:
         memory:
           limit: 2Gi
       gracefulShutdownTimeout: 30s
-      listenerClass: external-unstable
     roleGroups:
       default:
         envOverrides:
