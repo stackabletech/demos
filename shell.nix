@@ -2,8 +2,9 @@
 pkgs.mkShell {
   packages = with pkgs; [
     gettext # envsubst
-    (pkgs.python3.withPackages (python-pkgs: [
-      python-pkgs.pyyaml
-    ]))
+
+    # Needed by .scripts/update_helm_charts.py
+    python311Packages.pyyaml
+    kubernetes-helm
   ];
 }
