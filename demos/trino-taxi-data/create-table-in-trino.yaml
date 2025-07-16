@@ -59,29 +59,32 @@ data:
 
     run_query(connection, "CREATE SCHEMA IF NOT EXISTS hive.demo WITH (location = 's3a://demo/')")
     run_query(connection, """
-        CREATE TABLE IF NOT EXISTS hive.demo.ny_taxi_data_raw (
-            VendorID BIGINT,
-            tpep_pickup_datetime TIMESTAMP,
-            tpep_dropoff_datetime TIMESTAMP,
-            passenger_count DOUBLE,
-            trip_distance DOUBLE,
-            payment_type BIGINT,
-            Fare_amount DOUBLE,
-            Tip_amount DOUBLE,
-            Total_amount DOUBLE
-        ) WITH (
-            external_location = 's3a://demo/ny-taxi-data/raw/',
-            format = 'parquet'
-        )
+    CREATE TABLE IF NOT EXISTS hive.demo.ny_taxi_data_raw (
+        VendorID BIGINT,
+        tpep_pickup_datetime TIMESTAMP,
+        tpep_dropoff_datetime TIMESTAMP,
+        passenger_count DOUBLE,
+        trip_distance DOUBLE,
+        payment_type BIGINT,
+        Fare_amount DOUBLE,
+        Tip_amount DOUBLE,
+        Total_amount DOUBLE
+    ) WITH (
+        external_location = 's3a://demo/ny-taxi-data/raw/',
+        format = 'parquet'
+    )
     """)
 
     loaded_rows = run_query(connection, "SELECT COUNT(*) FROM hive.demo.ny_taxi_data_raw")[0][0]
     print(f"Loaded {loaded_rows} rows")
     assert loaded_rows > 0
 
-    print("Analyzing table ny_taxi_data_raw")
-    analyze_rows = run_query(connection, """ANALYZE hive.demo.ny_taxi_data_raw""")[0][0]
-    assert analyze_rows == loaded_rows
+    # Disabling ANALYZE for now, as it seems to fail when run twice (which can happen if Trino OOMs)
+    # See issue: https://github.com/trinodb/trino/issues/26214
+    # print("Analyzing table ny_taxi_data_raw")
+    # analyze_rows = run_query(connection, """ANALYZE hive.demo.ny_taxi_data_raw""")[0][0]
+    # assert analyze_rows == loaded_rows
+
     stats = run_query(connection, """show stats for hive.demo.ny_taxi_data_raw""")
     print("Produced the following stats:")
     print(*stats, sep="\n")
