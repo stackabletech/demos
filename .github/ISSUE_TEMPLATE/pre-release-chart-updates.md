@@ -15,6 +15,11 @@ Most of the charts are located in the `stacks/_templated` folder. Additional fol
 `stacks/observability` and `stacks/signal-processing`. It is recommended to search for `releaseName`
 to find all referenced charts.
 
+### Best-effort helper script
+
+There is a best-effort helper script which might help you: `.scripts/update_helm_charts.py`.
+Please read the warnings it prints on startup and keep them in mind.
+
 ### Update Instructions
 
 These instructions help to update the charts:
