@@ -10,11 +10,11 @@ spec:
         - name: setup-superset
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-          - bash
-          - -euo
-          - pipefail
-          - -c
-          - |
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
               curl -L -o superset-assets.zip sets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/superset-assets.zip
               python -u /tmp/script/script.py
           volumeMounts:
@@ -46,7 +46,7 @@ data:
     import logging
     import requests
 
-    base_url = "http://superset-node-default-headless:8088" # For local testing / developing replace it, afterwards change back to http://superset-node-default-headless:8088
+    base_url = "http://superset-node:8088" # For local testing / developing replace it, afterwards change back to http://superset-node:8088
     superset_username = open("/superset-credentials/adminUser.username").read()
     superset_password =  open("/superset-credentials/adminUser.password").read()
     trino_username = "admin"
