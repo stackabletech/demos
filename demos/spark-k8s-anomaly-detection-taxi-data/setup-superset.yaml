@@ -13,7 +13,7 @@ spec:
             [
               "bash",
               "-c",
-              "curl -o superset-assets.zip https://github.com/stackabletech/demos/raw/refs/heads/spark-anomaly-detection/fix-superset-trino-https/demos/spark-k8s-anomaly-detection-taxi-data/superset-assets.zip && python -u /tmp/script/script.py",
+              "curl -L -o superset-assets.zip sets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/superset-assets.zip && python -u /tmp/script/script.py",
             ]
           volumeMounts:
             - name: script
