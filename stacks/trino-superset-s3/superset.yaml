@@ -10,7 +10,7 @@ spec:
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
   nodes:
-    config:
+    roleConfig:
       listenerClass: external-unstable
     roleGroups:
       default:

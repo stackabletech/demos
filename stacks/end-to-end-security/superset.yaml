@@ -15,7 +15,7 @@ spec:
           clientCredentialsSecret: superset-keycloak-client
         userRegistrationRole: Gamma_extended
   nodes:
-    config:
+    roleConfig:
       listenerClass: external-unstable
     roleGroups:
       default:
