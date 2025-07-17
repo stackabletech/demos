@@ -26,7 +26,8 @@ spec:
             - -euo
             - pipefail
             - -c
-            - python -u /tmp/script/script.py
+            - |
+              python -u /tmp/script/script.py
           volumeMounts:
             - name: script
               mountPath: /tmp/script
