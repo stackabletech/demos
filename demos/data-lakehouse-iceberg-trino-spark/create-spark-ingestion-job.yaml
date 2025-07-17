@@ -19,8 +19,10 @@ spec:
             - pipefail
             - -c
             - |
+              echo 'Waiting for all minio instances to be ready'
+              kubectl wait --for=condition=ready --timeout=30m pod -l app=minio,release=minio,stackable.tech/vendor=Stackable
               echo 'Waiting for all kafka brokers to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka -l app.kubernetes.io/instance=kafka
+              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka,app.kubernetes.io/instance=kafka
       containers:
         - name: create-spark-ingestion-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
