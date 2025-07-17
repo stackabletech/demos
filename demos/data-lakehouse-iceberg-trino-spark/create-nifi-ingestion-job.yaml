@@ -16,6 +16,8 @@ spec:
             - pipefail
             - -c
             - |
+              echo 'Waiting for all nifi nodes to be ready'
+              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/instance=nifi,app.kubernetes.io/name=nifi
               echo 'Waiting for all kafka brokers to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/instance=kafka,app.kubernetes.io/name=kafka
       containers:
