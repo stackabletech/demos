@@ -195,7 +195,7 @@ data:
     .readStream \
     .format("kafka") \
     .options(**kafkaOptions) \
-    .option("subscribe", "water_levels_stations") \
+    .option("subscribe", "waterlevelsstations") \
     .option("startingOffsets", "earliest") \
     .option("maxOffsetsPerTrigger", 10000) \
     .option("failOnDataLoss", "false") \
@@ -244,7 +244,7 @@ data:
     .readStream \
     .format("kafka") \
     .options(**kafkaOptions) \
-    .option("subscribe", "water_levels_measurements") \
+    .option("subscribe", "waterlevelsmeasurements") \
     .option("startingOffsets", "earliest") \
     .option("maxOffsetsPerTrigger", 50000000) \
     .option("failOnDataLoss", "false") \
@@ -291,7 +291,7 @@ data:
     .readStream \
     .format("kafka") \
     .options(**kafkaOptions) \
-    .option("subscribe", "shared_bikes_station_information") \
+    .option("subscribe", "sharedbikesstationinformation") \
     .option("startingOffsets", "earliest") \
     .option("maxOffsetsPerTrigger", 10000000) \
     .option("failOnDataLoss", "false") \
@@ -338,7 +338,7 @@ data:
     .readStream \
     .format("kafka") \
     .options(**kafkaOptions) \
-    .option("subscribe", "shared_bikes_station_status") \
+    .option("subscribe", "sharedbikesstationstatus") \
     .option("startingOffsets", "earliest") \
     .option("maxOffsetsPerTrigger", 10000000) \
     .option("failOnDataLoss", "false") \
@@ -386,7 +386,7 @@ data:
     .readStream \
     .format("kafka") \
     .options(**kafkaOptions) \
-    .option("subscribe", "shared_bikes_bike_status") \
+    .option("subscribe", "sharedbikesbikestatus") \
     .option("startingOffsets", "earliest") \
     .option("maxOffsetsPerTrigger", 10000) \
     .option("failOnDataLoss", "false") \
