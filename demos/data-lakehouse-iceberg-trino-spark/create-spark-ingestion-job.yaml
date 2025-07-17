@@ -13,11 +13,24 @@ spec:
       initContainers:
         - name: wait-for-kafka
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-          command: ["bash", "-c", "echo 'Waiting for all kafka brokers to be ready' && kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka -l app.kubernetes.io/instance=kafka"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for all kafka brokers to be ready'
+              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka -l app.kubernetes.io/instance=kafka
       containers:
         - name: create-spark-ingestion-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
-          command: ["bash", "-c", "echo 'Submitting Spark job' && kubectl apply -f /tmp/manifest/spark-ingestion-job.yaml"]
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Submitting Spark job' && kubectl apply -f /tmp/manifest/spark-ingestion-job.yaml
           volumeMounts:
             - name: manifest
               mountPath: /tmp/manifest
@@ -56,7 +69,7 @@ data:
         spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
         spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
         spark.sql.catalog.lakehouse.type: hive
-        spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg:9083
+        spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg-metastore:9083
         # Every merge into statements creates 8 files.
         # Paralleling is enough for the demo, might need to be increased (or omitted entirely) when merge larger data volumes
         spark.sql.shuffle.partitions: "8"
