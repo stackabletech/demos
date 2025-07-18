@@ -10,6 +10,24 @@ options:
     stackable.tech/vendor: Stackable
   prometheus:
     prometheusSpec:
+      volumes:
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: pod,service=prometheus-kube-prometheus-prometheus
+              spec:
+                storageClassName: secrets.stackable.tech
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+      volumeMounts:
+        - name: tls
+          mountPath: /stackable/tls
       storageSpec:
         volumeClaimTemplate:
           spec:
