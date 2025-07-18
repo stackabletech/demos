@@ -7,10 +7,10 @@ demos:
       - airflow
       - job-scheduling
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/01-airflow-spark-clusterrole.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/02-airflow-spark-clusterrolebinding.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/03-enable-and-run-spark-dag.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/04-enable-and-run-date-dag.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/airflow-scheduled-job/01-airflow-spark-clusterrole.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/airflow-scheduled-job/02-airflow-spark-clusterrolebinding.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/airflow-scheduled-job/03-enable-and-run-spark-dag.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/airflow-scheduled-job/04-enable-and-run-date-dag.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 2401m
@@ -24,8 +24,8 @@ demos:
       - hdfs
       - cycling-tripdata
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/hbase-hdfs-load-cycling-data/distcp-cycling-data.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/hbase-hdfs-load-cycling-data/create-hfile-and-import-to-hbase.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/hbase-hdfs-load-cycling-data/distcp-cycling-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/hbase-hdfs-load-cycling-data/create-hfile-and-import-to-hbase.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: "3"
@@ -43,9 +43,9 @@ demos:
       - opa
       - keycloak
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/create-trino-tables.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/create-spark-report.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/end-to-end-security/create-trino-tables.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/end-to-end-security/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/end-to-end-security/create-spark-report.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 9000m
@@ -64,10 +64,10 @@ demos:
       - s3
       - earthquakes
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/create-nifi-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/create-druid-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-earthquake-data/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-earthquake-data/create-nifi-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-earthquake-data/create-druid-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-earthquake-data/setup-superset.yaml
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 8700m
@@ -86,10 +86,10 @@ demos:
       - s3
       - water-levels
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-nifi-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-druid-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-water-level-data/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-water-level-data/create-nifi-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-water-level-data/create-druid-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/nifi-kafka-druid-water-level-data/setup-superset.yaml
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: 8900m
@@ -106,10 +106,10 @@ demos:
       - s3
       - ny-taxi-data
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/load-test-data.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/create-spark-anomaly-detection-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/spark-k8s-anomaly-detection-taxi-data/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/spark-k8s-anomaly-detection-taxi-data/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/spark-k8s-anomaly-detection-taxi-data/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/spark-k8s-anomaly-detection-taxi-data/create-spark-anomaly-detection-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/spark-k8s-anomaly-detection-taxi-data/setup-superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6400m
@@ -141,9 +141,9 @@ demos:
       - s3
       - ny-taxi-data
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-taxi-data/load-test-data.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-taxi-data/create-table-in-trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/trino-taxi-data/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/trino-taxi-data/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/trino-taxi-data/create-table-in-trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/trino-taxi-data/setup-superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6800m
@@ -166,12 +166,12 @@ demos:
       - water-levels
       - earthquakes
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/load-test-data.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/create-trino-tables.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/create-nifi-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/setup-superset.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/create-trino-tables.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/create-nifi-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/data-lakehouse-iceberg-trino-spark/setup-superset.yaml
     supportedNamespaces: ["default"]
     resourceRequests:
       cpu: "80"
@@ -187,7 +187,7 @@ demos:
       - pyspark
       - ny-taxi-data
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/load-test-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/load-test-data.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3350m
@@ -204,7 +204,7 @@ demos:
       - vector
       - zookeeper
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/logging/zookeeper.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/logging/zookeeper.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6500m
@@ -220,9 +220,9 @@ demos:
       - grafana-dashboards
       - zookeeper
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/create-timescale-tables.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/create-nifi-ingestion-job.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/signal-processing/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/signal-processing/create-timescale-tables.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/signal-processing/create-nifi-ingestion-job.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: "3"
@@ -238,7 +238,7 @@ demos:
       - spark
       - S3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/jupyterhub-keycloak/load-gas-data.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/jupyterhub-keycloak/load-gas-data.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 6400m

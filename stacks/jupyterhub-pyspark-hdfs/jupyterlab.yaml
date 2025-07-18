@@ -40,7 +40,7 @@ spec:
       initContainers:
         - name: download-notebook
           image: oci.stackable.tech/stackable/spark-connect-client:3.5.6-stackable25.7.0
-          command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
+          command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/release-25.7/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
           volumeMounts:
             - mountPath: /notebook
               name: notebook
