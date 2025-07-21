@@ -20,6 +20,8 @@ spec:
                 - operator: kafka
                 - operator: nifi
                 - operator: opa
+                # TODO: enable Opensearch operator
+                # - opensearch
                 - operator: spark-k8s
                 - operator: superset
                 - operator: trino
@@ -28,20 +30,12 @@ spec:
               elements:
                 - cluster: demo
                   server: https://kubernetes.default.svc
-                  targetRevision: "25.3.0"
-                  repoUrl: https://repo.stackable.tech/repository/helm-stable/
+                  targetRevision: "{{ stackableReleaseVersion }}"
+                  repoUrl: "{{ stackableRepositoryUrl }}"
                 # - cluster: development
                 #   server: https://kubernetes-development.default.svc
                 #   targetRevision: "0.0.0-dev"
                 #   repoUrl: https://repo.stackable.tech/repository/helm-dev/
-                # - cluster: staging
-                #   server: https://kubernetes-staging.default.svc
-                #   targetRevision: "25.3.0"
-                #   repoUrl: https://repo.stackable.tech/repository/helm-stable/
-                # - cluster: production
-                #   server: https://kubernetes-production.default.svc
-                #   targetRevision: "24.11.1"
-                #   repoUrl: https://repo.stackable.tech/repository/helm-stable/
   # {% raw %}
   template:
     metadata:
