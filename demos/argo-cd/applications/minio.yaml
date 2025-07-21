@@ -9,9 +9,8 @@ spec:
     server: https://kubernetes.default.svc
     namespace: minio
   source:
-    repoURL: https://github.com/stackabletech/demos.git
-    # TODO: adapt to release-25.3
-    targetRevision: "spike/argocd-demo"
+    repoURL: "{{ customGitUrl }}"
+    targetRevision: "{{ customGitBranch }}"
     path: demos/argo-cd/manifests/minio/
   syncPolicy:
     syncOptions:

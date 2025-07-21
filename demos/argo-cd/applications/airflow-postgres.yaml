@@ -24,9 +24,8 @@ spec:
             database: airflow
             username: airflow
             existingSecret: postgresql-credentials
-    - repoURL: https://github.com/stackabletech/demos.git
-      # TODO: adapt to release-25.3
-      targetRevision: "spike/argocd-demo"
+    - repoURL: "{{ customGitUrl }}"
+      targetRevision: "{{ customGitBranch }}"
       path: demos/argo-cd/manifests/airflow-postgres/
   syncPolicy:
     syncOptions:
