@@ -31,11 +31,6 @@ spec:
                 - cluster: demo
                   server: https://kubernetes.default.svc
                   targetRevision: "{{ stackableReleaseVersion }}"
-                  repoUrl: "{{ stackableRepositoryUrl }}"
-                # - cluster: development
-                #   server: https://kubernetes-development.default.svc
-                #   targetRevision: "0.0.0-dev"
-                #   repoUrl: https://repo.stackable.tech/repository/helm-dev/
   # {% raw %}
   template:
     metadata:
@@ -51,12 +46,11 @@ spec:
             - .spec.names.shortNames | select(. == [])
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
-        repoURL: "{{ repoUrl }}"
+        repoURL: "oci.stackable.tech"
         targetRevision: "{{ targetRevision }}"
-        chart: "{{ operator }}-operator"
+        chart: "sdp-charts/{{ operator }}-operator"
         helm:
           releaseName: "{{ operator }}-operator"
-
       destination:
         server: "{{ server }}"
         namespace: stackable-operators
