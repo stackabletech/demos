@@ -5,15 +5,14 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 2.10.4
+    productVersion: 3.0.1
   clusterConfig:
-    listenerClass: external-unstable
     loadExamples: false
     exposeConfig: false
     credentialsSecret: airflow-credentials
     dagsGitSync:
-      - repo: https://github.com/stackabletech/demos/
-        branch: spike/argocd-demo
+      - repo: "{{ customGitUrl }}"
+        branch: "{{ customGitBranch }}"
         gitFolder: "demos/argo-cd/dags"
         depth: 2
     volumes:
@@ -35,6 +34,8 @@ spec:
       - name: minio-tls
         mountPath: /stackable/minio-tls
   webservers:
+    roleConfig:
+      listenerClass: external-unstable
     envOverrides: &envOverrides
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       # Via sealed secrets, just kept for reference here
@@ -63,6 +64,11 @@ spec:
           limit: 1Gi
     roleGroups:
       default:
+        # NOTE: In order to properly show ArgoCD in action - syncing changes via Git - do the following:
+        # - Fork this repository
+        # - Use the demo parameters `customGitUrl` and `customGitBranch` to point the
+        #   the repository to your fork and branch
+        # - Change the replicas here and push that to the provided `customGitBranch` in your fork
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
