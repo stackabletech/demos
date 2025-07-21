@@ -32,6 +32,13 @@ demos:
       cpu: 2401m
       memory: 9010Mi
       pvc: 24Gi
+    parameters:
+      - name: customGitUrl
+        description: The URL to the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
+        default: https://github.com/stackabletech/demos/
+      - name: customGitBranch
+        description: The Branch in the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
+        default: spike/argocd-demo
   airflow-scheduled-job:
     description: Activate a simple Airflow DAG to run continuously at a set interval
     stackableStack: airflow

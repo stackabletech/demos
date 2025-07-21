@@ -2,11 +2,12 @@
 stacks:
   argocd:
     description: Deploying Stackable Operators with ArgoCD
-    stackableRelease: dev
-    stackableOperators: ["argo-deploys-operators"]
+    stackableRelease: dev # This does not matter -> managed by ArgoCD
+    stackableOperators: ["argo-deploys-operators"] # This does not matter -> managed by ArgoCD
     labels:
       - argocd
       - sealed secrets
+      - stackable operators
       - git ops
     manifests:
       ################################
@@ -33,10 +34,14 @@ stacks:
       pvc: 20Gi
     parameters:
       - name: stackableReleaseVersion
-        description: Stackable release to be installed via Argo
+        description: The Stackable release to be installed via Argo. This replaces the `stackableRelease` parameter.
         default: 25.3.0
+      - name: stackableRepositoryUrl
+        description: The Stackable repository URL. This is usually required to test dev versions.
+        #default: https://repo.stackable.tech/repository/helm-dev/
+        default: https://repo.stackable.tech/repository/helm-stable/
       - name: argocdAdminPassword
-        description: Password of the ArgoCD admin user
+        description: Password of the ArgoCD admin user.
         # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
         default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
   monitoring:
