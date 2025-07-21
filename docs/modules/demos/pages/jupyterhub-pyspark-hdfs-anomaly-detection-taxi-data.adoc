@@ -118,9 +118,7 @@ You should arrive at your workspace:
 image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_workspace.png[]
 
 Now you can double-click on the `notebook` folder on the left, open and run the contained file.
-Click on the double arrow (⏩️) to execute the Python scripts (click on the image below to go to the notebook file).
-
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyter_hub_run_notebook.png[link=https://github.com/stackabletech/demos/blob/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,window=_blank]
+Click on the double arrow (⏩️) to execute the Python scripts (click on the image above to go to the notebook file).
 
 The Python notebook uses libraries such as `pandas` and `scikit-learn` to analyze the data.
 In addition, since the model training is delegated to a Spark Connect server, some of these dependencies, most notably `scikit-learn`, must also be made available on the Spark Connect pods.
