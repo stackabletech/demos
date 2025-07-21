@@ -33,7 +33,13 @@ spec:
             - pipefail
             - -c
             - |
-              # Configurable
+              #!/usr/bin/bash
+              #
+              # Wait for Kafka topics created by the Nifi workflows to be ready.
+              # Also wait for all topic partitions to have a leader.
+              # This is required for the Spark streaming job to be able to read from the topics.
+              # Without this check, the Spark job might hang indefinitely without processing any events.
+
               BROKER="${BROKER:-kafka-broker-default-0-listener-broker:9093}"
 
               log() {
