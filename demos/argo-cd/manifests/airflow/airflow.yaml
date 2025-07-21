@@ -10,9 +10,15 @@ spec:
     loadExamples: false
     exposeConfig: false
     credentialsSecret: airflow-credentials
+    # NOTE: This cannot be parameterized via stackablectl since it is synced via ArgoCD
+    #
+    # In terms of forking the repository, this should not be a problem since the DAGs are the same.
+    # You can still change this locally and point to the fork in case of any changes to DAGs.
+    #
+    # TODO(@maltesander): Adapt branch to main / 25.7.0
     dagsGitSync:
-      - repo: "{{ customGitUrl }}"
-        branch: "{{ customGitBranch }}"
+      - repo: https://github.com/stackabletech/demos/
+        branch: spike/argocd-demo
         gitFolder: "demos/argo-cd/dags"
         depth: 2
     volumes:
