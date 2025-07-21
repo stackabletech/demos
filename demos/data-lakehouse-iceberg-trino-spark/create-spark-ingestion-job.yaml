@@ -75,13 +75,12 @@ spec:
               do
                 result=$(check_leaders "$topic")
                 echo "$result"
-                if [ "$result" == "1" ] 
+                if [ "$result" == "1" ]
                 then
                   exit 1
                 fi
               done
               exit 0
-
           volumeMounts:
             - name: tls-kcat
               mountPath: /stackable/tls-kcat
