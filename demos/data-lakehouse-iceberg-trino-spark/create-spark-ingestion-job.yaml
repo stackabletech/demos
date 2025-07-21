@@ -40,7 +40,7 @@ spec:
               # This is required for the Spark streaming job to be able to read from the topics.
               # Without this check, the Spark job might hang indefinitely without processing any events.
 
-              BROKER="${BROKER:-kafka-broker-default-0-listener-broker:9093}"
+              BROKER="${BROKER:-kafka-broker-default:9093}"
 
               log() {
                 level="$1"
