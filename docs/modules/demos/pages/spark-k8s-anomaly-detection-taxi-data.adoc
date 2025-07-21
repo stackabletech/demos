@@ -3,7 +3,6 @@
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
-:forest-article: https://towardsdatascience.com/isolation-forest-and-spark-b88ade6c63ff
 :forest-algo: https://cs.nju.edu.cn/zhouzh/zhouzh.files/publication/icdm08b.pdf
 
 Install this demo on an existing Kubernetes cluster:
@@ -24,7 +23,7 @@ This demo should not be run alongside other demos.
 To run this demo, your system needs at least:
 
 * 10 {k8s-cpu}[cpu units] (core/hyperthread)
-* 32GiB memory
+* 34GiB memory
 * 35GiB disk storage
 
 == Overview
@@ -46,7 +45,7 @@ This demo will
    This demo uses it as the authorizer for Trino, which decides which user can query which data.
 ** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from
    Trino via SQL queries and build dashboards on top of that data.
-* Copy the taxi data in parquet format into the S3 staging area.
+* Create a Kubernetes job to upload the taxi data to the S3 staging area. The data is stored in parquet format.
 * A Spark batch job is started, which fetches the raw data, trains and scores a model, writing out the results to
   Trino/S3 for use by Superset.
 * Create Superset dashboards for visualization of the anomaly detection scores.
@@ -63,22 +62,21 @@ To list the installed Stackable services run the following command:
 ----
 $ stackablectl stacklet list
 
-┌──────────┬───────────────┬───────────┬───────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                     ┆ CONDITIONS                      │
-╞══════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════╪═════════════════════════════════╡
-│ hive     ┆ hive          ┆ default   ┆                                               ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive     ┆ hive-iceberg  ┆ default   ┆                                               ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa      ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset ┆ superset      ┆ default   ┆ external-http        http://172.18.0.2:30562  ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino    ┆ trino         ┆ default   ┆ coordinator-metrics  172.18.0.2:31980         ┆ Available, Reconciling, Running │
-│          ┆               ┆           ┆ coordinator-https    https://172.18.0.2:32186 ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio    ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32276  ┆                                 │
-└──────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
+┌──────────┬───────────────┬───────────┬─────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT  ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                   ┆ CONDITIONS                      │
+╞══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hive     ┆ hive          ┆ default   ┆ metastore-hive     hive-metastore.default.svc.cluster.local:9083            ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive     ┆ hive-iceberg  ┆ default   ┆ metastore-hive     hive-iceberg-metastore.default.svc.cluster.local:9083    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa      ┆ opa           ┆ default   ┆                                                                             ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset ┆ superset      ┆ default   ┆ node-http          http://superset-node.default.svc.cluster.local:8088      ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino    ┆ trino         ┆ default   ┆ coordinator-https  https://trino-coordinator.default.svc.cluster.local:8443 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio    ┆ minio-console ┆ default   ┆ https              https://10.0.0.11:31142                                  ┆                                 │
+└──────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -88,7 +86,14 @@ include::partial$instance-hint.adoc[]
 === List Buckets
 
 The S3 provided by MinIO is used as persistent storage to store all the data used.
-Open the endpoint `http` retrieved by `stackablectl stacklet list` in your browser (http://172.18.0.2:32276 in this case).
+Open the endpoint `https` retrieved by `stackablectl stacklet list` in your browser (https://10.0.0.11:31142 in this case).
+You need to accept the self-signed certificate in your browser before you can access the MinIO console.
+If the console is not reachable, you can forward the port used by the MinIO console and use https://localhost:9001 instead.
+
+[source,console]
+----
+$ kubectl port-forward service/minio-console 9001:https
+----
 
 image::spark-k8s-anomaly-detection-taxi-data/minio_0.png[]
 
@@ -124,7 +129,7 @@ This is a much smaller file, as it only contains scores for each aggregated peri
 The Spark job ingests the raw data and performs straightforward data wrangling and feature engineering.
 Any windowing features designed to capture the time-series nature of the data - such as lags or rolling averages - need to use evenly distributed partitions so that Spark can execute these tasks in parallel.
 The job uses an implementation of the Isolation Forest {forest-algo}[algorithm] provided by the scikit-learn {scikit-lib}[library]:
-the model is trained in a single task but is then distributed to each executor from where a user-defined function invokes it (see {forest-article}[this article] for how to call the sklearn library with a pyspark UDF).
+the model is trained in a single task and distributed among executors with the help of a PySpark user defined function.
 The Isolation Forest algorithm is used for unsupervised model training, meaning that a labelled set of data - against which the model is trained - is unnecessary.
 This makes model preparation easier as we do not have to divide the data set into training and validation datasets.
 
@@ -142,6 +147,13 @@ image::spark-k8s-anomaly-detection-taxi-data/spark_job.png[]
 == Dashboard
 
 Open the `external-http` Superset endpoint found in the output of the `stackablectl stacklet list` command.
+Alternatively, create a port-forward to the Superset service and point your browser to http://localhost:8088:
+
+[source,console]
+----
+$ kubectl port-forward service/superset-node 8088:http
+----
+
 The anomaly detection dashboard is pre-defined and accessible under the `Dashboards` tab when logged in to Superset using the username `admin` password `adminadmin`:
 
 image::spark-k8s-anomaly-detection-taxi-data/superset_anomaly_scores.png[]

@@ -5,20 +5,25 @@ metadata:
   name: hbase
 spec:
   image:
-    productVersion: 2.6.1
+    productVersion: 2.6.2
   clusterConfig:
-    listenerClass: external-unstable
     hdfsConfigMapName: hdfs
     zookeeperConfigMapName: hbase-znode
   masters:
+    config:
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
   regionServers:
+    config:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 2
   restServers:
+    config:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1

@@ -5,9 +5,8 @@ metadata:
   name: trino
 spec:
   image:
-    productVersion: "470"
+    productVersion: "476"
   clusterConfig:
-    listenerClass: external-unstable
     catalogLabelSelector:
       matchLabels:
         trino: trino
@@ -18,6 +17,8 @@ spec:
         configMapName: opa
         package: trino
   coordinators:
+    roleConfig:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1
@@ -28,7 +29,7 @@ spec:
           min: "1"
           max: "4"
         memory:
-          limit: '4Gi'
+          limit: '6Gi'
     roleGroups:
       default:
         replicas: 1
@@ -71,7 +72,7 @@ metadata:
   name: opa
 spec:
   image:
-    productVersion: 1.0.1
+    productVersion: 1.4.2
   servers:
     roleGroups:
       default: {}

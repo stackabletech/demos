@@ -5,12 +5,13 @@ metadata:
   name: superset
 spec:
   image:
-    productVersion: 4.1.1
+    productVersion: 4.1.2
   clusterConfig:
-    listenerClass: external-unstable
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
   nodes:
+    roleConfig:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1
@@ -25,8 +26,8 @@ stringData:
   adminUser.firstname: Superset
   adminUser.lastname: Admin
   adminUser.email: admin@superset.com
-  adminUser.password: {{ supersetAdminPassword }}
-  connections.secretKey: {{ supersetSecretKey }}
+  adminUser.password: "{{ supersetAdminPassword }}"
+  connections.secretKey: "{{ supersetSecretKey }}"
   connections.sqlalchemyDatabaseUri: postgresql://superset:superset@postgresql-superset/superset
 ---
 apiVersion: v1

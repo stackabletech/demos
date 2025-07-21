@@ -5,14 +5,12 @@ metadata:
   name: nifi
 spec:
   image:
-    productVersion: 2.2.0
+    productVersion: 2.4.0
     # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
     # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-    custom: oci.stackable.tech/stackable/nifi:2.2.0-postgresql
+    custom: oci.stackable.tech/demos/nifi:2.4.0-postgresql
     # pullPolicy: IfNotPresent
   clusterConfig:
-    listenerClass: external-unstable
-    zookeeperConfigMapName: nifi-znode
     authentication:
       - authenticationClass: nifi-users
     sensitiveProperties:
@@ -37,6 +35,8 @@ spec:
             capacity: "4Gi"
           stateRepo:
             capacity: "1Gi"
+    roleConfig:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1
@@ -57,11 +57,3 @@ metadata:
   name: nifi-admin-credentials
 stringData:
   admin: {{ nifiAdminPassword }}
----
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: nifi-znode
-spec:
-  clusterRef:
-    name: zookeeper

@@ -5,23 +5,23 @@ metadata:
   name: nifi
 spec:
   image:
-    productVersion: 2.2.0
+    productVersion: 2.4.0
   clusterConfig:
     authentication:
       - authenticationClass: nifi-admin-credentials
-    listenerClass: external-unstable
     sensitiveProperties:
       keySecret: nifi-sensitive-property-key
       autoGenerate: true
-    zookeeperConfigMapName: nifi-znode
   nodes:
+    roleConfig:
+      listenerClass: external-unstable
     config:
       resources:
         cpu:
           min: "2"
           max: "4"
         memory:
-          limit: '6Gi'
+          limit: "6Gi"
         storage:
           contentRepo:
             capacity: "10Gi"
@@ -52,12 +52,4 @@ kind: Secret
 metadata:
   name: nifi-admin-credentials-secret
 stringData:
-  admin: {{ nifiAdminPassword }}
----
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: nifi-znode
-spec:
-  clusterRef:
-    name: zookeeper
+  admin: "{{ nifiAdminPassword }}"

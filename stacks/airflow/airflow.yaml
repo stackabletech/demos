@@ -6,9 +6,8 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 2.10.4
+    productVersion: 3.0.1
   clusterConfig:
-    listenerClass: external-unstable
     loadExamples: false
     exposeConfig: false
     credentialsSecret: airflow-credentials
@@ -27,6 +26,8 @@ spec:
         mountPath: /dags/pyspark_pi.yaml
         subPath: pyspark_pi.yaml
   webservers:
+    roleConfig:
+      listenerClass: external-unstable
     config:
       resources:
         cpu:
@@ -75,7 +76,7 @@ data:
 
     with DAG(
         dag_id='date_demo',
-        schedule_interval='0-59 * * * *',
+        schedule='0-59 * * * *',
         start_date=datetime(2021, 1, 1),
         catchup=False,
         dagrun_timeout=timedelta(minutes=5),
@@ -222,7 +223,7 @@ data:
 
     with DAG(
             dag_id='sparkapp_dag',
-            schedule_interval=None,
+            schedule=None,
             start_date=datetime(2022, 1, 1),
             catchup=False,
             dagrun_timeout=timedelta(minutes=60),
@@ -274,7 +275,7 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        productVersion: 3.5.2
+        productVersion: 3.5.6
       mode: cluster
       mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
       job:

@@ -13,13 +13,15 @@ metadata:
   name: kafka
 spec:
   image:
-    productVersion: 3.9.0
+    productVersion: 3.9.1
   clusterConfig:
     zookeeperConfigMapName: kafka-znode
     authentication:
       - authenticationClass: kafka-client-tls
   brokers:
     config:
+      bootstrapListenerClass: external-stable
+      brokerListenerClass: external-stable
       resources:
         storage:
           logDirs:

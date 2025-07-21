@@ -6,7 +6,7 @@ name: jaeger
 repo:
   name: jaeger
   url: https://jaegertracing.github.io/helm-charts
-version: 3.3.2
+version: 3.4.1 # 1.53.0
 options:
   # labels:
   #   stackable.tech/vendor: Stackable

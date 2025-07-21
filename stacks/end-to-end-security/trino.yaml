@@ -5,9 +5,8 @@ metadata:
   name: trino
 spec:
   image:
-    productVersion: "470"
+    productVersion: "476"
   clusterConfig:
-    listenerClass: external-unstable
     tls:
       serverSecretClass: tls
     catalogLabelSelector:
@@ -23,6 +22,8 @@ spec:
         configMapName: opa
         package: trino
   coordinators:
+    roleConfig:
+      listenerClass: external-unstable
     podOverrides: &podOverrides
       spec:
         containers:

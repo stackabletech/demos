@@ -5,9 +5,8 @@ metadata:
   name: trino
 spec:
   image:
-    productVersion: "470"
+    productVersion: "476"
   clusterConfig:
-    listenerClass: external-unstable
     catalogLabelSelector:
       matchLabels:
         trino: trino
@@ -29,6 +28,8 @@ spec:
     roleGroups:
       default:
         replicas: 1
+    roleConfig:
+      listenerClass: external-unstable
   workers:
     config:
       resources:
@@ -99,7 +100,7 @@ metadata:
   name: opa
 spec:
   image:
-    productVersion: 1.0.1
+    productVersion: 1.4.2
   servers:
     roleGroups:
       default:

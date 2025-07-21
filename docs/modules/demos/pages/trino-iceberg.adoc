@@ -55,8 +55,7 @@ $ stackablectl stacklet list
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ opa     ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino   ┆ trino         ┆ default   ┆ coordinator-metrics  172.18.0.2:32612         ┆ Available, Reconciling, Running │
-│         ┆               ┆           ┆ coordinator-https    https://172.18.0.2:30856 ┆                                 │
+│ trino   ┆ trino         ┆ default   ┆ coordinator-https    https://172.18.0.2:30856 ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ minio   ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32489  ┆                                 │
 └─────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
@@ -77,7 +76,7 @@ As an alternative, you can use https://trino.io/download.html[trino-cli] by runn
 
 [source,console]
 ----
-$ java -jar ~/Downloads/trino-cli-470-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
+$ java -jar ~/Downloads/trino-cli-476-executable.jar --user admin --insecure --password --server https://172.18.0.2:30856
 ----
 
 Make sure to replace the server endpoint with the endpoint listed in the `stackablectl stacklet list` output.
