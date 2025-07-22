@@ -15,6 +15,10 @@ stacks:
       ################################
       - helmChart: stacks/_templates/argo-cd.yaml
       ################################
+      # prerequisites
+      ################################
+      - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
+      ################################
       # project - operators
       ################################
       - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
@@ -22,10 +26,6 @@ stacks:
       # applicationset - operators
       ################################
       - plainYaml: stacks/argo-cd/applicationsets/stackable-operators.yaml
-      ################################
-      # prerequisites
-      ################################
-      - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:
