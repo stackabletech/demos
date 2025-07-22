@@ -5,12 +5,15 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 3.0.1
+    # Currently does not work with the kubernetes executor S3 logging
+    # (and its still marked experimental as of release 25.7)
+    # productVersion: 3.0.1
+    productVersion: 2.10.5
   clusterConfig:
     loadExamples: false
     exposeConfig: false
     credentialsSecret: airflow-credentials
-    # NOTE: This cannot be parameterized via stackablectl since it is synced via ArgoCD
+    # NOTE: This cannot be parameterized via stackablectl since it is synced via ArgoCD.
     #
     # In terms of forking the repository, this should not be a problem since the DAGs are the same.
     # You can still change this locally and point to the fork in case of any changes to DAGs.
