@@ -115,7 +115,7 @@ image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_login.png[
 Log in with token `adminadmin`.
 You should arrive at your workspace:
 
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_workspace.png[link:{url-repo}/blob/{page-origin-refname}/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,linktarget=_blank,alt="JupyterLab Notebook"]
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_workspace.png[link:{web_url}/blob/{refname}/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,linktarget=_blank,alt="JupyterLab Notebook"]
 
 Now you can double-click on the `notebook` folder on the left, open and run the contained file.
 Click on the double arrow (⏩️) to execute the Python scripts (click on the image above to go to the notebook file).
