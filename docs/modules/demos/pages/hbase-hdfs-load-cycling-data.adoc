@@ -52,26 +52,31 @@ To list the installed Stackable services run the following command: `stackablect
 ----
 $ stackablectl stacklet list
 
-┌───────────┬───────────┬───────────┬──────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME      ┆ NAMESPACE ┆ ENDPOINTS                                                    ┆ CONDITIONS                      │
-╞═══════════╪═══════════╪═══════════╪══════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ hbase     ┆ hbase     ┆ default   ┆ regionserver                         172.18.0.2:31521        ┆ Available, Reconciling, Running │
-│           ┆           ┆           ┆ ui-http                              172.18.0.2:32064        ┆                                 │
-│           ┆           ┆           ┆ metrics                              172.18.0.2:31372        ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hdfs      ┆ hdfs      ┆ default   ┆ datanode-default-0-listener-data     172.18.0.2:31990        ┆ Available, Reconciling, Running │
-│           ┆           ┆           ┆ datanode-default-0-listener-http     http://172.18.0.2:30659 ┆                                 │
-│           ┆           ┆           ┆ datanode-default-0-listener-ipc      172.18.0.2:30678        ┆                                 │
-│           ┆           ┆           ┆ datanode-default-0-listener-metrics  172.18.0.2:31531        ┆                                 │
-│           ┆           ┆           ┆ namenode-default-0-http              http://172.18.0.2:32543 ┆                                 │
-│           ┆           ┆           ┆ namenode-default-0-metrics           172.18.0.2:30098        ┆                                 │
-│           ┆           ┆           ┆ namenode-default-0-rpc               172.18.0.2:30915        ┆                                 │
-│           ┆           ┆           ┆ namenode-default-1-http              http://172.18.0.2:31333 ┆                                 │
-│           ┆           ┆           ┆ namenode-default-1-metrics           172.18.0.2:30862        ┆                                 │
-│           ┆           ┆           ┆ namenode-default-1-rpc               172.18.0.2:31440        ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper ┆ default   ┆                                                              ┆ Available, Reconciling, Running │
-└───────────┴───────────┴───────────┴──────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────┬───────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME      ┆ NAMESPACE ┆ ENDPOINTS                                                                                     ┆ CONDITIONS                      │
+╞═══════════╪═══════════╪═══════════╪═══════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hbase     ┆ hbase     ┆ default   ┆ master-default-0-listener-master              172.19.0.5:32001                                ┆ Available, Reconciling, Running │
+│           ┆           ┆           ┆ master-default-0-listener-ui-http             http://172.19.0.5:30709                         ┆                                 │
+│           ┆           ┆           ┆ regionserver-default-0-listener-regionserver  172.19.0.4:32684                                ┆                                 │
+│           ┆           ┆           ┆ regionserver-default-0-listener-ui-http       http://172.19.0.4:31899                         ┆                                 │
+│           ┆           ┆           ┆ regionserver-default-1-listener-regionserver  172.19.0.5:30604                                ┆                                 │
+│           ┆           ┆           ┆ regionserver-default-1-listener-ui-http       http://172.19.0.5:30274                         ┆                                 │
+│           ┆           ┆           ┆ restserver-default-0-rest-http                172.19.0.5:32590                                ┆                                 │
+│           ┆           ┆           ┆ restserver-default-0-ui-http                  http://172.19.0.5:31997                         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hdfs      ┆ hdfs      ┆ default   ┆ datanode-default-0-listener-data              172.19.0.4:30883                                ┆ Available, Reconciling, Running │
+│           ┆           ┆           ┆ datanode-default-0-listener-http              http://172.19.0.4:32095                         ┆                                 │
+│           ┆           ┆           ┆ datanode-default-0-listener-ipc               172.19.0.4:30086                                ┆                                 │
+│           ┆           ┆           ┆ datanode-default-0-listener-metrics           172.19.0.4:31954                                ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-http                       http://172.19.0.4:32035                         ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-metrics                    172.19.0.4:30468                                ┆                                 │
+│           ┆           ┆           ┆ namenode-default-0-rpc                        172.19.0.4:31966                                ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-http                       http://172.19.0.5:31952                         ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-metrics                    172.19.0.5:32760                                ┆                                 │
+│           ┆           ┆           ┆ namenode-default-1-rpc                        172.19.0.5:32022                                ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper ┆ default   ┆ server-zk                                     zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
+└───────────┴───────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 
 ----
 
@@ -159,7 +164,8 @@ Took 13.4666 seconds
 
 == Inspecting the Table
 
-You can now use the table and the data. You can use all available HBase shell commands.
+You can now use the table and the data.
+You can use all available HBase shell commands.
 
 [source,sql]
 ----
@@ -192,10 +198,11 @@ COLUMN FAMILIES DESCRIPTION
 [TIP]
 ====
 Run `stackablectl stacklet list` to get the address of the _ui-http_ endpoint.
-If the UI is unavailable, do a port-forward `kubectl port-forward hbase-master-default-0 16010`.
+Depending on the type of listener class that has been defined, the address will either be directly reachable via e.g. the NodePort IP and an externally reachable port, or via a port-forward (with e.g. `kubectl port-forward hbase-master-default-0 16010`).
 ====
 
-The HBase web UI will give you information on the status and metrics of your HBase cluster. See below for the start page.
+The HBase web UI will give you information on the status and metrics of your HBase cluster.
+See below for the start page.
 
 image::hbase-hdfs-load-cycling-data/hbase-ui-start-page.png[]
 
