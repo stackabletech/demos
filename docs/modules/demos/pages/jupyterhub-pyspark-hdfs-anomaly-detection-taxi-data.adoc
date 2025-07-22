@@ -12,6 +12,7 @@
 :jupyter: https://jupyter.org
 :spark-connect: https://spark.apache.org/docs/latest/spark-connect-overview.html
 :spark-connect-client: https://github.com/stackabletech/docker-images/blob/main/spark-connect-client/Dockerfile
+:repo-url: https://github.com/stackabletech/demos
 
 This demo showcases the integration between {jupyterlab}[JupyterLab], {spark-connect}[Spark Connect] and {hadoop}[Apache Hadoop] deployed on the Stackable Data Platform (SDP) Kubernetes cluster.
 The SDP makes this integration easy by publishing a discovery ConfigMap for the HDFS cluster and a Spark Connect service.
@@ -115,7 +116,7 @@ image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_login.png[
 Log in with token `adminadmin`.
 You should arrive at your workspace:
 
-image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_workspace.png[link={page-origin-url}/blob/{page-origin-refname}/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,linktarget=_blank,alt="JupyterLab Notebook"]
+image::jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data/jupyterlab_workspace.png[link={repo-url}/blob/{page-origin-refname}/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb,linktarget=_blank,alt="JupyterLab Notebook"]
 
 Now you can double-click on the `notebook` folder on the left, open and run the contained file.
 Click on the double arrow (⏩️) to execute the Python scripts (click on the image above to go to the notebook file).
