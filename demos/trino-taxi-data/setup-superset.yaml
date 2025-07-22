@@ -9,7 +9,7 @@ spec:
       containers:
         - name: setup-superset
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable25.7.0-rc1
-          command: ["bash", "-c", "curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/release-25.7/demos/trino-taxi-data/superset-assets.zip && python -u /tmp/script/script.py"]
+          command: ["bash", "-c", "curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/pr-release-25.7-rc1/demos/trino-taxi-data/superset-assets.zip && python -u /tmp/script/script.py"]
           volumeMounts:
             - name: script
               mountPath: /tmp/script
