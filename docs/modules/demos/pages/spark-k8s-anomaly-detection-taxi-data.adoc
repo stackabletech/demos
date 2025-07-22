@@ -135,6 +135,8 @@ This makes model preparation easier as we do not have to divide the data set int
 
 You can inspect a running Spark job by forwarding the port used by the Spark-UI:
 
+NOTE: This is only possible while the job pod is running. Otherwise you will get an error.
+
 [source,console]
 ----
 $ kubectl port-forward spark-ad-driver 4040
