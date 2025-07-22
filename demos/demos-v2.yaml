@@ -218,7 +218,6 @@ demos:
       - nifi
       - jupyterhub
       - grafana-dashboards
-      - zookeeper
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/create-timescale-tables.yaml
