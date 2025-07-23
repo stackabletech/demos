@@ -7439,9 +7439,8 @@ data:
       "editable": true,
       "fiscalYearStartMonth": 0,
       "graphTooltip": 0,
-      "id": 3,
+      "id": 4,
       "links": [],
-      "liveNow": false,
       "panels": [
         {
           "datasource": {
@@ -7459,8 +7458,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7483,6 +7481,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7490,9 +7489,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7525,8 +7526,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7549,6 +7549,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7556,9 +7557,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7591,8 +7594,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7616,6 +7618,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7623,9 +7626,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7643,9 +7648,9 @@ data:
           "type": "stat"
         },
         {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
+          "fieldConfig": {
+            "defaults": {},
+            "overrides": []
           },
           "gridPos": {
             "h": 3,
@@ -7663,20 +7668,7 @@ data:
             "content": "<center><p style=\"font-size:20px\">$cluster</p></center>",
             "mode": "html"
           },
-          "pluginVersion": "9.2.4",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
+          "pluginVersion": "12.0.2",
           "title": "Cluster name",
           "type": "text"
         },
@@ -7695,8 +7687,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7719,6 +7710,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7726,9 +7718,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7737,7 +7731,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "count(hadoop_journalnode_version{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "count(journal_node_bytes_written{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "instant": true,
               "legendFormat": "__auto",
               "range": false,
@@ -7762,8 +7756,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7786,6 +7779,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7793,9 +7787,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7804,7 +7800,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "count(hadoop_namenode_version{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "count(name_node_name_node_state{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "instant": true,
               "legendFormat": "__auto",
               "range": false,
@@ -7829,8 +7825,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -7853,6 +7848,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -7860,9 +7856,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -7871,7 +7869,7 @@ data:
               },
               "editorMode": "code",
               "exemplar": false,
-              "expr": "count(hadoop_datanode_version{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "count(datanode_data_node_packet_responder_count{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "instant": true,
               "legendFormat": "__auto",
               "range": false,
@@ -7892,12 +7890,14 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "opacity",
@@ -7906,6 +7906,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineStyle": {
                   "fill": "solid"
@@ -7930,8 +7931,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8007,10 +8007,12 @@ data:
               "showLegend": false
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8063,12 +8065,14 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "opacity",
@@ -8077,6 +8081,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -8098,8 +8103,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8176,10 +8180,12 @@ data:
               "showLegend": false
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8220,12 +8226,14 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "opacity",
@@ -8234,6 +8242,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -8255,8 +8264,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8331,10 +8339,12 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8447,11 +8457,12 @@ data:
               "values": false
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8459,7 +8470,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "min(hadoop_namenode_capacity_remaining{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "min(fs_namesystem_capacity_remaining{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "remaining",
               "range": true,
               "refId": "A"
@@ -8470,7 +8481,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_capacity_used{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_capacity_used{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "used",
               "range": true,
@@ -8496,8 +8507,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8521,6 +8531,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -8528,9 +8539,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8538,7 +8551,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "min(hadoop_namenode_capacity_total{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "min(fs_namesystem_capacity_total{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -8558,12 +8571,14 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 25,
                 "gradientMode": "opacity",
@@ -8572,6 +8587,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -8593,8 +8609,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8669,10 +8684,12 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8680,7 +8697,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum(max by(pod)(rate(hadoop_datanode_bytes_read{namespace=~\"$namespace\",job=~\"$cluster\"}[$__rate_interval])))*8",
+              "expr": "sum(max by(pod)(rate(datanode_bytes_read{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"}[$__rate_interval])))*8",
               "hide": false,
               "legendFormat": "rx",
               "range": true,
@@ -8692,7 +8709,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "-sum(max by(pod)(rate(hadoop_datanode_bytes_written{namespace=~\"$namespace\",job=~\"$cluster\"}[$__rate_interval])))*8",
+              "expr": "-sum(max by(pod)(rate(datanode_bytes_written{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"}[$__rate_interval])))*8",
               "hide": false,
               "legendFormat": "tx",
               "range": true,
@@ -8713,11 +8730,13 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -8726,6 +8745,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -8747,8 +8767,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8760,7 +8779,7 @@ data:
             "overrides": []
           },
           "gridPos": {
-            "h": 5,
+            "h": 7,
             "w": 10,
             "x": 14,
             "y": 10
@@ -8777,10 +8796,12 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8788,7 +8809,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_files_total{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_files_total{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "total",
               "range": true,
               "refId": "A"
@@ -8799,7 +8820,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_num_files_under_construction{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_num_files_under_construction{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "under construction",
               "range": true,
@@ -8825,8 +8846,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8850,6 +8870,7 @@ data:
             "graphMode": "none",
             "justifyMode": "auto",
             "orientation": "auto",
+            "percentChangeColorMode": "standard",
             "reduceOptions": {
               "calcs": [
                 "lastNotNull"
@@ -8857,9 +8878,11 @@ data:
               "fields": "",
               "values": false
             },
-            "textMode": "auto"
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
           },
-          "pluginVersion": "9.2.4",
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -8867,7 +8890,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "min(hadoop_namenode_capacity_used{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "min(fs_namesystem_capacity_used{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -8884,14 +8907,85 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
+                "fixedColor": "green",
+                "mode": "fixed"
+              },
+              "mappings": [],
+              "thresholds": {
+                "mode": "absolute",
+                "steps": [
+                  {
+                    "color": "green"
+                  },
+                  {
+                    "color": "red",
+                    "value": 80
+                  }
+                ]
+              },
+              "unit": "bytes"
+            },
+            "overrides": []
+          },
+          "gridPos": {
+            "h": 3,
+            "w": 3,
+            "x": 4,
+            "y": 16
+          },
+          "id": 31,
+          "options": {
+            "colorMode": "value",
+            "graphMode": "none",
+            "justifyMode": "auto",
+            "orientation": "auto",
+            "percentChangeColorMode": "standard",
+            "reduceOptions": {
+              "calcs": [
+                "lastNotNull"
+              ],
+              "fields": "",
+              "values": false
+            },
+            "showPercentChange": false,
+            "textMode": "auto",
+            "wideLayout": true
+          },
+          "pluginVersion": "12.0.2",
+          "targets": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "prometheus"
+              },
+              "editorMode": "code",
+              "expr": "min(fs_namesystem_capacity_remaining{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "legendFormat": "__auto",
+              "range": true,
+              "refId": "A"
+            }
+          ],
+          "title": "DFS remaining",
+          "type": "stat"
+        },
+        {
+          "datasource": {
+            "type": "prometheus",
+            "uid": "prometheus"
+          },
+          "fieldConfig": {
+            "defaults": {
+              "color": {
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -8900,6 +8994,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -8921,8 +9016,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -8995,10 +9089,10 @@ data:
             ]
           },
           "gridPos": {
-            "h": 5,
+            "h": 7,
             "w": 10,
             "x": 14,
-            "y": 15
+            "y": 17
           },
           "id": 35,
           "options": {
@@ -9012,10 +9106,12 @@ data:
               "showLegend": true
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -9023,7 +9119,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_blocks_total{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_blocks_total{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "total",
               "range": true,
               "refId": "A"
@@ -9034,7 +9130,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_missing_blocks{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_missing_blocks{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "mssing",
               "range": true,
@@ -9046,7 +9142,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_corrupt_blocks{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_corrupt_blocks{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "corrupt",
               "range": true,
@@ -9058,7 +9154,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_under_replicated_blocks{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_under_replicated_blocks{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "underreplicated",
               "range": true,
@@ -9070,7 +9166,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_excess_blocks{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_excess_blocks{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "excess",
               "range": true,
@@ -9088,81 +9184,16 @@ data:
           "fieldConfig": {
             "defaults": {
               "color": {
-                "fixedColor": "green",
-                "mode": "fixed"
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "bytes"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 3,
-            "w": 3,
-            "x": 4,
-            "y": 16
-          },
-          "id": 31,
-          "options": {
-            "colorMode": "value",
-            "graphMode": "none",
-            "justifyMode": "auto",
-            "orientation": "auto",
-            "reduceOptions": {
-              "calcs": [
-                "lastNotNull"
-              ],
-              "fields": "",
-              "values": false
-            },
-            "textMode": "auto"
-          },
-          "pluginVersion": "9.2.4",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "min(hadoop_namenode_capacity_remaining{namespace=~\"$namespace\",job=~\"$cluster\"})",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "DFS remaining",
-          "type": "stat"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "none",
@@ -9171,6 +9202,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -9192,8 +9224,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -9206,7 +9237,7 @@ data:
           },
           "gridPos": {
             "h": 5,
-            "w": 6,
+            "w": 7,
             "x": 0,
             "y": 19
           },
@@ -9219,10 +9250,12 @@ data:
               "showLegend": false
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "single",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -9230,7 +9263,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "max(hadoop_namenode_total_load{namespace=~\"$namespace\",job=~\"$cluster\"})",
+              "expr": "max(fs_namesystem_total_load{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
@@ -9250,12 +9283,14 @@ data:
                 "mode": "palette-classic"
               },
               "custom": {
+                "axisBorderShow": false,
                 "axisCenteredZero": false,
                 "axisColorMode": "text",
                 "axisLabel": "",
                 "axisPlacement": "auto",
                 "axisSoftMin": 0,
                 "barAlignment": 0,
+                "barWidthFactor": 0.6,
                 "drawStyle": "line",
                 "fillOpacity": 0,
                 "gradientMode": "opacity",
@@ -9264,6 +9299,7 @@ data:
                   "tooltip": false,
                   "viz": false
                 },
+                "insertNulls": false,
                 "lineInterpolation": "linear",
                 "lineWidth": 1,
                 "pointSize": 5,
@@ -9285,8 +9321,7 @@ data:
                 "mode": "absolute",
                 "steps": [
                   {
-                    "color": "green",
-                    "value": null
+                    "color": "green"
                   },
                   {
                     "color": "red",
@@ -9350,8 +9385,8 @@ data:
           },
           "gridPos": {
             "h": 5,
-            "w": 6,
-            "x": 6,
+            "w": 7,
+            "x": 7,
             "y": 19
           },
           "id": 23,
@@ -9363,10 +9398,12 @@ data:
               "showLegend": false
             },
             "tooltip": {
+              "hideZeros": false,
               "mode": "multi",
               "sort": "none"
             }
           },
+          "pluginVersion": "12.0.2",
           "targets": [
             {
               "datasource": {
@@ -9397,22 +9434,25 @@ data:
           "type": "timeseries"
         }
       ],
+      "preload": false,
       "refresh": false,
-      "schemaVersion": 37,
-      "style": "dark",
+      "schemaVersion": 41,
       "tags": [],
       "templating": {
         "list": [
           {
+            "current": {
+              "text": "hdfs",
+              "value": "hdfs"
+            },
             "hide": 2,
             "name": "product",
             "query": "hdfs",
-            "skipUrlSync": false,
+            "skipUrlSync": true,
             "type": "constant"
           },
           {
             "current": {
-              "selected": false,
               "text": "default",
               "value": "default"
             },
@@ -9420,47 +9460,42 @@ data:
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "definition": "label_values(hadoop_namenode_blocks_total, namespace)",
-            "hide": 0,
+            "definition": "label_values(fs_namesystem_blocks_total,namespace)",
             "includeAll": false,
             "label": "Namespace",
-            "multi": false,
             "name": "namespace",
             "options": [],
             "query": {
-              "query": "label_values(hadoop_namenode_blocks_total, namespace)",
-              "refId": "StandardVariableQuery"
+              "qryType": 1,
+              "query": "label_values(fs_namesystem_blocks_total,namespace)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 1,
             "regex": "",
-            "skipUrlSync": false,
             "sort": 1,
             "type": "query"
           },
           {
             "current": {
-              "selected": false,
-              "text": "hdfs",
-              "value": "hdfs"
+              "text": "simple-hdfs",
+              "value": "simple-hdfs"
             },
             "datasource": {
               "type": "prometheus",
               "uid": "prometheus"
             },
-            "definition": "label_values(hadoop_namenode_blocks_total{namespace=~\"$namespace\"}, job)",
-            "hide": 0,
+            "definition": "label_values(fs_namesystem_blocks_total{namespace=~\"$namespace\"},app_kubernetes_io_instance)",
             "includeAll": false,
             "label": "Cluster",
-            "multi": false,
             "name": "cluster",
             "options": [],
             "query": {
-              "query": "label_values(hadoop_namenode_blocks_total{namespace=~\"$namespace\"}, job)",
-              "refId": "StandardVariableQuery"
+              "qryType": 1,
+              "query": "label_values(fs_namesystem_blocks_total{namespace=~\"$namespace\"},app_kubernetes_io_instance)",
+              "refId": "PrometheusVariableQueryEditor-VariableQuery"
             },
             "refresh": 2,
             "regex": "",
-            "skipUrlSync": false,
             "sort": 1,
             "type": "query"
           }
@@ -9474,8 +9509,7 @@ data:
       "timezone": "",
       "title": "HDFS",
       "uid": "qjZGZ3AVz",
-      "version": 4,
-      "weekStart": ""
+      "version": 4
     }
   hbase.json: |
     {
