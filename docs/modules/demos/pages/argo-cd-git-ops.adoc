@@ -13,6 +13,7 @@ This demo shows how to utilize GitOps and Infrastructure as Code (IaC) with Stac
 All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
 
 The key points to show are:
+
 * GitOps: How to deploy my changes from a Git repository to my cluster
 * Secrets: How to safely deploy credentials, access keys and store them in a Git repository
 * Although not included in this Demo, it assumes / tries to imitate a possible 
@@ -160,7 +161,6 @@ template:
     spec:
       project: "stackable-operators"
       ignoreDifferences:
-        # mitigating: https://github.com/stackabletech/hdfs-operator/issues/626
         - group: "apiextensions.k8s.io"
           kind: "CustomResourceDefinition"
           jqPathExpressions:
