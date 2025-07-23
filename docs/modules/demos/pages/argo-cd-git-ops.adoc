@@ -23,7 +23,7 @@ Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
-$ `stackablectl` demo install argo-cd-git-ops --namespace argo-cd
+$ stackablectl demo install argo-cd-git-ops --namespace argo-cd
 ----
 
 WARNING: This demo should not be run alongside other demos.
@@ -235,7 +235,7 @@ The Airflow Web UI is reachable via Nodeport or easier, using a port-forward:
 kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8080
 ----
 
-In your browser, go to `https://localhost:8080` and login with username `admin` and password `adminadmin`.
+In your browser, go to `http://localhost:8080` and login with username `admin` and password `adminadmin`.
 
 TODO: Screenshots
 
@@ -269,7 +269,7 @@ Once this is pushed / merged, ArgoCD should sync the changes and you should see 
 
 === Add new Airflow DAGs
 
-Similar to ArgoCD, after adding a new DAG to the folder `demos/argo-cd-git-ops/dags`, Airflow should pick up the new DAG via gitsync.
+Similar to ArgoCD, after adding a new DAG to the folder `demos/argo-cd-git-ops/dags`, Airflow should pick up the new DAG via gitsync and display it in the UI.
 
 
 
