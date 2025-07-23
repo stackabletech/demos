@@ -100,7 +100,19 @@ metadata:
 spec:
   generators:
     - matrix:
-        generators:
+        generators:licationSet`.
+** Spin up requirements like Minio and Postgres as `Application`.  
+** Deploy Stackable Airflow manifests in their respective `Projects`.
+** DAGs are synced via Airflow gitsync, not ArgoCD.
+** Airflow uses the Kubernetes executor and write its logs to S3 / Minio.
+** DAGs can be started manually in the Airflow webserver UI
+
+TODO: arch overview image
+
+== ArgoCD UI
+
+ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
+
           - list:
               elements:
                 - operator: commons
@@ -108,7 +120,19 @@ spec:
                 - operator: secret
                 - operator: airflow
                 - operator: druid
-                - operator: hbase
+                - operator: hbaselicationSet`.
+** Spin up requirements like Minio and Postgres as `Application`.  
+** Deploy Stackable Airflow manifests in their respective `Projects`.
+** DAGs are synced via Airflow gitsync, not ArgoCD.
+** Airflow uses the Kubernetes executor and write its logs to S3 / Minio.
+** DAGs can be started manually in the Airflow webserver UI
+
+TODO: arch overview image
+
+== ArgoCD UI
+
+ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
+
                 - operator: hdfs
                 - operator: hive
                 - operator: kafka
