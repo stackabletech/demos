@@ -1,39 +1,236 @@
+# ### Products
+#
+# Use something like this to check for metrics:
+# count by(job) ({__name__!=""})
+#
+# See https://github.com/stackabletech/issues/issues/735
+#
+# - [x] Airflow - exporter
+# - [x] Druid - native
+# - [x] HBase - native
+# - [x] Hadoop HDFS - native
+# - [x] Hive - exporter
+# - [x] Kafka - exporter
+# - [x] NiFi 1 - native
+# - [ ] NiFi 2 - native - partially working, needs mTLS
+# - [ ] OpenSearch
+# - [ ] Spark - native
+# - [x] Superset - exporter
+# - [x] Trino - native
+# - [x] ZooKeeper - native
+# - [x] OPA - native
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: scrape-label
+  name: stackable
   labels:
     stackable.tech/vendor: Stackable
     release: prometheus
 spec:
-  endpoints:
-  - port: metrics
-  selector:
-    matchLabels:
-      prometheus.io/scrape: "true"
   namespaceSelector:
     any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - airflow
+          - druid
+          - hive
+          - kafka
+          - nifi # This only works for NiFi 1, NiFi 2 has a special ServiceMonitor below
+          - opa
+          - superset
+          - trino
+  endpoints:
+    - scheme: http
+      port: metrics
+      path: /metrics
   jobLabel: app.kubernetes.io/instance
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: scrape-minio
+  name: stackable-native-metrics
   labels:
     stackable.tech/vendor: Stackable
     release: prometheus
 spec:
-  endpoints:
-  - path: /minio/v2/metrics/node
-    port: http
-    scheme: http
-  - path: /minio/v2/metrics/cluster
-    port: http
-    scheme: http
-  selector:
-    matchLabels:
-      app: minio
-      monitoring: "true"
   namespaceSelector:
     any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - zookeeper
+  endpoints:
+    - scheme: http
+      port: native-metrics
+      path: /metrics
+  jobLabel: app.kubernetes.io/instance
+---
+# Kafka is special in that the operator totally messes up services:
+# 1. The metrics Service is missing
+# 2. The role level simple-kafka-broker-default has the prometheus.io/scrape label, but exposes no ports...
+# 3. The role level simple-kafka-broker-default is labeled with app.kubernetes.io/name: listener???
+# So we have a dedicated config for it
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-kafka
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      app.kubernetes.io/name: listener # Dafuq?
+      app.kubernetes.io/component: broker # We need to filter on brokers instead, as the app.kubernetes.io/name is messed up
+  endpoints:
+    - scheme: http
+      port: metrics
+      path: /metrics
+  jobLabel: app.kubernetes.io/instance
+---
+# We prefer the native metrics over the statsd-exporter
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-hdfs
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+      app.kubernetes.io/name: hdfs
+  endpoints:
+    - scheme: http
+      port: http # Don't use metrics!
+      path: /prom
+  jobLabel: app.kubernetes.io/instance
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-hbase
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+      app.kubernetes.io/name: hbase
+  endpoints:
+    - scheme: http
+      port: ui-http
+      path: /prometheus
+  jobLabel: app.kubernetes.io/instance
+---
+# NiFI 2 is a beast on it's own....
+# The current state produces "server returned HTTP status 401 Unauthorized", but it's at least a
+# good starting point for a working version
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-nifi-2
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+    matchExpressions:
+      - key: app.kubernetes.io/name
+        operator: In
+        values:
+          - nifi
+      # - key: app.kubernetes.io/version
+      #   operator: NotIn
+      #   values:
+      #     - List all 1.x.x version combinations
+  endpoints:
+    - scheme: https
+      port: https
+      path: /nifi-api/flow/metrics/prometheus
+      # TODO: Use mTLS
+      # See https://github.com/stackabletech/demos/pull/260
+      # See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.TLSConfig
+      tlsConfig:
+        insecureSkipVerify: true
+      relabelings:
+        - sourceLabels:
+            - __meta_kubernetes_pod_name
+            - __meta_kubernetes_service_name
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_pod_container_port_number
+          targetLabel: __address__
+          replacement: ${1}.${2}-headless.${3}.svc.cluster.local:${4}
+          regex: (.+);(.+?)(?:-metrics)?;(.+);(.+)
+  jobLabel: app.kubernetes.io/instance
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-minio-http
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      app: minio
+      monitoring: "true"
+  endpoints:
+    - scheme: http
+      port: http
+      path: /minio/v2/metrics/cluster
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-minio-https
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      app: minio
+      monitoring: "true"
+  endpoints:
+    - scheme: https
+      port: https
+      path: /minio/v2/metrics/cluster
+      # Prevent "tls: failed to verify certificate: x509: cannot validate certificate for 100.96.234.154 because it doesn't contain any IP SANs"
+      tlsConfig:
+        insecureSkipVerify: true
