@@ -1,6 +1,6 @@
 ---
 stacks:
-  argocd:
+  argo-cd-git-ops:
     description: Deploying Stackable Operators with ArgoCD
     stackableRelease: dev # This does not matter -> managed by ArgoCD
     stackableOperators: ["argo-deploys-operators"] # This does not matter -> managed by ArgoCD
@@ -17,15 +17,15 @@ stacks:
       ################################
       # prerequisites
       ################################
-      - plainYaml: stacks/argo-cd/applications/sealed-secrets.yaml
+      - plainYaml: stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
       ################################
       # project - operators
       ################################
-      - plainYaml: stacks/argo-cd/projects/stackable-operators.yaml
+      - plainYaml: stacks/argo-cd-git-ops/projects/stackable-operators.yaml
       ################################
       # applicationset - operators
       ################################
-      - plainYaml: stacks/argo-cd/applicationsets/stackable-operators.yaml
+      - plainYaml: stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:

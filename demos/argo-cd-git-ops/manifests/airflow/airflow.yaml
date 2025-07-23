@@ -22,7 +22,7 @@ spec:
     dagsGitSync:
       - repo: https://github.com/stackabletech/demos/
         branch: spike/argocd-demo
-        gitFolder: "demos/argo-cd/dags"
+        gitFolder: "demos/argo-cd-git-ops/dags"
         depth: 2
     volumes:
       - name: minio-tls

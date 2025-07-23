@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: "{{ customGitUrl }}"
     targetRevision: "{{ customGitBranch }}"
-    path: demos/argo-cd/manifests/airflow/
+    path: demos/argo-cd-git-ops/manifests/airflow/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

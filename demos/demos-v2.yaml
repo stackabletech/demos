@@ -1,8 +1,8 @@
 ---
 demos:
-  argocd:
+  argo-cd-git-ops:
     description: Deploy Stackable operators and Airflow via ArgoCD and activate a simple Airflow DAG.
-    stackableStack: argocd
+    stackableStack: argo-cd-git-ops
     labels:
       - argocd
       - git ops
@@ -15,17 +15,17 @@ demos:
       ################################
       # projects
       ################################
-      - plainYaml: demos/argo-cd/projects/airflow.yaml
-      - plainYaml: demos/argo-cd/projects/minio.yaml
+      - plainYaml: demos/argo-cd-git-ops/projects/airflow.yaml
+      - plainYaml: demos/argo-cd-git-ops/projects/minio.yaml
       ################################
       # prerequisites
       ################################
-      - plainYaml: demos/argo-cd/applications/airflow-postgres.yaml
-      - plainYaml: demos/argo-cd/applications/minio.yaml
+      - plainYaml: demos/argo-cd-git-ops/applications/airflow-postgres.yaml
+      - plainYaml: demos/argo-cd-git-ops/applications/minio.yaml
       ################################
       # products
       ################################
-      - plainYaml: demos/argo-cd/applications/airflow.yaml
+      - plainYaml: demos/argo-cd-git-ops/applications/airflow.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:

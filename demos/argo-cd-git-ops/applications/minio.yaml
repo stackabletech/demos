@@ -11,7 +11,7 @@ spec:
   source:
     repoURL: "{{ customGitUrl }}"
     targetRevision: "{{ customGitBranch }}"
-    path: demos/argo-cd/manifests/minio/
+    path: demos/argo-cd-git-ops/manifests/minio/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true

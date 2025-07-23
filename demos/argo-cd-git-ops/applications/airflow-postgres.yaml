@@ -26,7 +26,7 @@ spec:
             existingSecret: postgresql-credentials
     - repoURL: "{{ customGitUrl }}"
       targetRevision: "{{ customGitBranch }}"
-      path: demos/argo-cd/manifests/airflow-postgres/
+      path: demos/argo-cd-git-ops/manifests/airflow-postgres/
   syncPolicy:
     syncOptions:
       - CreateNamespace=true
