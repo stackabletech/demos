@@ -1,7 +1,7 @@
 # ### Products
 #
 # Use something like this to check for metrics:
-# count by(job) ({__name__!=""})
+# count by (app_kubernetes_io_name, app_kubernetes_io_instance, pod) ({app_kubernetes_io_name!="",pod!=""})
 #
 # See https://github.com/stackabletech/issues/issues/735
 #
@@ -50,7 +50,12 @@ spec:
     - scheme: http
       port: metrics
       path: /metrics
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -75,7 +80,12 @@ spec:
     - scheme: http
       port: native-metrics
       path: /metrics
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 # Kafka is special in that the operator totally messes up services:
 # 1. The metrics Service is missing
@@ -101,7 +111,12 @@ spec:
     - scheme: http
       port: metrics
       path: /metrics
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 # We prefer the native metrics over the statsd-exporter
 apiVersion: monitoring.coreos.com/v1
@@ -123,7 +138,12 @@ spec:
     - scheme: http
       port: http # Don't use metrics!
       path: /prom
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
@@ -144,7 +164,12 @@ spec:
     - scheme: http
       port: ui-http
       path: /prometheus
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 # NiFI 2 is a beast on it's own....
 # The current state produces "server returned HTTP status 401 Unauthorized", but it's at least a
@@ -190,7 +215,12 @@ spec:
           targetLabel: __address__
           replacement: ${1}.${2}-headless.${3}.svc.cluster.local:${4}
           regex: (.+);(.+?)(?:-metrics)?;(.+);(.+)
-  jobLabel: app.kubernetes.io/instance
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
