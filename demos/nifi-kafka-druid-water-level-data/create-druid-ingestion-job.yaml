@@ -190,6 +190,6 @@ data:
           ],
           "targetRowsPerSegment": 5000000
         },
-        "maxNumSegmentsToMerge": 500,
+        "maxNumSegmentsToMerge": 500
       }
     }

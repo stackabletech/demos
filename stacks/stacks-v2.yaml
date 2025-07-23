@@ -620,7 +620,6 @@ stacks:
       - commons
       - listener
       - secret
-      - zookeeper
       - nifi
     labels:
       - timescaledb
