@@ -91,6 +91,7 @@ using different versions and Git sources (repository & branch) as well as the po
 NOTE: This demo does not use a multi cluster environment for the sake of simplicity. 
 
 [source,yaml]
+----
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
