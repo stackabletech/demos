@@ -56,21 +56,6 @@ This demo consists of multiple parts:
 
 TODO: arch overview image
 
-== ArgoCD UI
-
-ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
-
-[source,console]
-----
-kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
-----
-
-In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
-
-NOTE: There will be an initial warning from the Browser that this site is insecure due to self-signed certificates. This can be ignored in this case.
-
-TODO: screenshots
-
 == Sealed Secrets
 
 When managing all resources and configs via Git, deploying sensitive properties like certificates or credentials via Git becomes a problem.
@@ -82,6 +67,21 @@ Sensitive data is encrypted as a `SealedSecret` before commiting to the Git repo
 
 This way, everything will be stored and managed in Git.
 
+== ArgoCD UI
+
+ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
+
+[source,console]
+----
+kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
+----
+
+In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
+
+NOTE: There will be an initial warning from the Browser, that this site is insecure due to self-signed certificates. This can be ignored in this case.
+
+TODO: screenshots
+
 == Stackable operators
 
 The Stackable operators are deployed via ArgoCD using the Stackable Helm charts and an ArgoCD {argo-cd-applicationset}[`ApplicationSet`].
@@ -90,8 +90,7 @@ using different versions and Git sources (repository & branch) as well as the po
 
 NOTE: This demo does not use a multi cluster environment for the sake of simplicity. 
 
-[source,console]
-----
+[source,yaml]
 ---
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
@@ -100,19 +99,7 @@ metadata:
 spec:
   generators:
     - matrix:
-        generators:licationSet`.
-** Spin up requirements like Minio and Postgres as `Application`.  
-** Deploy Stackable Airflow manifests in their respective `Projects`.
-** DAGs are synced via Airflow gitsync, not ArgoCD.
-** Airflow uses the Kubernetes executor and write its logs to S3 / Minio.
-** DAGs can be started manually in the Airflow webserver UI
-
-TODO: arch overview image
-
-== ArgoCD UI
-
-ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
-
+        generators:
           - list:
               elements:
                 - operator: commons
@@ -120,19 +107,7 @@ ArgoCD will be the first product that is deployed in this Demo. Once the pods ar
                 - operator: secret
                 - operator: airflow
                 - operator: druid
-                - operator: hbaselicationSet`.
-** Spin up requirements like Minio and Postgres as `Application`.  
-** Deploy Stackable Airflow manifests in their respective `Projects`.
-** DAGs are synced via Airflow gitsync, not ArgoCD.
-** Airflow uses the Kubernetes executor and write its logs to S3 / Minio.
-** DAGs can be started manually in the Airflow webserver UI
-
-TODO: arch overview image
-
-== ArgoCD UI
-
-ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
-
+                - operator: hbase
                 - operator: hdfs
                 - operator: hive
                 - operator: kafka
@@ -175,7 +150,7 @@ ArgoCD will be the first product that is deployed in this Demo. Once the pods ar
 
 The `matrix.generators.list[].elements[]` will create a union of parameters that may be used in the `ApplicationSet` template as follows:
 
-[source,console]
+[source,yaml]
 ----
 # [...]
 template:
@@ -212,7 +187,7 @@ template:
 
 The templated version for e.g. the parameters `operator=zookeeper`, `server=https://kubernetes.default.svc` and `targetRevision=25.7.0` will result in the following template:
 
-[source,console]
+[source,yaml]
 ----
 # [...]
 template:
