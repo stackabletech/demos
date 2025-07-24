@@ -12,6 +12,10 @@ spec:
   masters:
     config:
       listenerClass: external-stable
+      config:
+        resources:
+          memory:
+            limit: 2Gi
     roleGroups:
       default:
         replicas: 1
