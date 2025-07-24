@@ -236,7 +236,7 @@ spec:
     any: true
   selector:
     matchLabels:
-      stackable.tech/vendor: Stackable
+      # stackable.tech/vendor: Stackable # This is not always set, e.g. missing in the nifi-kafka-druid-water-level-data demo
       app: minio
       monitoring: "true"
   endpoints:
@@ -256,7 +256,7 @@ spec:
     any: true
   selector:
     matchLabels:
-      stackable.tech/vendor: Stackable
+      # stackable.tech/vendor: Stackable # This is not always set, e.g. missing in the nifi-kafka-druid-water-level-data demo
       app: minio
       monitoring: "true"
   endpoints:
