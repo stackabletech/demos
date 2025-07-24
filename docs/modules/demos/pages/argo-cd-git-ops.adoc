@@ -45,9 +45,9 @@ To run this demo, your system needs at least:
 This demo consists of multiple parts:
 
 * Bootstrapping via `stackablectl`
-** Install a {sealed-secrets}[Sealed Secrets] controller via `stackablectl` to handle sensitive data like credentials or secret keys.
 ** Install {argo-cd}[Argo CD] via `stackablectl`. 
 * After the initial bootstrapping, ArgoCD takes over the deployment:
+** Install a {sealed-secrets}[Sealed Secrets] controller to handle sensitive data like credentials or secret keys.
 ** Install all Stackable operators using an `ApplicationSet`.
 ** Spin up requirements like Minio and Postgres as `Application`.  
 ** Deploy Stackable Airflow manifests in their respective `Projects`.
