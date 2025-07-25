@@ -303,6 +303,8 @@ data:
             memory:
               limit: 1024Mi
         replicas: 3
+
+
 # {% endraw %}
 ---
 apiVersion: v1
