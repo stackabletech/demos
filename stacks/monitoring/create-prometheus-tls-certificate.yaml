@@ -57,9 +57,9 @@ spec:
             volumeClaimTemplate:
               metadata:
                 annotations:
-                  # I assume Prometheus supports hot-reloading the certificate Secret.
-                  # If not, we can try to increase the lifetime here, but watch out that there is an
-                  # upper limit on the SecretClass!
+                  # Highly professional tests have shown that Prometheus is able to handle the
+                  # certificate rotation :)
+                  # You can change the certificate lifetime here for easier testing:
                   # secrets.stackable.tech/backend.autotls.cert.lifetime: "1d"
                   secrets.stackable.tech/class: "tls"
                   secrets.stackable.tech/format: "tls-pem"
