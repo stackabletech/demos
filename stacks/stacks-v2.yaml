@@ -189,8 +189,8 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/hdfs-hbase/hbase.yaml
     supportedNamespaces: []
     resourceRequests:
-      cpu: 4200m
-      memory: 10758Mi
+      cpu: 1950m
+      memory: 8192Mi
       pvc: 21Gi
     parameters: []
   nifi-kafka-druid-superset-s3:
