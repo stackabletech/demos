@@ -12856,7 +12856,7 @@ data:
               "placement": "right",
               "showLegend": true,
               "sortBy": "Last",
-              "sortDesc": true
+              "sortDesc": false
             },
             "tooltip": {
               "hideZeros": false,
