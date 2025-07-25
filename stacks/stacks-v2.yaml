@@ -12,11 +12,11 @@ stacks:
       - prometheus
       - grafana
     manifests:
-      - plainYaml: stacks/monitoring/grafana-dashboards.yaml
-      - plainYaml: stacks/monitoring/create-prometheus-tls-certificate-serviceaccount.yaml
-      - plainYaml: stacks/monitoring/create-prometheus-tls-certificate.yaml
-      - helmChart: stacks/monitoring/prometheus.yaml
-      - plainYaml: stacks/monitoring/prometheus-service-monitors.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/grafana-dashboards.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/create-prometheus-tls-certificate-serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/create-prometheus-tls-certificate.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/prometheus.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/monitoring/prometheus-service-monitors.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 1750m
