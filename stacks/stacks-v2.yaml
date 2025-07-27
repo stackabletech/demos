@@ -1,5 +1,15 @@
 ---
 stacks:
+  dev-logging:
+    description: Vector aggregator with console output to allow scraping logs with lnav
+    stackableRelease: dev
+    stackableOperators:
+    labels:
+      - logging
+      - vector
+    manifests:
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-console.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: dev
