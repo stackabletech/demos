@@ -12,9 +12,9 @@ SET standard_conforming_strings = on;
 --
 
 CREATE ROLE postgres;
-ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:o1uKb20JmvZX/K5xBpVVnA==$2J8w5sDbraAIugf89Kochc2Dl+hBsJEl48MTR8go7Gc=:GvE3vUl/cwfe+XqME3njxe1cCENo2uxYa/6TnJGlkvY=';
+ALTER ROLE postgres WITH SUPERUSER INHERIT CREATEROLE CREATEDB LOGIN REPLICATION BYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:XfE1S3tIVrPAwRXzqI/Ptw==$vacFUmkUUHcdejD7LOlHYax3gpEhEmObPcHVDtajYNY=:e+j2EaHndtOGxXISZsBR6Il+GViZc5R1d89AtPCRTCc=';
 CREATE ROLE superset;
-ALTER ROLE superset WITH NOSUPERUSER INHERIT NOCREATEROLE CREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:PQ2u8jCvwwNX2Cn2GsaCOA==$UI4y2+aSvIoubxGiS4MxxZ49xKYsgayMI/hQEDjKfeQ=:PzbSbLt9LGlIV7cXLxuM2eyYCfnt6xJSNQB01tNiTw4=';
+ALTER ROLE superset WITH NOSUPERUSER INHERIT NOCREATEROLE CREATEDB LOGIN NOREPLICATION NOBYPASSRLS PASSWORD 'SCRAM-SHA-256$4096:nRuwIDwDeM9M5AolN7yyNg==$ntPNX7rWLBipyL3oQVv7YnwI+EL2WvTX16gCd/3+GZ8=:PpXhlihnu6osG11eQipyn1hVHskdvmwIcNGe6GPlcOM=';
 
 --
 -- User Configurations
@@ -41,12 +41,13 @@ ALTER ROLE superset WITH NOSUPERUSER INHERIT NOCREATEROLE CREATEDB LOGIN NOREPLI
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.1
+-- Dumped from database version 17.5
+-- Dumped by pg_dump version 17.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -69,12 +70,13 @@ SET row_security = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.1
+-- Dumped from database version 17.5
+-- Dumped by pg_dump version 17.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -95,12 +97,13 @@ SET row_security = off;
 -- PostgreSQL database dump
 --
 
--- Dumped from database version 16.1
--- Dumped by pg_dump version 16.1
+-- Dumped from database version 17.5
+-- Dumped by pg_dump version 17.5
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -123,6 +126,7 @@ ALTER DATABASE superset OWNER TO superset;
 SET statement_timeout = 0;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
+SET transaction_timeout = 0;
 SET client_encoding = 'UTF8';
 SET standard_conforming_strings = on;
 SELECT pg_catalog.set_config('search_path', '', false);
@@ -749,6 +753,48 @@ ALTER SEQUENCE public.dashboards_id_seq OWNED BY public.dashboards.id;
 
 
 --
+-- Name: database_user_oauth2_tokens; Type: TABLE; Schema: public; Owner: superset
+--
+
+CREATE TABLE public.database_user_oauth2_tokens (
+    created_on timestamp without time zone,
+    changed_on timestamp without time zone,
+    id integer NOT NULL,
+    user_id integer NOT NULL,
+    database_id integer NOT NULL,
+    access_token bytea,
+    access_token_expiration timestamp without time zone,
+    refresh_token bytea,
+    created_by_fk integer,
+    changed_by_fk integer
+);
+
+
+ALTER TABLE public.database_user_oauth2_tokens OWNER TO superset;
+
+--
+-- Name: database_user_oauth2_tokens_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
+--
+
+CREATE SEQUENCE public.database_user_oauth2_tokens_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+ALTER SEQUENCE public.database_user_oauth2_tokens_id_seq OWNER TO superset;
+
+--
+-- Name: database_user_oauth2_tokens_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
+--
+
+ALTER SEQUENCE public.database_user_oauth2_tokens_id_seq OWNED BY public.database_user_oauth2_tokens.id;
+
+
+--
 -- Name: dbs; Type: TABLE; Schema: public; Owner: superset
 --
 
@@ -901,49 +947,6 @@ ALTER SEQUENCE public.favstar_id_seq OWNED BY public.favstar.id;
 
 
 --
--- Name: filter_sets; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.filter_sets (
-    created_on timestamp without time zone,
-    changed_on timestamp without time zone,
-    id integer NOT NULL,
-    name character varying(500) NOT NULL,
-    description text,
-    json_metadata text NOT NULL,
-    owner_id integer NOT NULL,
-    owner_type character varying(255) NOT NULL,
-    dashboard_id integer NOT NULL,
-    created_by_fk integer,
-    changed_by_fk integer
-);
-
-
-ALTER TABLE public.filter_sets OWNER TO superset;
-
---
--- Name: filter_sets_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
---
-
-CREATE SEQUENCE public.filter_sets_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.filter_sets_id_seq OWNER TO superset;
-
---
--- Name: filter_sets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
---
-
-ALTER SEQUENCE public.filter_sets_id_seq OWNED BY public.filter_sets.id;
-
-
---
 -- Name: key_value; Type: TABLE; Schema: public; Owner: superset
 --
 
@@ -1026,7 +1029,7 @@ CREATE TABLE public.logs (
     id integer NOT NULL,
     action character varying(512),
     user_id integer,
-    json text,
+    "json" text,
     dttm timestamp without time zone,
     dashboard_id integer,
     slice_id integer,
@@ -1092,7 +1095,8 @@ CREATE TABLE public.query (
     extra_json text,
     tmp_schema_name character varying(256),
     ctas_method character varying(16),
-    limiting_factor character varying(255) DEFAULT 'UNKNOWN'::character varying
+    limiting_factor character varying(255) DEFAULT 'UNKNOWN'::character varying,
+    catalog character varying(256)
 );
 
 
@@ -1237,7 +1241,8 @@ CREATE TABLE public.report_schedule (
     extra_json text NOT NULL,
     force_screenshot boolean,
     custom_width integer,
-    custom_height integer
+    custom_height integer,
+    email_subject character varying(255)
 );
 
 
@@ -1432,7 +1437,8 @@ CREATE TABLE public.saved_query (
     last_run timestamp without time zone,
     rows integer,
     uuid uuid,
-    template_parameters text
+    template_parameters text,
+    catalog character varying(256)
 );
 
 
@@ -1458,201 +1464,6 @@ ALTER SEQUENCE public.saved_query_id_seq OWNER TO superset;
 --
 
 ALTER SEQUENCE public.saved_query_id_seq OWNED BY public.saved_query.id;
-
-
---
--- Name: sl_columns; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_columns (
-    uuid uuid,
-    created_on timestamp without time zone,
-    changed_on timestamp without time zone,
-    id integer NOT NULL,
-    is_aggregation boolean NOT NULL,
-    is_additive boolean NOT NULL,
-    is_dimensional boolean NOT NULL,
-    is_filterable boolean NOT NULL,
-    is_increase_desired boolean NOT NULL,
-    is_managed_externally boolean NOT NULL,
-    is_partition boolean NOT NULL,
-    is_physical boolean NOT NULL,
-    is_temporal boolean NOT NULL,
-    is_spatial boolean NOT NULL,
-    name text,
-    type text,
-    unit text,
-    expression text,
-    description text,
-    warning_text text,
-    external_url text,
-    extra_json text,
-    created_by_fk integer,
-    changed_by_fk integer,
-    advanced_data_type text
-);
-
-
-ALTER TABLE public.sl_columns OWNER TO superset;
-
---
--- Name: sl_columns_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
---
-
-CREATE SEQUENCE public.sl_columns_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.sl_columns_id_seq OWNER TO superset;
-
---
--- Name: sl_columns_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
---
-
-ALTER SEQUENCE public.sl_columns_id_seq OWNED BY public.sl_columns.id;
-
-
---
--- Name: sl_dataset_columns; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_dataset_columns (
-    dataset_id integer NOT NULL,
-    column_id integer NOT NULL
-);
-
-
-ALTER TABLE public.sl_dataset_columns OWNER TO superset;
-
---
--- Name: sl_dataset_tables; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_dataset_tables (
-    dataset_id integer NOT NULL,
-    table_id integer NOT NULL
-);
-
-
-ALTER TABLE public.sl_dataset_tables OWNER TO superset;
-
---
--- Name: sl_dataset_users; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_dataset_users (
-    dataset_id integer NOT NULL,
-    user_id integer NOT NULL
-);
-
-
-ALTER TABLE public.sl_dataset_users OWNER TO superset;
-
---
--- Name: sl_datasets; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_datasets (
-    uuid uuid,
-    created_on timestamp without time zone,
-    changed_on timestamp without time zone,
-    id integer NOT NULL,
-    database_id integer NOT NULL,
-    is_physical boolean,
-    is_managed_externally boolean NOT NULL,
-    name text,
-    expression text,
-    external_url text,
-    extra_json text,
-    created_by_fk integer,
-    changed_by_fk integer
-);
-
-
-ALTER TABLE public.sl_datasets OWNER TO superset;
-
---
--- Name: sl_datasets_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
---
-
-CREATE SEQUENCE public.sl_datasets_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.sl_datasets_id_seq OWNER TO superset;
-
---
--- Name: sl_datasets_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
---
-
-ALTER SEQUENCE public.sl_datasets_id_seq OWNED BY public.sl_datasets.id;
-
-
---
--- Name: sl_table_columns; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_table_columns (
-    table_id integer NOT NULL,
-    column_id integer NOT NULL
-);
-
-
-ALTER TABLE public.sl_table_columns OWNER TO superset;
-
---
--- Name: sl_tables; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.sl_tables (
-    uuid uuid,
-    created_on timestamp without time zone,
-    changed_on timestamp without time zone,
-    id integer NOT NULL,
-    database_id integer NOT NULL,
-    is_managed_externally boolean NOT NULL,
-    catalog text,
-    schema text,
-    name text,
-    external_url text,
-    extra_json text,
-    created_by_fk integer,
-    changed_by_fk integer
-);
-
-
-ALTER TABLE public.sl_tables OWNER TO superset;
-
---
--- Name: sl_tables_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
---
-
-CREATE SEQUENCE public.sl_tables_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.sl_tables_id_seq OWNER TO superset;
-
---
--- Name: sl_tables_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
---
-
-ALTER SEQUENCE public.sl_tables_id_seq OWNED BY public.sl_tables.id;
 
 
 --
@@ -1718,6 +1529,7 @@ CREATE TABLE public.slices (
     certification_details text,
     is_managed_externally boolean DEFAULT false NOT NULL,
     external_url text,
+    catalog_perm character varying(1000),
     CONSTRAINT ck_chart_datasource CHECK (((datasource_type)::text = 'table'::text))
 );
 
@@ -1897,7 +1709,8 @@ CREATE TABLE public.tab_state (
     created_by_fk integer,
     changed_by_fk integer,
     hide_left_bar boolean DEFAULT false NOT NULL,
-    saved_query_id integer
+    saved_query_id integer,
+    catalog character varying(256)
 );
 
 
@@ -1992,7 +1805,8 @@ CREATE TABLE public.table_schema (
     description text,
     expanded boolean,
     created_by_fk integer,
-    changed_by_fk integer
+    changed_by_fk integer,
+    catalog character varying(256)
 );
 
 
@@ -2052,7 +1866,9 @@ CREATE TABLE public.tables (
     is_managed_externally boolean DEFAULT false NOT NULL,
     external_url text,
     normalize_columns boolean DEFAULT false,
-    always_filter_main_dttm boolean DEFAULT false
+    always_filter_main_dttm boolean DEFAULT false,
+    catalog character varying(256),
+    catalog_perm character varying(1000)
 );
 
 
@@ -2161,44 +1977,6 @@ ALTER SEQUENCE public.tagged_object_id_seq OWNED BY public.tagged_object.id;
 
 
 --
--- Name: url; Type: TABLE; Schema: public; Owner: superset
---
-
-CREATE TABLE public.url (
-    created_on timestamp without time zone,
-    changed_on timestamp without time zone,
-    id integer NOT NULL,
-    url text,
-    created_by_fk integer,
-    changed_by_fk integer
-);
-
-
-ALTER TABLE public.url OWNER TO superset;
-
---
--- Name: url_id_seq; Type: SEQUENCE; Schema: public; Owner: superset
---
-
-CREATE SEQUENCE public.url_id_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
-ALTER SEQUENCE public.url_id_seq OWNER TO superset;
-
---
--- Name: url_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: superset
---
-
-ALTER SEQUENCE public.url_id_seq OWNED BY public.url.id;
-
-
---
 -- Name: user_attribute; Type: TABLE; Schema: public; Owner: superset
 --
 
@@ -2209,7 +1987,8 @@ CREATE TABLE public.user_attribute (
     user_id integer,
     welcome_dashboard_id integer,
     created_by_fk integer,
-    changed_by_fk integer
+    changed_by_fk integer,
+    avatar_url character varying(100)
 );
 
 
@@ -2306,6 +2085,13 @@ ALTER TABLE ONLY public.dashboards ALTER COLUMN id SET DEFAULT nextval('public.d
 
 
 --
+-- Name: database_user_oauth2_tokens id; Type: DEFAULT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens ALTER COLUMN id SET DEFAULT nextval('public.database_user_oauth2_tokens_id_seq'::regclass);
+
+
+--
 -- Name: dbs id; Type: DEFAULT; Schema: public; Owner: superset
 --
 
@@ -2324,13 +2110,6 @@ ALTER TABLE ONLY public.dynamic_plugin ALTER COLUMN id SET DEFAULT nextval('publ
 --
 
 ALTER TABLE ONLY public.favstar ALTER COLUMN id SET DEFAULT nextval('public.favstar_id_seq'::regclass);
-
-
---
--- Name: filter_sets id; Type: DEFAULT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.filter_sets ALTER COLUMN id SET DEFAULT nextval('public.filter_sets_id_seq'::regclass);
 
 
 --
@@ -2418,27 +2197,6 @@ ALTER TABLE ONLY public.saved_query ALTER COLUMN id SET DEFAULT nextval('public.
 
 
 --
--- Name: sl_columns id; Type: DEFAULT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_columns ALTER COLUMN id SET DEFAULT nextval('public.sl_columns_id_seq'::regclass);
-
-
---
--- Name: sl_datasets id; Type: DEFAULT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets ALTER COLUMN id SET DEFAULT nextval('public.sl_datasets_id_seq'::regclass);
-
-
---
--- Name: sl_tables id; Type: DEFAULT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables ALTER COLUMN id SET DEFAULT nextval('public.sl_tables_id_seq'::regclass);
-
-
---
 -- Name: slice_user id; Type: DEFAULT; Schema: public; Owner: superset
 --
 
@@ -2513,13 +2271,6 @@ ALTER TABLE ONLY public.tag ALTER COLUMN id SET DEFAULT nextval('public.tag_id_s
 --
 
 ALTER TABLE ONLY public.tagged_object ALTER COLUMN id SET DEFAULT nextval('public.tagged_object_id_seq'::regclass);
-
-
---
--- Name: url id; Type: DEFAULT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.url ALTER COLUMN id SET DEFAULT nextval('public.url_id_seq'::regclass);
 
 
 --
@@ -2604,6 +2355,15 @@ COPY public.ab_permission (id, name) FROM stdin;
 68	database_access
 69	schema_access
 70	datasource_access
+73	can_csv_upload
+74	can_excel_upload
+75	can_columnar_upload
+76	catalog_access
+77	can_cache_dashboard_screenshot
+78	can_view_query
+79	can_view_chart_as_table
+80	can_drill
+81	can_tag
 \.
 
 
@@ -2710,12 +2470,6 @@ COPY public.ab_permission_view (id, permission_id, view_menu_id) FROM stdin;
 96	31	44
 97	32	44
 98	33	44
-99	3	45
-100	4	45
-101	3	46
-102	4	46
-103	3	47
-104	4	47
 105	34	33
 106	35	33
 107	36	33
@@ -2801,6 +2555,25 @@ COPY public.ab_permission_view (id, permission_id, view_menu_id) FROM stdin;
 188	70	96
 189	70	97
 190	70	98
+193	73	9
+194	74	9
+195	75	9
+196	76	99
+197	77	8
+198	5	1
+199	10	1
+200	6	1
+201	9	1
+202	78	8
+203	79	8
+204	80	8
+205	81	4
+206	81	8
+207	76	101
+208	69	102
+209	69	103
+210	69	104
+211	69	105
 \.
 
 
@@ -2905,12 +2678,6 @@ COPY public.ab_permission_view_role (id, permission_view_id, role_id) FROM stdin
 94	96	1
 95	97	1
 96	98	1
-97	99	1
-98	100	1
-99	101	1
-100	102	1
-101	103	1
-102	104	1
 103	105	1
 104	106	1
 105	107	1
@@ -3042,12 +2809,6 @@ COPY public.ab_permission_view_role (id, permission_view_id, role_id) FROM stdin
 231	96	3
 232	97	3
 233	98	3
-234	99	3
-235	100	3
-236	101	3
-237	102	3
-238	103	3
-239	104	3
 240	105	3
 241	106	3
 242	107	3
@@ -3188,7 +2949,6 @@ COPY public.ab_permission_view_role (id, permission_view_id, role_id) FROM stdin
 377	85	5
 378	87	5
 379	88	5
-380	114	5
 381	117	5
 382	119	5
 383	130	5
@@ -3309,6 +3069,43 @@ COPY public.ab_permission_view_role (id, permission_view_id, role_id) FROM stdin
 498	170	6
 500	182	9
 502	180	8
+503	193	1
+504	193	3
+505	194	1
+506	194	3
+507	195	1
+509	197	1
+510	198	1
+511	199	1
+512	200	1
+513	201	1
+514	202	1
+515	203	1
+516	204	1
+517	205	1
+518	206	1
+519	114	3
+520	197	3
+521	198	3
+522	199	3
+523	200	3
+524	201	3
+525	202	3
+526	203	3
+527	204	3
+528	205	3
+529	206	3
+530	114	4
+531	197	4
+532	198	4
+533	199	4
+534	200	4
+535	201	4
+536	202	4
+537	203	4
+538	204	4
+539	205	4
+540	206	4
 \.
 
 
@@ -3342,14 +3139,14 @@ COPY public.ab_role (id, name) FROM stdin;
 --
 
 COPY public.ab_user (id, first_name, last_name, username, password, active, email, last_login, login_count, fail_login_count, created_on, changed_on, created_by_fk, changed_by_fk) FROM stdin;
-1	Superset	Admin	admin	pbkdf2:sha256:600000$VtEwC0rP1mLkLXCr$7f88b3bf4078f2a7f141faa6fc3adb740a012813caf0e4186a5f8686b98f6e7b	t	admin@superset.com	2024-03-27 12:28:03.034176	17	0	2024-03-27 09:00:58.213426	2024-03-27 09:00:58.213437	\N	\N
-2	Daniel	King	daniel.king	pbkdf2:sha256:600000$XobvWsPoxpUBXba2$d55ffd2384a0ef4a547f9b1a28f129be7c953e319616cd3ebfc32c843f6e7f89	t	daniel.king@knab.com	2024-03-27 13:03:21.659711	4	0	2024-03-27 11:22:57.458016	2024-03-27 11:22:57.458026	\N	\N
 6	Pamela	Scott	pamela.scott	pbkdf2:sha256:600000$8fxRZw3aVI4bfwi7$ea9f35223de6eac05aa9545514e9435043897aaf76ceb2c24f0d63f1844c34ee	t	pamela.scott@knab.com	2024-03-28 07:00:26.144853	2	0	2024-03-27 12:26:07.70948	2024-03-27 12:26:07.709489	\N	\N
 4	Justin	Martin	justin.martin	pbkdf2:sha256:600000$2Ws6i8DFijoebva3$414384ff49e564884c4f8273e7037bedd64a931f300a229de408b2fd9b6b2885	t	justin.martin@knab.com	2024-03-28 07:01:21.548788	4	0	2024-03-27 12:25:15.310823	2024-03-27 12:25:15.310834	\N	\N
 7	Sophia	Clarke	sophia.clarke	pbkdf2:sha256:600000$Eh3aHfvVnAfLm1MH$778628976ff23ac23b1875d5511d3ccff6eb603d2fa189db8d2b33eedcb258e6	t	sophia.clarke@knab.com	2024-03-28 07:03:15.090283	4	0	2024-03-27 12:26:23.415568	2024-03-27 12:26:23.415577	\N	\N
 3	Isla	Williams	isla.williams	pbkdf2:sha256:600000$Shnct223WRMOpRBl$9e771548d71089f326f8edf712f8d90eab34864ef833081d0889284e95a13524	t	isla.williams@knab.com	2024-03-27 12:24:58.537556	1	0	2024-03-27 12:24:58.52987	2024-03-27 12:24:58.52988	\N	\N
 5	Mark	Ketting	mark.ketting	pbkdf2:sha256:600000$9PjSpVaXmmI2rpyi$9ccaf75fe3f36ab9ccf05004efe1b74e2d76d9bcf4dc4f5b28773d3d4454ed90	t	mark.ketting@knab.com	2024-03-27 12:25:50.846849	1	0	2024-03-27 12:25:50.840258	2024-03-27 12:25:50.840267	\N	\N
 8	William	Lewis	william.lewis	pbkdf2:sha256:600000$tNYDu1gAgzC4Zw38$dc4c35bdf39728d6154a66cc32f1058e7105aafa048bb27e177b7a903f14d298	t	william.lewis@knab.com	2024-03-27 12:26:38.256448	1	0	2024-03-27 12:26:38.250925	2024-03-27 12:26:38.250934	\N	\N
+1	Superset	Admin	admin	pbkdf2:sha256:600000$VtEwC0rP1mLkLXCr$7f88b3bf4078f2a7f141faa6fc3adb740a012813caf0e4186a5f8686b98f6e7b	t	admin@superset.com	2025-07-28 13:04:59.801521	19	0	2024-03-27 09:00:58.213426	2024-03-27 09:00:58.213437	\N	\N
+2	Daniel	King	daniel.king	pbkdf2:sha256:600000$XobvWsPoxpUBXba2$d55ffd2384a0ef4a547f9b1a28f129be7c953e319616cd3ebfc32c843f6e7f89	t	daniel.king@knab.com	2025-07-28 13:06:05.987585	5	0	2024-03-27 11:22:57.458016	2024-03-27 11:22:57.458026	\N	\N
 \.
 
 
@@ -3425,9 +3222,6 @@ COPY public.ab_view_menu (id, name) FROM stdin;
 42	SQLLab
 43	DynamicPlugin
 44	Api
-45	CsvToDatabaseView
-46	ExcelToDatabaseView
-47	ColumnarToDatabaseView
 48	EmbeddedView
 49	KV
 50	R
@@ -3466,10 +3260,7 @@ COPY public.ab_view_menu (id, name) FROM stdin;
 83	all_database_access
 84	all_query_access
 85	[Trino lakehouse].(id:1)
-86	[Trino lakehouse].[information_schema]
-88	[Trino lakehouse].[compliance_analytics]
 89	[Trino lakehouse].[customer](id:2)
-90	[Trino lakehouse].[customer_analytics]
 91	[Trino lakehouse].[customer_address](id:3)
 92	[Trino lakehouse].[customer_demographics](id:4)
 93	[Trino lakehouse].[customer_enriched](id:5)
@@ -3478,6 +3269,16 @@ COPY public.ab_view_menu (id, name) FROM stdin;
 96	[Trino lakehouse].[customer_demographics_enriched](id:8)
 97	[Trino lakehouse].[household_demographics_enriched](id:9)
 98	[Trino lakehouse].[customer_enriched](id:10)
+88	[Trino lakehouse].[lakehouse].[compliance_analytics]
+90	[Trino lakehouse].[lakehouse].[customer_analytics]
+86	[Trino lakehouse].[lakehouse].[information_schema]
+99	[Trino lakehouse].[lakehouse]
+100	UserRestApi
+101	[Trino lakehouse].[system]
+102	[Trino lakehouse].[system].[information_schema]
+103	[Trino lakehouse].[system].[jdbc]
+104	[Trino lakehouse].[system].[metadata]
+105	[Trino lakehouse].[lakehouse].[employees]
 \.
 
 
@@ -3486,7 +3287,7 @@ COPY public.ab_view_menu (id, name) FROM stdin;
 --
 
 COPY public.alembic_version (version_num) FROM stdin;
-b7851ee5522f
+48cbb571fa3a
 \.
 
 
@@ -3557,8 +3358,16 @@ COPY public.dashboard_user (id, user_id, dashboard_id) FROM stdin;
 --
 
 COPY public.dashboards (created_on, changed_on, id, dashboard_title, position_json, created_by_fk, changed_by_fk, css, description, slug, json_metadata, published, uuid, certified_by, certification_details, is_managed_externally, external_url) FROM stdin;
-2024-03-27 13:33:13.947737	2024-03-27 14:21:33.680941	3	Customer analytics	{"CHART-TxbrYIozYw":{"children":[],"id":"CHART-TxbrYIozYw","meta":{"chartId":4,"height":33,"sliceName":"Customers per state","uuid":"fa8b274f-8a69-4449-819e-521b4a6600a2","width":10},"parents":["ROOT_ID","GRID_ID","ROW-crD1lbf1oU"],"type":"CHART"},"CHART-i53yFbHq6z":{"children":[],"id":"CHART-i53yFbHq6z","meta":{"chartId":3,"height":33,"sliceName":"Number of customers","uuid":"bb2aacd7-a074-4289-a795-71ecca300f04","width":2},"parents":["ROOT_ID","GRID_ID","ROW-crD1lbf1oU"],"type":"CHART"},"DASHBOARD_VERSION_KEY":"v2","GRID_ID":{"children":["ROW-crD1lbf1oU"],"id":"GRID_ID","parents":["ROOT_ID"],"type":"GRID"},"HEADER_ID":{"id":"HEADER_ID","meta":{"text":"Customer analytics"},"type":"HEADER"},"ROOT_ID":{"children":["GRID_ID"],"id":"ROOT_ID","type":"ROOT"},"ROW-crD1lbf1oU":{"children":["CHART-i53yFbHq6z","CHART-TxbrYIozYw"],"id":"ROW-crD1lbf1oU","meta":{"background":"BACKGROUND_TRANSPARENT"},"parents":["ROOT_ID","GRID_ID"],"type":"ROW"}}	4	4		\N	\N	{"chart_configuration": {"4": {"id": 4, "crossFilters": {"scope": "global", "chartsInScope": [3]}}}, "global_chart_configuration": {"scope": {"rootPath": ["ROOT_ID"], "excluded": []}, "chartsInScope": [3, 4]}, "color_scheme": "", "refresh_frequency": 0, "shared_label_colors": {}, "color_scheme_domain": [], "expanded_slices": {}, "label_colors": {}, "timed_refresh_immune_slices": [], "cross_filters_enabled": true, "default_filters": "{}"}	t	c39aadfb-9037-4424-b9cc-98762297b25a			f	\N
-2024-03-27 13:19:04.095758	2024-03-27 13:28:21.264343	2	Customer compliance	{"CHART-_-vtEcReJp":{"children":[],"id":"CHART-_-vtEcReJp","meta":{"chartId":2,"height":52,"sliceName":"Customers per gender and martial status","uuid":"6293babd-b3bc-4d05-a70d-5b58e7717458","width":12},"parents":["ROOT_ID","GRID_ID","ROW-i-iK_9GOj"],"type":"CHART"},"CHART-explore-1-1":{"children":[],"id":"CHART-explore-1-1","meta":{"chartId":1,"height":43,"sliceName":"Customer age","uuid":"5faaa605-6dbd-47d4-a8c8-64839fb8ff12","width":12},"parents":["ROOT_ID","GRID_ID","ROW-Z7X4HOaDSO"],"type":"CHART"},"DASHBOARD_VERSION_KEY":"v2","GRID_ID":{"children":["ROW-Z7X4HOaDSO","ROW-i-iK_9GOj"],"id":"GRID_ID","parents":["ROOT_ID"],"type":"GRID"},"HEADER_ID":{"id":"HEADER_ID","meta":{"text":"Customer compliance"},"type":"HEADER"},"ROOT_ID":{"children":["GRID_ID"],"id":"ROOT_ID","type":"ROOT"},"ROW-Z7X4HOaDSO":{"children":["CHART-explore-1-1"],"id":"ROW-Z7X4HOaDSO","meta":{"0":"ROOT_ID","background":"BACKGROUND_TRANSPARENT"},"parents":["ROOT_ID","GRID_ID"],"type":"ROW"},"ROW-i-iK_9GOj":{"children":["CHART-_-vtEcReJp"],"id":"ROW-i-iK_9GOj","meta":{"background":"BACKGROUND_TRANSPARENT"},"parents":["ROOT_ID","GRID_ID"],"type":"ROW"}}	2	2		\N	\N	{"chart_configuration": {"1": {"id": 1, "crossFilters": {"scope": "global", "chartsInScope": [2]}}, "2": {"id": 2, "crossFilters": {"scope": "global", "chartsInScope": [1]}}}, "global_chart_configuration": {"scope": {"rootPath": ["ROOT_ID"], "excluded": []}, "chartsInScope": [1, 2]}, "color_scheme": "", "refresh_frequency": 0, "shared_label_colors": {"count": "#1FA8C9"}, "color_scheme_domain": [], "expanded_slices": {}, "label_colors": {}, "timed_refresh_immune_slices": [], "cross_filters_enabled": true, "default_filters": "{}"}	t	c33d4006-d49f-473a-b3b4-93c39e3c8310			f	\N
+2024-03-27 13:33:13.947737	2024-03-27 14:21:33.680941	3	Customer analytics	{"CHART-TxbrYIozYw": {"children": [], "id": "CHART-TxbrYIozYw", "meta": {"chartId": 4, "height": 33, "sliceName": "Customers per state", "uuid": "fa8b274f-8a69-4449-819e-521b4a6600a2", "width": 10}, "parents": ["ROOT_ID", "GRID_ID", "ROW-crD1lbf1oU"], "type": "CHART"}, "CHART-i53yFbHq6z": {"children": [], "id": "CHART-i53yFbHq6z", "meta": {"chartId": 3, "height": 33, "sliceName": "Number of customers", "uuid": "bb2aacd7-a074-4289-a795-71ecca300f04", "width": 2}, "parents": ["ROOT_ID", "GRID_ID", "ROW-crD1lbf1oU"], "type": "CHART"}, "DASHBOARD_VERSION_KEY": "v2", "GRID_ID": {"children": ["ROW-crD1lbf1oU"], "id": "GRID_ID", "parents": ["ROOT_ID"], "type": "GRID"}, "HEADER_ID": {"id": "HEADER_ID", "meta": {"text": "Customer analytics"}, "type": "HEADER"}, "ROOT_ID": {"children": ["GRID_ID"], "id": "ROOT_ID", "type": "ROOT"}, "ROW-crD1lbf1oU": {"children": ["CHART-i53yFbHq6z", "CHART-TxbrYIozYw"], "id": "ROW-crD1lbf1oU", "meta": {"background": "BACKGROUND_TRANSPARENT"}, "parents": ["ROOT_ID", "GRID_ID"], "type": "ROW"}}	4	4		\N	\N	{"chart_configuration": {"4": {"id": 4, "crossFilters": {"scope": "global", "chartsInScope": [3]}}}, "global_chart_configuration": {"scope": {"rootPath": ["ROOT_ID"], "excluded": []}, "chartsInScope": [3, 4]}, "color_scheme": "", "refresh_frequency": 0, "shared_label_colors": {}, "color_scheme_domain": [], "expanded_slices": {}, "label_colors": {}, "timed_refresh_immune_slices": [], "cross_filters_enabled": true, "native_filter_configuration": []}	t	c39aadfb-9037-4424-b9cc-98762297b25a			f	\N
+2024-03-27 13:19:04.095758	2024-03-27 13:28:21.264343	2	Customer compliance	{"CHART-_-vtEcReJp": {"children": [], "id": "CHART-_-vtEcReJp", "meta": {"chartId": 2, "height": 52, "sliceName": "Customers per gender and martial status", "uuid": "6293babd-b3bc-4d05-a70d-5b58e7717458", "width": 12}, "parents": ["ROOT_ID", "GRID_ID", "ROW-i-iK_9GOj"], "type": "CHART"}, "CHART-explore-1-1": {"children": [], "id": "CHART-explore-1-1", "meta": {"chartId": 1, "height": 43, "sliceName": "Customer age", "uuid": "5faaa605-6dbd-47d4-a8c8-64839fb8ff12", "width": 12}, "parents": ["ROOT_ID", "GRID_ID", "ROW-Z7X4HOaDSO"], "type": "CHART"}, "DASHBOARD_VERSION_KEY": "v2", "GRID_ID": {"children": ["ROW-Z7X4HOaDSO", "ROW-i-iK_9GOj"], "id": "GRID_ID", "parents": ["ROOT_ID"], "type": "GRID"}, "HEADER_ID": {"id": "HEADER_ID", "meta": {"text": "Customer compliance"}, "type": "HEADER"}, "ROOT_ID": {"children": ["GRID_ID"], "id": "ROOT_ID", "type": "ROOT"}, "ROW-Z7X4HOaDSO": {"children": ["CHART-explore-1-1"], "id": "ROW-Z7X4HOaDSO", "meta": {"0": "ROOT_ID", "background": "BACKGROUND_TRANSPARENT"}, "parents": ["ROOT_ID", "GRID_ID"], "type": "ROW"}, "ROW-i-iK_9GOj": {"children": ["CHART-_-vtEcReJp"], "id": "ROW-i-iK_9GOj", "meta": {"background": "BACKGROUND_TRANSPARENT"}, "parents": ["ROOT_ID", "GRID_ID"], "type": "ROW"}}	2	2		\N	\N	{"chart_configuration": {"1": {"id": 1, "crossFilters": {"scope": "global", "chartsInScope": [2]}}, "2": {"id": 2, "crossFilters": {"scope": "global", "chartsInScope": [1]}}}, "global_chart_configuration": {"scope": {"rootPath": ["ROOT_ID"], "excluded": []}, "chartsInScope": [1, 2]}, "color_scheme": "", "refresh_frequency": 0, "shared_label_colors": {"count": "#1FA8C9"}, "color_scheme_domain": [], "expanded_slices": {}, "label_colors": {}, "timed_refresh_immune_slices": [], "cross_filters_enabled": true, "native_filter_configuration": []}	t	c33d4006-d49f-473a-b3b4-93c39e3c8310			f	\N
+\.
+
+
+--
+-- Data for Name: database_user_oauth2_tokens; Type: TABLE DATA; Schema: public; Owner: superset
+--
+
+COPY public.database_user_oauth2_tokens (created_on, changed_on, id, user_id, database_id, access_token, access_token_expiration, refresh_token, created_by_fk, changed_by_fk) FROM stdin;
 \.
 
 
@@ -3567,7 +3376,7 @@ COPY public.dashboards (created_on, changed_on, id, dashboard_title, position_js
 --
 
 COPY public.dbs (created_on, changed_on, id, database_name, sqlalchemy_uri, created_by_fk, changed_by_fk, password, cache_timeout, extra, select_as_create_table_as, allow_ctas, expose_in_sqllab, force_ctas_schema, allow_run_async, allow_dml, verbose_name, impersonate_user, allow_file_upload, encrypted_extra, server_cert, allow_cvas, uuid, configuration_method, is_managed_externally, external_url) FROM stdin;
-2024-03-27 09:06:31.329851	2024-03-27 12:30:03.632211	1	Trino lakehouse	trino://superset:XXXXXXXXXX@trino-coordinator:8443/lakehouse?verify=false	1	1	\\x426f35784c53464f667134714b39515a74532f70366e794b48423565514e30716e5a59507053483348756f3d	\N	{"allows_virtual_table_explore": true}	f	t	t	\N	f	t	\N	t	f	\\x7553472f724455376b6d78545a396e476e6338794a413d3d	\N	t	f8d085f0-211e-4ab7-97b1-dcd9b96ee28d	sqlalchemy_form	f	\N
+2024-03-27 09:06:31.329851	2025-07-28 13:04:46.664444	1	Trino lakehouse	trino://superset:XXXXXXXXXX@trino-coordinator:8443/lakehouse	1	1	\\x426f35784c53464f667134714b39515a74532f70366e794b48423565514e30716e5a59507053483348756f3d	\N	{"allows_virtual_table_explore":true,"engine_params":{"connect_args":{"verify":false,"http_scheme":"https"}}}	f	t	t	\N	f	t	\N	t	f	\\x7553472f724455376b6d78545a396e476e6338794a413d3d	\N	t	f8d085f0-211e-4ab7-97b1-dcd9b96ee28d	sqlalchemy_form	f	\N
 \.
 
 
@@ -3592,14 +3401,6 @@ COPY public.embedded_dashboards (created_on, changed_on, allow_domain_list, uuid
 --
 
 COPY public.favstar (id, user_id, class_name, obj_id, dttm) FROM stdin;
-\.
-
-
---
--- Data for Name: filter_sets; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.filter_sets (created_on, changed_on, id, name, description, json_metadata, owner_id, owner_type, dashboard_id, created_by_fk, changed_by_fk) FROM stdin;
 \.
 
 
@@ -3634,6 +3435,10 @@ COPY public.key_value (id, resource, value, uuid, created_on, created_by_fk, cha
 26	superset_metastore_cache	\\x224243387a59686d6b47696f594c5045713570566d57476663555a4c4a677738313258367543764a77424f59746a2d7156744c704971386f50347349764472516e22	53280b98-2e2f-35d6-961c-959be027554c	2024-03-28 07:00:30.671388	6	\N	\N	2024-06-26 07:00:30.669884
 12	superset_metastore_cache	\\x22495a6b6f38396c7a49417245537452787335645245694f62356266386359614263524f4c4672746d5461584a31436836457269424d5371315339554766556c6a22	d684ff69-dd1c-304b-9431-64dc6259fe20	2024-03-27 13:19:23.823635	2	2024-03-28 07:01:52.974933	7	2024-06-26 07:01:52.973887
 22	superset_metastore_cache	\\x226e6d70674973416a4b5a5a7452385279483978696a57586235305177382d44533132436b37453677376446456e327a367476303846795a3959306b4a3065326122	8a21cb87-ed55-34ae-8c92-82a0a89d91cd	2024-03-27 13:33:01.591216	4	2024-03-27 13:33:15.427709	4	2024-04-03 13:33:15.426279
+27	superset_metastore_cache	\\x7b226f776e6572223a20312c202276616c7565223a20227b7d227d	eb533132-ac74-367c-b513-d09883e6c80a	2025-07-28 13:04:51.452482	1	\N	\N	2025-10-26 13:04:51.451469
+28	superset_metastore_cache	\\x22576d724e76656377396931524132477564325a554d33506c42794f69574377444f4c4c7a304a38724f6b396e465a434764366f64706f5335477068457468547322	f56b4e05-098f-3209-bdfe-05d8aa34cc28	2025-07-28 13:04:51.468249	1	\N	\N	2025-10-26 13:04:51.466089
+29	superset_metastore_cache	\\x7b226f776e6572223a20322c202276616c7565223a20227b7d227d	1b104aba-94a5-3a53-8aec-28043c302feb	2025-07-28 13:06:10.448716	2	\N	\N	2025-10-26 13:06:10.448166
+30	superset_metastore_cache	\\x2254674f57323134516b5a4a574b68507a63514845786c374d796e4f52565467754c7a317978515045494455347a4a4754475756366d356f345a354d765455446b22	d57e6533-3424-34e4-b82f-25f0fb77015d	2025-07-28 13:06:10.46083	2	\N	\N	2025-10-26 13:06:10.459696
 \.
 
 
@@ -3649,7 +3454,7 @@ COPY public.keyvalue (id, value) FROM stdin;
 -- Data for Name: logs; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, duration_ms, referrer) FROM stdin;
+COPY public.logs (id, action, user_id, "json", dttm, dashboard_id, slice_id, duration_ms, referrer) FROM stdin;
 1	csrf_token	1	{"path": "/api/v1/security/csrf_token/", "object_ref": "SecurityRestApi.csrf_token"}	2024-03-27 09:06:31.284398	\N	0	20	\N
 2	ImportExportRestApi.import_	1	{"path": "/api/v1/assets/import/", "passwords": "{\\"databases/Trino_TPCDS.yaml\\": \\"supersetsuperset\\"}", "object_ref": "ImportExportRestApi.import_"}	2024-03-27 09:06:31.347266	\N	0	37	\N
 3	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "{\\"columns\\": [\\"id\\", \\"database_name\\", \\"impersonate_user\\"], \\"filters\\": [{\\"col\\": \\"database_name\\", \\"opr\\": \\"eq\\", \\"value\\": \\"Trino TPCDS\\"}], \\"keys\\": [\\"none\\"]}", "rison": {"columns": ["id", "database_name", "impersonate_user"], "filters": [{"col": "database_name", "opr": "eq", "value": "Trino TPCDS"}], "keys": ["none"]}}	2024-03-27 09:06:31.400711	\N	0	27	\N
@@ -3841,6 +3646,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 134	DashboardRestApi.get_list	4	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:25:16.471243	\N	0	46	http://5.250.180.35:30980/superset/welcome/
 135	ChartRestApi.info	4	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:25:16.578971	\N	0	9	http://5.250.180.35:30980/superset/welcome/
 136	DashboardRestApi.info	4	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:25:16.5822	\N	0	16	http://5.250.180.35:30980/superset/welcome/
+311	log	1	{"source": "sqlLab", "ts": 1711543078791, "event_name": "spa_navigation", "path": "/dataset/add/", "event_type": "user", "event_id": "UtO2DVOJJ", "visibility": "visible"}	2024-03-27 12:37:59.825591	\N	0	0	http://5.250.180.35:30980/dataset/add/
 142	DashboardRestApi.get_list	4	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'4')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "4"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:25:24.573487	\N	0	95	http://5.250.180.35:30980/superset/welcome/
 147	DashboardRestApi.info	4	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:25:24.727379	\N	0	12	http://5.250.180.35:30980/superset/welcome/
 154	DashboardRestApi.get_list	5	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'5')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "5"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:25:51.867462	\N	0	88	http://5.250.180.35:30980/superset/welcome/
@@ -3907,6 +3713,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 180	DashboardRestApi.info	7	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:26:24.640314	\N	0	12	http://5.250.180.35:30980/superset/welcome/
 186	DashboardRestApi.get_list	8	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'8')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "8"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:26:39.275701	\N	0	90	http://5.250.180.35:30980/superset/welcome/
 190	ChartRestApi.info	8	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:26:39.569174	\N	0	7	http://5.250.180.35:30980/superset/welcome/
+1590	welcome	\N	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:02:34.182749	0	0	0	http://172.20.0.2:32720/sqllab/
 1314	log	7	{"source": "sqlLab", "ts": 1711546411807, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "_2zpTiQk3L", "visibility": "visible"}	2024-03-27 13:33:32.838761	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1570	DatabaseRestApi.function_names	7	{"path": "/api/v1/database/1/function_names/", "url_rule": "/api/v1/database/<int:pk>/function_names/", "object_ref": "DatabaseRestApi.function_names", "pk": 1}	2024-03-28 07:06:09.729726	\N	0	1103	http://5.250.180.35:30980/sqllab/
 1572	DatabaseRestApi.get_list	7	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:ct,value:''),(col:expose_in_sqllab,opr:eq,value:!t)),order_columns:database_name,order_direction:asc,page:0,page_size:100)", "rison": {"filters": [{"col": "database_name", "opr": "ct", "value": ""}, {"col": "expose_in_sqllab", "opr": "eq", "value": true}], "order_columns": "database_name", "order_direction": "asc", "page": 0, "page_size": 100}}	2024-03-28 07:06:20.114601	\N	0	38	http://5.250.180.35:30980/sqllab/
@@ -3929,6 +3736,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 199	LogRestApi.recent_activity	2	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2024-03-27 12:27:20.161509	\N	0	11	http://5.250.180.35:30980/superset/welcome/
 200	SavedQueryRestApi.get_list	2	{"path": "/api/v1/saved_query/", "q": "(filters:!((col:created_by,opr:rel_o_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "created_by", "opr": "rel_o_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:27:20.200359	\N	0	35	http://5.250.180.35:30980/superset/welcome/
 201	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:27:20.23281	\N	0	69	http://5.250.180.35:30980/superset/welcome/
+324	DatabaseRestApi.function_names	2	{"path": "/api/v1/database/1/function_names/", "url_rule": "/api/v1/database/<int:pk>/function_names/", "object_ref": "DatabaseRestApi.function_names", "pk": 1}	2024-03-27 12:41:30.150002	\N	0	1039	http://5.250.180.35:30980/sqllab/
 202	ChartRestApi.get_list	2	{"path": "/api/v1/chart/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:27:20.282255	\N	0	77	http://5.250.180.35:30980/superset/welcome/
 203	ChartRestApi.get_list	2	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:27:20.30424	\N	0	61	http://5.250.180.35:30980/superset/welcome/
 204	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 12:27:20.32477	\N	0	41	http://5.250.180.35:30980/superset/welcome/
@@ -3998,6 +3806,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1326	DashboardRestApi.favorite_status	4	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3]}	2024-03-27 14:20:20.263314	\N	0	13	http://5.250.180.35:30980/superset/dashboard/3/
 1328	log	4	{"source": "dashboard", "source_id": 3, "impression_id": "kkWMKvUsP", "version": "v2", "ts": 1711549219996, "event_name": "spa_navigation", "path": "/superset/dashboard/3/", "event_type": "user", "event_id": "yLct9Fo7j1", "visibility": "visible"}	2024-03-27 14:20:21.230098	3	0	0	http://5.250.180.35:30980/superset/dashboard/3/?native_filters_key=4YUk5clht3TNseXB_ig17L-ad6-aS6BB5i1SavO9rAFXK5PXNiUf91TEmvD5PL4t
 1329	log	4	{"source": "dashboard", "source_id": 3, "impression_id": "kkWMKvUsP", "version": "v2", "ts": 1711549220193, "event_name": "mount_dashboard", "is_soft_navigation": true, "is_edit_mode": false, "mount_duration": 197, "is_empty": false, "is_published": true, "event_type": "user", "event_id": "Gcnv71xr6l", "visibility": "visible"}	2024-03-27 14:20:21.230102	3	0	0	http://5.250.180.35:30980/superset/dashboard/3/?native_filters_key=4YUk5clht3TNseXB_ig17L-ad6-aS6BB5i1SavO9rAFXK5PXNiUf91TEmvD5PL4t
+1591	welcome	1	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:02:51.30432	0	0	41	\N
 1335	ChartRestApi.favorite_status	4	{"path": "/api/v1/chart/favorite_status/", "q": "!(4,3)", "object_ref": "ChartRestApi.favorite_status", "rison": [4, 3]}	2024-03-27 14:20:24.726593	\N	0	18	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1340	log	4	{"source": "dashboard", "source_id": 3, "impression_id": "kkWMKvUsP", "version": "v2", "ts": 1711549230552, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "xmgVVpk7q", "visibility": "visible"}	2024-03-27 14:20:31.583655	3	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1348	ChartDataRestApi.data	4	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "birth_date", "op": "TEMPORAL_RANGE", "val": "No filter"}, {"col": "state", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["state", "preferred_customer"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "slice_id": 4}, "dashboard_id": "3", "object_ref": "ChartDataRestApi.data"}	2024-03-27 14:20:33.281265	3	4	1416	http://5.250.180.35:30980/superset/dashboard/3/
@@ -4016,6 +3825,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 222	log	2	{"source": "sqlLab", "ts": 1711542506697, "event_name": "spa_navigation", "path": "/sqllab/", "event_type": "user", "event_id": "-E_5pvk8r", "visibility": "visible"}	2024-03-27 12:28:27.750521	\N	0	0	http://5.250.180.35:30980/sqllab/
 226	DatabaseRestApi.info	1	{"path": "/api/v1/database/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 12:28:31.477625	\N	0	15	http://5.250.180.35:30980/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 227	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2024-03-27 12:28:31.494097	\N	0	23	http://5.250.180.35:30980/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1575	DatabaseRestApi.info	7	{"path": "/api/v1/database/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:01:09.580595	0	0	25	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 229	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2024-03-27 12:29:10.191349	\N	0	23	http://5.250.180.35:30980/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 233	DatabaseRestApi.test_connection	1	{"path": "/api/v1/database/test_connection/", "object_ref": "DatabaseRestApi.test_connection"}	2024-03-27 12:29:28.620691	\N	0	434	http://5.250.180.35:30980/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 235	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 12:30:04.324706	\N	0	24	http://5.250.180.35:30980/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
@@ -4063,8 +3873,6 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 299	DatasetRestApi.get_list	2	{"path": "/api/v1/dataset/", "q": "(columns:!(id,table_name,datasource_type,database.database_name,schema),filters:!((col:table_name,opr:ct,value:'')),order_column:table_name,order_direction:asc,page:0,page_size:100)", "rison": {"columns": ["id", "table_name", "datasource_type", "database.database_name", "schema"], "filters": [{"col": "table_name", "opr": "ct", "value": ""}], "order_column": "table_name", "order_direction": "asc", "page": 0, "page_size": 100}}	2024-03-27 12:37:36.377221	\N	0	56	http://5.250.180.35:30980/chart/add
 304	SqlLabRestApi.get_results	2	{"path": "/api/v1/sqllab/execute/", "object_ref": "SqlLabRestApi.execute_sql_query"}	2024-03-27 12:37:44.537075	\N	0	2782	http://5.250.180.35:30980/sqllab/
 306	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2024-03-27 12:37:57.340498	\N	0	20	http://5.250.180.35:30980/tablemodelview/list/
-311	log	1	{"source": "sqlLab", "ts": 1711543078791, "event_name": "spa_navigation", "path": "/dataset/add/", "event_type": "user", "event_id": "UtO2DVOJJ", "visibility": "visible"}	2024-03-27 12:37:59.825591	\N	0	0	http://5.250.180.35:30980/dataset/add/
-324	DatabaseRestApi.function_names	2	{"path": "/api/v1/database/1/function_names/", "url_rule": "/api/v1/database/<int:pk>/function_names/", "object_ref": "DatabaseRestApi.function_names", "pk": 1}	2024-03-27 12:41:30.150002	\N	0	1039	http://5.250.180.35:30980/sqllab/
 329	log	2	{"source": "sqlLab", "source_id": "1", "db_id": 1, "schema": "compliance_analytics", "ts": 1711543294681, "event_name": "spa_navigation", "path": "/dataset/add/", "event_type": "user", "event_id": "OK1VWbogp", "visibility": "visible"}	2024-03-27 12:41:35.777331	\N	0	0	http://5.250.180.35:30980/dataset/add/
 334	DatabaseRestApi.tables	2	{"path": "/api/v1/database/1/tables/", "q": "(force:!f,schema_name:customer_analytics)", "url_rule": "/api/v1/database/<int:pk>/tables/", "object_ref": "DatabaseRestApi.tables", "pk": 1, "rison": {"force": false, "schema_name": "customer_analytics"}}	2024-03-27 12:42:05.944545	\N	0	604	http://5.250.180.35:30980/dataset/add/
 339	DatasetRestApi.post	2	{"path": "/api/v1/dataset/", "object_ref": "DatasetRestApi.post"}	2024-03-27 12:42:38.52594	\N	0	445	http://5.250.180.35:30980/dataset/add/
@@ -4109,6 +3917,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 312	DatabaseRestApi.schemas	1	{"path": "/api/v1/database/1/schemas/", "q": "(force:!f)", "url_rule": "/api/v1/database/<int:pk>/schemas/", "object_ref": "DatabaseRestApi.schemas", "pk": 1, "rison": {"force": false}}	2024-03-27 12:38:01.380342	\N	0	437	http://5.250.180.35:30980/dataset/add/
 316	root	2	{"path": "/sqllab/", "object_ref": "SqllabView.root"}	2024-03-27 12:41:28.374678	\N	0	337	\N
 321	DatabaseRestApi.schemas	2	{"path": "/api/v1/database/1/schemas/", "q": "(force:!f)", "url_rule": "/api/v1/database/<int:pk>/schemas/", "object_ref": "DatabaseRestApi.schemas", "pk": 1, "rison": {"force": false}}	2024-03-27 12:41:29.602639	\N	0	489	http://5.250.180.35:30980/sqllab/
+1413	DashboardRestApi.favorite_status	7	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 14:34:06.869521	\N	0	13	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 326	DatasetRestApi.get_list	2	{"path": "/api/v1/dataset/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 12:41:32.781174	\N	0	19	http://5.250.180.35:30980/tablemodelview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 331	DatabaseRestApi.table_metadata	2	{"path": "/api/v1/database/1/table/customer_enriched/compliance_analytics/", "url_rule": "/api/v1/database/<int:pk>/table/<path:table_name>/<schema_name>/", "object_ref": "DatabaseRestApi.table_metadata"}	2024-03-27 12:41:43.245206	\N	0	997	http://5.250.180.35:30980/dataset/add/
 336	DatasetRestApi.post	2	{"path": "/api/v1/dataset/", "object_ref": "DatasetRestApi.post"}	2024-03-27 12:42:09.473803	\N	0	702	http://5.250.180.35:30980/dataset/add/
@@ -4336,6 +4145,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 485	DatasetRestApi.post	1	{"path": "/api/v1/dataset/", "object_ref": "DatasetRestApi.post"}	2024-03-27 13:01:53.706897	\N	0	788	http://5.250.180.35:30980/dataset/add/
 490	log	1	{"source": "sqlLab", "source_id": "2", "db_id": 1, "schema": null, "ts": 1711544515326, "event_name": "spa_navigation", "path": "/tablemodelview/list/", "event_type": "user", "event_id": "MkcbG_iYK", "visibility": "visible"}	2024-03-27 13:01:56.357767	\N	0	0	http://5.250.180.35:30980/tablemodelview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 494	DatasetRestApi.get_list	1	{"path": "/api/v1/dataset/", "q": "(filters:!((col:database,opr:rel_o_m,value:1),(col:schema,opr:eq,value:compliance_analytics),(col:sql,opr:dataset_is_null_or_empty,value:!t)),page:0)", "rison": {"filters": [{"col": "database", "opr": "rel_o_m", "value": 1}, {"col": "schema", "opr": "eq", "value": "compliance_analytics"}, {"col": "sql", "opr": "dataset_is_null_or_empty", "value": true}], "page": 0}}	2024-03-27 13:02:03.564343	\N	0	27	http://5.250.180.35:30980/dataset/add/
+647	log	2	{"source": "explore", "source_id": 1, "impression_id": "qXcYZwS_-", "version": "v2", "ts": 1711544898287, "event_name": "spa_navigation", "path": "/explore/", "event_type": "user", "event_id": "vzqF6gJNn", "visibility": "visible"}	2024-03-27 13:08:19.520567	\N	0	0	http://5.250.180.35:30980/explore/?viz_type=table&datasource=10__table
 498	DatasetRestApi.get_list	1	{"path": "/api/v1/dataset/", "q": "(columns:!(id,table_name,datasource_type,database.database_name,schema),filters:!((col:table_name,opr:ct,value:customer_enriched)),order_column:table_name,order_direction:asc,page:0,page_size:1)", "rison": {"columns": ["id", "table_name", "datasource_type", "database.database_name", "schema"], "filters": [{"col": "table_name", "opr": "ct", "value": "customer_enriched"}], "order_column": "table_name", "order_direction": "asc", "page": 0, "page_size": 1}}	2024-03-27 13:02:07.659245	\N	0	18	http://5.250.180.35:30980/chart/add/?dataset=customer_enriched
 504	LogRestApi.recent_activity	2	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2024-03-27 13:03:04.127725	\N	0	3	http://5.250.180.35:30980/superset/welcome/
 509	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 13:03:04.323769	\N	0	54	http://5.250.180.35:30980/superset/welcome/
@@ -4438,9 +4248,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 632	ChartRestApi.get_list	4	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-27 13:07:53.785627	\N	0	64	http://5.250.180.35:30980/superset/welcome/
 636	ChartRestApi.info	4	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 13:07:54.464922	\N	0	12	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 642	log	4	{"source": "sqlLab", "ts": 1711544876103, "event_name": "spa_navigation", "path": "/tablemodelview/list/", "event_type": "user", "event_id": "7rohcQJQ_", "visibility": "visible"}	2024-03-27 13:07:57.137583	\N	0	0	http://5.250.180.35:30980/tablemodelview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
-647	log	2	{"source": "explore", "source_id": 1, "impression_id": "qXcYZwS_-", "version": "v2", "ts": 1711544898287, "event_name": "spa_navigation", "path": "/explore/", "event_type": "user", "event_id": "vzqF6gJNn", "visibility": "visible"}	2024-03-27 13:08:19.520567	\N	0	0	http://5.250.180.35:30980/explore/?viz_type=table&datasource=10__table
 648	log	2	{"source": "sqlLab", "ts": 1711544898482, "event_name": "mount_explorer", "event_type": "user", "event_id": "W79xEhwbPQ", "visibility": "visible"}	2024-03-27 13:08:19.52057	\N	0	0	http://5.250.180.35:30980/explore/?viz_type=table&datasource=10__table
-1413	DashboardRestApi.favorite_status	7	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 14:34:06.869521	\N	0	13	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1417	log	7	{"source": "dashboard", "source_id": 2, "impression_id": "S-8JPV-HY", "version": "v2", "ts": 1711550048713, "event_name": "load_chart", "slice_id": 1, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 69, "datasource": "10__table", "start_offset": 396, "duration": 1659, "has_extra_filters": false, "viz_type": "echarts_timeseries_bar", "data_age": null, "event_type": "timing", "trigger_event": "e6OB0t_kG"}	2024-03-27 14:34:10.322321	2	0	0	http://5.250.180.35:30980/dashboard/list/
 1418	log	7	{"source": "dashboard", "source_id": 2, "impression_id": "S-8JPV-HY", "version": "v2", "ts": 1711550048910, "event_name": "load_chart", "slice_id": 2, "applied_filters": [{"column": "gender"}], "is_cached": null, "force_refresh": false, "row_count": 10, "datasource": "10__table", "start_offset": 404, "duration": 1848, "has_extra_filters": false, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "e6OB0t_kG"}	2024-03-27 14:34:10.322325	2	0	0	http://5.250.180.35:30980/dashboard/list/
 587	log	2	{"source": "sqlLab", "ts": 1711544754909, "event_name": "spa_navigation", "path": "/explore/", "event_type": "user", "event_id": "fVnPSkMAS", "visibility": "visible"}	2024-03-27 13:05:56.254278	\N	0	0	http://5.250.180.35:30980/explore/?viz_type=pie&datasource=10__table
@@ -4535,6 +4343,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 664	log	2	{"source": "sqlLab", "ts": 1711544950507, "event_name": "load_chart", "slice_id": 0, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 11, "datasource": "10__table", "start_offset": 48729, "duration": 3490, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "D3QC-n56U"}	2024-03-27 13:09:11.558993	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
 665	log	2	{"source": "sqlLab", "ts": 1711544950525, "event_name": "render_chart", "slice_id": 0, "viz_type": "pivot_table_v2", "start_offset": 52234, "duration": 4, "event_type": "timing", "trigger_event": "D3QC-n56U"}	2024-03-27 13:09:11.558997	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
 670	log	2	{"source": "sqlLab", "ts": 1711544959852, "event_name": "change_explore_controls", "event_type": "user", "event_id": "hakl_88Bn", "visibility": "visible"}	2024-03-27 13:09:20.925292	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
+1133	log	4	{"source": "explore", "source_id": 3, "impression_id": "kkWMKvUsP", "version": "v2", "ts": 1711545842614, "event_name": "spa_navigation", "path": "/chart/list/", "event_type": "user", "event_id": "7jVpQouzA", "visibility": "visible"}	2024-03-27 13:24:03.646397	\N	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 674	log	2	{"source": "sqlLab", "ts": 1711544965389, "event_name": "load_chart", "slice_id": 0, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 11, "datasource": "10__table", "start_offset": 63134, "duration": 3967, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "hakl_88Bn"}	2024-03-27 13:09:26.454213	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
 675	log	2	{"source": "sqlLab", "ts": 1711544965412, "event_name": "render_chart", "slice_id": 0, "viz_type": "pivot_table_v2", "start_offset": 67118, "duration": 7, "event_type": "timing", "trigger_event": "hakl_88Bn"}	2024-03-27 13:09:26.45423	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
 679	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:09:37.29163	\N	0	2265	http://5.250.180.35:30980/explore/?form_data_key=WRJeoYGvhnUM6c2Zcdzq61h0LoC_Cb7Ghfq3ejbvFTnPwxQ-2jkx_Z_nY0cBxW-5&viz_type=table&datasource=10__table&datasource_id=10&datasource_type=table
@@ -4587,6 +4396,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 718	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {"slice_id": "2"}, "custom_params": {}, "custom_form_data": {}, "slice_id": 2}, "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:10:48.746653	\N	2	1851	http://5.250.180.35:30980/explore/?form_data_key=sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N&slice_id=2
 722	ChartRestApi.info	4	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 13:10:59.917105	\N	0	9	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 728	ExploreFormDataRestApi.put	2	{"path": "/api/v1/explore/form_data/sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N", "tab_id": "1", "url_rule": "/api/v1/explore/form_data/<string:key>", "object_ref": "ExploreFormDataRestApi.put", "key": "sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N"}	2024-03-27 13:11:37.542911	\N	0	29	http://5.250.180.35:30980/explore/?form_data_key=sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N&slice_id=2
+1143	DatasetRestApi.get	4	{"path": "/api/v1/dataset/5", "url_rule": "/api/v1/dataset/<int:pk>", "rison": {}}	2024-03-27 13:25:13.262574	\N	0	117	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=2&datasource_type=table
 739	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {"form_data_key": "sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N", "save_action": "overwrite", "slice_id": "2"}, "custom_params": {}, "custom_form_data": {}, "slice_id": 2}, "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:11:50.988429	\N	2	2313	http://5.250.180.35:30980/explore/?form_data_key=sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N&slice_id=2&save_action=overwrite
 749	ChartRestApi.favorite_status	2	{"path": "/api/v1/chart/favorite_status/", "q": "!(2,1)", "object_ref": "ChartRestApi.favorite_status", "rison": [2, 1]}	2024-03-27 13:12:01.932587	\N	0	16	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 754	log	2	{"source": "explore", "source_id": 2, "impression_id": "qXcYZwS_-", "version": "v2", "ts": 1711545123011, "event_name": "load_chart", "slice_id": 2, "applied_filters": [{"column": "gender"}], "is_cached": null, "force_refresh": false, "row_count": 10, "datasource": "10__table", "start_offset": 76364, "duration": -75046, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "LKnIDMXqd"}	2024-03-27 13:12:05.002153	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
@@ -4621,6 +4431,8 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1441	DashboardFilterStateRestApi.post	6	{"path": "/api/v1/dashboard/3/filter_state", "tab_id": "1", "url_rule": "/api/v1/dashboard/<int:pk>/filter_state", "object_ref": "DashboardFilterStateRestApi.post", "pk": 3}	2024-03-28 07:00:30.677851	\N	0	48	http://5.250.180.35:30980/superset/dashboard/3/
 1445	log	6	{"source": "dashboard", "source_id": 3, "impression_id": "I8TCtZW-N", "version": "v2", "ts": 1711609235279, "event_name": "load_chart", "slice_id": 3, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 1, "datasource": "2__table", "start_offset": 465, "duration": 5161, "has_extra_filters": false, "viz_type": "big_number_total", "data_age": null, "event_type": "timing", "trigger_event": "XEhshV9UR4"}	2024-03-28 07:00:36.406396	3	0	0	http://5.250.180.35:30980/superset/dashboard/3/?native_filters_key=BC8zYhmkGioYLPEq5pVmWGfcUZLJgw812X6uCvJwBOYtj-qVtLpIq8oP4sIvDrQn
 751	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {"form_data_key": "sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N", "save_action": "overwrite", "slice_id": "2"}, "custom_params": {}, "custom_form_data": {}, "slice_id": 2}, "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:12:02.992033	\N	2	2323	http://5.250.180.35:30980/explore/?form_data_key=sFcF7mH0sUlU1dq90XZF9PZGmuiwblCruUDA95gLmOfvcyZRBDQuAEEwT3JbHl9N&slice_id=2&save_action=overwrite
+1151	ChartDataRestApi.data	4	{"path": "/api/v1/chart/data", "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:25:31.751193	\N	0	1336	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=2&datasource_type=table
+1576	DatabaseRestApi.get_list	7	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:01:09.666842	0	0	101	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 761	ChartRestApi.get_list	2	{"path": "/api/v1/chart/", "q": "(columns:!(changed_on_delta_humanized,changed_on_utc,datasource_id,datasource_type,datasource_url,datasource_name_text,description_markeddown,description,id,params,slice_name,thumbnail_url,url,viz_type,owners.id,created_by.id),filters:!((col:viz_type,opr:neq,value:filter_box),(col:owners,opr:rel_m_m,value:2)),order_column:changed_on_delta_humanized,order_direction:desc,page_size:200)", "rison": {"columns": ["changed_on_delta_humanized", "changed_on_utc", "datasource_id", "datasource_type", "datasource_url", "datasource_name_text", "description_markeddown", "description", "id", "params", "slice_name", "thumbnail_url", "url", "viz_type", "owners.id", "created_by.id"], "filters": [{"col": "viz_type", "opr": "neq", "value": "filter_box"}, {"col": "owners", "opr": "rel_m_m", "value": 2}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page_size": 200}}	2024-03-27 13:12:06.811027	\N	0	96	http://5.250.180.35:30980/superset/dashboard/1/?edit=true
 767	log	2	{"source": "dashboard", "source_id": 1, "impression_id": "r5nI9hqkr", "version": "v2", "ts": 1711545128986, "event_name": "spa_navigation", "path": "/chart/list/", "event_type": "user", "event_id": "eZtYtH2w2", "visibility": "visible"}	2024-03-27 13:12:10.031205	1	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 771	log	2	{"source": "dashboard", "source_id": 1, "impression_id": "r5nI9hqkr", "version": "v2", "ts": 1711545132364, "event_name": "spa_navigation", "path": "/explore/", "event_type": "user", "event_id": "p7uXHzrRB", "visibility": "visible"}	2024-03-27 13:12:13.626717	1	0	0	http://5.250.180.35:30980/explore/?slice_id=1
@@ -4682,6 +4494,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 803	log	4	{"source": "sqlLab", "ts": 1711545161376, "event_name": "spa_navigation", "path": "/chart/list/", "event_type": "user", "event_id": "ivYC13VGo4", "visibility": "visible"}	2024-03-27 13:12:43.941367	\N	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 804	log	4	{"source": "sqlLab", "ts": 1711545161967, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "FWvarGlnR", "visibility": "visible"}	2024-03-27 13:12:43.941371	\N	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 805	log	4	{"source": "sqlLab", "ts": 1711545162907, "event_name": "spa_navigation", "path": "/chart/list/", "event_type": "user", "event_id": "Nf_kuFG8l", "visibility": "visible"}	2024-03-27 13:12:43.941372	\N	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1592	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2025-07-28 13:02:51.738867	0	0	86	http://172.20.0.2:32720/superset/welcome/
 806	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2024-03-27 13:12:53.790628	\N	0	21	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 807	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2024-03-27 13:12:53.833961	\N	0	19	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 808	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:12:53.88268	\N	0	35	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
@@ -4740,6 +4553,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 827	ChartRestApi.favorite_status	7	{"path": "/api/v1/chart/favorite_status/", "q": "!(1,2)", "object_ref": "ChartRestApi.favorite_status", "rison": [1, 2]}	2024-03-27 13:14:17.665085	\N	0	18	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 832	ExploreRestApi.get	2	{"path": "/api/v1/explore/", "slice_id": "1", "object_ref": "ExploreRestApi.get"}	2024-03-27 13:14:35.33604	\N	1	25	http://5.250.180.35:30980/explore/?slice_id=1
 841	explore_json	2	{"path": "/superset/explore_json/", "form_data": {"datasource": "10__table", "viz_type": "histogram", "slice_id": 1, "url_params": {"slice_id": "1"}, "all_columns_x": ["birth_year"], "adhoc_filters": [], "row_limit": 10000, "groupby": [], "color_scheme": "supersetColors", "link_length": "25", "show_legend": true, "extra_form_data": {}}, "query": "true", "object_ref": "Superset.explore_json"}	2024-03-27 13:14:55.142287	\N	1	30	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1
+1655	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:05:00.274187	0	0	78	http://172.20.0.2:32720/superset/welcome/
 845	log	2	{"source": "dashboard", "source_id": 1, "impression_id": "r5nI9hqkr", "version": "v2", "ts": 1711545314230, "event_name": "load_chart", "slice_id": 1, "applied_filters": [], "is_cached": false, "force_refresh": false, "row_count": 100000, "datasource": "10__table", "start_offset": 36074, "duration": 2918, "viz_type": "histogram", "data_age": null, "event_type": "timing", "trigger_event": "GutYZbIWE"}	2024-03-27 13:15:15.310857	1	0	0	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1
 846	log	2	{"source": "dashboard", "source_id": 1, "impression_id": "r5nI9hqkr", "version": "v2", "ts": 1711545314272, "event_name": "render_chart", "slice_id": 1, "viz_type": "histogram", "start_offset": 39011, "duration": 23, "event_type": "timing", "trigger_event": "GutYZbIWE"}	2024-03-27 13:15:15.31086	1	0	0	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1
 849	ExploreFormDataRestApi.put	2	{"path": "/api/v1/explore/form_data/bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK", "tab_id": "1", "url_rule": "/api/v1/explore/form_data/<string:key>", "object_ref": "ExploreFormDataRestApi.put", "key": "bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK"}	2024-03-27 13:15:41.026581	\N	0	55	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1
@@ -4809,6 +4623,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 909	ExploreFormDataRestApi.post	2	{"path": "/api/v1/explore/form_data", "tab_id": "1", "object_ref": "ExploreFormDataRestApi.post"}	2024-03-27 13:19:05.644393	\N	0	34	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1&save_action=overwrite
 915	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 13:19:08.470058	\N	0	13	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 920	log	7	{"source": "sqlLab", "ts": 1711545550550, "event_name": "spa_navigation", "path": "/profile/", "event_type": "user", "event_id": "RyKzfeLsn", "visibility": "visible"}	2024-03-27 13:19:11.58378	\N	0	0	http://5.250.180.35:30980/profile/
+1663	DashboardRestApi.info	1	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:05:00.644309	0	0	20	http://172.20.0.2:32720/superset/welcome/
 925	DashboardRestApi.get_list	7	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:19:14.974962	\N	0	42	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 929	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 13:19:18.213606	\N	0	15	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 934	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 13:19:23.349692	\N	0	17	http://5.250.180.35:30980/superset/dashboard/2/
@@ -4828,6 +4643,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1480	DashboardRestApi.favorite_status	4	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3]}	2024-03-28 07:01:23.44944	\N	0	14	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1485	LogRestApi.recent_activity	7	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2024-03-28 07:01:50.369205	\N	0	6	http://5.250.180.35:30980/superset/welcome/
 911	log	2	{"source": "explore", "source_id": 1, "impression_id": "0_2Vq7bXl", "version": "v2", "ts": 1711545547005, "event_name": "load_chart", "slice_id": 1, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 69, "datasource": "10__table", "start_offset": 19072, "duration": 2418, "viz_type": "echarts_timeseries_bar", "data_age": null, "event_type": "timing", "trigger_event": "QQwEXTuia"}	2024-03-27 13:19:08.052564	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1&save_action=overwrite
+1577	DatabaseRestApi.get_list	7	{"path": "/api/v1/database/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2025-07-28 13:01:09.6755	0	0	136	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 912	log	2	{"source": "explore", "source_id": 1, "impression_id": "0_2Vq7bXl", "version": "v2", "ts": 1711545547019, "event_name": "render_chart", "slice_id": 1, "viz_type": "echarts_timeseries_bar", "start_offset": 21499, "duration": 5, "event_type": "timing", "trigger_event": "QQwEXTuia"}	2024-03-27 13:19:08.052567	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=bnOTQQ6M7SxK5tUecoq_hRWDhF4uSotbxkM6_fc1cjomEKJHLRPj89awvu87kYyK&slice_id=1&save_action=overwrite
 917	root	7	{"path": "/profile/", "object_ref": "ProfileView.root"}	2024-03-27 13:19:10.014236	\N	0	79	\N
 921	DashboardRestApi.info	7	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 13:19:13.407381	\N	0	18	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
@@ -4848,6 +4664,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1527	DatabaseRestApi.schemas	7	{"path": "/api/v1/database/1/schemas/", "q": "(force:!t)", "url_rule": "/api/v1/database/<int:pk>/schemas/", "object_ref": "DatabaseRestApi.schemas", "pk": 1, "rison": {"force": true}}	2024-03-28 07:02:09.090539	\N	0	127	http://5.250.180.35:30980/sqllab/
 922	DashboardRestApi.get_list	7	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:19:13.416098	\N	0	42	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 926	log	7	{"source": "sqlLab", "ts": 1711545554847, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "uloa7QKGk_", "visibility": "visible"}	2024-03-27 13:19:15.877451	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1667	LogRestApi.recent_activity	1	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2025-07-28 13:06:01.415792	0	0	2	http://172.20.0.2:32720/superset/welcome/
 930	log	2	{"source": "sqlLab", "ts": 1711545557867, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "PbyLHqB3R2", "visibility": "visible"}	2024-03-27 13:19:18.902863	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 938	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "birth_year", "label": "birth_year", "expressionType": "SQL"}], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 100000, "series_columns": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index": ["birth_year"], "columns": [], "aggregates": {"count": {"operator": "mean"}}, "drop_missing_columns": false}}, {"operation": "flatten"}], "slice_id": 1}, "dashboard_id": "2", "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:19:25.614832	2	1	2271	http://5.250.180.35:30980/superset/dashboard/2/
 1489	DashboardRestApi.get_list	7	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2024-03-28 07:01:50.524138	\N	0	59	http://5.250.180.35:30980/superset/welcome/
@@ -4900,6 +4717,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 961	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "zunV5Sm7V", "version": "v2", "ts": 1711545615452, "event_name": "toggle_edit_dashboard", "edit_mode": true, "event_type": "user", "event_id": "ILRxq5VJm", "visibility": "visible"}	2024-03-27 13:20:16.490906	2	0	0	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=IZko89lzIArEStRxs5dREiOb5bf8cYaBcROLFrtmTaXJ1Ch6EriBMSq1S9UGfUlj
 963	DashboardFilterStateRestApi.post	2	{"path": "/api/v1/dashboard/2/filter_state", "tab_id": "1", "url_rule": "/api/v1/dashboard/<int:pk>/filter_state", "object_ref": "DashboardFilterStateRestApi.post", "pk": 2}	2024-03-27 13:20:23.578247	\N	0	26	http://5.250.180.35:30980/superset/dashboard/2/
 971	log	2	{"source": "sqlLab", "ts": 1711545626218, "event_name": "spa_navigation", "path": "/superset/dashboard/2/", "event_type": "user", "event_id": "GFmuGAhHTA", "visibility": "visible"}	2024-03-27 13:20:27.56192	\N	0	0	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=IZko89lzIArEStRxs5dREiOb5bf8cYaBcROLFrtmTaXJ1Ch6EriBMSq1S9UGfUlj
+1578	log	7	{"source": "sqlLab", "ts": 1753707669451, "event_name": "spa_navigation", "path": "/databaseview/list/", "event_type": "user", "event_id": "aCs_42oIOLStW5-zBuYLs", "visibility": "visible"}	2025-07-28 13:01:10.457789	0	0	0	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
 972	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "9unYGs9AS", "version": "v2", "ts": 1711545626482, "event_name": "mount_dashboard", "is_soft_navigation": false, "is_edit_mode": false, "mount_duration": 818, "is_empty": false, "is_published": false, "event_type": "user", "event_id": "AKBy_6FYHv", "visibility": "visible"}	2024-03-27 13:20:27.561924	\N	0	0	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=IZko89lzIArEStRxs5dREiOb5bf8cYaBcROLFrtmTaXJ1Ch6EriBMSq1S9UGfUlj
 979	DashboardRestApi.info	2	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2024-03-27 13:20:35.590055	\N	0	17	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 984	DatasetRestApi.get_list	2	{"path": "/api/v1/dataset/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:20:36.897261	\N	0	34	http://5.250.180.35:30980/tablemodelview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
@@ -4989,6 +4807,7 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1043	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "9unYGs9AS", "version": "v2", "ts": 1711545737368, "event_name": "mount_dashboard", "is_soft_navigation": true, "is_edit_mode": false, "mount_duration": 193, "is_empty": false, "is_published": true, "event_type": "user", "event_id": "9jCeC0Tf5X", "visibility": "visible"}	2024-03-27 13:22:18.397495	2	0	0	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=IZko89lzIArEStRxs5dREiOb5bf8cYaBcROLFrtmTaXJ1Ch6EriBMSq1S9UGfUlj
 1054	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 13:22:23.477962	\N	0	14	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1058	DashboardRestApi.favorite_status	7	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2024-03-27 13:22:25.593774	\N	0	12	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1579	DashboardRestApi.info	7	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:01:12.117327	0	0	16	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1063	DashboardRestApi.get_list	4	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:22:31.544365	\N	0	41	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1068	log	4	{"source": "sqlLab", "ts": 1711545752739, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "doVCm3Rf0Y", "visibility": "visible"}	2024-03-27 13:22:33.772607	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1072	log	2	{"source": "sqlLab", "ts": 1711545768281, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "NhqBT7SNBp", "visibility": "visible"}	2024-03-27 13:22:49.314621	\N	0	0	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
@@ -5106,9 +4925,6 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1224	DashboardRestApi.put	2	{"path": "/api/v1/dashboard/2", "url_rule": "/api/v1/dashboard/<pk>", "object_ref": "DashboardRestApi.put", "pk": "2"}	2024-03-27 13:28:21.272194	\N	0	34	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=IZko89lzIArEStRxs5dREiOb5bf8cYaBcROLFrtmTaXJ1Ch6EriBMSq1S9UGfUlj
 1227	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2024-03-27 13:28:24.468227	\N	0	48	http://5.250.180.35:30980/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
 1532	SqlLabRestApi.get	7	{"path": "/api/v1/sqllab/", "object_ref": "SqlLabRestApi.get"}	2024-03-28 07:02:55.632933	\N	0	19	http://5.250.180.35:30980/sqllab/
-1133	log	4	{"source": "explore", "source_id": 3, "impression_id": "kkWMKvUsP", "version": "v2", "ts": 1711545842614, "event_name": "spa_navigation", "path": "/chart/list/", "event_type": "user", "event_id": "7jVpQouzA", "visibility": "visible"}	2024-03-27 13:24:03.646397	\N	0	0	http://5.250.180.35:30980/chart/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
-1143	DatasetRestApi.get	4	{"path": "/api/v1/dataset/5", "url_rule": "/api/v1/dataset/<int:pk>", "rison": {}}	2024-03-27 13:25:13.262574	\N	0	117	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=2&datasource_type=table
-1151	ChartDataRestApi.data	4	{"path": "/api/v1/chart/data", "object_ref": "ChartDataRestApi.data"}	2024-03-27 13:25:31.751193	\N	0	1336	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=2&datasource_type=table
 1155	ExploreFormDataRestApi.put	4	{"path": "/api/v1/explore/form_data/nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF", "tab_id": "1", "url_rule": "/api/v1/explore/form_data/<string:key>", "object_ref": "ExploreFormDataRestApi.put", "key": "nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF"}	2024-03-27 13:25:44.163534	\N	0	20	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=5&datasource_type=table
 1160	log	4	{"source": "sqlLab", "ts": 1711545952027, "event_name": "change_explore_controls", "event_type": "user", "event_id": "K5L-Oqow9", "visibility": "visible"}	2024-03-27 13:25:53.065997	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=5&datasource_type=table
 1164	log	4	{"source": "sqlLab", "ts": 1711545965631, "event_name": "load_chart", "slice_id": 0, "applied_filters": [{"column": "birth_date"}], "is_cached": null, "force_refresh": false, "row_count": 665, "datasource": "5__table", "start_offset": 77927, "duration": 1443, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "jpridphPj"}	2024-03-27 13:26:06.693663	\N	0	0	http://5.250.180.35:30980/explore/?form_data_key=nekPZROaluou0k1axrdjzHuZS3H-Wg24XClEX95hRyCaneUwna7OVkHM05AkSTXF&viz_type=pivot_table_v2&datasource=2__table&datasource_id=5&datasource_type=table
@@ -5224,6 +5040,134 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 1246	log	7	{"source": "dashboard", "source_id": 2, "impression_id": "YSYl3C_eP", "version": "v2", "ts": 1711546111495, "event_name": "render_chart", "slice_id": 2, "viz_type": "pivot_table_v2", "start_offset": 4261, "duration": 50, "event_type": "timing", "trigger_event": "2mTt5D_JdQ"}	2024-03-27 13:28:32.529406	2	0	0	http://5.250.180.35:30980/superset/dashboard/2/?native_filters_key=CGebbU8iUSJ8BkmXOOYpWD5lqz1IdnLMhnnBMvJE2nsNqVKJb_C6pGD2-sGkk8d5
 1560	log	7	{"source": "sqlLab", "source_id": "4", "db_id": 1, "schema": "compliance_analytics", "ts": 1711609405515, "event_name": "sqllab_monitor_local_storage_usage", "current_usage": 0.61, "query_count": 0, "event_type": "user", "event_id": "GoTJoKFec", "visibility": "visible"}	2024-03-28 07:03:26.587994	\N	0	0	http://5.250.180.35:30980/sqllab/
 1562	DatabaseRestApi.schemas	7	{"path": "/api/v1/database/1/schemas/", "q": "(force:!t)", "url_rule": "/api/v1/database/<int:pk>/schemas/", "object_ref": "DatabaseRestApi.schemas", "pk": 1, "rison": {"force": true}}	2024-03-28 07:04:09.412029	\N	0	421	http://5.250.180.35:30980/sqllab/
+1593	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:02:51.750517	0	0	73	http://172.20.0.2:32720/superset/welcome/
+1597	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:02:51.859542	0	0	114	http://172.20.0.2:32720/superset/welcome/
+1599	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:02:51.995598	0	0	76	http://172.20.0.2:32720/superset/welcome/
+1604	log	1	{"source": "sqlLab", "ts": 1753707771607, "event_name": "spa_navigation", "path": "/superset/welcome/", "event_type": "user", "event_id": "auhjwx0XIFMoAApefsDAb", "visibility": "visible"}	2025-07-28 13:02:52.615481	0	0	0	http://172.20.0.2:32720/superset/welcome/
+1610	DatabaseRestApi.available	1	{"path": "/api/v1/database/available/", "object_ref": "DatabaseRestApi.available"}	2025-07-28 13:02:57.33249	0	0	53	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1615	test_connection_attempt	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:27.293676	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1617	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2025-07-28 13:04:21.034079	0	0	21	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1622	log	1	{"source": "sqlLab", "ts": 1753707860973, "event_name": "spa_navigation", "path": "/databaseview/list/", "event_type": "user", "event_id": "m1zZMCIm1qwF7Ltxr2CZN", "visibility": "visible"}	2025-07-28 13:04:21.978821	0	0	0	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1626	test_connection_error.DBAPIError	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:04:34.962715	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1630	DatabaseRestApi.put	1	{"path": "/api/v1/database/1", "allow_ctas": true, "allow_cvas": true, "allow_dml": true, "allow_file_upload": false, "allow_run_async": false, "backend": "trino", "cache_timeout": null, "configuration_method": "sqlalchemy_form", "database_name": "Trino lakehouse", "engine_information": {"disable_ssh_tunneling": false, "supports_dynamic_catalog": true, "supports_file_upload": true}, "expose_in_sqllab": true, "extra": "{\\"allows_virtual_table_explore\\":true,\\"engine_params\\":{\\"connect_args\\":{\\"verify\\":false,\\"http_scheme\\":\\"https\\"}}}", "force_ctas_schema": null, "id": 1, "impersonate_user": true, "is_managed_externally": false, "masked_encrypted_extra": "", "parameters_schema": {}, "server_cert": null, "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse", "uuid": "f8d085f0-211e-4ab7-97b1-dcd9b96ee28d", "query_input": "", "url_rule": "/api/v1/database/<int:pk>", "object_ref": "DatabaseRestApi.put", "pk": 1}	2025-07-28 13:04:47.085445	0	0	424	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1635	DashboardRestApi.info	1	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:04:48.498577	0	0	18	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1640	DashboardRestApi.get_datasets	1	{"path": "/api/v1/dashboard/3/datasets", "url_rule": "/api/v1/dashboard/<id_or_slug>/datasets", "object_ref": "DashboardRestApi.get_datasets", "id_or_slug": "3"}	2025-07-28 13:04:50.815726	0	0	53	http://172.20.0.2:32720/superset/dashboard/3/
+1645	ChartDataRestApi.data	1	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "birth_date", "op": "TEMPORAL_RANGE", "val": "No filter"}, {"col": "state", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["state", "preferred_customer"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "slice_id": 4}, "dashboard_id": "3", "datasource": {"id": 5, "type": "table"}, "force": false, "queries": [{"filters": [{"col": "birth_date", "op": "TEMPORAL_RANGE", "val": "No filter"}, {"col": "state", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["state", "preferred_customer"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}], "result_format": "json", "result_type": "full", "object_ref": "ChartDataRestApi.data"}	2025-07-28 13:04:51.633628	3	4	629	http://172.20.0.2:32720/superset/dashboard/3/
+1646	ChartRestApi.get	1	{"path": "/api/v1/chart/4", "url_rule": "/api/v1/chart/<int:pk>", "rison": {}}	2025-07-28 13:04:51.669301	0	0	8	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1653	LogRestApi.recent_activity	1	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2025-07-28 13:05:00.226524	0	0	3	http://172.20.0.2:32720/superset/welcome/
+1580	DashboardRestApi.get_list	7	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25,select_columns:!(id,dashboard_title,published,url,slug,changed_by,changed_on_delta_humanized,owners.id,owners.first_name,owners.last_name,owners,tags.id,tags.name,tags.type,status,certified_by,certification_details,changed_on))", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25, "select_columns": ["id", "dashboard_title", "published", "url", "slug", "changed_by", "changed_on_delta_humanized", "owners.id", "owners.first_name", "owners.last_name", "owners", "tags.id", "tags.name", "tags.type", "status", "certified_by", "certification_details", "changed_on"]}}	2025-07-28 13:01:12.172073	0	0	82	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1583	SqlLabRestApi.get	7	{"path": "/api/v1/sqllab/", "object_ref": "SqlLabRestApi.get"}	2025-07-28 13:01:14.015658	0	0	127	http://172.20.0.2:32720/sqllab/
+1585	DatabaseRestApi.schemas	7	{"path": "/api/v1/database/1/schemas/", "q": "(catalog:lakehouse,force:!f)", "url_rule": "/api/v1/database/<int:pk>/schemas/", "object_ref": "DatabaseRestApi.schemas", "pk": 1, "rison": {"catalog": "lakehouse", "force": false}}	2025-07-28 13:01:15.009709	0	0	878	http://172.20.0.2:32720/sqllab/
+1594	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:02:51.784971	0	0	111	http://172.20.0.2:32720/superset/welcome/
+1598	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:02:51.982775	0	0	75	http://172.20.0.2:32720/superset/welcome/
+1602	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3,2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3, 2]}	2025-07-28 13:02:52.100101	0	0	4	http://172.20.0.2:32720/superset/welcome/
+1603	DashboardRestApi.info	1	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:02:52.102667	0	0	20	http://172.20.0.2:32720/superset/welcome/
+1606	DatabaseRestApi.info	1	{"path": "/api/v1/database/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:02:55.36751	0	0	122	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1608	log	1	{"source": "sqlLab", "ts": 1753707775134, "event_name": "spa_navigation", "path": "/databaseview/list/", "event_type": "user", "event_id": "6HJOB51yXtLOAD7T9_4xF", "visibility": "visible"}	2025-07-28 13:02:56.140627	0	0	0	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1609	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:02:57.310622	0	0	19	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1612	test_connection_error.DBAPIError	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsupersetsupersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:19.092382	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1614	test_connection_error.DBAPIError	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsupersetsupersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:22.272303	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1618	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:04:21.034463	0	0	27	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1619	DatabaseRestApi.info	1	{"path": "/api/v1/database/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:04:21.108858	0	0	30	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1624	DatabaseRestApi.available	1	{"path": "/api/v1/database/available/", "object_ref": "DatabaseRestApi.available"}	2025-07-28 13:04:23.000048	0	0	46	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1627	test_connection_attempt	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\":true,\\"engine_params\\":{\\"connect_args\\":{\\"verify\\":false,\\"http_scheme\\":\\"https\\"}}}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:04:45.568824	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1629	DatabaseRestApi.test_connection	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\":true,\\"engine_params\\":{\\"connect_args\\":{\\"verify\\":false,\\"http_scheme\\":\\"https\\"}}}", "masked_encrypted_extra": "", "object_ref": "DatabaseRestApi.test_connection"}	2025-07-28 13:04:45.938269	0	0	380	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1631	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2025-07-28 13:04:47.21797	0	0	25	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1632	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:04:47.226841	0	0	20	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1581	DashboardRestApi.favorite_status	7	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2025-07-28 13:01:12.241581	0	0	14	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1584	DatabaseRestApi.get_list	7	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:ct,value:''),(col:expose_in_sqllab,opr:eq,value:!t)),order_column:database_name,order_direction:asc,page:0,page_size:100)", "rison": {"filters": [{"col": "database_name", "opr": "ct", "value": ""}, {"col": "expose_in_sqllab", "opr": "eq", "value": true}], "order_column": "database_name", "order_direction": "asc", "page": 0, "page_size": 100}}	2025-07-28 13:01:14.180018	0	0	59	http://172.20.0.2:32720/sqllab/
+1587	log	7	{"source": "sqlLab", "ts": 1753707673805, "event_name": "spa_navigation", "path": "/sqllab/", "event_type": "user", "event_id": "AUU9ivouYs9It7gyOjEK_", "visibility": "visible"}	2025-07-28 13:01:15.163858	0	0	0	http://172.20.0.2:32720/sqllab/
+1588	log	7	{"source": "sqlLab", "source_id": "5", "db_id": 1, "schema": "compliance_analytics", "ts": 1753707674075, "event_name": "sqllab_load_tab_state", "payload": {"queryEditorId": "5", "duration": 270, "inLocalStorage": false, "hasLoaded": true}, "event_type": "timing", "trigger_event": "AUU9ivouYs9It7gyOjEK_"}	2025-07-28 13:01:15.16386	0	0	0	http://172.20.0.2:32720/sqllab/
+1589	log	7	{"source": "sqlLab", "source_id": "5", "db_id": 1, "schema": "compliance_analytics", "ts": 1753707674157, "event_name": "sqllab_monitor_local_storage_usage", "current_usage": 0.73, "query_count": 0, "event_type": "user", "event_id": "BkPm2f54ZUt_irMqMpXi3", "visibility": "visible"}	2025-07-28 13:01:15.163861	0	0	0	http://172.20.0.2:32720/sqllab/
+1595	LogRestApi.recent_activity	1	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2025-07-28 13:02:51.80904	0	0	16	http://172.20.0.2:32720/superset/welcome/
+1600	ChartRestApi.favorite_status	1	{"path": "/api/v1/chart/favorite_status/", "q": "!(4,2,3,1)", "object_ref": "ChartRestApi.favorite_status", "rison": [4, 2, 3, 1]}	2025-07-28 13:02:52.097374	0	0	20	http://172.20.0.2:32720/superset/welcome/
+1607	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2025-07-28 13:02:55.367774	0	0	138	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1611	test_connection_attempt	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsupersetsupersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:18.150879	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1616	test_connection_error.DBAPIError	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:27.88321	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1620	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25)", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25}}	2025-07-28 13:04:21.113824	0	0	39	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1625	test_connection_attempt	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:04:34.459813	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1634	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25,select_columns:!(id,dashboard_title,published,url,slug,changed_by,changed_on_delta_humanized,owners.id,owners.first_name,owners.last_name,owners,tags.id,tags.name,tags.type,status,certified_by,certification_details,changed_on))", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25, "select_columns": ["id", "dashboard_title", "published", "url", "slug", "changed_by", "changed_on_delta_humanized", "owners.id", "owners.first_name", "owners.last_name", "owners", "tags.id", "tags.name", "tags.type", "status", "certified_by", "certification_details", "changed_on"]}}	2025-07-28 13:04:48.4942	0	0	18	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1636	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3,2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3, 2]}	2025-07-28 13:04:48.553559	0	0	1	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1638	DashboardRestApi.get_charts	1	{"path": "/api/v1/dashboard/3/charts", "url_rule": "/api/v1/dashboard/<id_or_slug>/charts", "object_ref": "DashboardRestApi.get_charts", "id_or_slug": "3"}	2025-07-28 13:04:50.772616	0	0	13	http://172.20.0.2:32720/superset/dashboard/3/
+1641	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3]}	2025-07-28 13:04:50.953007	0	0	1	http://172.20.0.2:32720/superset/dashboard/3/
+1643	DashboardFilterStateRestApi.post	1	{"path": "/api/v1/dashboard/3/filter_state", "tab_id": "3", "value": "{}", "url_rule": "/api/v1/dashboard/<int:pk>/filter_state", "object_ref": "DashboardFilterStateRestApi.post", "pk": 3}	2025-07-28 13:04:51.476178	0	0	28	http://172.20.0.2:32720/superset/dashboard/3/
+1650	log	1	{"source": "dashboard", "source_id": 3, "impression_id": "NGNmQdL5dKaPy29weSPr4", "version": "v2", "ts": 1753707891646, "event_name": "load_chart", "slice_id": 4, "has_err": true, "error_details": "Error: TrinoUserError(type=USER_ERROR, name=PERMISSION_DENIED, message=\\"Access Denied: Cannot select from columns [state, preferred_customer] in table or view lakehouse.customer_analytics.customer_enriched\\", query_id=20250728_130451_00020_cw7a3)", "datasource": "5__table", "start_offset": 292, "duration": 672, "event_type": "timing", "trigger_event": "0zYi_iO7cpwa6dgDhCxmG"}	2025-07-28 13:04:52.699362	0	0	0	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1652	welcome	1	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:04:59.854972	0	0	40	\N
+1582	log	7	{"source": "sqlLab", "ts": 1753707672027, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "Gt6AiSpfFPbXwrSxFkhLk", "visibility": "visible"}	2025-07-28 13:01:13.033156	0	0	0	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1586	DatabaseRestApi.function_names	7	{"path": "/api/v1/database/1/function_names/", "url_rule": "/api/v1/database/<int:pk>/function_names/", "object_ref": "DatabaseRestApi.function_names", "pk": 1}	2025-07-28 13:01:15.069565	0	0	943	http://172.20.0.2:32720/sqllab/
+1596	SavedQueryRestApi.get_list	1	{"path": "/api/v1/saved_query/", "q": "(filters:!((col:created_by,opr:rel_o_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "created_by", "opr": "rel_o_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:02:51.854665	0	0	84	http://172.20.0.2:32720/superset/welcome/
+1601	ChartRestApi.info	1	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:02:52.099727	0	0	13	http://172.20.0.2:32720/superset/welcome/
+1605	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:02:55.365734	0	0	125	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1613	test_connection_attempt	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsupersetsupersetsuperset@trino-coordinator:8443/lakehouse?verify=false", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\": true}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:03:21.554225	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1621	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:04:21.114942	0	0	22	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1623	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:04:22.978722	0	0	18	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1628	test_connection_success	1	{"path": "/api/v1/database/test_connection/", "sqlalchemy_uri": "trino://superset:supersetsuperset@trino-coordinator:8443/lakehouse", "database_name": "Trino lakehouse", "impersonate_user": true, "extra": "{\\"allows_virtual_table_explore\\":true,\\"engine_params\\":{\\"connect_args\\":{\\"verify\\":false,\\"http_scheme\\":\\"https\\"}}}", "masked_encrypted_extra": "", "engine": "TrinoEngineSpec"}	2025-07-28 13:04:45.93356	0	0	\N	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1633	DatabaseRestApi.available	1	{"path": "/api/v1/database/available/", "object_ref": "DatabaseRestApi.available"}	2025-07-28 13:04:47.25601	0	0	57	http://172.20.0.2:32720/databaseview/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc
+1637	log	1	{"source": "sqlLab", "ts": 1753707888410, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "cp41_IuQOhm0LIwZhto5l", "visibility": "visible"}	2025-07-28 13:04:49.41583	0	0	0	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1639	DashboardRestApi.get	1	{"path": "/api/v1/dashboard/3", "url_rule": "/api/v1/dashboard/<id_or_slug>", "object_ref": "DashboardRestApi.get", "dashboard_id": 3}	2025-07-28 13:04:50.77428	3	0	15	http://172.20.0.2:32720/superset/dashboard/3/
+1642	ChartDataRestApi.data	1	{"path": "/api/v1/chart/data", "form_data": {"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [], "metrics": ["count"], "annotation_layers": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "slice_id": 3}, "dashboard_id": "3", "datasource": {"id": 2, "type": "table"}, "force": false, "queries": [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [], "metrics": ["count"], "annotation_layers": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}], "result_format": "json", "result_type": "full", "object_ref": "ChartDataRestApi.data"}	2025-07-28 13:04:51.473311	3	3	470	http://172.20.0.2:32720/superset/dashboard/3/
+1644	ChartRestApi.get	1	{"path": "/api/v1/chart/3", "url_rule": "/api/v1/chart/<int:pk>", "rison": {}}	2025-07-28 13:04:51.522327	0	0	17	http://172.20.0.2:32720/superset/dashboard/3/
+1647	log	1	{"source": "sqlLab", "ts": 1753707890682, "event_name": "spa_navigation", "path": "/superset/dashboard/3/", "event_type": "user", "event_id": "o06lEFSB1-qcJmqhHnTaW", "visibility": "visible"}	2025-07-28 13:04:52.699357	0	0	0	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1648	log	1	{"source": "dashboard", "source_id": 3, "impression_id": "NGNmQdL5dKaPy29weSPr4", "version": "v2", "ts": 1753707890794, "event_name": "mount_dashboard", "is_soft_navigation": true, "is_edit_mode": false, "mount_duration": 112, "is_empty": false, "is_published": true, "event_type": "user", "event_id": "0zYi_iO7cpwa6dgDhCxmG", "visibility": "visible"}	2025-07-28 13:04:52.69936	0	0	0	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1649	log	1	{"source": "dashboard", "source_id": 3, "impression_id": "NGNmQdL5dKaPy29weSPr4", "version": "v2", "ts": 1753707891479, "event_name": "load_chart", "slice_id": 3, "has_err": true, "error_details": "Error: TrinoUserError(type=USER_ERROR, name=PERMISSION_DENIED, message=\\"Access Denied: Cannot select from columns [] in table or view lakehouse.customer_analytics.customer\\", query_id=20250728_130451_00019_cw7a3)", "datasource": "2__table", "start_offset": 285, "duration": 511, "event_type": "timing", "trigger_event": "0zYi_iO7cpwa6dgDhCxmG"}	2025-07-28 13:04:52.699361	0	0	0	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1651	welcome	\N	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:04:58.571177	0	0	0	http://172.20.0.2:32720/superset/dashboard/3/?native_filters_key=WmrNvecw9i1RA2Gud2ZUM3PlByOiWCwDOLLz0J8rOk9nFZCGd6odpoS5GphEthTs
+1654	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2025-07-28 13:05:00.263375	0	0	64	http://172.20.0.2:32720/superset/welcome/
+1656	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:05:00.279583	0	0	44	http://172.20.0.2:32720/superset/welcome/
+1657	SavedQueryRestApi.get_list	1	{"path": "/api/v1/saved_query/", "q": "(filters:!((col:created_by,opr:rel_o_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "created_by", "opr": "rel_o_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:05:00.317899	0	0	28	http://172.20.0.2:32720/superset/welcome/
+1662	ChartRestApi.favorite_status	1	{"path": "/api/v1/chart/favorite_status/", "q": "!(4,2,3,1)", "object_ref": "ChartRestApi.favorite_status", "rison": [4, 2, 3, 1]}	2025-07-28 13:05:00.640829	0	0	13	http://172.20.0.2:32720/superset/welcome/
+1664	ChartRestApi.info	1	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:05:00.644873	0	0	10	http://172.20.0.2:32720/superset/welcome/
+1666	welcome	1	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:06:01.075084	0	0	40	\N
+1668	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:allow_file_upload,opr:upload_is_enabled,value:!t)))", "rison": {"filters": [{"col": "allow_file_upload", "opr": "upload_is_enabled", "value": true}]}}	2025-07-28 13:06:01.509611	0	0	82	http://172.20.0.2:32720/superset/welcome/
+1670	SavedQueryRestApi.get_list	1	{"path": "/api/v1/saved_query/", "q": "(filters:!((col:created_by,opr:rel_o_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "created_by", "opr": "rel_o_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:01.523402	0	0	52	http://172.20.0.2:32720/superset/welcome/
+1673	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:01.616605	0	0	26	http://172.20.0.2:32720/superset/welcome/
+1677	ChartRestApi.info	1	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:01.725212	0	0	20	http://172.20.0.2:32720/superset/welcome/
+1679	log	1	{"source": "sqlLab", "ts": 1753707961366, "event_name": "spa_navigation", "path": "/superset/welcome/", "event_type": "user", "event_id": "lflR1X6FO4RMVYlUfqqYv", "visibility": "visible"}	2025-07-28 13:06:02.37462	0	0	0	http://172.20.0.2:32720/superset/welcome/
+1682	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3,2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3, 2]}	2025-07-28 13:06:02.828738	0	0	2	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1685	welcome	2	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:06:06.034332	0	0	34	\N
+1689	ChartRestApi.get_list	2	{"path": "/api/v1/chart/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:06.672808	0	0	311	http://172.20.0.2:32720/superset/welcome/
+1691	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:06.787316	0	0	298	http://172.20.0.2:32720/superset/welcome/
+1692	ChartRestApi.info	2	{"path": "/api/v1/chart/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:06.900901	0	0	13	http://172.20.0.2:32720/superset/welcome/
+1696	log	2	{"source": "sqlLab", "ts": 1753707966311, "event_name": "spa_navigation", "path": "/superset/welcome/", "event_type": "user", "event_id": "zyiKNE0gRLF0S634p4aoE", "visibility": "visible"}	2025-07-28 13:06:07.319714	0	0	0	http://172.20.0.2:32720/superset/welcome/
+1698	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25,select_columns:!(id,dashboard_title,published,url,slug,changed_by,changed_on_delta_humanized,owners.id,owners.first_name,owners.last_name,owners,tags.id,tags.name,tags.type,status,certified_by,certification_details,changed_on))", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25, "select_columns": ["id", "dashboard_title", "published", "url", "slug", "changed_by", "changed_on_delta_humanized", "owners.id", "owners.first_name", "owners.last_name", "owners", "tags.id", "tags.name", "tags.type", "status", "certified_by", "certification_details", "changed_on"]}}	2025-07-28 13:06:08.560083	0	0	50	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1702	DashboardRestApi.get	2	{"path": "/api/v1/dashboard/2", "url_rule": "/api/v1/dashboard/<id_or_slug>", "object_ref": "DashboardRestApi.get", "dashboard_id": 2}	2025-07-28 13:06:09.771191	2	0	8	http://172.20.0.2:32720/superset/dashboard/2/
+1703	DashboardRestApi.get_datasets	2	{"path": "/api/v1/dashboard/2/datasets", "url_rule": "/api/v1/dashboard/<id_or_slug>/datasets", "object_ref": "DashboardRestApi.get_datasets", "id_or_slug": "2"}	2025-07-28 13:06:09.870862	0	0	207	http://172.20.0.2:32720/superset/dashboard/2/
+1706	log	2	{"source": "sqlLab", "ts": 1753707969598, "event_name": "spa_navigation", "path": "/superset/dashboard/2/", "event_type": "user", "event_id": "JIhQMTQU-u31cGZtfhWut", "visibility": "visible"}	2025-07-28 13:06:10.802332	0	0	0	http://172.20.0.2:32720/superset/dashboard/2/?native_filters_key=TgOW214QkZJWKhPzcQHExl7MynORVTguLz1yxQPEIDU4zJGTGWV6m5o4Z5MvTUDk
+1707	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "C6wjacs__BuEKqGnBW-C6", "version": "v2", "ts": 1753707969795, "event_name": "mount_dashboard", "is_soft_navigation": true, "is_edit_mode": false, "mount_duration": 196, "is_empty": false, "is_published": true, "event_type": "user", "event_id": "ychV_Gi-IuphXixMhlkpn", "visibility": "visible"}	2025-07-28 13:06:10.802335	0	0	0	http://172.20.0.2:32720/superset/dashboard/2/?native_filters_key=TgOW214QkZJWKhPzcQHExl7MynORVTguLz1yxQPEIDU4zJGTGWV6m5o4Z5MvTUDk
+1658	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:05:00.318383	0	0	60	http://172.20.0.2:32720/superset/welcome/
+1661	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3,2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3, 2]}	2025-07-28 13:05:00.640279	0	0	14	http://172.20.0.2:32720/superset/welcome/
+1669	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:01.516236	0	0	64	http://172.20.0.2:32720/superset/welcome/
+1675	DashboardRestApi.favorite_status	1	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(3,2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [3, 2]}	2025-07-28 13:06:01.722232	0	0	9	http://172.20.0.2:32720/superset/welcome/
+1681	DashboardRestApi.info	1	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:02.772994	0	0	23	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1688	DashboardRestApi.get_list	2	{"path": "/api/v1/dashboard/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:06.666167	0	0	298	http://172.20.0.2:32720/superset/welcome/
+1694	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2025-07-28 13:06:06.970591	0	0	77	http://172.20.0.2:32720/superset/welcome/
+1699	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2025-07-28 13:06:08.626614	0	0	9	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1704	DashboardRestApi.favorite_status	2	{"path": "/api/v1/dashboard/favorite_status/", "q": "!(2)", "object_ref": "DashboardRestApi.favorite_status", "rison": [2]}	2025-07-28 13:06:09.958501	0	0	10	http://172.20.0.2:32720/superset/dashboard/2/
+1705	DashboardFilterStateRestApi.post	2	{"path": "/api/v1/dashboard/2/filter_state", "tab_id": "3", "value": "{}", "url_rule": "/api/v1/dashboard/<int:pk>/filter_state", "object_ref": "DashboardFilterStateRestApi.post", "pk": 2}	2025-07-28 13:06:10.465358	0	0	26	http://172.20.0.2:32720/superset/dashboard/2/
+1711	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "slice_id": 2}, "dashboard_id": "2", "datasource": {"id": 10, "type": "table"}, "force": false, "queries": [{"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}], "result_format": "json", "result_type": "full", "object_ref": "ChartDataRestApi.data"}	2025-07-28 13:06:14.566957	2	2	4565	http://172.20.0.2:32720/superset/dashboard/2/
+1659	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:05:00.522267	0	0	21	http://172.20.0.2:32720/superset/welcome/
+1665	log	1	{"source": "sqlLab", "ts": 1753707900147, "event_name": "spa_navigation", "path": "/superset/welcome/", "event_type": "user", "event_id": "UZaN7tDvHjMsjNfXsFNvR", "visibility": "visible"}	2025-07-28 13:05:01.153193	0	0	0	http://172.20.0.2:32720/superset/welcome/
+1671	DatabaseRestApi.get_list	1	{"path": "/api/v1/database/", "q": "(filters:!((col:database_name,opr:neq,value:examples)))", "rison": {"filters": [{"col": "database_name", "opr": "neq", "value": "examples"}]}}	2025-07-28 13:06:01.543315	0	0	94	http://172.20.0.2:32720/superset/welcome/
+1676	ChartRestApi.favorite_status	1	{"path": "/api/v1/chart/favorite_status/", "q": "!(4,2,3,1)", "object_ref": "ChartRestApi.favorite_status", "rison": [4, 2, 3, 1]}	2025-07-28 13:06:01.724295	0	0	13	http://172.20.0.2:32720/superset/welcome/
+1680	DashboardRestApi.get_list	1	{"path": "/api/v1/dashboard/", "q": "(order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:25,select_columns:!(id,dashboard_title,published,url,slug,changed_by,changed_on_delta_humanized,owners.id,owners.first_name,owners.last_name,owners,tags.id,tags.name,tags.type,status,certified_by,certification_details,changed_on))", "rison": {"order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 25, "select_columns": ["id", "dashboard_title", "published", "url", "slug", "changed_by", "changed_on_delta_humanized", "owners.id", "owners.first_name", "owners.last_name", "owners", "tags.id", "tags.name", "tags.type", "status", "certified_by", "certification_details", "changed_on"]}}	2025-07-28 13:06:02.769178	0	0	10	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1684	welcome	\N	{"path": "/superset/welcome/", "object_ref": "Superset.welcome"}	2025-07-28 13:06:05.068387	0	0	0	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1686	LogRestApi.recent_activity	2	{"path": "/api/v1/log/recent_activity/", "q": "(page_size:6)", "object_ref": "LogRestApi.recent_activity", "rison": {"page_size": 6}}	2025-07-28 13:06:06.370149	0	0	28	http://172.20.0.2:32720/superset/welcome/
+1690	ChartRestApi.get_list	2	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:06.782712	0	0	311	http://172.20.0.2:32720/superset/welcome/
+1695	ChartRestApi.favorite_status	2	{"path": "/api/v1/chart/favorite_status/", "q": "!(2,1)", "object_ref": "ChartRestApi.favorite_status", "rison": [2, 1]}	2025-07-28 13:06:06.971123	0	0	81	http://172.20.0.2:32720/superset/welcome/
+1700	log	2	{"source": "sqlLab", "ts": 1753707968429, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "8aiPtzUvKmY2_6lCuYpB_", "visibility": "visible"}	2025-07-28 13:06:09.435701	0	0	0	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1708	execute_sql	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "birth_year", "label": "birth_year", "expressionType": "SQL"}], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 100000, "series_columns": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index": ["birth_year"], "columns": [], "aggregates": {"count": {"operator": "mean"}}, "drop_missing_columns": false}}, {"operation": "flatten"}], "slice_id": 1}, "dashboard_id": "2", "datasource": {"id": 10, "type": "table"}, "force": false, "queries": [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "birth_year", "label": "birth_year", "expressionType": "SQL"}], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 100000, "series_columns": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index": ["birth_year"], "columns": [], "aggregates": {"count": {"operator": "mean"}}, "drop_missing_columns": false}}, {"operation": "flatten"}]}], "result_format": "json", "result_type": "full", "object_ref": "superset.models.core"}	2025-07-28 13:06:14.333152	2	1	4076	http://172.20.0.2:32720/superset/dashboard/2/
+1660	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:05:00.524425	0	0	197	http://172.20.0.2:32720/superset/welcome/
+1672	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!((col:owners,opr:rel_m_m,value:'1')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "owners", "opr": "rel_m_m", "value": "1"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:01.564715	0	0	59	http://172.20.0.2:32720/superset/welcome/
+1678	DashboardRestApi.info	1	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:01.729321	0	0	12	http://172.20.0.2:32720/superset/welcome/
+1683	log	1	{"source": "sqlLab", "ts": 1753707962671, "event_name": "spa_navigation", "path": "/dashboard/list/", "event_type": "user", "event_id": "cVct1XDHMnzYAJDndeCQZ", "visibility": "visible"}	2025-07-28 13:06:03.677263	0	0	0	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1687	SavedQueryRestApi.get_list	2	{"path": "/api/v1/saved_query/", "q": "(filters:!((col:created_by,opr:rel_o_m,value:'2')),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [{"col": "created_by", "opr": "rel_o_m", "value": "2"}], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:06.419653	0	0	33	http://172.20.0.2:32720/superset/welcome/
+1693	DashboardRestApi.info	2	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:06.961093	0	0	78	http://172.20.0.2:32720/superset/welcome/
+1697	DashboardRestApi.info	2	{"path": "/api/v1/dashboard/_info", "q": "(keys:!(permissions))", "rison": {"keys": ["permissions"]}}	2025-07-28 13:06:08.527414	0	0	13	http://172.20.0.2:32720/dashboard/list/?pageIndex=0&sortColumn=changed_on_delta_humanized&sortOrder=desc&viewMode=table
+1701	DashboardRestApi.get_charts	2	{"path": "/api/v1/dashboard/2/charts", "url_rule": "/api/v1/dashboard/<id_or_slug>/charts", "object_ref": "DashboardRestApi.get_charts", "id_or_slug": "2"}	2025-07-28 13:06:09.769619	0	0	110	http://172.20.0.2:32720/superset/dashboard/2/
+1710	execute_sql	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "slice_id": 2}, "dashboard_id": "2", "datasource": {"id": 10, "type": "table"}, "force": false, "queries": [{"filters": [{"col": "gender", "op": "IS NOT NULL"}], "extras": {"time_grain_sqla": "P1D", "having": "", "where": ""}, "applied_time_extras": {}, "columns": ["gender", "marital_status"], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 10000, "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}}], "result_format": "json", "result_type": "full", "object_ref": "superset.models.core"}	2025-07-28 13:06:14.553673	2	2	4283	http://172.20.0.2:32720/superset/dashboard/2/
+1674	ChartRestApi.get_list	1	{"path": "/api/v1/chart/", "q": "(filters:!(),order_column:changed_on_delta_humanized,order_direction:desc,page:0,page_size:5)", "rison": {"filters": [], "order_column": "changed_on_delta_humanized", "order_direction": "desc", "page": 0, "page_size": 5}}	2025-07-28 13:06:01.619317	0	0	73	http://172.20.0.2:32720/superset/welcome/
+1709	ChartDataRestApi.data	2	{"path": "/api/v1/chart/data", "form_data": {"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "birth_year", "label": "birth_year", "expressionType": "SQL"}], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 100000, "series_columns": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index": ["birth_year"], "columns": [], "aggregates": {"count": {"operator": "mean"}}, "drop_missing_columns": false}}, {"operation": "flatten"}], "slice_id": 1}, "dashboard_id": "2", "datasource": {"id": 10, "type": "table"}, "force": false, "queries": [{"filters": [], "extras": {"having": "", "where": ""}, "applied_time_extras": {}, "columns": [{"columnType": "BASE_AXIS", "sqlExpression": "birth_year", "label": "birth_year", "expressionType": "SQL"}], "metrics": ["count"], "orderby": [["count", false]], "annotation_layers": [], "row_limit": 100000, "series_columns": [], "series_limit": 0, "order_desc": true, "url_params": {}, "custom_params": {}, "custom_form_data": {}, "time_offsets": [], "post_processing": [{"operation": "pivot", "options": {"index": ["birth_year"], "columns": [], "aggregates": {"count": {"operator": "mean"}}, "drop_missing_columns": false}}, {"operation": "flatten"}]}], "result_format": "json", "result_type": "full", "object_ref": "ChartDataRestApi.data"}	2025-07-28 13:06:14.359654	2	1	4359	http://172.20.0.2:32720/superset/dashboard/2/
+1712	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "C6wjacs__BuEKqGnBW-C6", "version": "v2", "ts": 1753707974367, "event_name": "load_chart", "slice_id": 1, "applied_filters": [], "is_cached": null, "force_refresh": false, "row_count": 69, "datasource": "10__table", "start_offset": 362, "duration": 4406, "has_extra_filters": false, "viz_type": "echarts_timeseries_bar", "data_age": null, "event_type": "timing", "trigger_event": "ychV_Gi-IuphXixMhlkpn"}	2025-07-28 13:06:15.610998	2	0	0	http://172.20.0.2:32720/superset/dashboard/2/?native_filters_key=TgOW214QkZJWKhPzcQHExl7MynORVTguLz1yxQPEIDU4zJGTGWV6m5o4Z5MvTUDk
+1713	log	2	{"source": "dashboard", "source_id": 2, "impression_id": "C6wjacs__BuEKqGnBW-C6", "version": "v2", "ts": 1753707974603, "event_name": "load_chart", "slice_id": 2, "applied_filters": [{"column": "gender"}], "is_cached": null, "force_refresh": false, "row_count": 10, "datasource": "10__table", "start_offset": 371, "duration": 4634, "has_extra_filters": false, "viz_type": "pivot_table_v2", "data_age": null, "event_type": "timing", "trigger_event": "ychV_Gi-IuphXixMhlkpn"}	2025-07-28 13:06:15.611	2	0	0	http://172.20.0.2:32720/superset/dashboard/2/?native_filters_key=TgOW214QkZJWKhPzcQHExl7MynORVTguLz1yxQPEIDU4zJGTGWV6m5o4Z5MvTUDk
 \.
 
 
@@ -5231,23 +5175,23 @@ COPY public.logs (id, action, user_id, json, dttm, dashboard_id, slice_id, durat
 -- Data for Name: query; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.query (id, client_id, database_id, tmp_table_name, tab_name, sql_editor_id, user_id, status, schema, sql, select_sql, executed_sql, "limit", select_as_cta, select_as_cta_used, progress, rows, error_message, start_time, changed_on, end_time, results_key, start_running_time, end_result_backend_time, tracking_url, extra_json, tmp_schema_name, ctas_method, limiting_factor) FROM stdin;
-12	Jrk98FN2w	1	\N	Untitled Query 1	1	2	success	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect c_email_address from customer limit 10;	\N	select c_email_address from customer limit 11	10	f	f	100	10	\N	1711543015117.561000	2024-03-27 12:36:56.182014	1711543016181.262000	\N	1711543015150.273200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123655_00328_ju8t6	{"progress": null, "cancel_query": "20240327_123655_00328_ju8t6", "columns": [{"column_name": "c_email_address", "name": "c_email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY
-1	Mw4uBVfKu_	1	\N	Untitled Query 1	1	2	failed	compliance_analytics	SELECT ...	\N	SELECT ...	1000	f	f	0	\N	trino error: line 1:8: mismatched input '.'. Expecting: '*', 'ALL', 'DISTINCT', <expression>	1711542829589.144000	2024-03-27 12:33:50.057334	1711542830054.184800	\N	1711542829624.156000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123349_00275_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123349_00275_ju8t6", "errors": [{"message": "trino error: line 1:8: mismatched input '.'. Expecting: '*', 'ALL', 'DISTINCT', <expression>", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	DROPDOWN
-2	QS4LZrTz6	1	\N	Untitled Query 1	1	2	success	\N	show catalogs;	\N	show catalogs	1000	f	f	100	2	\N	1711542848571.085000	2024-03-27 12:34:09.053908	1711542849052.810000	\N	1711542848604.193800	\N	https://trino-coordinator:8443/ui/query.html?20240327_123408_00282_ju8t6	{"progress": null, "cancel_query": "20240327_123408_00282_ju8t6", "columns": [{"column_name": "Catalog", "name": "Catalog", "type": "VARCHAR(9)", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED
-3	4mbK6KXOk	1	\N	Untitled Query 1	1	2	success	\N	show schemas in lakehouse;	\N	show schemas in lakehouse	1000	f	f	100	3	\N	1711542853137.856000	2024-03-27 12:34:13.317387	1711542853316.668000	\N	1711542853171.211000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123413_00283_ju8t6	{"progress": null, "cancel_query": "20240327_123413_00283_ju8t6", "columns": [{"column_name": "Schema", "name": "Schema", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED
-4	vk2GJA5K9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched;	\N	select * from customer_enriched\nLIMIT 1001	1000	f	f	100	1000	\N	1711542919372.418000	2024-03-27 12:35:22.807514	1711542922806.228000	\N	1711542919409.512000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123519_00303_ju8t6	{"progress": null, "cancel_query": "20240327_123519_00303_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	DROPDOWN
-5	PM3mRsNy9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched;	\N	select * from customer_enriched\nLIMIT 1001	1000	f	f	100	1000	\N	1711542926621.373800	2024-03-27 12:35:29.459486	1711542929458.469000	\N	1711542926658.553000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123527_00305_ju8t6	{"progress": null, "cancel_query": "20240327_123527_00305_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	DROPDOWN
-6	0MdMJL60h	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect count(*) from customer_enriched;	\N	select count(*) from customer_enriched\nLIMIT 1001	1000	f	f	100	1	\N	1711542939438.598000	2024-03-27 12:35:41.945619	1711542941944.849900	\N	1711542939477.136000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123539_00307_ju8t6	{"progress": null, "cancel_query": "20240327_123539_00307_ju8t6", "columns": [{"column_name": "_col0", "name": "_col0", "type": "BIGINT", "type_generic": 0, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED
-7	EDJ0I0tSu	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711542951873.389000	2024-03-27 12:35:54.888638	1711542954887.568800	\N	1711542951910.428000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123552_00309_ju8t6	{"progress": null, "cancel_query": "20240327_123552_00309_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY
-13	2N_nz05vF	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711543024213.791000	2024-03-27 12:37:06.936934	1711543026935.951000	\N	1711543024248.967800	\N	https://trino-coordinator:8443/ui/query.html?20240327_123704_00329_ju8t6	{"progress": null, "cancel_query": "20240327_123704_00329_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY
-15	NIM-VIdKK	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711544649572.436000	2024-03-27 13:04:12.320069	1711544652319.072000	\N	1711544649624.490000	\N	https://trino-coordinator:8443/ui/query.html?20240327_130409_00569_ju8t6	{"progress": null, "cancel_query": "20240327_130409_00569_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY
-9	VdtjAyUkY	1	\N	Untitled Query 1	1	2	failed	customer_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;\nselect zip from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	0	\N	Statement 2 out of 3 trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched	1711542979884.444000	2024-03-27 12:36:20.846258	1711542980842.223900	\N	1711542979924.067100	\N	https://trino-coordinator:8443/ui/query.html?20240327_123620_00325_ju8t6	{"progress": "Running statement 2 out of 3", "cancel_query": "20240327_123620_00325_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY
-10	LnRtE3oBP	1	\N	Untitled Query 1	1	2	failed	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect zip from customer limit 10;	\N	select zip from customer limit 11	10	f	f	0	\N	trino error: line 1:8: Column 'zip' cannot be resolved	1711542991819.304000	2024-03-27 12:36:32.437532	1711542992432.836000	\N	1711542991858.577000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123632_00326_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123632_00326_ju8t6", "errors": [{"message": "trino error: line 1:8: Column 'zip' cannot be resolved", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY
-8	FuvAXEcGF	1	\N	Untitled Query 1	1	2	failed	customer_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;\nselect * from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	0	\N	Statement 2 out of 3 trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched	1711542972627.379000	2024-03-27 12:36:13.464293	1711542973460.482000	\N	1711542972666.273200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123613_00323_ju8t6	{"progress": "Running statement 2 out of 3", "cancel_query": "20240327_123613_00323_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY
-14	UsJrDW2-9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711543061767.401900	2024-03-27 12:37:44.519117	1711543064518.110000	\N	1711543061801.399000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123742_00330_ju8t6	{"progress": null, "cancel_query": "20240327_123742_00330_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY
-11	Nt2wnnDs0	1	\N	Untitled Query 1	1	2	failed	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect * from customer limit 10;	\N	select * from customer limit 11	10	f	f	0	\N	trino error: Access Denied: Cannot select from columns [c_salutation, c_preferred_cust_flag, c_first_sales_date_sk, c_customer_sk, c_login, c_current_cdemo_sk, c_first_name, c_current_hdemo_sk, c_current_addr_sk, c_last_name, c_customer_id, c_last_review_date_sk, c_birth_month, c_birth_country, c_birth_year, c_birth_day, c_email_address, c_first_shipto_date_sk] in table or view lakehouse.customer_analytics.customer	1711542997011.704800	2024-03-27 12:36:37.636022	1711542997632.158000	\N	1711542997045.679200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123637_00327_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123637_00327_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [c_salutation, c_preferred_cust_flag, c_first_sales_date_sk, c_customer_sk, c_login, c_current_cdemo_sk, c_first_name, c_current_hdemo_sk, c_current_addr_sk, c_last_name, c_customer_id, c_last_review_date_sk, c_birth_month, c_birth_country, c_birth_year, c_birth_day, c_email_address, c_first_shipto_date_sk] in table or view lakehouse.customer_analytics.customer", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY
-16	2LhbZULUJ	1	\N	Untitled Query 1	4	7	success	compliance_analytics	show schemas in lakehouse;	\N	show schemas in lakehouse	1000	f	f	100	3	\N	1711609389099.847200	2024-03-28 07:03:09.59736	1711609389596.254200	\N	1711609389136.403000	\N	https://trino-coordinator:8443/ui/query.html?20240328_070309_00045_4rgfx	{"progress": null, "cancel_query": "20240328_070309_00045_4rgfx", "columns": [{"column_name": "Schema", "name": "Schema", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED
+COPY public.query (id, client_id, database_id, tmp_table_name, tab_name, sql_editor_id, user_id, status, schema, sql, select_sql, executed_sql, "limit", select_as_cta, select_as_cta_used, progress, rows, error_message, start_time, changed_on, end_time, results_key, start_running_time, end_result_backend_time, tracking_url, extra_json, tmp_schema_name, ctas_method, limiting_factor, catalog) FROM stdin;
+12	Jrk98FN2w	1	\N	Untitled Query 1	1	2	success	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect c_email_address from customer limit 10;	\N	select c_email_address from customer limit 11	10	f	f	100	10	\N	1711543015117.561000	2024-03-27 12:36:56.182014	1711543016181.262000	\N	1711543015150.273200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123655_00328_ju8t6	{"progress": null, "cancel_query": "20240327_123655_00328_ju8t6", "columns": [{"column_name": "c_email_address", "name": "c_email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY	lakehouse
+1	Mw4uBVfKu_	1	\N	Untitled Query 1	1	2	failed	compliance_analytics	SELECT ...	\N	SELECT ...	1000	f	f	0	\N	trino error: line 1:8: mismatched input '.'. Expecting: '*', 'ALL', 'DISTINCT', <expression>	1711542829589.144000	2024-03-27 12:33:50.057334	1711542830054.184800	\N	1711542829624.156000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123349_00275_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123349_00275_ju8t6", "errors": [{"message": "trino error: line 1:8: mismatched input '.'. Expecting: '*', 'ALL', 'DISTINCT', <expression>", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	DROPDOWN	lakehouse
+2	QS4LZrTz6	1	\N	Untitled Query 1	1	2	success	\N	show catalogs;	\N	show catalogs	1000	f	f	100	2	\N	1711542848571.085000	2024-03-27 12:34:09.053908	1711542849052.810000	\N	1711542848604.193800	\N	https://trino-coordinator:8443/ui/query.html?20240327_123408_00282_ju8t6	{"progress": null, "cancel_query": "20240327_123408_00282_ju8t6", "columns": [{"column_name": "Catalog", "name": "Catalog", "type": "VARCHAR(9)", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED	lakehouse
+3	4mbK6KXOk	1	\N	Untitled Query 1	1	2	success	\N	show schemas in lakehouse;	\N	show schemas in lakehouse	1000	f	f	100	3	\N	1711542853137.856000	2024-03-27 12:34:13.317387	1711542853316.668000	\N	1711542853171.211000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123413_00283_ju8t6	{"progress": null, "cancel_query": "20240327_123413_00283_ju8t6", "columns": [{"column_name": "Schema", "name": "Schema", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED	lakehouse
+4	vk2GJA5K9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched;	\N	select * from customer_enriched\nLIMIT 1001	1000	f	f	100	1000	\N	1711542919372.418000	2024-03-27 12:35:22.807514	1711542922806.228000	\N	1711542919409.512000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123519_00303_ju8t6	{"progress": null, "cancel_query": "20240327_123519_00303_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	DROPDOWN	lakehouse
+5	PM3mRsNy9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched;	\N	select * from customer_enriched\nLIMIT 1001	1000	f	f	100	1000	\N	1711542926621.373800	2024-03-27 12:35:29.459486	1711542929458.469000	\N	1711542926658.553000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123527_00305_ju8t6	{"progress": null, "cancel_query": "20240327_123527_00305_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	DROPDOWN	lakehouse
+6	0MdMJL60h	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect count(*) from customer_enriched;	\N	select count(*) from customer_enriched\nLIMIT 1001	1000	f	f	100	1	\N	1711542939438.598000	2024-03-27 12:35:41.945619	1711542941944.849900	\N	1711542939477.136000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123539_00307_ju8t6	{"progress": null, "cancel_query": "20240327_123539_00307_ju8t6", "columns": [{"column_name": "_col0", "name": "_col0", "type": "BIGINT", "type_generic": 0, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED	lakehouse
+7	EDJ0I0tSu	1	\N	Untitled Query 1	1	2	success	compliance_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711542951873.389000	2024-03-27 12:35:54.888638	1711542954887.568800	\N	1711542951910.428000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123552_00309_ju8t6	{"progress": null, "cancel_query": "20240327_123552_00309_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY	lakehouse
+13	2N_nz05vF	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711543024213.791000	2024-03-27 12:37:06.936934	1711543026935.951000	\N	1711543024248.967800	\N	https://trino-coordinator:8443/ui/query.html?20240327_123704_00329_ju8t6	{"progress": null, "cancel_query": "20240327_123704_00329_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY	lakehouse
+15	NIM-VIdKK	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711544649572.436000	2024-03-27 13:04:12.320069	1711544652319.072000	\N	1711544649624.490000	\N	https://trino-coordinator:8443/ui/query.html?20240327_130409_00569_ju8t6	{"progress": null, "cancel_query": "20240327_130409_00569_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY	lakehouse
+9	VdtjAyUkY	1	\N	Untitled Query 1	1	2	failed	customer_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;\nselect zip from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	0	\N	Statement 2 out of 3 trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched	1711542979884.444000	2024-03-27 12:36:20.846258	1711542980842.223900	\N	1711542979924.067100	\N	https://trino-coordinator:8443/ui/query.html?20240327_123620_00325_ju8t6	{"progress": "Running statement 2 out of 3", "cancel_query": "20240327_123620_00325_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY	lakehouse
+10	LnRtE3oBP	1	\N	Untitled Query 1	1	2	failed	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect zip from customer limit 10;	\N	select zip from customer limit 11	10	f	f	0	\N	trino error: line 1:8: Column 'zip' cannot be resolved	1711542991819.304000	2024-03-27 12:36:32.437532	1711542992432.836000	\N	1711542991858.577000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123632_00326_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123632_00326_ju8t6", "errors": [{"message": "trino error: line 1:8: Column 'zip' cannot be resolved", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY	lakehouse
+8	FuvAXEcGF	1	\N	Untitled Query 1	1	2	failed	customer_analytics	show schemas in lakehouse;\nselect * from customer_enriched limit 10;\nselect * from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	0	\N	Statement 2 out of 3 trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched	1711542972627.379000	2024-03-27 12:36:13.464293	1711542973460.482000	\N	1711542972666.273200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123613_00323_ju8t6	{"progress": "Running statement 2 out of 3", "cancel_query": "20240327_123613_00323_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [household_demo_sk, zip, country, suite_number, customer_demo_sk, city, ca_street_name, birth_date, county, preferred_customer, given_name, location_type, ca_street_number, email_address, salutation, state, gmt_offset, customer_id, family_name] in table or view lakehouse.customer_analytics.customer_enriched", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY	lakehouse
+14	UsJrDW2-9	1	\N	Untitled Query 1	1	2	success	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	\N	select * from customer_enriched limit 11	10	f	f	100	10	\N	1711543061767.401900	2024-03-27 12:37:44.519117	1711543064518.110000	\N	1711543061801.399000	\N	https://trino-coordinator:8443/ui/query.html?20240327_123742_00330_ju8t6	{"progress": null, "cancel_query": "20240327_123742_00330_ju8t6", "columns": [{"column_name": "customer_id", "name": "customer_id", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "salutation", "name": "salutation", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "preferred_customer", "name": "preferred_customer", "type": "BOOLEAN", "type_generic": 3, "is_dttm": false}, {"column_name": "birth_year", "name": "birth_year", "type": "INTEGER", "type_generic": 0, "is_dttm": false}, {"column_name": "email_address", "name": "email_address", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "country", "name": "country", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "state", "name": "state", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "zip", "name": "zip", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "city", "name": "city", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "gmt_offset", "name": "gmt_offset", "type": "DECIMAL(5, 2)", "type_generic": 0, "is_dttm": false}, {"column_name": "gender", "name": "gender", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}, {"column_name": "marital_status", "name": "marital_status", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	QUERY	lakehouse
+11	Nt2wnnDs0	1	\N	Untitled Query 1	1	2	failed	customer_analytics	--show schemas in lakehouse;\n--select * from customer_enriched limit 10;\nselect * from customer limit 10;	\N	select * from customer limit 11	10	f	f	0	\N	trino error: Access Denied: Cannot select from columns [c_salutation, c_preferred_cust_flag, c_first_sales_date_sk, c_customer_sk, c_login, c_current_cdemo_sk, c_first_name, c_current_hdemo_sk, c_current_addr_sk, c_last_name, c_customer_id, c_last_review_date_sk, c_birth_month, c_birth_country, c_birth_year, c_birth_day, c_email_address, c_first_shipto_date_sk] in table or view lakehouse.customer_analytics.customer	1711542997011.704800	2024-03-27 12:36:37.636022	1711542997632.158000	\N	1711542997045.679200	\N	https://trino-coordinator:8443/ui/query.html?20240327_123637_00327_ju8t6	{"progress": "Running statement 1 out of 1", "cancel_query": "20240327_123637_00327_ju8t6", "errors": [{"message": "trino error: Access Denied: Cannot select from columns [c_salutation, c_preferred_cust_flag, c_first_sales_date_sk, c_customer_sk, c_login, c_current_cdemo_sk, c_first_name, c_current_hdemo_sk, c_current_addr_sk, c_last_name, c_customer_id, c_last_review_date_sk, c_birth_month, c_birth_country, c_birth_year, c_birth_day, c_email_address, c_first_shipto_date_sk] in table or view lakehouse.customer_analytics.customer", "error_type": "GENERIC_DB_ENGINE_ERROR", "level": "error", "extra": {"engine_name": "Trino", "issue_codes": [{"code": 1002, "message": "Issue 1002 - The database returned an unexpected error."}]}}]}	\N	TABLE	QUERY	lakehouse
+16	2LhbZULUJ	1	\N	Untitled Query 1	4	7	success	compliance_analytics	show schemas in lakehouse;	\N	show schemas in lakehouse	1000	f	f	100	3	\N	1711609389099.847200	2024-03-28 07:03:09.59736	1711609389596.254200	\N	1711609389136.403000	\N	https://trino-coordinator:8443/ui/query.html?20240328_070309_00045_4rgfx	{"progress": null, "cancel_query": "20240328_070309_00045_4rgfx", "columns": [{"column_name": "Schema", "name": "Schema", "type": "VARCHAR", "type_generic": 1, "is_dttm": false}]}	\N	TABLE	NOT_LIMITED	lakehouse
 \.
 
 
@@ -5271,7 +5215,7 @@ COPY public.report_recipient (id, type, recipient_config_json, report_schedule_i
 -- Data for Name: report_schedule; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.report_schedule (id, type, name, description, context_markdown, active, crontab, sql, chart_id, dashboard_id, database_id, last_eval_dttm, last_state, last_value, last_value_row_json, validator_type, validator_config_json, log_retention, grace_period, created_on, changed_on, created_by_fk, changed_by_fk, working_timeout, report_format, creation_method, timezone, extra_json, force_screenshot, custom_width, custom_height) FROM stdin;
+COPY public.report_schedule (id, type, name, description, context_markdown, active, crontab, sql, chart_id, dashboard_id, database_id, last_eval_dttm, last_state, last_value, last_value_row_json, validator_type, validator_config_json, log_retention, grace_period, created_on, changed_on, created_by_fk, changed_by_fk, working_timeout, report_format, creation_method, timezone, extra_json, force_screenshot, custom_width, custom_height, email_subject) FROM stdin;
 \.
 
 
@@ -5311,63 +5255,7 @@ COPY public.row_level_security_filters (created_on, changed_on, id, clause, crea
 -- Data for Name: saved_query; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.saved_query (created_on, changed_on, id, user_id, db_id, label, schema, sql, description, changed_by_fk, created_by_fk, extra_json, last_run, rows, uuid, template_parameters) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_columns; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_columns (uuid, created_on, changed_on, id, is_aggregation, is_additive, is_dimensional, is_filterable, is_increase_desired, is_managed_externally, is_partition, is_physical, is_temporal, is_spatial, name, type, unit, expression, description, warning_text, external_url, extra_json, created_by_fk, changed_by_fk, advanced_data_type) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_dataset_columns; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_dataset_columns (dataset_id, column_id) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_dataset_tables; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_dataset_tables (dataset_id, table_id) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_dataset_users; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_dataset_users (dataset_id, user_id) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_datasets; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_datasets (uuid, created_on, changed_on, id, database_id, is_physical, is_managed_externally, name, expression, external_url, extra_json, created_by_fk, changed_by_fk) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_table_columns; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_table_columns (table_id, column_id) FROM stdin;
-\.
-
-
---
--- Data for Name: sl_tables; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.sl_tables (uuid, created_on, changed_on, id, database_id, is_managed_externally, catalog, schema, name, external_url, extra_json, created_by_fk, changed_by_fk) FROM stdin;
+COPY public.saved_query (created_on, changed_on, id, user_id, db_id, label, schema, sql, description, changed_by_fk, created_by_fk, extra_json, last_run, rows, uuid, template_parameters, catalog) FROM stdin;
 \.
 
 
@@ -5387,11 +5275,11 @@ COPY public.slice_user (id, user_id, slice_id) FROM stdin;
 -- Data for Name: slices; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.slices (created_on, changed_on, id, slice_name, datasource_type, datasource_name, viz_type, params, created_by_fk, changed_by_fk, description, cache_timeout, perm, datasource_id, schema_perm, uuid, query_context, last_saved_at, last_saved_by_fk, certified_by, certification_details, is_managed_externally, external_url) FROM stdin;
-2024-03-27 13:10:33.36777	2024-03-27 13:28:09.660392	2	Customers per gender and martial status	table	compliance_analytics.customer_enriched	pivot_table_v2	{"datasource":"10__table","viz_type":"pivot_table_v2","slice_id":2,"groupbyColumns":["gender"],"groupbyRows":["marital_status"],"time_grain_sqla":"P1D","temporal_columns_lookup":{},"metrics":["count"],"metricsLayout":"ROWS","adhoc_filters":[{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_oi2u5m0p2o_h6xcp4zrqia","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"gender"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":true,"colTotals":true,"colSubTotals":false,"transposePivot":false,"combineMetric":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[2]}	2	2	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	10	[Trino lakehouse].[compliance_analytics]	6293babd-b3bc-4d05-a70d-5b58e7717458	{"datasource":{"id":10,"type":"table"},"force":false,"queries":[{"filters":[{"col":"gender","op":"IS NOT NULL"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["gender","marital_status"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"10__table","viz_type":"pivot_table_v2","slice_id":2,"groupbyColumns":["gender"],"groupbyRows":["marital_status"],"time_grain_sqla":"P1D","temporal_columns_lookup":{},"metrics":["count"],"metricsLayout":"ROWS","adhoc_filters":[{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_oi2u5m0p2o_h6xcp4zrqia","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"gender"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":true,"colTotals":true,"colSubTotals":false,"transposePivot":false,"combineMetric":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[2],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:28:09.65244	2	\N	\N	f	\N
-2024-03-27 13:07:15.570466	2024-03-27 13:19:04.302024	1	Customer age	table	compliance_analytics.customer_enriched	echarts_timeseries_bar	{"datasource":"10__table","viz_type":"echarts_timeseries_bar","slice_id":1,"x_axis":"birth_year","xAxisForceCategorical":true,"x_axis_sort_asc":true,"x_axis_sort_series":"name","x_axis_sort_series_ascending":true,"metrics":["count"],"groupby":[],"adhoc_filters":[],"order_desc":true,"row_limit":"100000","truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastEnabled":false,"forecastPeriods":10,"forecastInterval":0.8,"orientation":"vertical","x_axis_title_margin":15,"y_axis_title_margin":15,"y_axis_title_position":"Left","sort_series_type":"sum","color_scheme":"supersetColors","only_total":true,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","y_axis_format":"SMART_NUMBER","truncateXAxis":true,"y_axis_bounds":[null,null],"rich_tooltip":true,"tooltipTimeFormat":"smart_date","extra_form_data":{},"dashboards":[2]}	2	2	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	10	[Trino lakehouse].[compliance_analytics]	5faaa605-6dbd-47d4-a8c8-64839fb8ff12	{"datasource":{"id":10,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[{"columnType":"BASE_AXIS","sqlExpression":"birth_year","label":"birth_year","expressionType":"SQL"}],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":100000,"series_columns":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"time_offsets":[],"post_processing":[{"operation":"pivot","options":{"index":["birth_year"],"columns":[],"aggregates":{"count":{"operator":"mean"}},"drop_missing_columns":false}},{"operation":"flatten"}]}],"form_data":{"datasource":"10__table","viz_type":"echarts_timeseries_bar","slice_id":1,"x_axis":"birth_year","xAxisForceCategorical":true,"x_axis_sort_asc":true,"x_axis_sort_series":"name","x_axis_sort_series_ascending":true,"metrics":["count"],"groupby":[],"adhoc_filters":[],"order_desc":true,"row_limit":"100000","truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastEnabled":false,"forecastPeriods":10,"forecastInterval":0.8,"orientation":"vertical","x_axis_title_margin":15,"y_axis_title_margin":15,"y_axis_title_position":"Left","sort_series_type":"sum","color_scheme":"supersetColors","only_total":true,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","y_axis_format":"SMART_NUMBER","truncateXAxis":true,"y_axis_bounds":[null,null],"rich_tooltip":true,"tooltipTimeFormat":"smart_date","extra_form_data":{},"dashboards":[2],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:19:04.294946	2	\N	\N	f	\N
-2024-03-27 13:24:00.34103	2024-03-27 13:24:00.341036	3	Number of customers	table	customer_analytics.customer	big_number_total	{"datasource":"2__table","viz_type":"big_number_total","metric":"count","adhoc_filters":[],"header_font_size":0.4,"subheader_font_size":0.15,"y_axis_format":"SMART_NUMBER","time_format":"smart_date","extra_form_data":{},"dashboards":[]}	4	4	\N	\N	[Trino lakehouse].[customer](id:2)	2	[Trino lakehouse].[customer_analytics]	bb2aacd7-a074-4289-a795-71ecca300f04	{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":["count"],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"2__table","viz_type":"big_number_total","metric":"count","adhoc_filters":[],"header_font_size":0.4,"subheader_font_size":0.15,"y_axis_format":"SMART_NUMBER","time_format":"smart_date","extra_form_data":{},"dashboards":[],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:24:00.33899	4	\N	\N	f	\N
-2024-03-27 13:33:00.298876	2024-03-27 13:33:14.12662	4	Customers per state	table	customer_analytics.customer_enriched	pivot_table_v2	{"datasource":"5__table","viz_type":"pivot_table_v2","slice_id":4,"groupbyColumns":["state"],"groupbyRows":["preferred_customer"],"time_grain_sqla":"P1D","temporal_columns_lookup":{"birth_date":true},"metrics":["count"],"metricsLayout":"COLUMNS","adhoc_filters":[{"clause":"WHERE","comparator":"No filter","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_5mb0q3yizik_0otv2gotnpi","isExtra":false,"isNew":false,"operator":"TEMPORAL_RANGE","sqlExpression":null,"subject":"birth_date"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_04997e44dahr_1j3hb5sursk","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"state"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":false,"colTotals":true,"transposePivot":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[3]}	4	4	\N	\N	[Trino lakehouse].[customer_enriched](id:5)	5	[Trino lakehouse].[customer_analytics]	fa8b274f-8a69-4449-819e-521b4a6600a2	{"datasource":{"id":5,"type":"table"},"force":false,"queries":[{"filters":[{"col":"birth_date","op":"TEMPORAL_RANGE","val":"No filter"},{"col":"state","op":"IS NOT NULL"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["state","preferred_customer"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"5__table","viz_type":"pivot_table_v2","slice_id":4,"groupbyColumns":["state"],"groupbyRows":["preferred_customer"],"time_grain_sqla":"P1D","temporal_columns_lookup":{"birth_date":true},"metrics":["count"],"metricsLayout":"COLUMNS","adhoc_filters":[{"clause":"WHERE","comparator":"No filter","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_5mb0q3yizik_0otv2gotnpi","isExtra":false,"isNew":false,"operator":"TEMPORAL_RANGE","sqlExpression":null,"subject":"birth_date"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_04997e44dahr_1j3hb5sursk","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"state"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":false,"colTotals":true,"transposePivot":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[3],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:33:14.120392	4	\N	\N	f	\N
+COPY public.slices (created_on, changed_on, id, slice_name, datasource_type, datasource_name, viz_type, params, created_by_fk, changed_by_fk, description, cache_timeout, perm, datasource_id, schema_perm, uuid, query_context, last_saved_at, last_saved_by_fk, certified_by, certification_details, is_managed_externally, external_url, catalog_perm) FROM stdin;
+2024-03-27 13:07:15.570466	2024-03-27 13:19:04.302024	1	Customer age	table	compliance_analytics.customer_enriched	echarts_timeseries_bar	{"datasource":"10__table","viz_type":"echarts_timeseries_bar","slice_id":1,"x_axis":"birth_year","xAxisForceCategorical":true,"x_axis_sort_asc":true,"x_axis_sort_series":"name","x_axis_sort_series_ascending":true,"metrics":["count"],"groupby":[],"adhoc_filters":[],"order_desc":true,"row_limit":"100000","truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastEnabled":false,"forecastPeriods":10,"forecastInterval":0.8,"orientation":"vertical","x_axis_title_margin":15,"y_axis_title_margin":15,"y_axis_title_position":"Left","sort_series_type":"sum","color_scheme":"supersetColors","only_total":true,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","y_axis_format":"SMART_NUMBER","truncateXAxis":true,"y_axis_bounds":[null,null],"rich_tooltip":true,"tooltipTimeFormat":"smart_date","extra_form_data":{},"dashboards":[2]}	2	2	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	10	[Trino lakehouse].[lakehouse].[compliance_analytics]	5faaa605-6dbd-47d4-a8c8-64839fb8ff12	{"datasource":{"id":10,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[{"columnType":"BASE_AXIS","sqlExpression":"birth_year","label":"birth_year","expressionType":"SQL"}],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":100000,"series_columns":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"time_offsets":[],"post_processing":[{"operation":"pivot","options":{"index":["birth_year"],"columns":[],"aggregates":{"count":{"operator":"mean"}},"drop_missing_columns":false}},{"operation":"flatten"}]}],"form_data":{"datasource":"10__table","viz_type":"echarts_timeseries_bar","slice_id":1,"x_axis":"birth_year","xAxisForceCategorical":true,"x_axis_sort_asc":true,"x_axis_sort_series":"name","x_axis_sort_series_ascending":true,"metrics":["count"],"groupby":[],"adhoc_filters":[],"order_desc":true,"row_limit":"100000","truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastEnabled":false,"forecastPeriods":10,"forecastInterval":0.8,"orientation":"vertical","x_axis_title_margin":15,"y_axis_title_margin":15,"y_axis_title_position":"Left","sort_series_type":"sum","color_scheme":"supersetColors","only_total":true,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","y_axis_format":"SMART_NUMBER","truncateXAxis":true,"y_axis_bounds":[null,null],"rich_tooltip":true,"tooltipTimeFormat":"smart_date","extra_form_data":{},"dashboards":[2],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:19:04.294946	2	\N	\N	f	\N	[Trino lakehouse].[lakehouse]
+2024-03-27 13:10:33.36777	2024-03-27 13:28:09.660392	2	Customers per gender and martial status	table	compliance_analytics.customer_enriched	pivot_table_v2	{"datasource":"10__table","viz_type":"pivot_table_v2","slice_id":2,"groupbyColumns":["gender"],"groupbyRows":["marital_status"],"time_grain_sqla":"P1D","temporal_columns_lookup":{},"metrics":["count"],"metricsLayout":"ROWS","adhoc_filters":[{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_oi2u5m0p2o_h6xcp4zrqia","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"gender"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":true,"colTotals":true,"colSubTotals":false,"transposePivot":false,"combineMetric":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[2]}	2	2	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	10	[Trino lakehouse].[lakehouse].[compliance_analytics]	6293babd-b3bc-4d05-a70d-5b58e7717458	{"datasource":{"id":10,"type":"table"},"force":false,"queries":[{"filters":[{"col":"gender","op":"IS NOT NULL"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["gender","marital_status"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"10__table","viz_type":"pivot_table_v2","slice_id":2,"groupbyColumns":["gender"],"groupbyRows":["marital_status"],"time_grain_sqla":"P1D","temporal_columns_lookup":{},"metrics":["count"],"metricsLayout":"ROWS","adhoc_filters":[{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_oi2u5m0p2o_h6xcp4zrqia","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"gender"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":true,"colTotals":true,"colSubTotals":false,"transposePivot":false,"combineMetric":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[2],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:28:09.65244	2	\N	\N	f	\N	[Trino lakehouse].[lakehouse]
+2024-03-27 13:24:00.34103	2024-03-27 13:24:00.341036	3	Number of customers	table	customer_analytics.customer	big_number_total	{"datasource":"2__table","viz_type":"big_number_total","metric":"count","adhoc_filters":[],"header_font_size":0.4,"subheader_font_size":0.15,"y_axis_format":"SMART_NUMBER","time_format":"smart_date","extra_form_data":{},"dashboards":[]}	4	4	\N	\N	[Trino lakehouse].[customer](id:2)	2	[Trino lakehouse].[lakehouse].[customer_analytics]	bb2aacd7-a074-4289-a795-71ecca300f04	{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{"filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":[],"metrics":["count"],"annotation_layers":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"2__table","viz_type":"big_number_total","metric":"count","adhoc_filters":[],"header_font_size":0.4,"subheader_font_size":0.15,"y_axis_format":"SMART_NUMBER","time_format":"smart_date","extra_form_data":{},"dashboards":[],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:24:00.33899	4	\N	\N	f	\N	[Trino lakehouse].[lakehouse]
+2024-03-27 13:33:00.298876	2024-03-27 13:33:14.12662	4	Customers per state	table	customer_analytics.customer_enriched	pivot_table_v2	{"datasource":"5__table","viz_type":"pivot_table_v2","slice_id":4,"groupbyColumns":["state"],"groupbyRows":["preferred_customer"],"time_grain_sqla":"P1D","temporal_columns_lookup":{"birth_date":true},"metrics":["count"],"metricsLayout":"COLUMNS","adhoc_filters":[{"clause":"WHERE","comparator":"No filter","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_5mb0q3yizik_0otv2gotnpi","isExtra":false,"isNew":false,"operator":"TEMPORAL_RANGE","sqlExpression":null,"subject":"birth_date"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_04997e44dahr_1j3hb5sursk","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"state"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":false,"colTotals":true,"transposePivot":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[3]}	4	4	\N	\N	[Trino lakehouse].[customer_enriched](id:5)	5	[Trino lakehouse].[lakehouse].[customer_analytics]	fa8b274f-8a69-4449-819e-521b4a6600a2	{"datasource":{"id":5,"type":"table"},"force":false,"queries":[{"filters":[{"col":"birth_date","op":"TEMPORAL_RANGE","val":"No filter"},{"col":"state","op":"IS NOT NULL"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["state","preferred_customer"],"metrics":["count"],"orderby":[["count",false]],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"5__table","viz_type":"pivot_table_v2","slice_id":4,"groupbyColumns":["state"],"groupbyRows":["preferred_customer"],"time_grain_sqla":"P1D","temporal_columns_lookup":{"birth_date":true},"metrics":["count"],"metricsLayout":"COLUMNS","adhoc_filters":[{"clause":"WHERE","comparator":"No filter","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_5mb0q3yizik_0otv2gotnpi","isExtra":false,"isNew":false,"operator":"TEMPORAL_RANGE","sqlExpression":null,"subject":"birth_date"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_04997e44dahr_1j3hb5sursk","isExtra":false,"isNew":false,"operator":"IS NOT NULL","operatorId":"IS_NOT_NULL","sqlExpression":null,"subject":"state"}],"row_limit":10000,"order_desc":true,"aggregateFunction":"Sum","rowTotals":true,"rowSubTotals":false,"colTotals":true,"transposePivot":false,"valueFormat":"SMART_NUMBER","date_format":"smart_date","rowOrder":"key_a_to_z","colOrder":"key_a_to_z","extra_form_data":{},"dashboards":[3],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}	2024-03-27 13:33:14.120392	4	\N	\N	f	\N	[Trino lakehouse].[lakehouse]
 \.
 
 
@@ -5441,11 +5329,11 @@ COPY public.ssh_tunnels (created_on, changed_on, created_by_fk, changed_by_fk, e
 -- Data for Name: tab_state; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.tab_state (created_on, changed_on, extra_json, id, user_id, label, active, database_id, schema, sql, query_limit, latest_query_id, autorun, template_params, created_by_fk, changed_by_fk, hide_left_bar, saved_query_id) FROM stdin;
-2024-03-27 12:59:26.539305	2024-03-27 13:00:34.819923	{"updatedAt":1711544428919,"version":1}	2	1	Untitled Query 1	t	1	customer_analytics	SELECT ...	1000	\N	f	\N	1	1	f	\N
-2024-03-27 12:33:40.432511	2024-03-27 13:04:14.771012	{"updatedAt":1711544649456,"version":1}	1	2	Untitled Query 1	t	1	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	1000	NIM-VIdKK	f	\N	2	2	f	\N
-2024-03-28 07:00:45.761485	2024-03-28 07:00:51.869129	{"updatedAt":1711609246787,"version":1}	3	6	Untitled Query 1	t	1	customer_analytics	SELECT ...	1000	\N	f	\N	6	6	f	\N
-2024-03-28 07:06:19.891235	2024-03-28 07:06:29.696062	{"updatedAt":1711609584612,"version":1}	5	7	Untitled Query 1	t	1	compliance_analytics	SELECT ...	1000	\N	f	\N	7	7	f	\N
+COPY public.tab_state (created_on, changed_on, extra_json, id, user_id, label, active, database_id, schema, sql, query_limit, latest_query_id, autorun, template_params, created_by_fk, changed_by_fk, hide_left_bar, saved_query_id, catalog) FROM stdin;
+2024-03-27 12:33:40.432511	2024-03-27 13:04:14.771012	{"updatedAt":1711544649456,"version":1}	1	2	Untitled Query 1	t	1	compliance_analytics	--show schemas in lakehouse;\nselect * from customer_enriched limit 10;\n--select c_email_address from customer limit 10;	1000	NIM-VIdKK	f	\N	2	2	f	\N	lakehouse
+2024-03-27 12:59:26.539305	2024-03-27 13:00:34.819923	{"updatedAt":1711544428919,"version":1}	2	1	Untitled Query 1	t	1	customer_analytics	SELECT ...	1000	\N	f	\N	1	1	f	\N	lakehouse
+2024-03-28 07:00:45.761485	2024-03-28 07:00:51.869129	{"updatedAt":1711609246787,"version":1}	3	6	Untitled Query 1	t	1	customer_analytics	SELECT ...	1000	\N	f	\N	6	6	f	\N	lakehouse
+2024-03-28 07:06:19.891235	2025-07-28 13:01:20.164305	{"updatedAt":1753707675148,"version":1}	5	7	Untitled Query 1	t	1	compliance_analytics	SELECT ...	1000	\N	f	\N	7	7	f	\N	lakehouse
 \.
 
 
@@ -5550,7 +5438,7 @@ COPY public.table_columns (created_on, changed_on, id, table_id, column_name, is
 -- Data for Name: table_schema; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.table_schema (created_on, changed_on, extra_json, id, tab_state_id, database_id, schema, "table", description, expanded, created_by_fk, changed_by_fk) FROM stdin;
+COPY public.table_schema (created_on, changed_on, extra_json, id, tab_state_id, database_id, schema, "table", description, expanded, created_by_fk, changed_by_fk, catalog) FROM stdin;
 \.
 
 
@@ -5558,16 +5446,16 @@ COPY public.table_schema (created_on, changed_on, extra_json, id, tab_state_id, 
 -- Data for Name: tables; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.tables (created_on, changed_on, id, table_name, main_dttm_col, default_endpoint, database_id, created_by_fk, changed_by_fk, "offset", description, is_featured, cache_timeout, schema, sql, params, perm, filter_select_enabled, fetch_values_predicate, is_sqllab_view, template_params, schema_perm, extra, uuid, is_managed_externally, external_url, normalize_columns, always_filter_main_dttm) FROM stdin;
-2024-03-27 13:02:07.16599	2024-03-27 13:02:07.49932	10	customer_enriched	\N	\N	1	1	1	0	\N	f	\N	compliance_analytics	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	t	\N	f	\N	[Trino lakehouse].[compliance_analytics]	\N	a310a9fe-e582-4cd3-8941-3625afcd54ff	f	\N	f	f
-2024-03-27 12:59:45.846675	2024-03-27 12:59:46.363021	2	customer	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer](id:2)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	03100221-8213-4d85-8896-e13fa95fbbd0	f	\N	f	f
-2024-03-27 13:00:04.955623	2024-03-27 13:00:05.469258	3	customer_address	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_address](id:3)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	985d0de6-bb7c-42b6-986f-101643e80a7a	f	\N	f	f
-2024-03-27 13:00:17.385615	2024-03-27 13:00:17.869299	4	customer_demographics	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_demographics](id:4)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	9556a5ee-9557-4ee8-a255-73e8243f95d4	f	\N	f	f
-2024-03-27 13:00:46.52258	2024-03-27 13:00:46.879753	5	customer_enriched	birth_date	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_enriched](id:5)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	77bdb731-deaa-4de4-b7a4-e1b214b6a2e9	f	\N	f	f
-2024-03-27 13:01:08.401535	2024-03-27 13:01:08.872462	6	household_demographics	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[household_demographics](id:6)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	f726c004-9f9a-452a-985f-2c98dce639f0	f	\N	f	f
-2024-03-27 13:01:23.528732	2024-03-27 13:01:23.990913	7	income_band	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[income_band](id:7)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	92ee35d2-dd94-4a96-91bf-987d62b18065	f	\N	f	f
-2024-03-27 13:01:42.574294	2024-03-27 13:01:42.888335	8	customer_demographics_enriched	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_demographics_enriched](id:8)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	24a1f592-e336-433c-83dc-de561e308e8f	f	\N	f	f
-2024-03-27 13:01:53.376185	2024-03-27 13:01:53.683648	9	household_demographics_enriched	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[household_demographics_enriched](id:9)	t	\N	f	\N	[Trino lakehouse].[customer_analytics]	\N	341b20f3-39de-468f-9d30-b0bcce22a87c	f	\N	f	f
+COPY public.tables (created_on, changed_on, id, table_name, main_dttm_col, default_endpoint, database_id, created_by_fk, changed_by_fk, "offset", description, is_featured, cache_timeout, schema, sql, params, perm, filter_select_enabled, fetch_values_predicate, is_sqllab_view, template_params, schema_perm, extra, uuid, is_managed_externally, external_url, normalize_columns, always_filter_main_dttm, catalog, catalog_perm) FROM stdin;
+2024-03-27 12:59:45.846675	2024-03-27 12:59:46.363021	2	customer	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer](id:2)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	03100221-8213-4d85-8896-e13fa95fbbd0	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:00:04.955623	2024-03-27 13:00:05.469258	3	customer_address	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_address](id:3)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	985d0de6-bb7c-42b6-986f-101643e80a7a	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:00:17.385615	2024-03-27 13:00:17.869299	4	customer_demographics	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_demographics](id:4)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	9556a5ee-9557-4ee8-a255-73e8243f95d4	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:00:46.52258	2024-03-27 13:00:46.879753	5	customer_enriched	birth_date	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_enriched](id:5)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	77bdb731-deaa-4de4-b7a4-e1b214b6a2e9	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:01:08.401535	2024-03-27 13:01:08.872462	6	household_demographics	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[household_demographics](id:6)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	f726c004-9f9a-452a-985f-2c98dce639f0	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:01:23.528732	2024-03-27 13:01:23.990913	7	income_band	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[income_band](id:7)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	92ee35d2-dd94-4a96-91bf-987d62b18065	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:01:42.574294	2024-03-27 13:01:42.888335	8	customer_demographics_enriched	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[customer_demographics_enriched](id:8)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	24a1f592-e336-433c-83dc-de561e308e8f	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:01:53.376185	2024-03-27 13:01:53.683648	9	household_demographics_enriched	\N	\N	1	1	1	0	\N	f	\N	customer_analytics	\N	\N	[Trino lakehouse].[household_demographics_enriched](id:9)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[customer_analytics]	\N	341b20f3-39de-468f-9d30-b0bcce22a87c	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
+2024-03-27 13:02:07.16599	2024-03-27 13:02:07.49932	10	customer_enriched	\N	\N	1	1	1	0	\N	f	\N	compliance_analytics	\N	\N	[Trino lakehouse].[customer_enriched](id:10)	t	\N	f	\N	[Trino lakehouse].[lakehouse].[compliance_analytics]	\N	a310a9fe-e582-4cd3-8941-3625afcd54ff	f	\N	f	f	lakehouse	[Trino lakehouse].[lakehouse]
 \.
 
 
@@ -5588,18 +5476,10 @@ COPY public.tagged_object (created_on, changed_on, id, tag_id, object_id, object
 
 
 --
--- Data for Name: url; Type: TABLE DATA; Schema: public; Owner: superset
---
-
-COPY public.url (created_on, changed_on, id, url, created_by_fk, changed_by_fk) FROM stdin;
-\.
-
-
---
 -- Data for Name: user_attribute; Type: TABLE DATA; Schema: public; Owner: superset
 --
 
-COPY public.user_attribute (created_on, changed_on, id, user_id, welcome_dashboard_id, created_by_fk, changed_by_fk) FROM stdin;
+COPY public.user_attribute (created_on, changed_on, id, user_id, welcome_dashboard_id, created_by_fk, changed_by_fk, avatar_url) FROM stdin;
 \.
 
 
@@ -5615,21 +5495,21 @@ COPY public.user_favorite_tag (user_id, tag_id) FROM stdin;
 -- Name: ab_permission_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.ab_permission_id_seq', 70, true);
+SELECT pg_catalog.setval('public.ab_permission_id_seq', 81, true);
 
 
 --
 -- Name: ab_permission_view_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.ab_permission_view_id_seq', 190, true);
+SELECT pg_catalog.setval('public.ab_permission_view_id_seq', 211, true);
 
 
 --
 -- Name: ab_permission_view_role_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.ab_permission_view_role_id_seq', 502, true);
+SELECT pg_catalog.setval('public.ab_permission_view_role_id_seq', 540, true);
 
 
 --
@@ -5664,7 +5544,7 @@ SELECT pg_catalog.setval('public.ab_user_role_id_seq', 16, true);
 -- Name: ab_view_menu_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.ab_view_menu_id_seq', 98, true);
+SELECT pg_catalog.setval('public.ab_view_menu_id_seq', 105, true);
 
 
 --
@@ -5724,6 +5604,13 @@ SELECT pg_catalog.setval('public.dashboards_id_seq', 3, true);
 
 
 --
+-- Name: database_user_oauth2_tokens_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
+--
+
+SELECT pg_catalog.setval('public.database_user_oauth2_tokens_id_seq', 1, false);
+
+
+--
 -- Name: dbs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
@@ -5745,17 +5632,10 @@ SELECT pg_catalog.setval('public.favstar_id_seq', 1, false);
 
 
 --
--- Name: filter_sets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
---
-
-SELECT pg_catalog.setval('public.filter_sets_id_seq', 1, false);
-
-
---
 -- Name: key_value_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.key_value_id_seq', 26, true);
+SELECT pg_catalog.setval('public.key_value_id_seq', 30, true);
 
 
 --
@@ -5769,7 +5649,7 @@ SELECT pg_catalog.setval('public.keyvalue_id_seq', 1, false);
 -- Name: logs_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
 --
 
-SELECT pg_catalog.setval('public.logs_id_seq', 1574, true);
+SELECT pg_catalog.setval('public.logs_id_seq', 1713, true);
 
 
 --
@@ -5833,27 +5713,6 @@ SELECT pg_catalog.setval('public.row_level_security_filters_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.saved_query_id_seq', 1, false);
-
-
---
--- Name: sl_columns_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
---
-
-SELECT pg_catalog.setval('public.sl_columns_id_seq', 1, false);
-
-
---
--- Name: sl_datasets_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
---
-
-SELECT pg_catalog.setval('public.sl_datasets_id_seq', 1, false);
-
-
---
--- Name: sl_tables_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
---
-
-SELECT pg_catalog.setval('public.sl_tables_id_seq', 1, false);
 
 
 --
@@ -5931,13 +5790,6 @@ SELECT pg_catalog.setval('public.tag_id_seq', 1, false);
 --
 
 SELECT pg_catalog.setval('public.tagged_object_id_seq', 1, false);
-
-
---
--- Name: url_id_seq; Type: SEQUENCE SET; Schema: public; Owner: superset
---
-
-SELECT pg_catalog.setval('public.url_id_seq', 1, false);
 
 
 --
@@ -6172,6 +6024,14 @@ ALTER TABLE ONLY public.dashboards
 
 
 --
+-- Name: database_user_oauth2_tokens database_user_oauth2_tokens_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens
+    ADD CONSTRAINT database_user_oauth2_tokens_pkey PRIMARY KEY (id);
+
+
+--
 -- Name: dbs dbs_database_name_key; Type: CONSTRAINT; Schema: public; Owner: superset
 --
 
@@ -6225,14 +6085,6 @@ ALTER TABLE ONLY public.dynamic_plugin
 
 ALTER TABLE ONLY public.favstar
     ADD CONSTRAINT favstar_pkey PRIMARY KEY (id);
-
-
---
--- Name: filter_sets filter_sets_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.filter_sets
-    ADD CONSTRAINT filter_sets_pkey PRIMARY KEY (id);
 
 
 --
@@ -6340,86 +6192,6 @@ ALTER TABLE ONLY public.saved_query
 
 
 --
--- Name: sl_columns sl_columns_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_columns
-    ADD CONSTRAINT sl_columns_pkey PRIMARY KEY (id);
-
-
---
--- Name: sl_columns sl_columns_uuid_key; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_columns
-    ADD CONSTRAINT sl_columns_uuid_key UNIQUE (uuid);
-
-
---
--- Name: sl_dataset_columns sl_dataset_columns_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_columns
-    ADD CONSTRAINT sl_dataset_columns_pkey PRIMARY KEY (dataset_id, column_id);
-
-
---
--- Name: sl_dataset_tables sl_dataset_tables_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_tables
-    ADD CONSTRAINT sl_dataset_tables_pkey PRIMARY KEY (dataset_id, table_id);
-
-
---
--- Name: sl_dataset_users sl_dataset_users_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_users
-    ADD CONSTRAINT sl_dataset_users_pkey PRIMARY KEY (dataset_id, user_id);
-
-
---
--- Name: sl_datasets sl_datasets_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets
-    ADD CONSTRAINT sl_datasets_pkey PRIMARY KEY (id);
-
-
---
--- Name: sl_datasets sl_datasets_uuid_key; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets
-    ADD CONSTRAINT sl_datasets_uuid_key UNIQUE (uuid);
-
-
---
--- Name: sl_table_columns sl_table_columns_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_table_columns
-    ADD CONSTRAINT sl_table_columns_pkey PRIMARY KEY (table_id, column_id);
-
-
---
--- Name: sl_tables sl_tables_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables
-    ADD CONSTRAINT sl_tables_pkey PRIMARY KEY (id);
-
-
---
--- Name: sl_tables sl_tables_uuid_key; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables
-    ADD CONSTRAINT sl_tables_uuid_key UNIQUE (uuid);
-
-
---
 -- Name: slice_user slice_user_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
 --
 
@@ -6513,6 +6285,14 @@ ALTER TABLE ONLY public.tag
 
 ALTER TABLE ONLY public.tagged_object
     ADD CONSTRAINT tagged_object_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: tagged_object uix_tagged_object; Type: CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.tagged_object
+    ADD CONSTRAINT uix_tagged_object UNIQUE (tag_id, object_id, object_type);
 
 
 --
@@ -6612,19 +6392,18 @@ ALTER TABLE ONLY public.tables
 
 
 --
--- Name: url url_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.url
-    ADD CONSTRAINT url_pkey PRIMARY KEY (id);
-
-
---
 -- Name: user_attribute user_attribute_pkey; Type: CONSTRAINT; Schema: public; Owner: superset
 --
 
 ALTER TABLE ONLY public.user_attribute
     ADD CONSTRAINT user_attribute_pkey PRIMARY KEY (id);
+
+
+--
+-- Name: idx_user_id_database_id; Type: INDEX; Schema: public; Owner: superset
+--
+
+CREATE INDEX idx_user_id_database_id ON public.database_user_oauth2_tokens USING btree (user_id, database_id);
 
 
 --
@@ -6670,6 +6449,27 @@ CREATE INDEX ix_query_results_key ON public.query USING btree (results_key);
 
 
 --
+-- Name: ix_report_execution_log_report_schedule_id; Type: INDEX; Schema: public; Owner: superset
+--
+
+CREATE INDEX ix_report_execution_log_report_schedule_id ON public.report_execution_log USING btree (report_schedule_id);
+
+
+--
+-- Name: ix_report_execution_log_start_dttm; Type: INDEX; Schema: public; Owner: superset
+--
+
+CREATE INDEX ix_report_execution_log_start_dttm ON public.report_execution_log USING btree (start_dttm);
+
+
+--
+-- Name: ix_report_recipient_report_schedule_id; Type: INDEX; Schema: public; Owner: superset
+--
+
+CREATE INDEX ix_report_recipient_report_schedule_id ON public.report_recipient USING btree (report_schedule_id);
+
+
+--
 -- Name: ix_report_schedule_active; Type: INDEX; Schema: public; Owner: superset
 --
 
@@ -6681,6 +6481,13 @@ CREATE INDEX ix_report_schedule_active ON public.report_schedule USING btree (ac
 --
 
 CREATE INDEX ix_row_level_security_filters_filter_type ON public.row_level_security_filters USING btree (filter_type);
+
+
+--
+-- Name: ix_sql_editor_id; Type: INDEX; Schema: public; Owner: superset
+--
+
+CREATE INDEX ix_sql_editor_id ON public.query USING btree (sql_editor_id);
 
 
 --
@@ -6869,6 +6676,38 @@ ALTER TABLE ONLY public.dashboards
 
 
 --
+-- Name: database_user_oauth2_tokens database_user_oauth2_tokens_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens
+    ADD CONSTRAINT database_user_oauth2_tokens_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
+
+
+--
+-- Name: database_user_oauth2_tokens database_user_oauth2_tokens_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens
+    ADD CONSTRAINT database_user_oauth2_tokens_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
+
+
+--
+-- Name: database_user_oauth2_tokens database_user_oauth2_tokens_database_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens
+    ADD CONSTRAINT database_user_oauth2_tokens_database_id_fkey FOREIGN KEY (database_id) REFERENCES public.dbs(id) ON DELETE CASCADE;
+
+
+--
+-- Name: database_user_oauth2_tokens database_user_oauth2_tokens_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
+--
+
+ALTER TABLE ONLY public.database_user_oauth2_tokens
+    ADD CONSTRAINT database_user_oauth2_tokens_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.ab_user(id) ON DELETE CASCADE;
+
+
+--
 -- Name: dbs dbs_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
 --
 
@@ -6906,30 +6745,6 @@ ALTER TABLE ONLY public.dynamic_plugin
 
 ALTER TABLE ONLY public.favstar
     ADD CONSTRAINT favstar_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.ab_user(id);
-
-
---
--- Name: filter_sets filter_sets_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.filter_sets
-    ADD CONSTRAINT filter_sets_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: filter_sets filter_sets_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.filter_sets
-    ADD CONSTRAINT filter_sets_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: filter_sets filter_sets_dashboard_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.filter_sets
-    ADD CONSTRAINT filter_sets_dashboard_id_fkey FOREIGN KEY (dashboard_id) REFERENCES public.dashboards(id);
 
 
 --
@@ -7253,134 +7068,6 @@ ALTER TABLE ONLY public.saved_query
 
 
 --
--- Name: sl_columns sl_columns_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_columns
-    ADD CONSTRAINT sl_columns_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_columns sl_columns_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_columns
-    ADD CONSTRAINT sl_columns_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_dataset_columns sl_dataset_columns_column_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_columns
-    ADD CONSTRAINT sl_dataset_columns_column_id_fkey FOREIGN KEY (column_id) REFERENCES public.sl_columns(id);
-
-
---
--- Name: sl_dataset_columns sl_dataset_columns_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_columns
-    ADD CONSTRAINT sl_dataset_columns_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.sl_datasets(id);
-
-
---
--- Name: sl_dataset_tables sl_dataset_tables_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_tables
-    ADD CONSTRAINT sl_dataset_tables_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.sl_datasets(id);
-
-
---
--- Name: sl_dataset_tables sl_dataset_tables_table_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_tables
-    ADD CONSTRAINT sl_dataset_tables_table_id_fkey FOREIGN KEY (table_id) REFERENCES public.sl_tables(id);
-
-
---
--- Name: sl_dataset_users sl_dataset_users_dataset_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_users
-    ADD CONSTRAINT sl_dataset_users_dataset_id_fkey FOREIGN KEY (dataset_id) REFERENCES public.sl_datasets(id);
-
-
---
--- Name: sl_dataset_users sl_dataset_users_user_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_dataset_users
-    ADD CONSTRAINT sl_dataset_users_user_id_fkey FOREIGN KEY (user_id) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_datasets sl_datasets_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets
-    ADD CONSTRAINT sl_datasets_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_datasets sl_datasets_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets
-    ADD CONSTRAINT sl_datasets_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_datasets sl_datasets_database_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_datasets
-    ADD CONSTRAINT sl_datasets_database_id_fkey FOREIGN KEY (database_id) REFERENCES public.dbs(id);
-
-
---
--- Name: sl_table_columns sl_table_columns_column_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_table_columns
-    ADD CONSTRAINT sl_table_columns_column_id_fkey FOREIGN KEY (column_id) REFERENCES public.sl_columns(id);
-
-
---
--- Name: sl_table_columns sl_table_columns_table_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_table_columns
-    ADD CONSTRAINT sl_table_columns_table_id_fkey FOREIGN KEY (table_id) REFERENCES public.sl_tables(id);
-
-
---
--- Name: sl_tables sl_tables_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables
-    ADD CONSTRAINT sl_tables_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_tables sl_tables_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables
-    ADD CONSTRAINT sl_tables_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: sl_tables sl_tables_database_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.sl_tables
-    ADD CONSTRAINT sl_tables_database_id_fkey FOREIGN KEY (database_id) REFERENCES public.dbs(id);
-
-
---
 -- Name: slices slices_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
 --
 
@@ -7578,22 +7265,6 @@ ALTER TABLE ONLY public.tagged_object
 
 ALTER TABLE ONLY public.tagged_object
     ADD CONSTRAINT tagged_object_tag_id_fkey FOREIGN KEY (tag_id) REFERENCES public.tag(id);
-
-
---
--- Name: url url_changed_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.url
-    ADD CONSTRAINT url_changed_by_fk_fkey FOREIGN KEY (changed_by_fk) REFERENCES public.ab_user(id);
-
-
---
--- Name: url url_created_by_fk_fkey; Type: FK CONSTRAINT; Schema: public; Owner: superset
---
-
-ALTER TABLE ONLY public.url
-    ADD CONSTRAINT url_created_by_fk_fkey FOREIGN KEY (created_by_fk) REFERENCES public.ab_user(id);
 
 
 --

@@ -7,7 +7,7 @@
 5. `pgdump` the Postgres and update the dump in Git. For that shell into `postgresql-superset-0` and execute
 
 ```sh
-export PGPASSWORD="$POSTGRES_POSTGRES_PASSWORD"
+export PGPASSWORD=$(cat "${POSTGRES_POSTGRES_PASSWORD_FILE}")
 
 pg_dumpall -Upostgres > /tmp/dump.sql
 ```
