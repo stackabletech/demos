@@ -7,8 +7,7 @@ spec:
   image:
     # Currently does not work with the kubernetes executor S3 logging
     # (and its still marked experimental as of release 25.7)
-    # productVersion: 3.0.1
-    productVersion: 2.10.5
+    productVersion: 3.0.1
   clusterConfig:
     loadExamples: false
     exposeConfig: false
