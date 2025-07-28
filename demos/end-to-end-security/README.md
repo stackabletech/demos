@@ -9,11 +9,11 @@
 ```sh
 export PGPASSWORD="$POSTGRES_POSTGRES_PASSWORD"
 
-pg_dumpall -Upostgres | gzip -c > /tmp/dump.sql.gz
+pg_dumpall -Upostgres > /tmp/dump.sql
 ```
 
 Afterwards copy the dump to your local machine using
 
 ```sh
-kubectl cp postgresql-superset-0:/tmp/dump.sql.gz postgres_superset_dump.sql.gz
+kubectl cp postgresql-superset-0:/tmp/dump.sql postgres_superset_dump.sql
 ```
