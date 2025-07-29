@@ -28,9 +28,9 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/hbase-hdfs-load-cycling-data/create-hfile-and-import-to-hbase.yaml
     supportedNamespaces: []
     resourceRequests:
-      cpu: "3"
-      memory: 5638Mi
-      pvc: 16Gi
+      cpu: 1950m
+      memory: 9216Mi
+      pvc: 21Gi
   end-to-end-security:
     description: Demonstrates end-to-end security across multiple products
     stackableStack: end-to-end-security
@@ -218,7 +218,6 @@ demos:
       - nifi
       - jupyterhub
       - grafana-dashboards
-      - zookeeper
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/create-timescale-tables.yaml
