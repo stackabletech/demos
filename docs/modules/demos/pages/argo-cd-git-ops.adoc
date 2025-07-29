@@ -24,6 +24,8 @@ image::argo-cd-git-ops/architecture-overview.svg[]
 
 Install this demo on an existing Kubernetes cluster:
 
+TODO: We need a pointer here to the last paragraph (forking repo) if people want to "interact" and not just install the demo (install command requires extra parameters)
+
 [source,console]
 ----
 $ stackablectl demo install argo-cd-git-ops --namespace argo-cd
@@ -38,9 +40,9 @@ NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`. Argo
 
 To run this demo, your system needs at least:
 
-* 20 {k8s-cpu}[cpu units] (core/hyperthread)
-* 20GiB memory
-* 20GiB disk storage
+* 15 {k8s-cpu}[cpu units] (core/hyperthread)
+* 15 GiB memory
+* 5 GiB disk storage
 
 == Overview
 
@@ -74,7 +76,7 @@ This way, everything will be stored and managed in Git.
 
 == ArgoCD UI
 
-ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the Web UI.
+ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the web UI.
 
 [source,console]
 ----
@@ -85,7 +87,25 @@ In your browser, go to `https://localhost:8443` and login with username `admin` 
 
 NOTE: There will be an initial warning from the Browser, that this site is insecure due to self-signed certificates. This can be ignored in this case.
 
-TODO: screenshots
+The ArgoCD Web UI entry page shows an overview of deployed applications and their status and other metadata as the repository or the date of the last synchronization run.
+
+TODO: Screenshot - Argo UI overview
+
+Single applications can be inspected closer after clicking on e.g. the `airflow` project.
+
+TODO: Screenshot - Argo UI - Airflow
+
+Detailed information about the cluster, the cluster status and deployed components can be accessed in the application details.
+Additionally, if the Git repository and the cluster state itself differ, possible applied changes can be previewed in a code diff similar to Git pull requests.
+
+TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
+
+Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`. This means that changes to the Git repository are immediatly synced into the cluster.
+This is nice in the demo case, but should be disabled for production use cases.
+
+TODO: Screenshot - Argo UI - applications/airflow/details
+
+Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
 
 == Stackable operators
 
@@ -94,6 +114,8 @@ The Stackable operators are deployed via ArgoCD using the Stackable Helm charts 
 using different versions and Git sources (repository & branch) as well as the possibility to deploy to different clusters.
 
 NOTE: This demo does not use a multi cluster environment for the sake of simplicity. 
+
+TODO: Do the code snippets actually help? Maybe text is better... its about showing at least some parts of a multi cluster setup...
 
 [source,yaml]
 ----
@@ -232,26 +254,39 @@ Now with ArgoCD deployed, the Sealed Secrets controller and Stackable operators 
 
 == Airflow
 
-The Airflow Web UI is reachable via Nodeport or easier, using a port-forward:
+The Airflow web UI is reachable via Nodeport or easier, using a port-forward:
 
 [source,console]
 ----
-kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8080
+kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8081:8080
 ----
 
 In your browser, go to `http://localhost:8080` and login with username `admin` and password `adminadmin`.
 
-TODO: Screenshots
-
-TODO: Similar to the ArgoCD {argo-cd-application}[`Application`]
+TODO: Screenshots - start dag
 
 === Starting DAGs
 
 TODO: screenshots?
 
-=== Checking logs
+== Minio / S3 - check logs
 
-TODO: even important here?
+Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket. When accessing the logs via the Airflow webserver,
+the logs are fetched from S3 instead of the (already deleted) executor pods. The Minio / S3 instance can be accessed via port-forward:
+
+[source,console]
+----
+kubectl --namespace minio port-forward service/minio-console 9001:9001
+----
+
+Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`. After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
+
+NOTE: There will be an initial warning from the Browser, that this site is insecure due to self-signed certificates. This can be ignored in this case.
+
+TODO: Screenshot - minio UI with log data
+
+As a last step, in order to better interact and not just "sync" from the Git repository, the following paragraph demonstrates how to fork the demo repository and adapt the `stackablectl` install command to point to the forked repository.
+In this forked repository, changes can be made the code and synced into the cluster via ArgoCD.
 
 == How to interact with ArgoCD and the Git repository
 
