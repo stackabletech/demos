@@ -269,15 +269,14 @@ Once this is pushed / merged, ArgoCD should sync the changes and you should see 
 
 === Add new Airflow DAGs
 
+In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have to adapt the gitsync configuration for DAGs to the forked repository:
+
+[source,yaml]
+----
+    dagsGitSync:
+      - repo: <my-demo-fork-url>
+        branch: <my-custom-branch-with-changes>
+        [...]
+----
+
 Similar to ArgoCD, after adding a new DAG to the folder `demos/argo-cd-git-ops/dags`, Airflow should pick up the new DAG via gitsync and display it in the UI.
-
-
-
-
-
-
-
-
-
-
-
