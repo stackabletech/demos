@@ -1,0 +1,16 @@
+# argo-cd-git-ops
+
+## How to create sealed secrets
+
+This demo uses [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) to decrypt secrets stored in Git.
+
+The CLI tool `kubeseal` must be installed as described in the [Sealed Secrets readme](https://github.com/bitnami-labs/sealed-secrets?tab=readme-ov-file#kubeseal).
+
+The easiest way to seal secrets via `kubeseal` is to have the `argo-cd-git-ops` installed. It provides the Sealed Secrets controller and
+a generated certificate that is automatically used for signing.
+
+```sh
+kubeseal -n stackable-airflow --format=yaml < airflow-credentials.yaml > sealed-airflow-credentials.yaml
+```
+
+TODO: We should probably create a script that seals all secrets and puts them in the respective stack / demo folders
