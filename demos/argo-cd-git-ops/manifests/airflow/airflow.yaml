@@ -72,7 +72,7 @@ spec:
           min: 400m
           max: "1"
         memory:
-          limit: 1.5Gi
+          limit: 2Gi
     roleGroups:
       default:
         # NOTE: In order to properly show ArgoCD in action - syncing changes via Git - do the following:
