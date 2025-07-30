@@ -20,7 +20,7 @@ The key points to show are:
 
 ArgoCD and other deployed products and dependencies are illustrated in the following diagram: 
 
-image::argo-cd-git-ops/architecture-overview.svg[]
+image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 
 Install this demo on an existing Kubernetes cluster:
 
@@ -60,8 +60,6 @@ This demo consists of multiple parts:
 ** Checkout Airflow UI and synced DAGs (the DAGs are synced via gitsync, not ArgoCD)
 ** Start a DAG and inspect the logs written to S3 / Minio by the Kubernetes executor
 * Optional: Inspect Minio UI for logs
-
-TODO: arch overview image
 
 == Sealed Secrets
 
