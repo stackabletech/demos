@@ -13,7 +13,7 @@
 # [x] NiFi 1 - native
 # [x] NiFi 2 - native
 # [ ] OpenSearch - not officially part of the platform yet
-# [ ] Spark - native - was too lazy
+# [ ] Spark - native - partially done, see comment on it below
 # [x] Superset - exporter
 # [x] Trino - native
 # [x] ZooKeeper - native
@@ -219,6 +219,36 @@ spec:
           targetLabel: __address__
           replacement: ${1}.${2}-headless.${3}.svc.cluster.local:${4}
           regex: (.+);(.+?)(?:-metrics)?;(.+);(.+)
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
+---
+# spark-k8s-operator does not deploy any Services at all (at least for SparkApplications).
+# We currently only scrape the driver, going forward we might want to scrape the executors as well.
+# In the future we might also want to scrape SparkConnect and HistoryServers.
+apiVersion: monitoring.coreos.com/v1
+kind: PodMonitor
+metadata:
+  name: stackable-spark-application-driver
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+      app.kubernetes.io/name: spark-k8s
+      spark-role: driver
+  podMetricsEndpoints:
+    - scheme: http
+      port: spark-ui
+      path: /metrics/prometheus
   podTargetLabels:
     - app.kubernetes.io/name
     - app.kubernetes.io/instance
