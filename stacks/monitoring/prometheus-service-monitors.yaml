@@ -134,7 +134,7 @@ spec:
       app.kubernetes.io/name: hdfs
   endpoints:
     - scheme: http
-      port: http # Don't use metrics!
+      port: http # Don't use the "metrics" exporter port, we want native metrics instead
       path: /prom
   podTargetLabels:
     - app.kubernetes.io/name
