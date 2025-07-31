@@ -500,7 +500,6 @@ spec:
       securityContext:
         fsGroup: 1000
         fsGroupChangePolicy: OnRootMismatch
-        runAsGroup: 1000
         runAsUser: 1000
 
       serviceAccountName: minio-sa
