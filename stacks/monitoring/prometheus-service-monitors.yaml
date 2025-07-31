@@ -37,7 +37,6 @@ spec:
           - airflow
           - druid
           - hive
-          - kafka
           - nifi # This only works for NiFi 1, NiFi 2 has a special ServiceMonitor below
           - opa
           - superset
