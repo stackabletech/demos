@@ -16,8 +16,7 @@ spec:
             - |
               kubectl rollout status --watch statefulset/postgresql-superset
               cd /tmp
-              curl --fail -O https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/postgres_superset_dump.sql.gz
-              gunzip postgres_superset_dump.sql.gz
+              curl --fail -O https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/postgres_superset_dump.sql
 
               # We need to omit changing the users password, as otherwise the content in the Secrets does not match
               # the actual password in Postgres.
