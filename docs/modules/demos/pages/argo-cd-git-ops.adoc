@@ -8,6 +8,7 @@
 :sealed-secrets: https://github.com/bitnami-labs/sealed-secrets
 :stackable-demo-repository: https://github.com/stackabletech/demos/
 :airflow: https://airflow.apache.org/
+:github-fork: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo
 
 This demo shows how to utilize GitOps and Infrastructure as Code (IaC) with Stackable and {argo-cd}[ArgoCD]. 
 All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
@@ -24,7 +25,7 @@ image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 
 Install this demo on an existing Kubernetes cluster:
 
-TODO: We need a pointer here to the last paragraph (forking repo) if people want to "interact" and not just install the demo (install command requires extra parameters)
+// TODO: We need a pointer here to the last paragraph (forking repo) if people want to "interact" and not just install the demo (install command requires extra parameters)
 
 [source,console]
 ----
@@ -87,21 +88,21 @@ This can be ignored in this case.
 
 The ArgoCD Web UI entry page shows an overview of deployed applications, their status and other metadata as the repository or the date of the last synchronization run.
 
-TODO: Screenshot - Argo UI overview
+// TODO: Screenshot - Argo UI overview
 
 Single applications can be inspected closer after clicking on e.g. the `airflow` project.
 
-TODO: Screenshot - Argo UI - Airflow
+// TODO: Screenshot - Argo UI - Airflow
 
 Detailed information about the Airflow cluster, the cluster status and deployed components can be accessed in the application details.
 Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
 
-TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
+// TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
 
 Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`. This means that changes to the Git repository are immediatly synced into the cluster.
 This is nice in the demo case, but should be disabled for production use cases.
 
-TODO: Screenshot - Argo UI - applications/airflow/details
+// TODO: Screenshot - Argo UI - applications/airflow/details
 
 Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
 
@@ -224,7 +225,7 @@ template:
 This allows control over which releases and versions are deployed to which cluster.
 ====
 
-Now with ArgoCD deployed, the Sealed Secrets controller and Stackable operators up and running, you can inspect Airflow as the first Stackable product.
+Now with ArgoCD, the Sealed Secrets controller and Stackable operators up and running, you can inspect Airflow as the first Stackable product.
 
 == Airflow
 
@@ -236,12 +237,30 @@ kubectl --namespace stackable-airflow port-forward service/airflow-webserver 808
 ----
 
 In your browser, go to `http://localhost:8080` and login with username `admin` and password `adminadmin`.
+The welcome page and an overview over synced DAGs should be displayed.
 
-=== Starting DAGs
+image::argo-cd-git-ops/airflow-welcome-page.png[]
 
-TODO: screenshots?
+=== Start the DAG
 
-== Minio / S3 - check logs
+The `date_demo` DAG can be started by moving the slider and trigger the DAG runs. The DAG itself can be inspected by clicking on it.
+
+=== Inspect the DAG
+
+The overview displays details about the DAG runs, durations and other metadata. The graph, code or events can be selected in the tabs for more details.
+
+image::argo-cd-git-ops/airflow-dag-overview.png[]
+
+=== Inspect a DAG run
+
+A single DAG run can be selected by clicking on one of the green squares next to `run_every_minute` on the left.
+More information is displayed here, and the DAG logs written by the Kubernetes Executor to S3/Minio can be selected in the `Logs` tab.
+
+image::argo-cd-git-ops/airflow-dag-run-logs.png[]
+
+In the logs, the output of the DAG is printed under a line containing `Output:`, the timestamp of the DAG run. 
+
+== Minio
 
 Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket. When accessing the logs via the Airflow webserver,
 the logs are fetched from S3 instead of the (already deleted) executor pods. The Minio / S3 instance can be accessed via port-forward:
@@ -257,27 +276,37 @@ After the successful Airflow DAG run, logs should be stored in `demo/airflow-tas
 NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates. 
 This can be ignored in this case.
 
-TODO: Screenshot - minio UI with log data
+image::argo-cd-git-ops/minio-dag-run-logs.png[]
 
-As a last step, in order to better interact and not just "sync" from the Git repository, the following paragraph demonstrates how to fork the demo repository and adapt the `stackablectl` install command to point to the forked repository.
-In this forked repository, changes can be made the code and synced into the cluster via ArgoCD.
+The log files contained in the single folders are the same as the logs shown above in the Airflow web UI.
+
+== Conclusion
+
+This demo illustrates the combination of ArgoCD and Stackable, using the full potential of GitOps and demonstrating key features for a successful IaC deployment using Stackable.
+
+// TODO: extend...
+
+As a last step, in order to synchronize changes made to manifests or secrets from the Git repository, the following paragraph demonstrates on how to run this demo on a forked GitHub repository.
 
 == How to interact with ArgoCD and the Git repository
 
 Since this Demo is hosted in the {stackable-demo-repository}[Stackable Demo repository], where merging etc. requires approval, the recommendation is to fork the {stackable-demo-repository}[Stackable Demo repository].
+This {github-fork}[GitHub tutorial] shows how to fork a repository.
 
-Once forked, you can install this demo using `stackablectl` parameters to customize the forked repository:
+After forking the demo repository, a local copy can be cloned and the `stackablectl` install command must be parameterized with the fork URL and branch.
 
 [source,console]
 ----
 stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
 ----
 
-This way, ArgoCD is instructed to pull the Stackable manifests from the forked repository, where your changes can be properly synced via ArgoCD.
+In this forked and cloned repository, changes can be made the code and synced into the cluster via ArgoCD.
+
+This way, ArgoCD is instructed to pull the Stackable manifests from the forked repository, where the changes are synced via ArgoCD into the cluster.
 
 === Increase Airflow webserver replicas
 
-Assuming your working directory ist the root of the forked demo repository, try to increase the `spec.webservers.roleGroups.<role-group>.replicas` in the folder `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml`.
+Assuming your working directory is the root of the forked demo repository, try to increase the `spec.webservers.roleGroups.<role-group>.replicas` in the folder `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml`.
 Once this is pushed / merged, ArgoCD should sync the changes and you should see more webserver pods.
 
 === Add new Airflow DAGs
