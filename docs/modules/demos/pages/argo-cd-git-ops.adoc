@@ -256,12 +256,10 @@ The Airflow web UI is reachable via Nodeport or easier, using a port-forward:
 
 [source,console]
 ----
-kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8081:8080
+kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8080:8080
 ----
 
 In your browser, go to `http://localhost:8080` and login with username `admin` and password `adminadmin`.
-
-TODO: Screenshots - start dag
 
 === Starting DAGs
 
