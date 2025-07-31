@@ -14,8 +14,8 @@ All products and manifests are synced and deployed via ArgoCD (except ArgoCD its
 
 The key points to show are:
 
-* GitOps: How to deploy changes from a Git repository to my cluster?
-* Secrets: How to safely store and deploy credentials, access keys from a Git repository?
+* GitOps: How to deploy changes from a Git repository to a cluster?
+* Secrets: How to safely store and deploy credentials or access keys from a Git repository?
 * Interaction with Stackable products (e.g. Airflow and DAGs via gitsync)
 
 ArgoCD and other deployed products and dependencies are illustrated in the following diagram: 
@@ -49,22 +49,20 @@ To run this demo, your system needs at least:
 
 This demo consists of multiple parts:
 
-* Bootstrapping via `stackablectl`:
-** Install {argo-cd}[Argo CD] via `stackablectl`
+* Bootstrapping {argo-cd}[Argo CD]  via `stackablectl`:
 * Deploy components via ArgoCD:
-** Install a {sealed-secrets}[Sealed Secrets] controller to handle sensitive data like credentials or secret keys
-** Install all Stackable operators using an `ApplicationSet`
-** Install requirements like Minio and Postgres as `Application`
-** Deploy Stackable Airflow manifests into their respective `Projects`
-* Inspect ArgoCD UI
-* Inspect Airflow and start DAGs
-** Checkout Airflow UI and synced DAGs (the DAGs are synced via gitsync, not ArgoCD)
-** Start a DAG and inspect the logs written to S3 / Minio by the Kubernetes executor
-* Optional: Inspect Minio UI for logs
+** Install a {sealed-secrets}[Sealed Secrets] controller to decrypt secrets stored in a Git repository
+** Install all Stackable operators using an ArgoCD `ApplicationSet`
+** Install the Airflow dependencies Minio and Postgres as ArgoCD `Application`
+** Deploy Stackable Airflow manifests into their respective ArgoCD `Projects`
+* Inspect Airflow web UI
+** DAGs are synced from a Git repository
+** Start a DAG and check the results
+** Check Kubernetes Executor logs persisted in Minio
 
 == Sealed Secrets
 
-When managing all resources and configs via Git, deploying sensitive properties like certificates or credentials via Git becomes a problem.
+When managing all resources and configuration via Git, deploying sensitive data like certificates or credentials via Git becomes a problem.
 
 There are multiple solutions to this such as Hashicorp or Bitwarden, which depend heavily on the infrastructure already available.
 
@@ -75,8 +73,7 @@ This way, everything will be stored and managed in Git.
 
 == ArgoCD UI
 
-ArgoCD will be the first product that is deployed in this Demo.
-Once the pods are ready, you can port-forward the argocd-server in order to access the web UI.
+After bootstrapping ArgoCD via `stackablectl`, once the pods are ready, you can port-forward the argocd-server Service in order to access the web UI.
 
 [source,console]
 ----
@@ -88,7 +85,7 @@ In your browser, go to `https://localhost:8443` and login with username `admin` 
 NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
 This can be ignored in this case.
 
-The ArgoCD Web UI entry page shows an overview of deployed applications and their status and other metadata as the repository or the date of the last synchronization run.
+The ArgoCD Web UI entry page shows an overview of deployed applications, their status and other metadata as the repository or the date of the last synchronization run.
 
 TODO: Screenshot - Argo UI overview
 
@@ -96,8 +93,8 @@ Single applications can be inspected closer after clicking on e.g. the `airflow`
 
 TODO: Screenshot - Argo UI - Airflow
 
-Detailed information about the cluster, the cluster status and deployed components can be accessed in the application details.
-Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff similar to Git pull requests.
+Detailed information about the Airflow cluster, the cluster status and deployed components can be accessed in the application details.
+Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
 
 TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
 
@@ -116,11 +113,13 @@ using different versions and Git sources (repository & branch) as well as the po
 
 NOTE: This demo does not use a multi cluster environment for the sake of simplicity. 
 
-TODO: Do the code snippets actually help? Maybe text is better... its about showing at least some parts of a multi cluster setup...
+The following part is dives deeper into the definition of theStackable operator `ApplicationSet` and can be skipped.
 
+.Stackable operators `ApplicationSet` details
+[%collapsible]
+====
 [source,yaml]
 ----
----
 apiVersion: argoproj.io/v1alpha1
 kind: ApplicationSet
 metadata:
@@ -130,7 +129,7 @@ spec:
     - matrix:
         generators:
           - list:
-              elements:
+              elements: # <1>
                 - operator: commons
                 - operator: listener
                 - operator: secret
@@ -147,7 +146,7 @@ spec:
                 - operator: trino
                 - operator: zookeeper
           - list:
-              elements:
+              elements: # <2>
                 - cluster: demo
                   server: https://kubernetes.default.svc
                   targetRevision: 25.7.0
@@ -176,6 +175,8 @@ spec:
                 #   targetRevision: 25.3.0
 # [...]
 ----
+<1> List of Stackable operators to install.
+<2> List of clusters and Stackable release versions for each cluster.
 
 The `matrix.generators.list[].elements[]` will create a union of parameters that may be used in the `ApplicationSet` template as follows:
 
@@ -186,7 +187,7 @@ template:
     metadata:
       name: "{{ operator }}-operator"
     spec:
-      project: "stackable-operators"
+      project: "stackable-operators" # <1>
       ignoreDifferences:
         - group: "apiextensions.k8s.io"
           kind: "CustomResourceDefinition"
@@ -196,60 +197,32 @@ template:
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
         repoURL: "oci.stackable.tech"
-        targetRevision: "{{ targetRevision }}"
-        chart: "sdp-charts/{{ operator }}-operator"
+        targetRevision: "{{ targetRevision }}" # <2>
+        chart: "sdp-charts/{{ operator }}-operator" # <3>
         helm:
-          releaseName: "{{ operator }}-operator"
+          releaseName: "{{ operator }}-operator" # <4>
       destination:
-        server: "{{ server }}"
-        namespace: "stackable-operators"
+        server: "{{ server }}" # <5>
+        namespace: "stackable-operators" # <6>
       syncPolicy:
         syncOptions:
-          - CreateNamespace=true
+          - CreateNamespace=true # <7>
           - ServerSideApply=true
           - RespectIgnoreDifferences=true
         automated:
           selfHeal: true
           prune: true
 ----
-
-The templated version for e.g. the parameters `operator=zookeeper`, `server=https://kubernetes.default.svc` and `targetRevision=25.7.0` will result in the following template:
-
-[source,yaml]
-----
-# [...]
-template:
-    metadata:
-      name: "zookeeper-operator"
-    spec:
-      project: "stackable-operators"
-      ignoreDifferences:
-        - group: "apiextensions.k8s.io"
-          kind: "CustomResourceDefinition"
-          jqPathExpressions:
-            - .spec.names.categories | select(. == [])
-            - .spec.names.shortNames | select(. == [])
-            - .spec.versions[].additionalPrinterColumns | select(. == [])
-      source:
-        repoURL: "oci.stackable.tech"
-        targetRevision: "25.7.0"
-        chart: "sdp-charts/zookeeper-operator"
-        helm:
-          releaseName: "zookeeper-operator"
-      destination:
-        server: "https://kubernetes.default.svc"
-        namespace: "stackable-operators"
-      syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
-          - ServerSideApply=true
-          - RespectIgnoreDifferences=true
-        automated:
-          selfHeal: true
-          prune: true
-----
+<1> The ArgoCD project name.
+<2> The Stackable release version, e.g. `25.7.0` (templated from the matrix generators).
+<3> The Chart name in the repository e.g. `"sdp-charts/airflow-operator"` (templated from the matrix generators).
+<4> The Helm release name e.g. `airflow-operator` (templated from the matrix generators).
+<5> The Kubernetes cluster, e.g. `https://kubernetes.default.svc` for this demo (templated from the matrix generators).
+<6> The namespace to deploy the operators in. Will be created if `spec.syncPolicy.syncOptions[].CreateNamespace` is set to true.
+<7> Automatically create missing namespaces.
 
 This allows control over which releases and versions are deployed to which cluster.
+====
 
 Now with ArgoCD deployed, the Sealed Secrets controller and Stackable operators up and running, you can inspect Airflow as the first Stackable product.
 
