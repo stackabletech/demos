@@ -1,7 +1,7 @@
 # Use something like this to check for metrics:
 # count by (app_kubernetes_io_name, app_kubernetes_io_instance, pod) ({app_kubernetes_io_name!="",pod!=""})
 #
-# Products metrics covered by the ServiceMonitors below. The list also includes wether the
+# Products metrics covered by the ServiceMonitors below. The list also includes whether the
 # ServiceMonitor scrapes native metrics or a statsd/JMX exporter.
 #
 # [x] Airflow - exporter
