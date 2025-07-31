@@ -33,7 +33,8 @@ $ stackablectl demo install argo-cd-git-ops --namespace argo-cd
 
 WARNING: This demo should not be run alongside other demos.
 
-NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`. ArgoCD itself will create other namespaces for the deployed products.
+NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`.
+ArgoCD itself will create other namespaces for the deployed products.
 
 [#system-requirements]
 == System requirements
@@ -65,7 +66,7 @@ This demo consists of multiple parts:
 
 When managing all resources and configs via Git, deploying sensitive properties like certificates or credentials via Git becomes a problem.
 
-There are multiple solutions like Hashicorp or Bitwarden, which heavily depend on the infrastructure already available.
+There are multiple solutions to this such as Hashicorp or Bitwarden, which depend heavily on the infrastructure already available.
 
 For the sake of this demo, {sealed-secrets}[Bitnami's Sealed Secrets] are utilized. 
 Sensitive data is encrypted as a `SealedSecret` before commiting to the Git repository, synced via ArgoCD and decrypted by the Sealed Secrets controller into a standard Kubernetes `Secret`.
@@ -74,7 +75,8 @@ This way, everything will be stored and managed in Git.
 
 == ArgoCD UI
 
-ArgoCD will be the first product that is deployed in this Demo. Once the pods are ready, you can port-forward the argocd-server in order to access the web UI.
+ArgoCD will be the first product that is deployed in this Demo.
+Once the pods are ready, you can port-forward the argocd-server in order to access the web UI.
 
 [source,console]
 ----
@@ -83,7 +85,8 @@ kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
 
 In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
 
-NOTE: There will be an initial warning from the Browser, that this site is insecure due to self-signed certificates. This can be ignored in this case.
+NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
+This can be ignored in this case.
 
 The ArgoCD Web UI entry page shows an overview of deployed applications and their status and other metadata as the repository or the date of the last synchronization run.
 
@@ -94,7 +97,7 @@ Single applications can be inspected closer after clicking on e.g. the `airflow`
 TODO: Screenshot - Argo UI - Airflow
 
 Detailed information about the cluster, the cluster status and deployed components can be accessed in the application details.
-Additionally, if the Git repository and the cluster state itself differ, possible applied changes can be previewed in a code diff similar to Git pull requests.
+Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff similar to Git pull requests.
 
 TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
 
@@ -275,9 +278,11 @@ the logs are fetched from S3 instead of the (already deleted) executor pods. The
 kubectl --namespace minio port-forward service/minio-console 9001:9001
 ----
 
-Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`. After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
+Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`.
+After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
 
-NOTE: There will be an initial warning from the Browser, that this site is insecure due to self-signed certificates. This can be ignored in this case.
+NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates. 
+This can be ignored in this case.
 
 TODO: Screenshot - minio UI with log data
 

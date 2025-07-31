@@ -6,8 +6,8 @@ This demo uses [Sealed Secrets](https://github.com/bitnami-labs/sealed-secrets) 
 
 The CLI tool `kubeseal` must be installed as described in the [Sealed Secrets readme](https://github.com/bitnami-labs/sealed-secrets?tab=readme-ov-file#kubeseal).
 
-The easiest way to seal secrets via `kubeseal` is to have the `argo-cd-git-ops` Stack installed. It provides the Sealed Secrets controller and
-a generated certificate that is automatically used for signing via `kubeseal`.
+The easiest way to seal secrets via `kubeseal` is to have the `argo-cd-git-ops` Stack installed.
+It provides the Sealed Secrets controller and a generated certificate that is automatically used for signing via `kubeseal`.
 
 ```sh
 kubeseal -n stackable-airflow --format=yaml < airflow-credentials.yaml > sealed-airflow-credentials.yaml
