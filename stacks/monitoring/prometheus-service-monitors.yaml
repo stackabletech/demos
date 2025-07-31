@@ -1,6 +1,9 @@
 # Use something like this to check for metrics:
 # count by (app_kubernetes_io_name, app_kubernetes_io_instance, pod) ({app_kubernetes_io_name!="",pod!=""})
 #
+# Products metrics covered by the ServiceMonitors below. The list also includes wether the
+# ServiceMonitor scrapes native metrics or a statsd/JMX exporter.
+#
 # [x] Airflow - exporter
 # [x] Druid - native
 # [x] HBase - native
@@ -10,7 +13,7 @@
 # [x] NiFi 1 - native
 # [x] NiFi 2 - native
 # [ ] OpenSearch - not officially part of the platform yet
-# [ ] Spark - native - was too lazy, no idea if we even expose metrics
+# [ ] Spark - native - was too lazy
 # [x] Superset - exporter
 # [x] Trino - native
 # [x] ZooKeeper - native
