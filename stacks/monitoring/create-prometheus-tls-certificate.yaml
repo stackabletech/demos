@@ -1,0 +1,76 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: create-prometheus-tls-certificate
+  labels:
+    app: create-prometheus-tls-certificate
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: create-prometheus-tls-certificate
+  template:
+    metadata:
+      labels:
+        app: create-prometheus-tls-certificate
+    spec:
+      serviceAccountName: create-prometheus-tls-certificate-serviceaccount
+      containers:
+      - name: create-prometheus-tls-certificate
+        image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        env:
+          - name: POD_NAME
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.name
+          - name: POD_NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
+        command:
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              # "kubectl create secret" fails on existing Secrets, so we "kubectl apply" instead
+              kubectl create secret generic prometheus-tls-certificate \
+              --from-file=/prometheus-tls-certificate/ca.crt \
+              --from-file=/prometheus-tls-certificate/tls.crt \
+              --from-file=/prometheus-tls-certificate/tls.key \
+              --dry-run=client -o yaml \
+              | kubectl apply -f -
+
+              echo Sleeping 6 hours before deleting my own Pod
+              sleep 21600 # 6 * 60 * 60
+
+              echo "Deleting our own Pod, so that it gets re-created and secret-operator issues a new certificate (only crash-looping the container is not enough!)"
+              kubectl --namespace "$POD_NAMESPACE" delete pod "$POD_NAME"
+              exit 0
+        volumeMounts:
+          - name: prometheus-tls-certificate
+            mountPath: /prometheus-tls-certificate
+      volumes:
+        - name: prometheus-tls-certificate
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  # Highly professional tests have shown that Prometheus is able to handle the
+                  # certificate rotation :)
+                  # You can change the certificate lifetime here for easier testing:
+                  # secrets.stackable.tech/backend.autotls.cert.lifetime: "1d"
+                  secrets.stackable.tech/class: "tls"
+                  secrets.stackable.tech/format: "tls-pem"
+                  secrets.stackable.tech/scope: "service=prometheus"
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+                volumeMode: Filesystem
+      securityContext:
+        fsGroup: 1000
