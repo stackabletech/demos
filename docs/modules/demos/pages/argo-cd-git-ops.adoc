@@ -27,7 +27,7 @@ The key points to show are:
 ** Use Airflow and {airflow-git-sync}[git-sync] to fetch DAGs from a Git repository
 ** Add or update existing DAGs by commiting to the Git repository
 
-ArgoCD and other deployed products and dependencies are illustrated in the following diagram: 
+ArgoCD and other deployed products and dependencies are illustrated in the following diagram:
 
 image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 
@@ -76,7 +76,7 @@ When managing all resources and configuration via Git, deploying sensitive data 
 
 There are multiple solutions to this such as Hashicorp or Bitwarden, which depend heavily on the infrastructure already available.
 
-For the sake of this demo, {sealed-secrets}[Bitnami's Sealed Secrets] are utilized. 
+For the sake of this demo, {sealed-secrets}[Bitnami's Sealed Secrets] are utilized.
 Sensitive data is encrypted as a `SealedSecret` before commiting to the Git repository, synced via ArgoCD and decrypted by the Sealed Secrets controller into a standard Kubernetes `Secret`.
 
 This way, everything will be stored and managed in Git.
@@ -121,7 +121,7 @@ The Stackable operators are deployed via ArgoCD using the Stackable Helm charts 
 `ApplicationSets` allow templating, which is required to e.g. manage and deploy to multi cluster environments (e.g. development - staging - production),
 using different versions and Git sources (repository & branch) as well as the possibility to deploy to different clusters.
 
-NOTE: This demo does not use a multi cluster environment for the sake of simplicity. 
+NOTE: This demo does not use a multi cluster environment for the sake of simplicity.
 
 The following part is dives deeper into the definition of theStackable operator `ApplicationSet` and can be skipped.
 
@@ -179,7 +179,7 @@ spec:
                 #   targetRevision: 25.7.0
                 ###########################################################################################
                 # Production cluster: Currently running release 25.3.0 and awaiting upgrade to 25.7.0
-                ###########################################################################################                
+                ###########################################################################################
                 # - cluster: production
                 #   server: https://kubernetes-production.default.svc
                 #   targetRevision: 25.3.0
@@ -267,7 +267,7 @@ More information is displayed here, and the DAG logs written by the Kubernetes E
 
 image::argo-cd-git-ops/airflow-dag-run-logs.png[]
 
-In the logs, the output of the DAG is printed under a line containing `Output:`, the timestamp of the DAG run. 
+In the logs, the output of the DAG is printed under a line containing `Output:`, the timestamp of the DAG run.
 
 == Minio
 
@@ -282,7 +282,7 @@ kubectl --namespace minio port-forward service/minio-console 9001:9001
 Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`.
 After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
 
-NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates. 
+NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
 This can be ignored in this case.
 
 image::argo-cd-git-ops/minio-dag-run-logs.png[]
