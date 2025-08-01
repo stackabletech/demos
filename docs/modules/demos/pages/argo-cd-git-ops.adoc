@@ -5,19 +5,27 @@
 :argo-cd: https://argoproj.github.io/cd/
 :argo-cd-application: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications
 :argo-cd-applicationset: https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
+:argo-cd-core-concepts: https://argo-cd.readthedocs.io/en/stable/core_concepts/
 :sealed-secrets: https://github.com/bitnami-labs/sealed-secrets
 :stackable-demo-repository: https://github.com/stackabletech/demos/
 :airflow: https://airflow.apache.org/
+:airflow-git-sync: https://docs.stackable.tech/home/stable/airflow/usage-guide/mounting-dags/#_via_git_sync
 :github-fork: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo
 
-This demo shows how to utilize GitOps and Infrastructure as Code (IaC) with Stackable and {argo-cd}[ArgoCD]. 
+This demo shows how to utilize GitOps and Infrastructure as Code (IaC) with Stackable and {argo-cd}[ArgoCD].
+Basic knowledge about ArgoCD and its {argo-cd-core-concepts}[core concepts] are assumed and not explained further.
+
 All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
 
 The key points to show are:
 
-* GitOps: How to deploy changes from a Git repository to a cluster?
-* Secrets: How to safely store and deploy credentials or access keys from a Git repository?
-* Interaction with Stackable products (e.g. Airflow and DAGs via gitsync)
+* Infrastructure - GitOps
+** How to synchronize changes from a Git repository?
+** How to apply the Git version and branch control to different Kubernetes clusters (development, staging, production)?
+** How to safely store and deploy sensitive data from a Git repository?
+* Interaction with Stackable products and Git
+** Use Airflow and {airflow-git-sync}[git-sync] to fetch DAGs from a Git repository
+** Add or update existing DAGs by commiting to the Git repository
 
 ArgoCD and other deployed products and dependencies are illustrated in the following diagram: 
 
@@ -25,7 +33,8 @@ image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 
 Install this demo on an existing Kubernetes cluster:
 
-// TODO: We need a pointer here to the last paragraph (forking repo) if people want to "interact" and not just install the demo (install command requires extra parameters)
+NOTE: In order to interact with the Git repository, this repository must be forked and additional parameters must be provided to `stackablectl`.
+This is explained in more detail in the section <<interact-with-git-repository,How to interact with the Git repository>>.
 
 [source,console]
 ----
@@ -288,7 +297,8 @@ This demo illustrates the combination of ArgoCD and Stackable, using the full po
 
 As a last step, in order to synchronize changes made to manifests or secrets from the Git repository, the following paragraph demonstrates on how to run this demo on a forked GitHub repository.
 
-== How to interact with ArgoCD and the Git repository
+[#interact-with-git-repository]
+== How to interact with ArgoCD, Airflow and the Git repository
 
 Since this Demo is hosted in the {stackable-demo-repository}[Stackable Demo repository], where merging etc. requires approval, the recommendation is to fork the {stackable-demo-repository}[Stackable Demo repository].
 This {github-fork}[GitHub tutorial] shows how to fork a repository.
@@ -311,7 +321,7 @@ Once this is pushed / merged, ArgoCD should sync the changes and you should see 
 
 === Add new Airflow DAGs
 
-In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have to adapt the gitsync configuration for DAGs to the forked repository:
+In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have to adapt the git-sync configuration for DAGs to the forked repository:
 
 [source,yaml]
 ----
@@ -321,4 +331,4 @@ In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have 
         [...]
 ----
 
-Similar to ArgoCD, after adding a new DAG to the folder `demos/argo-cd-git-ops/dags`, Airflow should pick up the new DAG via gitsync and display it in the UI.
+Similar to ArgoCD, after adding a new DAG to the folder `demos/argo-cd-git-ops/dags`, Airflow should pick up the new DAG via git-sync and display it in the UI.
