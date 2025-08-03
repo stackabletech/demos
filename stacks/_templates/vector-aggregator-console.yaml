@@ -1,0 +1,25 @@
+releaseName: vector-aggregator
+name: vector
+repo:
+  name: vector
+  url: https://helm.vector.dev
+version: 0.34.0
+options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
+  podLabels: # Doesn't seem to work?
+    stackable.tech/vendor: Stackable
+  role: Aggregator
+  customConfig:
+    sources:
+      vector:
+        address: 0.0.0.0:6000
+        type: vector
+        version: "2"
+    sinks:
+      console:
+        type: console
+        encoding:
+          codec: json
+        inputs:
+          - vector
