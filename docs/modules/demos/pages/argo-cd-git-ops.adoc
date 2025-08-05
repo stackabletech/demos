@@ -252,11 +252,13 @@ image::argo-cd-git-ops/airflow-welcome-page.png[]
 
 === Start the DAG
 
-The `date_demo` DAG can be started by moving the slider and trigger the DAG runs. The DAG itself can be inspected by clicking on it.
+The `date_demo` DAG can be started by moving the slider and trigger the DAG runs.
+The DAG itself can be inspected by clicking on it.
 
 === Inspect the DAG
 
-The overview displays details about the DAG runs, durations and other metadata. The graph, code or events can be selected in the tabs for more details.
+The overview displays details about the DAG runs, durations and other metadata.
+The graph, code or events can be selected in the tabs for more details.
 
 image::argo-cd-git-ops/airflow-dag-overview.png[]
 
@@ -271,8 +273,9 @@ In the logs, the output of the DAG is printed under a line containing `Output:`,
 
 == Minio
 
-Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket. When accessing the logs via the Airflow webserver,
-the logs are fetched from S3 instead of the (already deleted) executor pods. The Minio / S3 instance can be accessed via port-forward:
+Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket.
+When accessing the logs via the Airflow webserver, the logs are fetched from S3 instead of the (already deleted) executor pods.
+The Minio / S3 instance can be accessed via port-forward:
 
 [source,console]
 ----
@@ -295,7 +298,7 @@ This demo illustrates the combination of ArgoCD and Stackable, using the full po
 
 // TODO: extend...
 
-As a last step, in order to synchronize changes made to manifests or secrets from the Git repository, the following paragraph demonstrates on how to run this demo on a forked GitHub repository.
+The last step is to demonstrate synchronizing changes made to manifests or secrets from the Git repository (to do this the demo is run on a forked GitHub repository).
 
 [#interact-with-git-repository]
 == How to interact with ArgoCD, Airflow and the Git repository
