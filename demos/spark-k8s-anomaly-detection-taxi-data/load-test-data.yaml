@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: load-ny-taxi-data
-          image: "bitnami/minio:2022-debian-10"
+          image: "bitnamilegacy/minio:2022-debian-10"
           # yamllint disable-line rule:line-length
           command:
             - "bash"

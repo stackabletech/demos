@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
         - name: load-test-data
-          image: "bitnami/minio:2024-debian-12"
+          image: "bitnamilegacy/minio:2024-debian-12"
           # Please try to order the load jobs from small to large datasets
           command:
             - bash

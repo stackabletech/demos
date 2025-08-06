@@ -26,7 +26,7 @@ spec:
               mountPath: /dump/
       containers:
         - name: restore-postgres
-          image: docker.io/bitnami/postgresql:16.1.0-debian-11-r11 # Same image as the bitnami postgres helm-chart is using
+          image: docker.io/bitnamilegacy/postgresql:16.1.0-debian-11-r11 # Same image as the bitnami postgres helm-chart is using
           command:
             - bash
             - -c
