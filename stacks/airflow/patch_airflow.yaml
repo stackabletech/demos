@@ -1,0 +1,37 @@
+---
+apiVersion: airflow.stackable.tech/v1alpha1
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  clusterConfig:
+    dbInit: false
+    volumeMounts:
+      - name: airflow-dags
+        mountPath: /dags/dag_factory.py
+        subPath: dag_factory.py
+      - name: airflow-dags
+        mountPath: /dags/date_demo.py
+        subPath: date_demo.py
+      - name: airflow-dags
+        mountPath: /dags/pyspark_pi.py
+        subPath: pyspark_pi.py
+      - name: airflow-dags
+        mountPath: /dags/pyspark_pi.yaml
+        subPath: pyspark_pi.yaml
+  webservers:
+    roleGroups:
+      default:
+        envOverrides: &envOverrides
+          AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+          AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: "60"
+          AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: "60"
+          AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "60"
+          AIRFLOW__DAG_PROCESSOR__PRINT_STATS_INTERVAL: "60"
+          AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+  kubernetesExecutors:
+    envOverrides: *envOverrides
+  schedulers:
+    roleGroups:
+      default:
+        envOverrides: *envOverrides
