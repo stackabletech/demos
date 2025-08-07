@@ -363,8 +363,7 @@ In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have 
 ----
 
 After adding a new DAG to the folder `demos/argo-cd-git-ops/dags/`, Airflow should pick up the new DAG via git-sync and display it in the UI.
-This may take a while for the syncing process.
-Refreshing the Airflow UI might help if no DAGs show up.
+This may take up to a couple of minutes to be displayed in the UI.
 
 The synchronisation status of the DAGs can be monitored in via the Airflow scheduler:
 
@@ -388,6 +387,8 @@ File Path                                                               PID  Run
 [2025-08-06T15:32:23.345+0000] {manager.py:997} INFO - 
 ================================================================================
 ----
+
+If another DAG is displayed, try to refresh the Airflow UI if changes have not been propagated yet.
 
 ==== Commit and push changes
 
