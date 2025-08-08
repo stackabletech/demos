@@ -20,6 +20,7 @@ and changes are automatically synchronized. This tutorial demonstrates how to de
 following Infrastructure-as-Code (IaC) and GitOps principles.
 
 You will learn how to:
+
 * Deploy Stackable operators and products via Git-managed manifests.
 * Use Sealed Secrets to securely manage sensitive credentials.
 * Update Airflow DAGs or modify deployments simply by committing to Git.
@@ -33,11 +34,13 @@ All products and manifests are synced and deployed via ArgoCD (except ArgoCD its
 == System requirements
 
 To run this demo, ensure you have the following prerequisites:
+
 * a Kubernetes Cluster (e.g., Kind, Minikube, or managed services like EKS, GKE, AKS).
 * `kubectl`: Installed and configured to access your cluster.
 * Optional: a GitHub account - required for forking and interacting with the demo repository.
 
 Resource requirements for this demo:
+
 * 15 {k8s-cpu}[cpu units] (core/hyperthread)
 * 15 GiB memory
 * 5 GiB disk storage
@@ -300,6 +303,7 @@ or integrate external secret stores like HashiCorp Vault for production use.
 This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
 
 This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
+
 * All cluster resources and workloads are managed declaratively via Git.
 * ArgoCD continuously ensures the cluster state matches Git.
 * Sealed Secrets provide secure and auditable secret management.
@@ -310,6 +314,7 @@ and enforcing consistency.
 By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
 
 Next steps:
+
 * Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
 * Integrate CI workflows to automatically validate and merge manifest updates.
 * Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
