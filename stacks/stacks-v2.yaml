@@ -140,7 +140,6 @@ stacks:
       - airflow
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/redis-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
