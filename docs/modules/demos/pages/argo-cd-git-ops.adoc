@@ -34,10 +34,7 @@ All products and manifests are synced and deployed via ArgoCD (except ArgoCD its
 
 To run this demo, ensure you have the following prerequisites:
 * a Kubernetes Cluster (e.g., Kind, Minikube, or managed services like EKS, GKE, AKS).
-* `kubectl`: Instal
-All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
-
-[#system-requiremenled and configured to access your cluster.
+* `kubectl`: Installed and configured to access your cluster.
 * Optional: a GitHub account - required for forking and interacting with the demo repository.
 
 Resource requirements for this demo:
