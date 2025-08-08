@@ -94,21 +94,24 @@ This can be ignored in this case.
 
 The ArgoCD Web UI entry page shows an overview of deployed applications, their status and other metadata as the repository or the date of the last synchronization run.
 
-// TODO: Screenshot - Argo UI overview
+image::argo-cd-git-ops/argocd-overview.png[]
 
 Single applications can be inspected closer after clicking on e.g. the `airflow` project.
 
-// TODO: Screenshot - Argo UI - Airflow
+image::argo-cd-git-ops/argocd-airflow-application-overview.png[]
 
 Detailed information about the Airflow cluster, the cluster status and deployed components can be accessed in the application details.
 Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
 
-// TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
-
-Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`. This means that changes to the Git repository are immediatly synced into the cluster.
+Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`.
+This means that changes to the Git repository are immediatly synced into the cluster.
 This is nice in the demo case, but should be disabled for production use cases.
 
-// TODO: Screenshot - Argo UI - applications/airflow/details
+image::argo-cd-git-ops/arcocd-airflow-application-details.png[]
+
+More information about the cluster and e.g. networking can be displayed in the different tabs on the top right.
+
+image::argo-cd-git-ops/arcocd-airflow-application-network.png[]
 
 Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
 
