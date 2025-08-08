@@ -123,8 +123,6 @@ data:
     scheme=https
     connectToMinio $scheme
 
-
-
     # Create the buckets
     createBucket demo "public" false false false
 
@@ -210,8 +208,6 @@ data:
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
-
-
 
     # Create the users
     echo console > $MINIO_ACCESSKEY_SECRETKEY_TMP
