@@ -13,28 +13,29 @@ stacks:
       ################################
       # bootstrap argo
       ################################
-      - helmChart: stacks/_templates/argo-cd.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/argo-cd.yaml
       ################################
       # prerequisites
       ################################
-      - plainYaml: stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
       ################################
       # project - operators
       ################################
-      - plainYaml: stacks/argo-cd-git-ops/projects/stackable-operators.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/projects/stackable-operators.yaml
       ################################
       # applicationset - operators
       ################################
-      - plainYaml: stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:
-      memory: 10000Mi
-      cpu: 8000m
-      pvc: 20Gi
+      memory: 5000Mi
+      cpu: 5000m
+      pvc: 5Gi
     parameters:
       - name: stackableReleaseVersion
         description: The Stackable release to be installed via Argo. This replaces the demo `stackableRelease` parameter.
+        # TODO(@maltesander): Must be adapted in case of release !
         default: 0.0.0-dev
       - name: argocdAdminPassword
         description: Password of the ArgoCD admin user.

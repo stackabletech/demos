@@ -20,10 +20,10 @@ spec:
     # In terms of forking the repository, this should not be a problem since the DAGs are the same.
     # You can still change this locally and point to the fork in case of any changes to DAGs.
     #
-    # TODO(@maltesander): Adapt branch to main / 25.7.0
+    # TODO(@maltesander): In a Stackable release, this branch should point to the release-YY.MM branch!
     dagsGitSync:
       - repo: https://github.com/stackabletech/demos/
-        branch: spike/argocd-demo
+        branch: main
         gitFolder: "demos/argo-cd-git-ops/dags"
         depth: 2
     volumes:
