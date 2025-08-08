@@ -14,7 +14,7 @@
 
 == Motivation
 
-Modern Kubernetes environments thrive on automation, reproducibility, and strong version control. 
+Modern Kubernetes environments thrive on automation, reproducibility, and strong version control.
 GitOps provides a reliable way to manage infrastructure and applications declaratively: your desired cluster state is stored in Git,
 and changes are automatically synchronized. This tutorial demonstrates how to deploy Stackable operators and products using {argo-cd}[ArgoCD],
 following Infrastructure-as-Code (IaC) and GitOps principles.
@@ -291,8 +291,8 @@ The log files contained in the single folders are the same as the logs shown abo
 
 == Conclusion
 
-This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps. 
-Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing, 
+This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
+Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
 or integrate external secret stores like HashiCorp Vault for production use.
 This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
 
@@ -302,7 +302,7 @@ This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a
 * Sealed Secrets provide secure and auditable secret management.
 * Airflow DAG updates occur automatically by committing code to the repository.
 
-This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility, 
+This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
 and enforcing consistency.
 By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
 
@@ -384,7 +384,7 @@ File Path                                                               PID  Run
 /stackable/app/git-0/current/demos/argo-cd-git-ops/dags/date_demo.py     51  0.03s             0           0                                                   0
 ================================================================================
 [2025-08-06T15:32:23.182+0000] {kubernetes_executor_utils.py:95} INFO - Kubernetes watch timed out waiting for events. Restarting watch.
-[2025-08-06T15:32:23.345+0000] {manager.py:997} INFO - 
+[2025-08-06T15:32:23.345+0000] {manager.py:997} INFO -
 ================================================================================
 ----
 
