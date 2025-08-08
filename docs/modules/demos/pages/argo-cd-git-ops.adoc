@@ -107,11 +107,11 @@ Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`.
 This means that changes to the Git repository are immediatly synced into the cluster.
 This is nice in the demo case, but should be disabled for production use cases.
 
-image::argo-cd-git-ops/arcocd-airflow-application-details.png
+image::argo-cd-git-ops/arcocd-airflow-application-details.png[]
 
 More information about the cluster and e.g. networking can be displayed in the different tabs on the top right.
 
-image::argo-cd-git-ops/arcocd-airflow-application-network.png
+image::argo-cd-git-ops/arcocd-airflow-application-network.png[]
 
 Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
 
