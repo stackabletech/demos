@@ -91,7 +91,7 @@ kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
 ----
 
 In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
-image::argo-cd-git-ops/architecture-overview.drawio.svg[]
+
 NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
 This can be ignored in this case.
 
