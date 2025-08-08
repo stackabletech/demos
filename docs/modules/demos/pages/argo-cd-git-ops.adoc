@@ -23,7 +23,7 @@ You will learn how to:
 * Deploy Stackable operators and products via Git-managed manifests.
 * Use Sealed Secrets to securely manage sensitive credentials.
 * Update Airflow DAGs or modify deployments simply by committing to Git.
-adminadmi
+
 This hands-on approach illustrates how GitOps can simplify application lifecycle management and enforce a clear,
 auditable workflow across environments (development, staging, production).
 
