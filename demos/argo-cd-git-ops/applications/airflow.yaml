@@ -1,0 +1,20 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow
+spec:
+  project: airflow
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: stackable-airflow
+  source:
+    repoURL: "{{ customGitUrl }}"
+    targetRevision: "{{ customGitBranch }}"
+    path: demos/argo-cd-git-ops/manifests/airflow/
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

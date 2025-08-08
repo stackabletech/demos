@@ -1,5 +1,44 @@
 ---
 demos:
+  argo-cd-git-ops:
+    description: Deploy Stackable operators and Airflow via ArgoCD and activate a simple Airflow DAG.
+    stackableStack: argo-cd-git-ops
+    labels:
+      - argocd
+      - git ops
+      - airflow
+      - job scheduling
+      - git sync
+      - kubernetes executor
+      - sealed secrets
+    manifests:
+      ################################
+      # projects
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/projects/airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/projects/minio.yaml
+      ################################
+      # prerequisites
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/airflow-postgres.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/minio.yaml
+      ################################
+      # products
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/airflow.yaml
+    supportedNamespaces:
+      - argo-cd
+    resourceRequests:
+      cpu: 15000m
+      memory: 15Gi
+      pvc: 15Gi
+    parameters:
+      - name: customGitUrl
+        description: The URL to the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
+        default: https://github.com/stackabletech/demos/
+      - name: customGitBranch
+        description: The Branch in the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
+        default: main
   airflow-scheduled-job:
     description: Activate a simple Airflow DAG to run continuously at a set interval
     stackableStack: airflow

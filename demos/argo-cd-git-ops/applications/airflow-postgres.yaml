@@ -1,0 +1,46 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: airflow-postgres
+spec:
+  project: airflow
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: stackable-airflow
+  sources:
+    - repoURL: "registry-1.docker.io/bitnamicharts"
+      path: postgresql
+      # helm inspect chart oci://registry-1.docker.io/bitnamicharts/postgresql
+      targetRevision: 16.6.3 # 17.4.0
+      chart: postgresql
+      helm:
+        # TODO this breaks naming as long as we use the airflow stack yaml which needs this svc name
+        releaseName: postgresql-airflow
+        valuesObject:
+          global:
+            security:
+              allowInsecureImages: true
+          image:
+            repository: bitnamilegacy/postgresql
+          volumePermissions:
+            image:
+              repository: bitnamilegacy/os-shell
+          metrics:
+            image:
+              repository: bitnamilegacy/postgres-exporter
+          commonLabels:
+            stackable.tech/vendor: Stackable
+          auth:
+            database: airflow
+            username: airflow
+            existingSecret: postgresql-credentials
+    - repoURL: "{{ customGitUrl }}"
+      targetRevision: "{{ customGitBranch }}"
+      path: demos/argo-cd-git-ops/manifests/airflow-postgres/
+  syncPolicy:
+    syncOptions:
+      - CreateNamespace=true
+    automated:
+      selfHeal: true
+      prune: true

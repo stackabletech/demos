@@ -1,5 +1,46 @@
 ---
 stacks:
+  argo-cd-git-ops:
+    description: Deploying Stackable Operators with ArgoCD
+    stackableRelease: dev # This does not matter -> managed by ArgoCD
+    stackableOperators: ["argo-deploys-operators"] # This does not matter -> managed by ArgoCD
+    labels:
+      - argocd
+      - sealed secrets
+      - stackable operators
+      - git ops
+    manifests:
+      ################################
+      # bootstrap argo
+      ################################
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/argo-cd.yaml
+      ################################
+      # prerequisites
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
+      ################################
+      # project - operators
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/projects/stackable-operators.yaml
+      ################################
+      # applicationset - operators
+      ################################
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
+    supportedNamespaces:
+      - argo-cd
+    resourceRequests:
+      memory: 5000Mi
+      cpu: 5000m
+      pvc: 5Gi
+    parameters:
+      - name: stackableReleaseVersion
+        description: The Stackable release to be installed via Argo. This replaces the demo `stackableRelease` parameter.
+        # TODO(@maltesander): Must be adapted in case of release !
+        default: 0.0.0-dev
+      - name: argocdAdminPassword
+        description: Password of the ArgoCD admin user.
+        # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
+        default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
   monitoring:
     description: Stack containing Prometheus and Grafana
     stackableRelease: dev

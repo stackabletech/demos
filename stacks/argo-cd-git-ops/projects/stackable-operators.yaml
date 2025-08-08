@@ -1,0 +1,16 @@
+---
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: stackable-operators
+spec:
+  description: Project to manage Stackable Operators via Helm
+  sourceRepos:
+    - "*"
+  destinations:
+    - namespace: stackable-operators
+      server: https://kubernetes.default.svc
+  # required to deploy clusterwide resources like clusteroles etc.
+  clusterResourceWhitelist:
+    - group: "*"
+      kind: "*"
