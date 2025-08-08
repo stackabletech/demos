@@ -23,7 +23,7 @@ You will learn how to:
 * Deploy Stackable operators and products via Git-managed manifests.
 * Use Sealed Secrets to securely manage sensitive credentials.
 * Update Airflow DAGs or modify deployments simply by committing to Git.
-
+adminadmi
 This hands-on approach illustrates how GitOps can simplify application lifecycle management and enforce a clear,
 auditable workflow across environments (development, staging, production).
 
@@ -34,7 +34,10 @@ All products and manifests are synced and deployed via ArgoCD (except ArgoCD its
 
 To run this demo, ensure you have the following prerequisites:
 * a Kubernetes Cluster (e.g., Kind, Minikube, or managed services like EKS, GKE, AKS).
-* `kubectl`: Installed and configured to access your cluster.
+* `kubectl`: Instal
+All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
+
+[#system-requiremenled and configured to access your cluster.
 * Optional: a GitHub account - required for forking and interacting with the demo repository.
 
 Resource requirements for this demo:
@@ -88,27 +91,30 @@ kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
 ----
 
 In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
-
+image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
 This can be ignored in this case.
 
 The ArgoCD Web UI entry page shows an overview of deployed applications, their status and other metadata as the repository or the date of the last synchronization run.
 
-// TODO: Screenshot - Argo UI overview
+image::argo-cd-git-ops/argocd-overview.png[]
 
 Single applications can be inspected closer after clicking on e.g. the `airflow` project.
 
-// TODO: Screenshot - Argo UI - Airflow
+image::argo-cd-git-ops/argocd-airflow-application-overview.png[]
 
 Detailed information about the Airflow cluster, the cluster status and deployed components can be accessed in the application details.
 Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
 
-// TODO: Screenshot - Argo UI - application details Network / List tab -> mark network tabs etc.
-
-Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`. This means that changes to the Git repository are immediatly synced into the cluster.
+Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`.
+This means that changes to the Git repository are immediatly synced into the cluster.
 This is nice in the demo case, but should be disabled for production use cases.
 
-// TODO: Screenshot - Argo UI - applications/airflow/details
+image::argo-cd-git-ops/arcocd-airflow-application-details.png
+
+More information about the cluster and e.g. networking can be displayed in the different tabs on the top right.
+
+image::argo-cd-git-ops/arcocd-airflow-application-network.png
 
 Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
 
