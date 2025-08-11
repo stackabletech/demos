@@ -5,7 +5,8 @@ metadata:
   name: airflow
 spec:
   clusterConfig:
-    dbInit: false
+    databaseInitialization:
+      enabled: false
     volumeMounts:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py

@@ -129,7 +129,7 @@ asynchronously - and another to poll the running job to report on its status.
 
 image::airflow-scheduled-job/airflow_11.png[]
 
-== Patching Airflow to deactivate database initialization
+== Patching Airflow to stress-test DAG parsing using relevant environment variables
 
 By default, Airflow runs database intialization routines on start-up.
 These check that an Admin user exists and that the database schema is up-to-date.
@@ -145,12 +145,16 @@ metadata:
   name: airflow
 spec:
   clusterConfig:
-    dbInit: false  # <1>
+    databaseInitialization:
+      enabled: false  # <1>
 ----
-<1> Turn off the initialization routine by setting `dbInit` to `false`
+<1> Turn off the initialization routine by setting `databaseInitialization.enabled` to `false`
 
-NOTE: The field `dbInit` is `true` by default to be backwards-compatible.
+NOTE: The field `databaseInitialization.enabled` is `true` by default to be backwards-compatible.
 A fresh Airflow cluster cannot be created with this field set to `false` as this results in missing metadata in the Airflow database.
+
+WARNING: Setting `databaseInitialization.enabled` to `false` is an unsupported operation as subsequent updates to a running Airflow cluster can result in broken behaviour due to inconsistent metadata.
+Only set `databaseInitialization.enabled` to `false` if you know what you are doing!
 
 The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
 This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
@@ -166,7 +170,8 @@ metadata:
   name: airflow
 spec:
   clusterConfig:
-    dbInit: false
+    databaseInitialization:
+      enabled: false
     volumeMounts:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py
