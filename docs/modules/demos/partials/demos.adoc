@@ -1,4 +1,5 @@
 * xref:airflow-scheduled-job.adoc[]
+* xref:argo-cd-git-ops.adoc[]
 * xref:data-lakehouse-iceberg-trino-spark.adoc[]
 * xref:end-to-end-security.adoc[]
 * xref:hbase-hdfs-load-cycling-data.adoc[]

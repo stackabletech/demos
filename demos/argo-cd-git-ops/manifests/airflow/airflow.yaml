@@ -1,0 +1,111 @@
+---
+apiVersion: airflow.stackable.tech/v1alpha1
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  image:
+    # Currently does not work with the kubernetes executor S3 logging
+    # (and its still marked experimental as of release 25.7). See:
+    # https://github.com/apache/airflow/issues/50583
+    # https://github.com/apache/airflow/issues/52501
+    # productVersion: 3.0.1
+    productVersion: 2.10.5
+  clusterConfig:
+    loadExamples: false
+    exposeConfig: false
+    credentialsSecret: airflow-credentials
+    # NOTE: This cannot be parameterized via stackablectl since it is synced via ArgoCD.
+    #
+    # In terms of forking the repository, this should not be a problem since the DAGs are the same.
+    # You can still change this locally and point to the fork in case of any changes to DAGs.
+    #
+    # TODO(@maltesander): In a Stackable release, this branch should point to the release-YY.MM branch!
+    dagsGitSync:
+      - repo: https://github.com/stackabletech/demos/
+        branch: main
+        gitFolder: "demos/argo-cd-git-ops/dags"
+        depth: 2
+    volumes:
+      - name: minio-tls
+        ephemeral:
+          volumeClaimTemplate:
+            metadata:
+              annotations:
+                secrets.stackable.tech/class: tls
+                secrets.stackable.tech/scope: pod
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: "1"
+              storageClassName: secrets.stackable.tech
+    volumeMounts:
+      - name: minio-tls
+        mountPath: /stackable/minio-tls
+  webservers:
+    roleConfig:
+      listenerClass: external-unstable
+    envOverrides: &envOverrides
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+      # Via sealed secrets and pod overrides, just kept for reference here
+      # AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
+      AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
+      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
+      # 20 seconds to reload the DAGS folder (default: 300)
+      AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "20"
+    podOverrides: &podOverrides
+      spec:
+        containers:
+          - name: airflow
+            env:
+              - name: AIRFLOW_CONN_MINIO
+                valueFrom:
+                  secretKeyRef:
+                    name: airflow-minio-connection
+                    key: airflow-minio-connection
+    config:
+      gracefulShutdownTimeout: 30s
+      resources:
+        cpu:
+          min: 400m
+          max: "1"
+        memory:
+          limit: 2Gi
+    roleGroups:
+      default:
+        # NOTE: In order to properly show ArgoCD in action - syncing changes via Git - do the following:
+        # - Fork this repository
+        # - Use the demo parameters `customGitUrl` and `customGitBranch` to point the
+        #   the repository to your fork and branch
+        # - Change the replicas here and push that to the provided `customGitBranch` in your fork
+        replicas: 1
+  kubernetesExecutors:
+    envOverrides: *envOverrides
+    podOverrides:
+      spec:
+        containers:
+          - name: base
+            env:
+              - name: AIRFLOW_CONN_MINIO
+                valueFrom:
+                  secretKeyRef:
+                    name: airflow-minio-connection
+                    key: airflow-minio-connection
+  schedulers:
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
+    config:
+      gracefulShutdownTimeout: 30s
+      resources:
+        cpu:
+          min: 400m
+          max: "1"
+        memory:
+          limit: 1Gi
+    roleGroups:
+      default:
+        replicas: 1
