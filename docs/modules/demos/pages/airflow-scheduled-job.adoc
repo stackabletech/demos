@@ -159,7 +159,7 @@ Only set `databaseInitialization.enabled` to `false` if you know what you are do
 The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
 This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
 To include this in the list of DAGs (without removing the existing ones), an extra volumeMount is needed, as shown below.
-The patch also sets some environment variables that can used to change the frequency of certain operations. The descriptions can be found here: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html.
+The patch also sets some environment variables that can be used to change the frequency of certain operations. The descriptions can be found here: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html[window=_blank].
 
 [source,yaml]
 ----
