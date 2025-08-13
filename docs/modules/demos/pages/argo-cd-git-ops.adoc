@@ -310,31 +310,6 @@ image::argo-cd-git-ops/minio-dag-run-logs.png[]
 
 The log files contained in the single folders are the same as the logs shown above in the Airflow web UI.
 
-== Conclusion
-
-This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
-Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
-or integrate external secret stores like HashiCorp Vault for production use.
-This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
-
-This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
-
-* All cluster resources and workloads are managed declaratively via Git.
-* ArgoCD continuously ensures the cluster state matches Git.
-* Sealed Secrets provide secure and auditable secret management.
-* Airflow DAG updates occur automatically by committing code to the repository.
-
-This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
-and enforcing consistency.
-By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
-
-Next steps:
-
-* Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
-* Integrate CI workflows to automatically validate and merge manifest updates.
-* Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
-* Experiment with DataOps (e.g., Airflow and Trino).
-
 [#interact-with-git-repository]
 == How to interact with ArgoCD, Airflow and the Git repository
 
@@ -427,3 +402,28 @@ git push origin <my-custom-branch-with-changes>
 ----
 
 Now ArgoCD and Airflow should sync the respective changes into the cluster.
+
+== Conclusion
+
+This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
+Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
+or integrate external secret stores like HashiCorp Vault for production use.
+This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
+
+This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
+
+* All cluster resources and workloads are managed declaratively via Git.
+* ArgoCD continuously ensures the cluster state matches Git.
+* Sealed Secrets provide secure and auditable secret management.
+* Airflow DAG updates occur automatically by committing code to the repository.
+
+This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
+and enforcing consistency.
+By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
+
+Next steps:
+
+* Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
+* Integrate CI workflows to automatically validate and merge manifest updates.
+* Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
+* Experiment with DataOps (e.g., Airflow and Trino).
