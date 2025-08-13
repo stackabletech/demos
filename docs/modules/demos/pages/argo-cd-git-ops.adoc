@@ -26,7 +26,7 @@ You will learn how to:
 * Update Airflow DAGs or modify deployments simply by committing to Git.
 
 This hands-on approach illustrates how GitOps can simplify application lifecycle management and enforce a clear,
-auditable workflow across environments (development, staging, production).
+auditable workflow across single or multiple Kubernetes environments (development, staging, production).
 
 All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
 
@@ -55,17 +55,31 @@ image::argo-cd-git-ops/architecture-overview.drawio.svg[]
 
 ## Installation
 
-Install this demo on an existing Kubernetes cluster:
+WARNING: This demo should not be run alongside other demos.
 
-NOTE: In order to interact with the Git repository, this repository must be forked and additional parameters must be provided to `stackablectl`.
-This is explained in more detail in the section <<interact-with-git-repository,How to interact with the Git repository>>.
+This demo can be installed on an existing Kubernetes cluster in two ways:
+
+### 1. Exploration - interact with the ArgoCD, Airflow and Minio web UI
+
+The "easy" way. Checkout the ArgoCD, Airflow and Minio web UI, start DAGs and explore logs.
 
 [source,console]
 ----
 $ stackablectl demo install argo-cd-git-ops --namespace argo-cd
 ----
 
-WARNING: This demo should not be run alongside other demos.
+### 2. GitOps - interact with a Git repository to apply changes made in code into the cluster
+
+In addition to the exploration part, users can interact with a forked repository and apply changes to the Git repository.
+These changes then are automatically synced into the cluster.
+
+In order to interact with the Git repository, the {stackable-demo-repository}[stackable demo repository] must be forked and additional parameters must be provided to `stackablectl`.
+This is explained in more detail in the section <<interact-with-git-repository,How to interact with the Git repository>> at the bottom.
+
+[source,console]
+----
+stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
+----
 
 NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`.
 ArgoCD itself will create other namespaces for the deployed products.
@@ -126,7 +140,8 @@ using different versions and Git sources (repository & branch) as well as the po
 
 NOTE: This demo does not use a multi cluster environment for the sake of simplicity.
 
-The following part dives deeper into the definition of the Stackable operator `ApplicationSet` and can be skipped.
+The following part dives deeper into the definition of the Stackable operator `ApplicationSet` consumed by ArgoCD.
+Users not interested in the technical parts of the `ApplicationSet` might skip this section.
 
 .Stackable operators `ApplicationSet` details
 [%collapsible]
@@ -191,7 +206,7 @@ spec:
 <1> List of Stackable operators to install.
 <2> List of clusters and Stackable release versions for each cluster.
 
-The `matrix.generators.list[].elements[]` will create a union of parameters that may be used in the `ApplicationSet` template as follows:
+The `matrix.generators.list[].elements[]` will create a union of parameters (e.g. `operator`, `cluster`, `server` and `targetRevision`), that may be used in the `ApplicationSet` template as follows:
 
 [source,yaml]
 ----
@@ -295,41 +310,18 @@ image::argo-cd-git-ops/minio-dag-run-logs.png[]
 
 The log files contained in the single folders are the same as the logs shown above in the Airflow web UI.
 
-== Conclusion
-
-This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
-Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
-or integrate external secret stores like HashiCorp Vault for production use.
-This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
-
-This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
-
-* All cluster resources and workloads are managed declaratively via Git.
-* ArgoCD continuously ensures the cluster state matches Git.
-* Sealed Secrets provide secure and auditable secret management.
-* Airflow DAG updates occur automatically by committing code to the repository.
-
-This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
-and enforcing consistency.
-By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
-
-Next steps:
-
-* Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
-* Integrate CI workflows to automatically validate and merge manifest updates.
-* Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
-* Experiment with DataOps (e.g., Airflow and Trino).
-
 [#interact-with-git-repository]
 == How to interact with ArgoCD, Airflow and the Git repository
 
-Since this Demo is hosted in the {stackable-demo-repository}[Stackable Demo repository], where merging etc. requires approval, the recommendation is to fork the {stackable-demo-repository}[Stackable Demo repository].
+Since this Demo is hosted in the {stackable-demo-repository}[Stackable Demo repository], where merging etc. requires approval,
+the recommendation is to fork and clone the {stackable-demo-repository}[Stackable Demo repository].
+This requires a two-step process:
 
-=== Forking the demo repository
+=== 1. Forking the demo repository
 
 This {github-fork}[GitHub tutorial] shows how to fork a repository.
 
-=== Cloning the demo repository
+=== 2. Cloning the demo repository
 
 Clone the demo repository:
 
@@ -339,26 +331,27 @@ git clone https://github.com/<your-username>/demos.git
 cd demos
 ----
 
-After forking the demo repository, a local copy can be cloned and the `stackablectl` install command must be parameterized with the fork URL and branch.
+After forking and cloning a local copy, the `stackablectl` install command must be parameterized with the forked repository URL and branch.
 
 [source,console]
 ----
 stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
 ----
 
-=== Making changes to the repository
+== Making changes to the repository
 
-Edit manifests or add new DAG files within your cloned repository:
+After obaining a local copy, changes made to Stackable manifests or Airflow DAGs can be integrated via GitOps.
+Edit Stackable manifests or add new DAGs within your cloned repository:
 
 * Manifests are in: `demos/argo-cd-git-ops/manifests/`
 * Airflow DAGs are in: `demos/argo-cd-git-ops/dags/`
 
-==== Increase Airflow webserver replicas
+=== 1. Increase Airflow webserver replicas
 
 Assuming your working directory is the root of the forked demo repository, try to increase the `spec.webservers.roleGroups.<role-group>.replicas` in the folder `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml`.
 Once this is pushed / merged, ArgoCD should sync the changes and you should see more webserver pods.
 
-==== Add new Airflow DAGs
+=== 2. Add new Airflow DAGs
 
 In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have to adapt the git-sync configuration for DAGs to the forked repository:
 
@@ -398,7 +391,7 @@ File Path                                                               PID  Run
 
 If another DAG is displayed, try to refresh the Airflow UI if changes have not been propagated yet.
 
-==== Commit and push changes
+=== 3. Commit and push changes
 
 [source,console]
 ----
@@ -409,3 +402,28 @@ git push origin <my-custom-branch-with-changes>
 ----
 
 Now ArgoCD and Airflow should sync the respective changes into the cluster.
+
+== Conclusion
+
+This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
+Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
+or integrate external secret stores like HashiCorp Vault for production use.
+This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
+
+This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
+
+* All cluster resources and workloads are managed declaratively via Git.
+* ArgoCD continuously ensures the cluster state matches Git.
+* Sealed Secrets provide secure and auditable secret management.
+* Airflow DAG updates occur automatically by committing code to the repository.
+
+This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
+and enforcing consistency.
+By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
+
+Next steps:
+
+* Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
+* Integrate CI workflows to automatically validate and merge manifest updates.
+* Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
+* Experiment with DataOps (e.g., Airflow and Trino).
