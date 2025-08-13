@@ -129,6 +129,65 @@ asynchronously - and another to poll the running job to report on its status.
 
 image::airflow-scheduled-job/airflow_11.png[]
 
+== Patching Airflow to stress-test DAG parsing using relevant environment variables
+
+The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
+This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
+To include this in the list of DAGs (without removing the existing ones), an extra volumeMount is needed, as shown below.
+The patch also sets some environment variables that can be used to change the frequency of certain operations. The descriptions can be found here: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html[window=_blank].
+
+[source,yaml]
+----
+---
+apiVersion: airflow.stackable.tech/v1alpha1
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  clusterConfig:
+    volumeMounts:
+      - name: airflow-dags
+        mountPath: /dags/dag_factory.py
+        subPath: dag_factory.py
+      - name: airflow-dags
+        mountPath: /dags/date_demo.py
+        subPath: date_demo.py
+      - name: airflow-dags
+        mountPath: /dags/pyspark_pi.py
+        subPath: pyspark_pi.py
+      - name: airflow-dags
+        mountPath: /dags/pyspark_pi.yaml
+        subPath: pyspark_pi.yaml
+  webservers:
+    roleGroups:
+      default:
+        envOverrides: &envOverrides
+          AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+          AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: "60"
+          AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: "60"
+          AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "60"
+          AIRFLOW__DAG_PROCESSOR__PRINT_STATS_INTERVAL: "60"
+          AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+  kubernetesExecutors:
+    envOverrides: *envOverrides
+  schedulers:
+    roleGroups:
+      default:
+        envOverrides: *envOverrides
+----
+
+THe patch can be applied like this:
+
+[source,console]
+----
+kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml
+----
+
+[NOTE]
+====
+The scheduled job runs every minute and so an instance of it may be running while the scheduler is being re-started as a result of the patch, in which case that instance may fail.
+====
+
 == Summary
 
 This demo showed how DAGs can be made available for Airflow, scheduled, run and then inspected with the Webserver UI.

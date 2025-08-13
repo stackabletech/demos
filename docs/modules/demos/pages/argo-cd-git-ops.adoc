@@ -1,0 +1,411 @@
+= argo-cd-git-ops
+:description: Deploy Stackable operators and products with ArgoCD. Sync manifests and secrets from Git.
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:argo-cd: https://argoproj.github.io/cd/
+:argo-cd-application: https://argo-cd.readthedocs.io/en/stable/operator-manual/declarative-setup/#applications
+:argo-cd-applicationset: https://argo-cd.readthedocs.io/en/stable/user-guide/application-set/
+:argo-cd-core-concepts: https://argo-cd.readthedocs.io/en/stable/core_concepts/
+:sealed-secrets: https://github.com/bitnami-labs/sealed-secrets
+:stackable-demo-repository: https://github.com/stackabletech/demos/
+:airflow: https://airflow.apache.org/
+:airflow-git-sync: https://docs.stackable.tech/home/stable/airflow/usage-guide/mounting-dags/#_via_git_sync
+:github-fork: https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/working-with-forks/fork-a-repo
+
+== Motivation
+
+Modern Kubernetes environments thrive on automation, reproducibility, and strong version control.
+GitOps provides a reliable way to manage infrastructure and applications declaratively: your desired cluster state is stored in Git,
+and changes are automatically synchronized. This tutorial demonstrates how to deploy Stackable operators and products using {argo-cd}[ArgoCD],
+following Infrastructure-as-Code (IaC) and GitOps principles.
+
+You will learn how to:
+
+* Deploy Stackable operators and products via Git-managed manifests.
+* Use Sealed Secrets to securely manage sensitive credentials.
+* Update Airflow DAGs or modify deployments simply by committing to Git.
+
+This hands-on approach illustrates how GitOps can simplify application lifecycle management and enforce a clear,
+auditable workflow across environments (development, staging, production).
+
+All products and manifests are synced and deployed via ArgoCD (except ArgoCD itself, which is bootstrapped via `stackablectl`).
+
+[#system-requirements]
+== System requirements
+
+To run this demo, ensure you have the following prerequisites:
+
+* a Kubernetes Cluster (e.g., Kind, Minikube, or managed services like EKS, GKE, AKS).
+* `kubectl`: Installed and configured to access your cluster.
+* Optional: a GitHub account - required for forking and interacting with the demo repository.
+
+Resource requirements for this demo:
+
+* 15 {k8s-cpu}[cpu units] (core/hyperthread)
+* 15 GiB memory
+* 5 GiB disk storage
+
+Basic knowledge about ArgoCD and its {argo-cd-core-concepts}[core concepts] are assumed and not explained further.
+
+## Architecture
+
+ArgoCD and other deployed products and dependencies are illustrated in the following diagram:
+
+image::argo-cd-git-ops/architecture-overview.drawio.svg[]
+
+## Installation
+
+Install this demo on an existing Kubernetes cluster:
+
+NOTE: In order to interact with the Git repository, this repository must be forked and additional parameters must be provided to `stackablectl`.
+This is explained in more detail in the section <<interact-with-git-repository,How to interact with the Git repository>>.
+
+[source,console]
+----
+$ stackablectl demo install argo-cd-git-ops --namespace argo-cd
+----
+
+WARNING: This demo should not be run alongside other demos.
+
+NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`.
+ArgoCD itself will create other namespaces for the deployed products.
+
+== Sealed Secrets
+
+When managing all resources and configuration via Git, deploying sensitive data like certificates or credentials via Git becomes a problem.
+
+There are multiple solutions to this such as Hashicorp or Bitwarden, which depend heavily on the infrastructure already available.
+
+For the sake of this demo, {sealed-secrets}[Bitnami's Sealed Secrets] are utilized.
+Sensitive data is encrypted as a `SealedSecret` before commiting to the Git repository, synced via ArgoCD and decrypted by the Sealed Secrets controller into a standard Kubernetes `Secret`.
+
+This way, everything will be stored and managed in Git.
+
+== ArgoCD UI
+
+After bootstrapping ArgoCD via `stackablectl`, once the pods are ready, you can port-forward the argocd-server Service in order to access the web UI.
+
+[source,console]
+----
+kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
+----
+
+In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
+
+NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
+This can be ignored in this case.
+
+The ArgoCD Web UI entry page shows an overview of deployed applications, their status and other metadata as the repository or the date of the last synchronization run.
+
+image::argo-cd-git-ops/argocd-overview.png[]
+
+Single applications can be inspected closer after clicking on e.g. the `airflow` project.
+
+image::argo-cd-git-ops/argocd-airflow-application-overview.png[]
+
+Detailed information about the Airflow cluster, the cluster status and deployed components can be accessed in the application details.
+Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
+
+Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`.
+This means that changes to the Git repository are immediatly synced into the cluster.
+This is nice in the demo case, but should be disabled for production use cases.
+
+image::argo-cd-git-ops/argocd-airflow-application-details.png[]
+
+More information about the cluster and e.g. networking can be displayed in the different tabs on the top right.
+
+image::argo-cd-git-ops/argocd-airflow-application-network.png[]
+
+Now, after a quick overview of the ArgoCD web UI, the following part demonstrates how to sync and deploy Stackable operators via ArgoCD.
+
+== Stackable operators
+
+The Stackable operators are deployed via ArgoCD using the Stackable Helm charts and an ArgoCD {argo-cd-applicationset}[`ApplicationSet`].
+`ApplicationSets` allow templating, which is required to e.g. manage and deploy to multi cluster environments (e.g. development - staging - production),
+using different versions and Git sources (repository & branch) as well as the possibility to deploy to different clusters.
+
+NOTE: This demo does not use a multi cluster environment for the sake of simplicity.
+
+The following part dives deeper into the definition of the Stackable operator `ApplicationSet` and can be skipped.
+
+.Stackable operators `ApplicationSet` details
+[%collapsible]
+====
+[source,yaml]
+----
+apiVersion: argoproj.io/v1alpha1
+kind: ApplicationSet
+metadata:
+  name: stackable-operators
+spec:
+  generators:
+    - matrix:
+        generators:
+          - list:
+              elements: # <1>
+                - operator: commons
+                - operator: listener
+                - operator: secret
+                - operator: airflow
+                - operator: druid
+                - operator: hbase
+                - operator: hdfs
+                - operator: hive
+                - operator: kafka
+                - operator: nifi
+                - operator: opa
+                - operator: spark-k8s
+                - operator: superset
+                - operator: trino
+                - operator: zookeeper
+          - list:
+              elements: # <2>
+                - cluster: demo
+                  server: https://kubernetes.default.svc
+                  targetRevision: 25.7.0
+                ###########################################################################################
+                # The following definitions are not used in this Demo, it is shown for completeness
+                # for multi cluster setups
+                ###########################################################################################
+
+                ###########################################################################################
+                # Development cluster: Checking newest Stackable developments for nightly 0.0.0-dev builds
+                ###########################################################################################
+                # - cluster: development
+                #   server: https://kubernetes-development.default.svc
+                #   targetRevision: 0.0.0-dev
+                ###########################################################################################
+                # Staging cluster: Checking compatibility for upgrades from 25.3.0 to 25.7.0
+                ###########################################################################################
+                # - cluster: staging
+                #   server: https://kubernetes-staging.default.svc
+                #   targetRevision: 25.7.0
+                ###########################################################################################
+                # Production cluster: Currently running release 25.3.0 and awaiting upgrade to 25.7.0
+                ###########################################################################################
+                # - cluster: production
+                #   server: https://kubernetes-production.default.svc
+                #   targetRevision: 25.3.0
+# [...]
+----
+<1> List of Stackable operators to install.
+<2> List of clusters and Stackable release versions for each cluster.
+
+The `matrix.generators.list[].elements[]` will create a union of parameters that may be used in the `ApplicationSet` template as follows:
+
+[source,yaml]
+----
+# [...]
+template:
+    metadata:
+      name: "{{ operator }}-operator"
+    spec:
+      project: "stackable-operators" # <1>
+      ignoreDifferences:
+        - group: "apiextensions.k8s.io"
+          kind: "CustomResourceDefinition"
+          jqPathExpressions:
+            - .spec.names.categories | select(. == [])
+            - .spec.names.shortNames | select(. == [])
+            - .spec.versions[].additionalPrinterColumns | select(. == [])
+      source:
+        repoURL: "oci.stackable.tech"
+        targetRevision: "{{ targetRevision }}" # <2>
+        chart: "sdp-charts/{{ operator }}-operator" # <3>
+        helm:
+          releaseName: "{{ operator }}-operator" # <4>
+      destination:
+        server: "{{ server }}" # <5>
+        namespace: "stackable-operators" # <6>
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true # <7>
+          - ServerSideApply=true
+          - RespectIgnoreDifferences=true
+        automated:
+          selfHeal: true
+          prune: true
+----
+<1> The ArgoCD project name.
+<2> The Stackable release version, e.g. `25.7.0` (templated from the matrix generators).
+<3> The Chart name in the repository e.g. `"sdp-charts/airflow-operator"` (templated from the matrix generators).
+<4> The Helm release name e.g. `airflow-operator` (templated from the matrix generators).
+<5> The Kubernetes cluster, e.g. `https://kubernetes.default.svc` for this demo (templated from the matrix generators).
+<6> The namespace to deploy the operators in. Will be created if `spec.syncPolicy.syncOptions[].CreateNamespace` is set to true.
+<7> Automatically create missing namespaces.
+
+This allows control over which releases and versions are deployed to which cluster.
+====
+
+Now with ArgoCD, the Sealed Secrets controller and Stackable operators up and running, you can inspect Airflow as the first Stackable product.
+
+== Airflow
+
+The Airflow web UI is reachable via Nodeport or easier, using a port-forward:
+
+[source,console]
+----
+kubectl --namespace stackable-airflow port-forward service/airflow-webserver 8080:8080
+----
+
+In your browser, go to `http://localhost:8080` and login with username `admin` and password `adminadmin`.
+The welcome page and an overview over synced DAGs should be displayed.
+
+image::argo-cd-git-ops/airflow-welcome-page.png[]
+
+=== Start the DAG
+
+The `date_demo` DAG can be started by moving the slider and trigger the DAG runs.
+The DAG itself can be inspected by clicking on it.
+
+=== Inspect the DAG
+
+The overview displays details about the DAG runs, durations and other metadata.
+The graph, code or events can be selected in the tabs for more details.
+
+image::argo-cd-git-ops/airflow-dag-overview.png[]
+
+=== Inspect a DAG run
+
+A single DAG run can be selected by clicking on one of the green squares next to `run_every_minute` on the left.
+More information is displayed here, and the DAG logs written by the Kubernetes Executor to S3/Minio can be selected in the `Logs` tab.
+
+image::argo-cd-git-ops/airflow-dag-run-logs.png[]
+
+In the logs, the output of the DAG is printed under a line containing `Output:`, the timestamp of the DAG run.
+
+== Minio
+
+Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket.
+When accessing the logs via the Airflow webserver, the logs are fetched from S3 instead of the (already deleted) executor pods.
+The Minio / S3 instance can be accessed via port-forward:
+
+[source,console]
+----
+kubectl --namespace minio port-forward service/minio-console 9001:9001
+----
+
+Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`.
+After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
+
+NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
+This can be ignored in this case.
+
+image::argo-cd-git-ops/minio-dag-run-logs.png[]
+
+The log files contained in the single folders are the same as the logs shown above in the Airflow web UI.
+
+== Conclusion
+
+This demo acts as a blueprint for showing how complex data platform components can be managed with ArgoCD and GitOps.
+Once familiar with this pattern, you can extend it to multi-cluster environments, add CI/CD pipelines for automated manifest testing,
+or integrate external secret stores like HashiCorp Vault for production use.
+This setup lays the foundation for a fully automated, scalable, and secure Kubernetes-based data platform.
+
+This tutorial demonstrates how ArgoCD and Stackable can be combined to deliver a streamlined GitOps experience:
+
+* All cluster resources and workloads are managed declaratively via Git.
+* ArgoCD continuously ensures the cluster state matches Git.
+* Sealed Secrets provide secure and auditable secret management.
+* Airflow DAG updates occur automatically by committing code to the repository.
+
+This approach scales naturally across environments - development, staging, and production - while reducing manual operations, improving visibility,
+and enforcing consistency.
+By adopting GitOps with ArgoCD and Stackable, teams gain a clear, auditable, and automated path from code to production.
+
+Next steps:
+
+* Explore multi-cluster ApplicationSet deployments to target multiple Kubernetes clusters.
+* Integrate CI workflows to automatically validate and merge manifest updates.
+* Expand beyond Airflow to manage additional Stackable components (e.g., Kafka, Trino, Superset).
+* Experiment with DataOps (e.g., Airflow and Trino).
+
+[#interact-with-git-repository]
+== How to interact with ArgoCD, Airflow and the Git repository
+
+Since this Demo is hosted in the {stackable-demo-repository}[Stackable Demo repository], where merging etc. requires approval, the recommendation is to fork the {stackable-demo-repository}[Stackable Demo repository].
+
+=== Forking the demo repository
+
+This {github-fork}[GitHub tutorial] shows how to fork a repository.
+
+=== Cloning the demo repository
+
+Clone the demo repository:
+
+[source,console]
+----
+git clone https://github.com/<your-username>/demos.git
+cd demos
+----
+
+After forking the demo repository, a local copy can be cloned and the `stackablectl` install command must be parameterized with the fork URL and branch.
+
+[source,console]
+----
+stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
+----
+
+=== Making changes to the repository
+
+Edit manifests or add new DAG files within your cloned repository:
+
+* Manifests are in: `demos/argo-cd-git-ops/manifests/`
+* Airflow DAGs are in: `demos/argo-cd-git-ops/dags/`
+
+==== Increase Airflow webserver replicas
+
+Assuming your working directory is the root of the forked demo repository, try to increase the `spec.webservers.roleGroups.<role-group>.replicas` in the folder `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml`.
+Once this is pushed / merged, ArgoCD should sync the changes and you should see more webserver pods.
+
+==== Add new Airflow DAGs
+
+In the `demos/argo-cd-git-ops/manifests/airflow/airflow.yaml` manifest you have to adapt the git-sync configuration for DAGs to the forked repository:
+
+[source,yaml]
+----
+    dagsGitSync:
+      - repo: https://github.com/<your-username>/demos/
+        branch: <my-custom-branch-with-changes>
+        [...]
+----
+
+After adding a new DAG to the folder `demos/argo-cd-git-ops/dags/`, Airflow should pick up the new DAG via git-sync and display it in the UI.
+This may take up to a couple of minutes to be displayed in the UI.
+
+The synchronisation status of the DAGs can be monitored in via the Airflow scheduler:
+
+[source,console]
+----
+kubectl logs -n stackable-airflow -c airflow -f svc/airflow-scheduler-default-headless
+----
+
+which should show output the DAG processing stats:
+
+[source,console]
+----
+================================================================================
+DAG File Processing Stats
+
+File Path                                                               PID  Runtime      # DAGs    # Errors  Last Runtime    Last Run      Last # of DB Queries
+--------------------------------------------------------------------  -----  ---------  --------  ----------  --------------  ----------  ----------------------
+/stackable/app/git-0/current/demos/argo-cd-git-ops/dags/date_demo.py     51  0.03s             0           0                                                   0
+================================================================================
+[2025-08-06T15:32:23.182+0000] {kubernetes_executor_utils.py:95} INFO - Kubernetes watch timed out waiting for events. Restarting watch.
+[2025-08-06T15:32:23.345+0000] {manager.py:997} INFO -
+================================================================================
+----
+
+If another DAG is displayed, try to refresh the Airflow UI if changes have not been propagated yet.
+
+==== Commit and push changes
+
+[source,console]
+----
+git checkout -b <my-custom-branch-with-changes>
+git add .
+git commit -m "Update Airflow configuration and add new DAG"
+git push origin <my-custom-branch-with-changes>
+----
+
+Now ArgoCD and Airflow should sync the respective changes into the cluster.

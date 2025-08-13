@@ -1,0 +1,18 @@
+---
+releaseName: argocd
+name: argo-cd
+repo:
+  name: argo-cd
+  url: https://argoproj.github.io/argo-helm
+version: v8.1.4
+options:
+  configs:
+    secret:
+      argocdServerAdminPassword: "{{ argocdAdminPassword }}"
+      # We have to set the time otherwise error message:
+      # invalid session: Account password has changed since token issued
+      argocdServerAdminPasswordMtime: "2025-01-01T00:00:00Z"
+  dex:
+    enabled: false
+  notifications:
+    enabled: false

@@ -1,0 +1,16 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: airflow-minio-connection
+  namespace: stackable-airflow
+spec:
+  encryptedData:
+    airflow-minio-connection: AgAHQL1NIeZiWH1opQYqHINixw0muWaNsYKMhtgJqqdVMLeKIU/sckZ7Z6aokaEYXGVQRe+Tp+D9AaYaF5CdKeMQKQ3MmhxXYZh0EuAcNRyvz4u4K696KEIa4XpaT5k6oRbIwRUGCc4hiRVApmMOgGYl4iEwVQ/1Twd5ffEAohMsySgZQBn17zB+hKC3u2AcIrZ1btHvBrVhC4pil/kyytBwjTkMq1iAkF8lwt7gatLukD9ldLaVdYTe21R+nP/UT7DwHRnBlI1dzkfrMdplFud2XIEmSrFF7ihzc5r+Lsm2vsnjaV5OgzDjIPI3RRA7g8/06Lebpru/E9h6HB5RIu59ga72g02QIHh5HffGUCnbEsLTDDbBcuAQB2jSodotfsofVKOhZChOIJDchvohhrQ86wqlkQyjfNMq2Gh46Nc7ZjomlpL/p0afmak34GFoPYMCD7IJ2DafEsmKA8dYfjTI1kVzLhYuoeDB3f82tu8xL9cXCEUsw7Y7EosZjeITeLcV1oMm+jeHzNHGaLmCI9k1sY5bL6xjbG59sOvuEgI302tS9ua592u9uqOOKKjE4eZM7CAmEjgMmDPbeteXGnZcOqfj8FWmlp0f4gm9s+68KH5PDtkKdtBckNjDeLj3QhMC2gstXnPJR3Hnm/bFQ4i/6XpnkuOFCvQT/Baar5scw4vhJ0tN8TGeMd651YXU7N2MEB+2WtiO0StbzhcWIoiGmvN+SRLawPZ87Sqlt26/bs5+jnuEv4Fy1oXhxbZwuf/YsZjEaKFI+HbFVvwM0K2d00/z9DYAB44oY2PmrZwsk0KqP2hkuumq
+  template:
+    metadata:
+      creationTimestamp: null
+      name: airflow-minio-connection
+      namespace: stackable-airflow
+    type: Opaque
