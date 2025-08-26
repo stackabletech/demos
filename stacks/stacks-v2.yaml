@@ -489,8 +489,8 @@ stacks:
     description: >-
       An OpenLDAP instance with two users (alice:alice, bob:bob) and TLS enabled.
       The bind user credentials are: ldapadmin:ldapadminpassword.
-      The LDAP AuthenticationClass is called 'ldap' and the SecretClass for the bind credentials is called 'ldap-bind-credentials'.
-      The stack already creates an appropriate Secret, so referring to the 'ldap' AuthenticationClass in your ProductCluster should be enough.
+      The LDAP AuthenticationClass is called 'openldap' and the SecretClass for the bind credentials is called 'openldap-bind-credentials'.
+      The stack already creates an appropriate Secret, so referring to the 'openldap' AuthenticationClass in your ProductCluster should be enough.
     stackableRelease: dev
     stackableOperators:
       - commons
