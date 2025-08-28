@@ -12,7 +12,7 @@
 # [x] Kafka - exporter
 # [x] NiFi 1 - native
 # [x] NiFi 2 - native
-# [ ] OpenSearch - not officially part of the platform yet
+# [x] OpenSearch - native
 # [ ] Spark - native - partially done, see comment on it below
 # [x] Superset - exporter
 # [x] Trino - native
@@ -162,6 +162,56 @@ spec:
     - scheme: http
       port: ui-http
       path: /prometheus
+  podTargetLabels:
+    - app.kubernetes.io/name
+    - app.kubernetes.io/instance
+    - app.kubernetes.io/component
+    - app.kubernetes.io/role-group
+    - app.kubernetes.io/version
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-opensearch
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      stackable.tech/vendor: Stackable
+      prometheus.io/scrape: "true"
+      app.kubernetes.io/name: opensearch
+  endpoints:
+    - relabelings:
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_scheme
+          action: replace
+          targetLabel: __scheme__
+          regex: (https?)
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_path
+          action: replace
+          targetLabel: __metrics_path__
+          regex: (.+)
+        # Use the FQDN instead of the IP address because the IP address
+        # is not contained in the certificate.
+        - sourceLabels:
+            - __meta_kubernetes_pod_name
+            - __meta_kubernetes_service_name
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_service_annotation_prometheus_io_port
+          action: replace
+          targetLabel: __address__
+          regex: (.+);(.+);(.+);(\d+)
+          replacement: $1.$2.$3.svc.cluster.local:$4
+      tlsConfig:
+        ca:
+          secret:
+            name: prometheus-tls-certificate
+            key: ca.crt
   podTargetLabels:
     - app.kubernetes.io/name
     - app.kubernetes.io/instance
