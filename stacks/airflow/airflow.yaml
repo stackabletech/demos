@@ -6,7 +6,8 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 3.0.1
+    productVersion: 3.0.6
+    pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
     exposeConfig: false
