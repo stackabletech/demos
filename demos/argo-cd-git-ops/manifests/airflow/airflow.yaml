@@ -5,12 +5,8 @@ metadata:
   name: airflow
 spec:
   image:
-    # Currently does not work with the kubernetes executor S3 logging
-    # (and its still marked experimental as of release 25.7). See:
-    # https://github.com/apache/airflow/issues/50583
-    # https://github.com/apache/airflow/issues/52501
-    # productVersion: 3.0.1
-    productVersion: 2.10.5
+    productVersion: 3.0.6
+    pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
     exposeConfig: false
