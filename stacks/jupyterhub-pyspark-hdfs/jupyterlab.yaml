@@ -21,7 +21,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: jupyterlab
-          image: oci.stackable.tech/stackable/spark-connect-client:3.5.6-stackable0.0.0-dev
+          image: oci.stackable.tech/stackable/spark-connect-client:3.5.7-stackable0.0.0-dev
           imagePullPolicy: IfNotPresent
           command:
             - bash
@@ -39,8 +39,13 @@ spec:
               name: notebook
       initContainers:
         - name: download-notebook
-          image: oci.stackable.tech/stackable/spark-connect-client:3.5.6-stackable0.0.0-dev
-          command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb']
+          image: oci.stackable.tech/stackable/spark-connect-client:3.5.7-stackable0.0.0-dev
+          command:
+            [
+              "sh",
+              "-c",
+              "curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb",
+            ]
           volumeMounts:
             - mountPath: /notebook
               name: notebook

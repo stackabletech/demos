@@ -303,7 +303,7 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        productVersion: 3.5.6
+        productVersion: 3.5.7
       mode: cluster
       mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
       job:
@@ -331,6 +331,7 @@ data:
             memory:
               limit: 1024Mi
         replicas: 3
+
 # {% endraw %}
 ---
 apiVersion: v1

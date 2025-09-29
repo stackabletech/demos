@@ -10,22 +10,22 @@ spec:
         - name: wait-for-testdata
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-          - bash
-          - -euo
-          - pipefail
-          - -c
-          - |
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
               echo 'Waiting for job load-ny-taxi-data to finish'
               kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data
       containers:
         - name: create-spark-anomaly-detection-job
           image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
           command:
-          - bash
-          - -euo
-          - pipefail
-          - -c
-          - |
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
               echo 'Submitting Spark job'
               kubectl apply -f /tmp/manifest/spark-ad-job.yaml
           volumeMounts:
@@ -51,7 +51,7 @@ data:
       name: spark-ad
     spec:
       sparkImage:
-        productVersion: 3.5.6
+        productVersion: 3.5.7
       mode: cluster
       mainApplicationFile: local:///spark-scripts/spark-ad.py
       deps:
