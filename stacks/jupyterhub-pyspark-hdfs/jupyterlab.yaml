@@ -21,7 +21,7 @@ spec:
       serviceAccountName: default
       containers:
         - name: jupyterlab
-          image: oci.stackable.tech/stackable/spark-connect-client:3.5.7-stackable0.0.0-dev
+          image: oci.stackable.tech/stackable/spark-connect-client:4.0.1-stackable0.0.0-dev
           imagePullPolicy: IfNotPresent
           command:
             - bash
@@ -39,7 +39,7 @@ spec:
               name: notebook
       initContainers:
         - name: download-notebook
-          image: oci.stackable.tech/stackable/spark-connect-client:3.5.7-stackable0.0.0-dev
+          image: oci.stackable.tech/stackable/spark-connect-client:4.0.1-stackable0.0.0-dev
           command:
             - bash
           args:
