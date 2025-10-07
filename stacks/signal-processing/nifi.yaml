@@ -36,7 +36,7 @@ spec:
           stateRepo:
             capacity: "1Gi"
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1

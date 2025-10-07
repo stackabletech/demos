@@ -11,7 +11,7 @@ spec:
     mapboxSecret: superset-mapbox-api-key
   nodes:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
