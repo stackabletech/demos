@@ -1,23 +1,18 @@
 ---
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: kafka-znode
-spec:
-  clusterRef:
-    name: zookeeper
----
 apiVersion: kafka.stackable.tech/v1alpha1
 kind: KafkaCluster
 metadata:
   name: kafka
 spec:
   image:
-    productVersion: 3.9.1
+    productVersion: 4.1.0
   clusterConfig:
-    zookeeperConfigMapName: kafka-znode
     authentication:
       - authenticationClass: kafka-client-tls
+  controllers:
+    roleGroups:
+      default:
+        replicas: 1
   brokers:
     config:
       bootstrapListenerClass: external-stable
@@ -35,7 +30,7 @@ spec:
       default:
         replicas: 1
         configOverrides:
-          server.properties:
+          broker.properties:
             num.partitions: "8"
             # We have
             # 1 brokers

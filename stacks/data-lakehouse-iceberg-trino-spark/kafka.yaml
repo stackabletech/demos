@@ -7,9 +7,12 @@ spec:
   image:
     productVersion: 3.9.1
   clusterConfig:
-    zookeeperConfigMapName: kafka-znode
     authentication:
       - authenticationClass: kafka-client-tls
+  controllers:
+    roleGroups:
+      default:
+        replicas: 1
   brokers:
     config:
       resources:
@@ -25,7 +28,7 @@ spec:
       default:
         replicas: 5
         configOverrides:
-          server.properties:
+          broker.properties:
             num.partitions: "27"
             log.segment.bytes: "50000000" # 0.5GB
             log.retention.bytes: "2000000000" # 2 GB. Should keep between 2.0 and 2.5GB
@@ -38,11 +41,3 @@ spec:
   provider:
     tls:
       clientCertSecretClass: tls
----
-apiVersion: zookeeper.stackable.tech/v1alpha1
-kind: ZookeeperZnode
-metadata:
-  name: kafka-znode
-spec:
-  clusterRef:
-    name: zookeeper
