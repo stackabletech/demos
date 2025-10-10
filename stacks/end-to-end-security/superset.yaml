@@ -16,7 +16,7 @@ spec:
         userRegistrationRole: Gamma_extended
   nodes:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1

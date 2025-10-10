@@ -27,14 +27,17 @@ spec:
   image:
     productVersion: 3.4.2
   clusterConfig:
-    listenerClass: external-unstable
     dfsReplication: 1
     zookeeperConfigMapName: hdfs-znode
   nameNodes:
+    config:
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 2
   dataNodes:
+    config:
+      listenerClass: external-unstable
     roleGroups:
       default:
         replicas: 1

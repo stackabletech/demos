@@ -23,7 +23,7 @@ spec:
         package: trino
   coordinators:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     podOverrides: &podOverrides
       spec:
         containers:

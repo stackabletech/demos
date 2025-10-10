@@ -29,7 +29,7 @@ spec:
       default:
         replicas: 1
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
   workers:
     config:
       resources:

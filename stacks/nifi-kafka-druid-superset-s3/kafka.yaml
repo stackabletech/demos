@@ -16,7 +16,7 @@ spec:
   brokers:
     config:
       bootstrapListenerClass: external-stable
-      brokerListenerClass: external-stable
+      brokerListenerClass: external-unstable
       resources:
         storage:
           logDirs:

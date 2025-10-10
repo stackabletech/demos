@@ -18,7 +18,7 @@ spec:
         package: trino
   coordinators:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       queryMaxMemory: 10TB
       resources:

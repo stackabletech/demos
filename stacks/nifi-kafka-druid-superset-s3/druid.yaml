@@ -29,13 +29,13 @@ spec:
         baseKey: data
   brokers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
   coordinators:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
@@ -67,7 +67,7 @@ spec:
               limit: 16Gi
   routers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1

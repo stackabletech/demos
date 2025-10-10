@@ -70,7 +70,7 @@ spec:
     catalogLabelSelector:
       matchLabels:
         trino: trino
-    listenerClass: external-unstable
+    listenerClass: external-stable
   coordinators:
     roleGroups:
       default:

@@ -18,7 +18,7 @@ spec:
         package: trino
   coordinators:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1

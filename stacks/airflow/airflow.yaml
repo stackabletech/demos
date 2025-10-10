@@ -28,7 +28,7 @@ spec:
         subPath: pyspark_pi.yaml
   webservers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         cpu:
