@@ -160,7 +160,7 @@ spec:
       app.kubernetes.io/name: hbase
   endpoints:
     - scheme: http
-      port: ui-http
+      port: metrics
       path: /prometheus
   podTargetLabels:
     - app.kubernetes.io/name
