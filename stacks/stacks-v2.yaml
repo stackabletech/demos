@@ -83,8 +83,8 @@ stacks:
       - vector
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/stacks/logging/opensearch.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/stacks/_templates/opensearch-dashboards.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/opensearch.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/setup-opensearch-dashboards.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator.yaml
     supportedNamespaces: []
