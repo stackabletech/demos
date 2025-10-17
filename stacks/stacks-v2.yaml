@@ -99,9 +99,12 @@ stacks:
       - name: openSearchDashboardPassword
         description: Password of OpenSearch Dashboard user
         default: kibanaserverkibanaserver
-      - name: setSysctlMaxMapCount
-        description: Wether an init-container should be used to increase 'sysctl -w vm.max_map_count'. This requires to spawn an init-container with runsAsUser 0 privileges, which some clusters prohibit. You can increase 'vm.max_map_count' on all of the kubernetes nodes manually and set this to 'false'.
-        default: "true"
+      - name: opensearchVersion
+        description: Version of OpenSearch and OpenSearch Dashboards to deploy
+        default: 3.1.0
+      - name: stackableReleaseVersion
+        description: The Stackable release to be used for the OpenSearch Dashboards image tag
+        default: 0.0.0-dev
   observability:
     description: >-
       An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.

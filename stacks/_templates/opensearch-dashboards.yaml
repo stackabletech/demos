@@ -4,12 +4,12 @@ name: opensearch-dashboards
 repo:
   name: opensearch-dashboards
   url: https://opensearch-project.github.io/helm-charts
-version: 3.1.0
+version: {{ opensearchVersion }}
 options:
   opensearchHosts: https://opensearch:9200
   image:
     repository: oci.stackable.tech/sdp/opensearch-dashboards
-    tag: 3.1.0-stackable0.0.0-dev
+    tag: "{{ opensearchVersion }}-stackable{{ stackableReleaseVersion }}"
   labels:
     stackable.tech/vendor: Stackable
   service:
@@ -23,9 +23,8 @@ options:
       stackable.tech/vendor: Stackable
   opensearchAccount:
     secret: opensearch-dashboard-user
-  extraEnvs:
-    - name: OPEN_SEARCH_ADMIN_PASSWORD
-      valueFrom:
-        secretKeyRef:
-          name: opensearch-user
-          key: password
+  serviceAccount:
+    create: false
+    # Use the ServiceAccount of OpenSearch because its permissions are already configured to work on
+    # OpenShift.
+    name: opensearch-serviceaccount
