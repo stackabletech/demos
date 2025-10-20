@@ -36,7 +36,7 @@ metadata:
   name: hive-hdfs
 spec:
   image:
-    productVersion: 4.0.1
+    productVersion: 4.1.0
   clusterConfig:
     database:
       connString: jdbc:postgresql://hivehdfs-postgresql:5432/hivehdfs
@@ -55,7 +55,7 @@ metadata:
   name: hive-s3
 spec:
   image:
-    productVersion: 4.0.1
+    productVersion: 4.1.0
   clusterConfig:
     database:
       connString: jdbc:postgresql://hives3-postgresql:5432/hives3
