@@ -21,7 +21,7 @@ spec:
           min: "500m"
           max: "4"
         memory:
-          limit: '6Gi'
+          limit: "6Gi"
         storage:
           contentRepo:
             capacity: "10Gi"
@@ -33,6 +33,10 @@ spec:
             capacity: "4Gi"
           stateRepo:
             capacity: "1Gi"
+    configOverrides:
+      nifi.properties:
+        nifi.web.https.sni.required: "false"
+        nifi.web.https.sni.host.check: "false"
     roleGroups:
       default:
         replicas: 1
