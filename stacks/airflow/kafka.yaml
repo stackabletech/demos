@@ -1,0 +1,22 @@
+---
+apiVersion: kafka.stackable.tech/v1alpha1
+kind: KafkaCluster
+metadata:
+  name: kafka
+spec:
+  image:
+    productVersion: 4.1.0
+  clusterConfig:
+    tls:
+      serverSecretClass: null
+  controllers:
+    roleGroups:
+      default:
+        replicas: 1
+  brokers:
+    config:
+      bootstrapListenerClass: cluster-internal
+      brokerListenerClass: cluster-internal
+    roleGroups:
+      default:
+        replicas: 1
