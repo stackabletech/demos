@@ -26,7 +26,7 @@ spec:
               echo 'Waiting for all nifi instances to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi
         - name: wait-for-kafka-topics
-          image: oci.stackable.tech/sdp/kafka:3.9.1-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/kafka:4.1.0-stackable0.0.0-dev
           command:
             - bash
             - -euo
