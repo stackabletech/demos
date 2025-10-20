@@ -70,8 +70,9 @@ spec:
     catalogLabelSelector:
       matchLabels:
         trino: trino
-    listenerClass: external-stable
   coordinators:
+    roleConfig:
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
