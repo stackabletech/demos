@@ -20,8 +20,7 @@ spec:
                 - operator: kafka
                 - operator: nifi
                 - operator: opa
-                # TODO: enable Opensearch operator
-                # - opensearch
+                - operator: opensearch
                 - operator: spark-k8s
                 - operator: superset
                 - operator: trino

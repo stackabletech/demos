@@ -51,6 +51,7 @@ spec:
           - name: security-config
             secret:
               secretName: opensearch-security-config
+              defaultMode: 0660
           - name: tls
             ephemeral:
               volumeClaimTemplate:
