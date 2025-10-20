@@ -113,14 +113,14 @@ $ kubectl exec kafka-broker-default-0 -c kafka -- \
 --command-config /stackable/config/client.properties
 ...
 Topic: earthquakes	TopicId: ND51v_XcQPK4Ilm7A35Pag	PartitionCount: 8	ReplicationFactor: 1	Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
-	Topic: earthquakes	Partition: 0	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 1	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 2	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 3	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 4	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 5	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 6	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
-	Topic: earthquakes	Partition: 7	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr: 
+	Topic: earthquakes	Partition: 0	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 1	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 2	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 3	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 4	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 5	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 6	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
+	Topic: earthquakes	Partition: 7	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
 ----
 
 You can see that Kafka consists of one broker, and the topic `earthquakes` with eight partitions has been created. To
