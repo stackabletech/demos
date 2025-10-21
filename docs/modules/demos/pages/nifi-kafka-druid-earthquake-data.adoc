@@ -124,7 +124,7 @@ Topic: earthquakes	TopicId: ND51v_XcQPK4Ilm7A35Pag	PartitionCount: 8	Replication
 ----
 
 You can see that Kafka consists of one broker, and the topic `earthquakes` with eight partitions has been created. To
-see some records sent to Kafka, run the following command. You can change the number of records to print via the `-c`
+see some records sent to Kafka, run the following command. You can change the number of records to print via the `--max-messages`
 parameter.
 
 [source,console]
