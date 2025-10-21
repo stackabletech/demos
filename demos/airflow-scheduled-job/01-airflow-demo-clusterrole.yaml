@@ -1,0 +1,42 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: airflow-demo-clusterrole
+rules:
+- apiGroups:
+    - spark.stackable.tech
+  resources:
+    - sparkapplications
+  verbs:
+    - create
+    - get
+    - list
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets
+  verbs:
+    - get
+    - watch
+    - list
+- apiGroups:
+    - ""
+  resources:
+    - persistentvolumeclaims
+  verbs:
+    - list
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+    - watch
+    - list
+- apiGroups:
+    - ""
+  resources:
+    - pods/exec
+  verbs:
+    - create

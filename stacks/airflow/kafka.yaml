@@ -1,4 +1,13 @@
 ---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: TrustStore
+metadata:
+  name: truststore-pem
+spec:
+  secretClassName: tls
+  format: tls-pem
+  targetKind: ConfigMap
+---
 apiVersion: kafka.stackable.tech/v1alpha1
 kind: KafkaCluster
 metadata:
@@ -8,7 +17,7 @@ spec:
     productVersion: 4.1.0
   clusterConfig:
     tls:
-      serverSecretClass: null
+      serverSecretClass: tls
   controllers:
     roleGroups:
       default:
@@ -17,6 +26,16 @@ spec:
     config:
       bootstrapListenerClass: cluster-internal
       brokerListenerClass: cluster-internal
+    podOverrides:
+        spec:
+          containers:
+            - name: kafka
+              env:
+              - name: BOOTSTRAP_SERVER
+                valueFrom:
+                  configMapKeyRef:
+                    name: kafka
+                    key: KAFKA
     roleGroups:
       default:
         replicas: 1

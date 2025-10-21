@@ -1,0 +1,67 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: start-kafka-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: start-kafka-job
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+          # N.B. it is possible for the scheduler to report that a DAG exists,
+          # only for the worker task to fail if a pod is unexpectedly
+          # restarted. The wait/watch steps below are not "water-tight" but add
+          # a layer of stability by at least ensuring that the cluster is
+          # initialized and ready and that all pods are reachable (albeit
+          # independent of each other).
+          command:
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              # Kafka: wait for cluster
+              kubectl rollout status --watch statefulset/kafka-broker-default
+              kubectl rollout status --watch statefulset/kafka-controller-default
+
+              # Kafka: create consumer offsets topics (required for group coordinator)
+              kubectl exec kafka-broker-default-0 -c kafka -- \
+                /stackable/kafka/bin/kafka-topics.sh \
+                --bootstrap-server kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093 \
+                --create \
+                --topic __consumer_offsets \
+                --partitions 50 \
+                --replication-factor 1 \
+                --config cleanup.policy=compact \
+                --command-config /stackable/config/client.properties
+
+              # Airflow: wait for cluster
+              kubectl rollout status --watch statefulset/airflow-webserver-default
+              kubectl rollout status --watch statefulset/airflow-scheduler-default
+
+              # Airflow: activate DAG
+              AIRFLOW_ADMIN_PASSWORD=$(cat /airflow-credentials/adminUser.password)
+              ACCESS_TOKEN=$(curl -XPOST http://airflow-webserver-default-headless:8080/auth/token -H 'Content-Type: application/json' -d '{"username": "admin", "password": "'$AIRFLOW_ADMIN_PASSWORD'"}' | jq -r .access_token)
+              curl -H "Authorization: Bearer $ACCESS_TOKEN" -H 'Content-Type: application/json' -XPATCH http://airflow-webserver-default-headless:8080/api/v2/dags/kafka_watcher -d '{"is_paused": false}' | jq
+
+              # Kafka: produce a message to create the topic
+              kubectl exec kafka-broker-default-0 -c kafka -- bash -c \
+                'echo "Hello World at: $(date)" | /stackable/kafka/bin/kafka-console-producer.sh \
+                --bootstrap-server kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093 \
+                --producer.config /stackable/config/client.properties \
+                --topic test-topic'
+          volumeMounts:
+            - name: airflow-credentials
+              mountPath: /airflow-credentials
+      volumes:
+        - name: airflow-credentials
+          secret:
+            secretName: airflow-credentials
+      restartPolicy: OnFailure
+  backoffLimit: 20 # give some time for the Airflow cluster to be available

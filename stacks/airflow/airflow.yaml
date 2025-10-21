@@ -16,6 +16,9 @@ spec:
       - name: airflow-dags
         configMap:
           name: airflow-dags
+      - name: kafka-tls-pem
+        configMap:
+          name: truststore-pem
     volumeMounts:
       - name: airflow-dags
         mountPath: /dags/date_demo.py
@@ -29,6 +32,8 @@ spec:
       - name: airflow-dags
         mountPath: /dags/kafka.py
         subPath: kafka.py
+      - name: kafka-tls-pem
+        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleConfig:
       listenerClass: external-unstable
@@ -43,24 +48,25 @@ spec:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+      #AIRFLOW_CONN_KAFKA_CONN: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.{{ NAMESPACE }}.svc.cluster.local:9093\", \"security.protocol\": \"SSL\", \"ssl.ca.location\": \"/stackable/kafka-tls-pem/ca.crt\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
     podOverrides: &podOverrides
       spec:
         containers:
           - name: airflow
+            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            imagePullPolicy: IfNotPresent
             env:
-              - name: KAFKA_BOOTSTRAP
-                valueFrom:
-                  configMapKeyRef:
-                    name: kafka
-                    key: KAFKA
-              - name: AIRFLOW_CONN_KAFKA_CONN # $(KAFKA_BOOTSTRAP)
-                value: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.demo.svc.cluster.local:9092\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: AIRFLOW_CONN_KAFKA_CONN
+              value: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093\", \"security.protocol\": \"SSL\", \"ssl.ca.location\": \"/stackable/kafka-tls-pem/ca.crt\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
     roleGroups:
       default:
         replicas: 1
   kubernetesExecutors:
     envOverrides: *envOverrides
-    podOverrides: *podOverrides
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
@@ -118,7 +124,7 @@ data:
     # Define an asset that watches for messages on the queue
     asset = Asset("kafka_queue_asset", watchers=[AssetWatcher(name="kafka_watcher", trigger=trigger)])
 
-    with DAG(dag_id="example_kafka_watcher", schedule=[asset]) as dag:
+    with DAG(dag_id="kafka_watcher", schedule=[asset]) as dag:
       EmptyOperator(task_id="task")
 
   date_demo.py: |
