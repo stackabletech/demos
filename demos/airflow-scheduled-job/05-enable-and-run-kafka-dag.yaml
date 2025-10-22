@@ -35,6 +35,7 @@ spec:
                 /stackable/kafka/bin/kafka-topics.sh \
                 --bootstrap-server kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093 \
                 --create \
+                --if-not-exists \
                 --topic __consumer_offsets \
                 --partitions 50 \
                 --replication-factor 1 \

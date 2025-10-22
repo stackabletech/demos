@@ -1,11 +1,18 @@
 = airflow-scheduled-job
-:description: This demo installs Airflow with Postgres and Redis on Kubernetes, showcasing DAG scheduling, job runs, and status verification via the Airflow UI.
+:description: This demo installs Airflow with Postgres, Kafka and OPA on Kubernetes, showcasing DAG scheduling, job runs, and status verification via the Airflow UI.
 
 Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
 $ stackablectl demo install airflow-scheduled-job
+----
+
+You can also deploy it to a specific namespace (the namespace `airflow-demo` will be assumed in this guide):
+
+[source,console]
+----
+$ stackablectl demo install airflow-scheduled-job -n airflow-demo
 ----
 
 [WARNING]
@@ -29,11 +36,14 @@ This demo will
 * Install the required Stackable operators
 * Spin up the following data products
 ** *Postgresql*: An open-source database used for Airflow cluster and job metadata.
-** *Redis*: An in-memory data structure store used for queuing Airflow jobs
 ** *Airflow*: An open-source workflow management platform for data engineering pipelines.
-* Mount two Airflow jobs (referred to as Directed Acyclic Graphs, or DAGs) for the cluster to use
+** *Kafka*: An open-source messaging broker that will be used to trigger an Airflow DAG.
+** *Open Policy Agent*: An open-source policy engine used for user authorization.
+* Mount several Airflow jobs (referred to as Directed Acyclic Graphs, or DAGs) for the cluster to use
 * Enable and schedule the jobs
 * Verify the job status with the Airflow Webserver UI
+* Illustrate DAG event-based scheduling
+* Illustrate user authorization
 
 You can see the deployed products and their relationship in the following diagram:
 
@@ -45,39 +55,44 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
-┌─────────┬─────────┬───────────┬─────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT ┆ NAME    ┆ NAMESPACE ┆ ENDPOINTS                               ┆ CONDITIONS                      │
-╞═════════╪═════════╪═══════════╪═════════════════════════════════════════╪═════════════════════════════════╡
-│ airflow ┆ airflow ┆ default   ┆ webserver-http  http://172.19.0.5:30913 ┆ Available, Reconciling, Running │
-└─────────┴─────────┴───────────┴─────────────────────────────────────────┴─────────────────────────────────┘
+$ stackablectl stacklet list -n airflow-demo
+
+┌─────────┬─────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME        ┆ NAMESPACE    ┆ ENDPOINTS                                                                                                              ┆ CONDITIONS                      │
+╞═════════╪═════════════╪══════════════╪════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow     ┆ airflow-demo ┆ webserver-http                              http://172.19.0.6:32111                                                    ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka   ┆ kafka       ┆ airflow-demo ┆ broker-default-0-listener-broker-kafka-tls  kafka-broker-default-0-listener-broker.airflow-demo.svc.cluster.local:9093 ┆ Available, Reconciling, Running │
+│         ┆             ┆              ┆ broker-default-0-listener-broker-metrics    kafka-broker-default-0-listener-broker.airflow-demo.svc.cluster.local:9606 ┆                                 │
+│         ┆             ┆              ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.airflow-demo.svc.cluster.local:9093         ┆                                 │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa     ┆ opa-airflow ┆ airflow-demo ┆                                                                                                                        ┆ Available, Reconciling, Running │
+└─────────┴─────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
 == Airflow Webserver UI
 
-Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.0.5:30913` in this case).
+Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.0.6:32111` in this case).
 
 image::airflow-scheduled-job/airflow_1.png[]
 
 Log in with the username `admin` and password `adminadmin`.
-Click in 'Active DAGs' at the top and you will see an overview showing the DAGs mounted during the demo
+Click on 'DAGs' in the left margin and you will see an overview showing the DAGs mounted during the demo
 setup (`date_demo` and `sparkapp_dag`).
 
 image::airflow-scheduled-job/airflow_2.png[]
 
 There are two things to notice here.
-Both DAGs have been enabled, as shown by the slider on the far right of the screen for each DAG
-(DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for this demo):
+All DAGs but one (the one demonstrating a deferrable operator) have been enabled, as shown by the slider on the far right of the screen for each DAG
+(DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for this demo).
+Secondly, the `date_demo` job has been busy, with several runs already logged:
 
 image::airflow-scheduled-job/airflow_3.png[]
 
-Secondly, the `date_demo` job has been busy, with several runs already logged.
 The `sparkapp_dag` has only been run once because they have been defined with different schedules.
-
-image::airflow-scheduled-job/airflow_4.png[]
-
+The `kafka_watcher` job has been activated and is awaiting a trigger action (in this case, a message arriving in a designated Kafka topic).
 Clicking on the DAG name and then on `Runs` will display the individual job runs:
 
 image::airflow-scheduled-job/airflow_5.png[]
@@ -128,6 +143,47 @@ By navigating to the graphical overview of the job we can see that DAG has two s
 asynchronously - and another to poll the running job to report on its status.
 
 image::airflow-scheduled-job/airflow_11.png[]
+
+=== `kafka_watcher` DAG
+
+This DAG is using the event-scheduling feature of Airflow.
+Click on the DAG and then select the `Code` tab in the window on the right half of the screen.
+When a message arrives in the topic named test-topic, the DAG will be triggered.
+Note that the connection to Kafka (`kafka_conn`) is expected: this has been created as part of the airflow cluster:
+
+image::airflow-scheduled-job/airflow_12.png[]
+
+We can use the kafka-producer script bundled with Kafka to write to this topic:
+
+[source,bash]
+----
+kubectl exec -n airflow-demo kafka-broker-default-0 -c kafka -- bash -c \
+'echo "Hello World at: $(date)" | /stackable/kafka/bin/kafka-console-producer.sh \
+  --bootstrap-server $BOOTSTRAP_SERVER \
+  --topic test-topic \
+  --producer.config /stackable/config/client.properties'
+----
+
+image::airflow-scheduled-job/airflow_13.png[]
+
+image::airflow-scheduled-job/airflow_14.png[]
+
+image::airflow-scheduled-job/airflow_15.png[]
+
+image::airflow-scheduled-job/airflow_16.png[]
+
+image::airflow-scheduled-job/airflow_17.png[]
+
+
+image::airflow-scheduled-job/deferrable_01_running.png[]
+image::airflow-scheduled-job/deferrable_02_queued.png[]
+image::airflow-scheduled-job/deferrable_03_deferred.png[]
+image::airflow-scheduled-job/deferrable_04_queued.png[]
+image::airflow-scheduled-job/deferrable_05_running.png[]
+image::airflow-scheduled-job/deferrable_06_status.png[]
+
+image::airflow-scheduled-job/opa_01.png[]
+
 
 == Patching Airflow to stress-test DAG parsing using relevant environment variables
 
