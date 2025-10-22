@@ -14,7 +14,7 @@ spec:
       autoGenerate: true
   nodes:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         cpu:
