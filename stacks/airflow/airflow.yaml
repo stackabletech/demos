@@ -9,8 +9,14 @@ spec:
     productVersion: 3.0.6
     pullPolicy: IfNotPresent
   clusterConfig:
+    authorization:
+      opa:
+        configMapName: opa-airflow
+        package: airflow
+        cache:
+          entryTimeToLive: 5s
+          maxEntries: 10
     loadExamples: false
-    exposeConfig: false
     credentialsSecret: airflow-credentials
     volumes:
       - name: airflow-dags
@@ -32,6 +38,9 @@ spec:
       - name: airflow-dags
         mountPath: /dags/kafka.py
         subPath: kafka.py
+      - name: airflow-dags
+        mountPath: /dags/triggerer.py
+        subPath: triggerer.py
       - name: kafka-tls-pem
         mountPath: /stackable/kafka-tls-pem
   webservers:
@@ -48,7 +57,12 @@ spec:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
-      #AIRFLOW_CONN_KAFKA_CONN: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.{{ NAMESPACE }}.svc.cluster.local:9093\", \"security.protocol\": \"SSL\", \"ssl.ca.location\": \"/stackable/kafka-tls-pem/ca.crt\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
+      # Airflow 3: Disable decision caching for easy debugging
+      AIRFLOW__CORE__AUTH_OPA_CACHE_MAXSIZE: "0"
+    configOverrides:
+      webserver_config.py:
+        # Allow "POST /login/" without CSRF token
+        WTF_CSRF_ENABLED: "False"
     podOverrides: &podOverrides
       spec:
         containers:
@@ -66,6 +80,8 @@ spec:
       default:
         replicas: 1
   kubernetesExecutors:
+    # do not apply the podOverrides here as we don't need and it will interfere
+    # with the pod template
     envOverrides: *envOverrides
   schedulers:
     envOverrides: *envOverrides
@@ -127,6 +143,61 @@ data:
     with DAG(dag_id="kafka_watcher", schedule=[asset]) as dag:
       EmptyOperator(task_id="task")
 
+  triggerer.py: |
+    from datetime import datetime, timedelta
+
+    from airflow import DAG
+    from airflow.models.baseoperator import BaseOperator
+    from airflow.triggers.temporal import TimeDeltaTrigger
+    from airflow.utils.context import Context
+    from airflow.operators.empty import EmptyOperator
+
+    # ------------------------------------------------------
+    # Custom deferrable operator - does a simple async sleep
+    # ------------------------------------------------------
+    class CoreDeferrableSleepOperator(BaseOperator):
+        """
+        Sleeps for ``duration`` seconds without occupying a worker.
+        The async hand-off happens via ``self.defer`` + ``TimeDeltaTrigger``.
+        """
+        ui_color = "#ffefeb"
+
+        def __init__(self, *, duration: int, **kwargs):
+            super().__init__(**kwargs)
+            self.duration = duration
+
+        def execute(self, context: Context):
+            """Run on a worker, then hand control to the Triggerer."""
+            # Build the trigger that will fire after `duration` seconds.
+            trigger = TimeDeltaTrigger(timedelta(seconds=self.duration))
+
+            # *** Asynchronous hand-off ***
+            # This tells the scheduler: “pause this task, let the Triggerer watch the timer”.
+            self.defer(trigger=trigger, method_name="execute_complete")
+
+        def execute_complete(self, context: Context, event=None):
+            """Resumes here once the Triggerer fires."""
+            self.log.info("Deferrable sleep of %s seconds finished.", self.duration)
+            return "DONE"
+
+    default_args = {"owner": "stackable", "retries": 0}
+
+    with DAG(
+        dag_id="core_deferrable_sleep_demo",
+        schedule=None,
+        # N.B. this be earlier than the current timestamp!
+        start_date=datetime(2025, 8, 1),
+        catchup=False,
+        default_args=default_args,
+        tags=["example", "triggerer"],
+    ) as dag:
+
+        sleep = CoreDeferrableSleepOperator(
+            task_id="deferrable_sleep",
+            duration=10,
+        )
+
+        sleep
   date_demo.py: |
     """Example DAG returning the current date"""
     from datetime import datetime, timedelta

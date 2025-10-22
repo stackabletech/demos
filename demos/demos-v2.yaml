@@ -48,9 +48,10 @@ demos:
     manifests:
       - plainYaml: demos/airflow-scheduled-job/01-airflow-demo-clusterrole.yaml
       - plainYaml: demos/airflow-scheduled-job/02-airflow-demo-clusterrolebinding.yaml
-      #- plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/03-enable-and-run-spark-dag.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/03-enable-and-run-spark-dag.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/04-enable-and-run-date-dag.yaml
       - plainYaml: demos/airflow-scheduled-job/05-enable-and-run-kafka-dag.yaml
+      - plainYaml: demos/airflow-scheduled-job/06-create-opa-users.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 2401m

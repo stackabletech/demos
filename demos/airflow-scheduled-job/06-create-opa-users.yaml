@@ -1,0 +1,52 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: start-users-job
+spec:
+  template:
+    spec:
+      containers:
+        - name: start-users-job
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          # N.B. it is possible for the scheduler to report that a DAG exists,
+          # only for the worker task to fail if a pod is unexpectedly
+          # restarted. The wait/watch steps below are not "water-tight" but add
+          # a layer of stability by at least ensuring that the cluster is
+          # initialized and ready and that all pods are reachable (albeit
+          # independent of each other).
+          command:
+          - bash
+          - -euo
+          - pipefail
+          - -c
+          - |
+              # Airflow: wait for cluster
+              kubectl rollout status --watch statefulset/airflow-webserver-default
+              kubectl rollout status --watch statefulset/airflow-scheduler-default
+
+              # Airflow: create users
+              kubectl exec airflow-webserver-default-0 -- airflow users create \
+                --username "jane.doe" \
+                --firstname "Jane" \
+                --lastname "Doe" \
+                --email "jane.doe@stackable.tech" \
+                --password "jane.doe" \
+                --role "User"
+
+              kubectl exec airflow-webserver-default-0 -- airflow users create \
+                --username "richard.roe" \
+                --firstname "Richard" \
+                --lastname "Roe" \
+                --email "richard.roe@stackable.tech" \
+                --password "richard.roe" \
+                --role "User"
+          volumeMounts:
+            - name: airflow-credentials
+              mountPath: /airflow-credentials
+      volumes:
+        - name: airflow-credentials
+          secret:
+            secretName: airflow-credentials
+      restartPolicy: OnFailure
+  backoffLimit: 20 # give some time for the Airflow cluster to be available

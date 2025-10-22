@@ -141,12 +141,15 @@ stacks:
       - airflow
       - spark-k8s
       - kafka
+      - opa
     labels:
       - airflow
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: stacks/airflow/airflow.yaml
       - plainYaml: stacks/airflow/kafka.yaml
+      - plainYaml: stacks/airflow/opa.yaml
+      - plainYaml: stacks/airflow/opa-rules.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
