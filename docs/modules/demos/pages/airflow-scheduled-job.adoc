@@ -180,12 +180,14 @@ image::airflow-scheduled-job/airflow_15.png[]
 
 === `core_deferrable_sleep_demo` DAG
 
-Now log out of the UI. This next section will illustrate user authorization with the Open Policy Agent (OPA) and the OPA Authorizer that is included in Stackable's Airflow product images.
+Now log out of the UI.
+This next section will illustrate user authorization with the Open Policy Agent (OPA) and the OPA Authorizer that is included in Stackable's Airflow product images.
 Two other users - other than `admin` - are supplied with this demo: `jane.doe` and `richard.roe` (the passwords are the same as the user names).
 `jane.doe` has permission to view all DAGs but only has permission to activate and run `core_deferrable_sleep_demo`.
 `richard.roe` does not have permission to view or action any DAGs.
 Login in as `jane.doe`.
-You will see the list of 4 DAGs as usual, and can enable `core_deferrable_sleep_demo` (the only DAG not automatically enabled when the demo was deployed).
+Select the DAGs view, making sure to set the filter from `Enabled` to `All`.
+You will see the list of 4 DAGs, and can enable `core_deferrable_sleep_demo` (the only DAG not automatically enabled when the demo was deployed).
 But if you try and run any other DAG, permission will be denied:
 
 image::airflow-scheduled-job/airflow_16.png[]
@@ -212,6 +214,7 @@ image::airflow-scheduled-job/opa_01.png[]
 
 == Patching Airflow to stress-test DAG parsing using relevant environment variables
 
+Log back into the UI as `admin`.
 The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
 This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
 To include this in the list of DAGs (without removing the existing ones), an extra volumeMount is needed, as shown below.
@@ -230,20 +233,14 @@ spec:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py
         subPath: dag_factory.py
-      - name: airflow-dags
-        mountPath: /dags/date_demo.py
-        subPath: date_demo.py
-      - name: airflow-dags
-        mountPath: /dags/pyspark_pi.py
-        subPath: pyspark_pi.py
-      - name: airflow-dags
-        mountPath: /dags/pyspark_pi.yaml
-        subPath: pyspark_pi.yaml
+      - name: kafka-tls-pem
+        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleGroups:
       default:
         envOverrides: &envOverrides
           AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+          PYTHONPATH: "/stackable/app/log_config:/dags"
           AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: "60"
           AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: "60"
           AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "60"
@@ -261,7 +258,7 @@ THe patch can be applied like this:
 
 [source,console]
 ----
-kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml
+kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-demo
 ----
 
 [NOTE]
