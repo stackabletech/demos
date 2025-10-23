@@ -45,7 +45,7 @@ spec:
         mountPath: /stackable/kafka-tls-pem
   webservers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         cpu:

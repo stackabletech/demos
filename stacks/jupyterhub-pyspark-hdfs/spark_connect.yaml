@@ -54,7 +54,7 @@ spec:
             configMap:
               name: hdfs
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         memory:

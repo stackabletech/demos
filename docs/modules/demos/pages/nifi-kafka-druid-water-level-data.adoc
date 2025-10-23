@@ -92,6 +92,215 @@ $ stackablectl stacklet list
 
 include::partial$instance-hint.adoc[]
 
+== Inspect the data in Kafka
+
+Kafka is an event streaming platform to stream the data in near real-time. All the messages put in and read from Kafka
+are structured in dedicated queues called topics. The test data will be put into topics called stations and measurements. The records
+are produced (put in) by the test data generator and consumed (read) by Druid afterwards in the same order they were
+created.
+
+To interact with Kafka you will use the client scripts shipped with the Kafka image. Kafka uses mutual TLS, so clients
+wanting to connect to Kafka must present a valid TLS certificate. The easiest way to obtain this is to shell into the
+`kafka-broker-default-0` Pod, as we will do in the following section for demonstration purposes. For a production setup,
+you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
+Kafka Pod.
+
+=== List the available Topics
+
+You can execute a command on the Kafka broker to list the available topics as follows:
+
+[source,console]
+----
+$ kubectl k exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-topics.sh \
+--describe \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties
+...
+Topic: measurements     TopicId: w9qYb3GaTvCMZj4G8pkPPQ PartitionCount: 8       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
+        Topic: measurements     Partition: 0    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 1    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 2    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 3    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 4    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 5    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 6    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 7    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+Topic: stations TopicId: QkKmvOagQkG4QbeS0IZ_Tg PartitionCount: 8       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
+        Topic: stations Partition: 0    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 1    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 2    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 3    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 4    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 5    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 6    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 7    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+----
+
+You can see that Kafka consists of one broker, and the topics `stations` and `measurements` have been created with eight
+partitions each.
+
+=== Show Sample Records
+
+To see some records sent to Kafka, run the following commands. You can change the number of records to
+print via the `--max-messages` parameter.
+
+[source,console]
+----
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic stations \
+--offset earliest \
+--partition 0 \
+--max-messages 2
+----
+
+Below is an example of the output of two records:
+
+[source,json]
+----
+{
+  "uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87",
+  "number": 48900237,
+  "shortname": "EITZE",
+  "longname": "EITZE",
+  "km": 9.56,
+  "agency": "VERDEN",
+  "longitude": 9.2767694354,
+  "latitude": 52.9040654474,
+  "water": {
+    "shortname": "ALLER",
+    "longname": "ALLER"
+  }
+}
+{
+  "uuid": "5aaed954-de4e-4528-8f65-f3f530bc8325",
+  "number": 48900204,
+  "shortname": "RETHEM",
+  "longname": "RETHEM",
+  "km": 34.22,
+  "agency": "VERDEN",
+  "longitude": 9.3828408101,
+  "latitude": 52.7890975921,
+  "water": {
+    "shortname": "ALLER",
+    "longname": "ALLER"
+  }
+}
+----
+
+[source,console]
+----
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic measurements \
+--offset earliest \
+--partition 0 \
+--max-messages 3
+----
+
+Below is an example of the output of three records:
+
+[source,json]
+----
+{
+  "timestamp": 1658151900000,
+  "value": 221,
+  "station_uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87"
+}
+{
+  "timestamp": 1658152800000,
+  "value": 220,
+  "station_uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87"
+}
+{
+  "timestamp": 1658153700000,
+  "value": 220,
+  "station_uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87"
+}
+----
+
+The records of the two topics only contain the needed data. The measurement records contain a `station_uuid` for the
+measuring station. The relationship is illustrated below.
+
+image::nifi-kafka-druid-water-level-data/topics.png[]
+
+The reason for splitting the data up into two different topics is the improved performance. One more straightforward
+solution would be to use a single topic and produce records like the following:
+
+[source,json]
+----
+{
+  "uuid": "47174d8f-1b8e-4599-8a59-b580dd55bc87",
+  "number": 48900237,
+  "shortname": "EITZE",
+  "longname": "EITZE",
+  "km": 9.56,
+  "agency": "VERDEN",
+  "longitude": 9.2767694354,
+  "latitude": 52.9040654474,
+  "water": {
+    "shortname": "ALLER",
+    "longname": "ALLER"
+  },
+  "timestamp": 1658151900000,
+  "value": 221
+}
+----
+
+Notice the two last attributes that differ from the previously shown `stations` records. The obvious downside is that
+every measurement (multiple millions of it) has to contain all the data known about the station it was measured at. This
+often leads to transmitting and storing duplicated information, e.g., the longitude of a station, resulting in increased
+network traffic and storage usage. The solution is only to send a station's known/needed data or measurement data. This
+process is called data normalization. The downside is that when analyzing the data, you need to combine the records from
+multiple tables in Druid (`stations` and `measurements`).
+
+If you are interested in how many records have been produced to the Kafka topic so far, use the following command. It
+will print the last record produced to the topic partition, formatted with the pattern specified in the `-f` parameter.
+The given pattern will print some metadata of the record.
+
+[source,console]
+----
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-get-offsets.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
+--topic measurements
+...
+measurements:0:1366665
+measurements:1:1364930
+measurements:2:1395607
+measurements:3:1390762
+measurements:4:1368829
+measurements:5:1362539
+measurements:6:1344362
+measurements:7:1369651
+----
+
+Multiplying `1,324,098` records by `8` partitions, we end up with ~ 10,592,784 records.
+
+To inspect the last produced records, use the following command. Here, we consume the last three records from partition
+`0` of the `measurements` topic.
+
+[source,console]
+----
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic measurements \
+--offset latest \
+--partition 0 \
+--max-messages 3
+-...
+{"timestamp":"2025-10-21T11:00:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
+{"timestamp":"2025-10-21T11:15:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
+{"timestamp":"2025-10-21T11:00:00+02:00","value":8.0,"station_uuid":"7deedc21-2878-40cc-ab47-f6da0d9002f1"}
+----
 == NiFi
 
 NiFi fetches water-level data from the internet and ingests it into Kafka in real time. This demo includes a workflow
