@@ -153,7 +153,7 @@ Note that the connection to Kafka (`kafka_conn`) is expected: this has been crea
 
 image::airflow-scheduled-job/airflow_12.png[]
 
-We can use the kafka-producer script bundled with Kafka to write to this topic:
+We can use the kafka-producer script bundled with Kafka to write to this topic (note the namespace we chose initially is used consistently in this demo):
 
 [source,bash]
 ----
@@ -164,23 +164,48 @@ kubectl exec -n airflow-demo kafka-broker-default-0 -c kafka -- bash -c \
   --producer.config /stackable/config/client.properties'
 ----
 
+The triggerer logs will show that this DAG was fired (logging out the message that we wrote to the topic above):
+
 image::airflow-scheduled-job/airflow_13.png[]
+
+The DAG view will show that run was successful.
+Note the `kafka_queue_asset` under `Schedule`.
+This is an Airflow object (also defined in the DAG code) that wraps the actual trigger/wait mechanism in an generic way for use in DAG code.
 
 image::airflow-scheduled-job/airflow_14.png[]
 
+Clicking on the asset will show the triggers that have been fired, called `Asset Events`:
+
 image::airflow-scheduled-job/airflow_15.png[]
+
+=== `core_deferrable_sleep_demo` DAG
+
+Now log out of the UI. This next section will illustrate user authorization with the Open Policy Agent (OPA) and the OPA Authorizer that is included in Stackable's Airflow product images.
+Two other users - other than `admin` - are supplied with this demo: `jane.doe` and `richard.roe` (the passwords are the same as the user names).
+`jane.doe` has permission to view all DAGs but only has permission to activate and run `core_deferrable_sleep_demo`.
+`richard.roe` does not have permission to view or action any DAGs.
+Login in as `jane.doe`.
+You will see the list of 4 DAGs as usual, and can enable `core_deferrable_sleep_demo` (the only DAG not automatically enabled when the demo was deployed).
+But if you try and run any other DAG, permission will be denied:
 
 image::airflow-scheduled-job/airflow_16.png[]
 
+Enable and run `core_deferrable_sleep_demo`:
+
 image::airflow-scheduled-job/airflow_17.png[]
 
+Click on the DAG, switching to the task view.
+This DAG uses a deferrable operator which, in conjunction with the triggerer process, "offloads" the DAG from its worker for a specfic period of time, before being picked up and again and executed.
+You will see the task cycle through the following states:
 
 image::airflow-scheduled-job/deferrable_01_running.png[]
 image::airflow-scheduled-job/deferrable_02_queued.png[]
 image::airflow-scheduled-job/deferrable_03_deferred.png[]
 image::airflow-scheduled-job/deferrable_04_queued.png[]
 image::airflow-scheduled-job/deferrable_05_running.png[]
-image::airflow-scheduled-job/deferrable_06_status.png[]
+image::airflow-scheduled-job/deferrable_06_success.png[]
+
+Now log out and log in again as `richard.roe`. On the home screen no DAGs are visible, as expected by the authorization rules defined for this user:
 
 image::airflow-scheduled-job/opa_01.png[]
 
