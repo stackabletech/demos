@@ -1,0 +1,19 @@
+---
+apiVersion: opa.stackable.tech/v1alpha1
+kind: OpaCluster
+metadata:
+  name: opa-airflow
+spec:
+  image:
+    productVersion: 1.8.0
+    pullPolicy: IfNotPresent
+  servers:
+    config:
+      logging:
+        containers:
+          opa:
+            loggers:
+              decision:
+                level: INFO
+    roleGroups:
+      default: {}

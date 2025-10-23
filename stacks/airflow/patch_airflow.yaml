@@ -9,20 +9,14 @@ spec:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py
         subPath: dag_factory.py
-      - name: airflow-dags
-        mountPath: /dags/date_demo.py
-        subPath: date_demo.py
-      - name: airflow-dags
-        mountPath: /dags/pyspark_pi.py
-        subPath: pyspark_pi.py
-      - name: airflow-dags
-        mountPath: /dags/pyspark_pi.yaml
-        subPath: pyspark_pi.yaml
+      - name: kafka-tls-pem
+        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleGroups:
       default:
         envOverrides: &envOverrides
           AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+          PYTHONPATH: "/stackable/app/log_config:/dags"
           AIRFLOW__CORE__MIN_SERIALIZED_DAG_UPDATE_INTERVAL: "60"
           AIRFLOW__CORE__MIN_SERIALIZED_DAG_FETCH_INTERVAL: "60"
           AIRFLOW__DAG_PROCESSOR__MIN_FILE_PROCESS_INTERVAL: "60"

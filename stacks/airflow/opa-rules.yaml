@@ -1,0 +1,96 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-rules
+  labels:
+    opa.stackable.tech/bundle: "true"
+data:
+  airflow.rego: |
+    package airflow
+
+    default is_authorized_configuration := false
+    default is_authorized_connection := false
+    default is_authorized_dag := false
+    default is_authorized_backfill := false
+    default is_authorized_asset := false
+    default is_authorized_asset_alias := false
+
+    # Allow the user "admin" to create test users
+    # POST /auth/fab/v1/users
+    is_authorized_custom_view if {
+        input.method == "POST"
+        input.resource_name == "Users"
+
+        input.user.name == "admin"
+    }
+    is_authorized_configuration if {
+        input.user.name == "admin"
+    }
+    is_authorized_configuration if {
+        input.user.name == "admin"
+    }
+    is_authorized_connection if {
+        input.user.name == "admin"
+    }
+    is_authorized_dag if {
+        input.user.name == "admin"
+    }
+    is_authorized_dataset if {
+        input.user.name == "admin"
+    }
+    is_authorized_pool if {
+        input.user.name == "admin"
+    }
+    is_authorized_variable if {
+        input.user.name == "admin"
+    }
+    is_authorized_view if {
+        input.user.name == "admin"
+    }
+    is_authorized_custom_view if {
+        input.user.name == "admin"
+    }
+    is_authorized_backfill if {
+        input.user.name == "admin"
+    }
+    is_authorized_asset if {
+        input.user.name == "admin"
+    }
+    is_authorized_asset_alias if {
+        input.user.name == "admin"
+    }
+
+    # GET /home
+    is_authorized_view if {
+        input.access_view == "WEBSITE"
+
+        input.user.name == "jane.doe"
+    }
+
+    is_authorized_dag if {
+        input.method == "GET"
+        input.user.name == "jane.doe"
+    }
+
+    is_authorized_dag if {
+        input.method == "GET"
+        input.access_entity == "RUN"
+        input.details.id == "core_deferrable_sleep_demo"
+
+        input.user.name == "jane.doe"
+    }
+
+    is_authorized_dag if {
+        input.method == "PUT"
+        input.details.id == "core_deferrable_sleep_demo"
+
+        input.user.name == "jane.doe"
+    }
+
+    is_authorized_dag if {
+        input.method == "POST"
+        input.details.id == "core_deferrable_sleep_demo"
+
+        input.user.name == "jane.doe"
+    }
