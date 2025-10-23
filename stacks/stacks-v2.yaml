@@ -194,7 +194,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
