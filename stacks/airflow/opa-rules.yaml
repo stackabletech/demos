@@ -27,9 +27,6 @@ data:
     is_authorized_configuration if {
         input.user.name == "admin"
     }
-    is_authorized_configuration if {
-        input.user.name == "admin"
-    }
     is_authorized_connection if {
         input.user.name == "admin"
     }
