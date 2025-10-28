@@ -139,12 +139,17 @@ stacks:
       - listener
       - secret
       - airflow
-      - spark-k8s # Some demo does schedule a Spark job
+      - spark-k8s
+      - kafka
+      - opa
     labels:
       - airflow
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa-rules.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
