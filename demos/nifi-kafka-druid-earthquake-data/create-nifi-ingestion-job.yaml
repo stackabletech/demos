@@ -76,7 +76,7 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
-    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/demos/nifi-kafka-druid-earthquake-data/IngestEarthquakesToKafka.json")
+    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/release-25.7/demos/nifi-kafka-druid-earthquake-data/IngestEarthquakesToKafka.json")
     filename = "/tmp/IngestEarthquakesToKafka.json"
     with open(filename, "wb") as f:
         f.write(response.content)
