@@ -40,10 +40,12 @@ spec:
           - airflow
           - druid
           - hive
-          - nifi # This only works for NiFi 1, NiFi 2 has a special ServiceMonitor below
+          - kafka
+          - nifi # This only works for NiFi 1, NiFi 2 works via stackable-generic
           - opa
           - superset
           - trino
+          - zookeeper
   endpoints:
     - scheme: http
       port: metrics
@@ -55,10 +57,25 @@ spec:
     - app.kubernetes.io/role-group
     - app.kubernetes.io/version
 ---
+# Utilize `prometheus.io/scheme`, `prometheus.io/port`, `prometheus.io/path` annotations set by the operators
+# to scrape all Stackable products.
+# [x] Airflow - relabel drop filter on airflow container
+# [x] Druid
+# [x] HBase
+# [X] Hadoop HDFS - relabel drop filter on empty container
+# [x] Hive
+# [~] Kafka - TODO: listener services have metrics?
+# [x] NiFi 1 + 2
+# [ ] OpenSearch
+# [x] Spark: Connect, HistoryServer
+# [x] Superset - relabel drop filter on superset container
+# [x] Trino
+# [x] ZooKeeper
+# [x] OPA
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
-  name: stackable-native-metrics
+  name: stackable-generic
   labels:
     stackable.tech/vendor: Stackable
     release: prometheus
@@ -69,46 +86,49 @@ spec:
     matchLabels:
       stackable.tech/vendor: Stackable
       prometheus.io/scrape: "true"
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - zookeeper
   endpoints:
-    - scheme: http
-      port: native-metrics
-      path: /metrics
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-# Kafka is special in that the operator totally messes up services:
-# 1. The metrics Service is missing
-# 2. The role level simple-kafka-broker-default has the prometheus.io/scrape label, but exposes no ports...
-# 3. The role level simple-kafka-broker-default is labeled with app.kubernetes.io/name: listener???
-# So we have a dedicated config for it
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-kafka
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      app.kubernetes.io/name: listener # Dafuq?
-      app.kubernetes.io/component: broker # We need to filter on brokers instead, as the app.kubernetes.io/name is messed up
-  endpoints:
-    - scheme: http
-      port: metrics
-      path: /metrics
+    - relabelings:
+        - sourceLabels:
+            - __meta_kubernetes_pod_container_name
+          # Pods show up twice due to multiple containers, we only keep the main / product container.
+          # Except for Airflow and Superset, where we chose the metrics container (otherwise scheduler, worker etc.
+          # which only have the metrics container are not getting picked up).
+          # - airflow: airflow
+          # - superset: superset
+          # - empty: filter when container label does not exist: hdfs
+          regex: ^(airflow|superset|)$
+          action: drop
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_scheme
+          action: replace
+          targetLabel: __scheme__
+          regex: (https?)
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_path
+          action: replace
+          targetLabel: __metrics_path__
+          regex: (.+)
+        - sourceLabels:
+            - __meta_kubernetes_service_name
+            - __meta_kubernetes_namespace
+            - __meta_kubernetes_service_annotation_prometheus_io_port
+          action: replace
+          targetLabel: __address__
+          regex: (.+);(.+);(\d+)
+          # TODO: We could set the cluster domain via annotation as well and pick it up here.
+          replacement: $1.$2.svc.cluster.local:$3
+      tlsConfig:
+        ca:
+          secret:
+            name: prometheus-tls-certificate
+            key: ca.crt
+        cert:
+          secret:
+            name: prometheus-tls-certificate
+            key: tls.crt
+        keySecret:
+          name: prometheus-tls-certificate
+          key: tls.key
   podTargetLabels:
     - app.kubernetes.io/name
     - app.kubernetes.io/instance
@@ -212,63 +232,6 @@ spec:
           secret:
             name: prometheus-tls-certificate
             key: ca.crt
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-# NiFI 2 is a beast on it's own...
-# We need to use mTLS (otherwise we get a 401) and can not use the PodIP
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-nifi-2
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - nifi
-  endpoints:
-    - scheme: https
-      port: https
-      path: /nifi-api/flow/metrics/prometheus
-      # See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.TLSConfig
-      tlsConfig:
-        ca:
-          secret:
-            name: prometheus-tls-certificate
-            key: ca.crt
-        cert:
-          secret:
-            name: prometheus-tls-certificate
-            key: tls.crt
-        keySecret:
-          name: prometheus-tls-certificate
-          key: tls.key
-      # We need to talk to the Pod via the FQDN of the Pod because of the stupid SNI check of NiFi.
-      # We can not use the typical PodIP, as it is not contained in the NiFi certificate,
-      # see https://github.com/stackabletech/secret-operator/issues/620
-      relabelings:
-        - sourceLabels:
-            - __meta_kubernetes_pod_name
-            - __meta_kubernetes_service_name
-            - __meta_kubernetes_namespace
-            - __meta_kubernetes_pod_container_port_number
-          targetLabel: __address__
-          replacement: ${1}.${2}-headless.${3}.svc.cluster.local:${4}
-          regex: (.+);(.+?)(?:-metrics)?;(.+);(.+)
   podTargetLabels:
     - app.kubernetes.io/name
     - app.kubernetes.io/instance
