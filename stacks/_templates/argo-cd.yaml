@@ -4,7 +4,7 @@ name: argo-cd
 repo:
   name: argo-cd
   url: https://argoproj.github.io/argo-helm
-version: v8.1.4
+version: 9.0.5 # v3.1.9
 options:
   configs:
     secret:
