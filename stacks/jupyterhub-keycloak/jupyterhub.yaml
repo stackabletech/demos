@@ -8,7 +8,7 @@ repo:
 # Special care should be taken during testing when this version was bumped.
 # There might be cases where this needs to be dropped back, because the chart
 # is not compatible with other components of the stack/images used.
-version: 4.2.0 # 5.3.0
+version: 4.3.1 # 5.4.1
 options:
   hub:
     config:
