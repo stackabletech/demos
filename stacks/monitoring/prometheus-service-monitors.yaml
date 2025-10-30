@@ -84,9 +84,8 @@ spec:
     - app.kubernetes.io/role-group
     - app.kubernetes.io/version
 ---
-# spark-k8s-operator does not deploy any Services at all (at least for SparkApplications).
 # We currently only scrape the driver, going forward we might want to scrape the executors as well.
-# In the future we might also want to scrape SparkConnect and HistoryServers.
+# SparkConnect and HistoryServers are scraped via the `stackable` ServiceMonitor.
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
