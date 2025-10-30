@@ -47,27 +47,32 @@ spec:
           # - empty: filter when container label does not exist: hdfs
           regex: ^(airflow|superset|)$
           action: drop
+          # Add empty label if not existing or pass-through existing value
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_clusterdomain
-          targetLabel: __cluster_domain__
+          targetLabel: __tmp_cluster_domain__
+          replacement: ""
+          # Use default value if empty
+        - sourceLabels:
+            - __tmp_cluster_domain__
+          targetLabel: __tmp_cluster_domain__
           regex: ^$
           replacement: "cluster.local"
+          # Scheme and Port
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_scheme
-          action: replace
           targetLabel: __scheme__
           regex: (https?)
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_path
-          action: replace
           targetLabel: __metrics_path__
           regex: (.+)
+          # Build metrics service address
         - sourceLabels:
             - __meta_kubernetes_service_name
             - __meta_kubernetes_namespace
-            - __cluster_domain__
+            - __tmp_cluster_domain__
             - __meta_kubernetes_service_annotation_prometheus_io_port
-          action: replace
           targetLabel: __address__
           regex: (.+);(.+);(.+);(\d+)
           replacement: $1.$2.svc.$3:$4
