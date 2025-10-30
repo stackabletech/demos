@@ -122,6 +122,7 @@ data:
     KNAB.COM = {
      acl_file = /stackable/config/kadm5.acl
      disable_encrypted_timestamp = false
+     max_renewable_life = 7d
     }
     [domain_realm]
     .cluster.local = KNAB.COM
