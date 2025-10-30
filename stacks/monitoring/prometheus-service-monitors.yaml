@@ -50,12 +50,12 @@ spec:
           # Add empty label if not existing or pass-through existing value
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_clusterdomain
-          targetLabel: __tmp_cluster_domain__
-          replacement: ""
+          targetLabel: __tmp_clusterdomain__
+          replacement: $1
           # Use default value if empty
         - sourceLabels:
-            - __tmp_cluster_domain__
-          targetLabel: __tmp_cluster_domain__
+            - __tmp_clusterdomain__
+          targetLabel: __tmp_clusterdomain__
           regex: ^$
           replacement: "cluster.local"
           # Scheme and Port
@@ -71,7 +71,7 @@ spec:
         - sourceLabels:
             - __meta_kubernetes_service_name
             - __meta_kubernetes_namespace
-            - __tmp_cluster_domain__
+            - __tmp_clusterdomain__
             - __meta_kubernetes_service_annotation_prometheus_io_port
           targetLabel: __address__
           regex: (.+);(.+);(.+);(\d+)
