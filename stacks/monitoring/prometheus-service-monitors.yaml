@@ -6,8 +6,9 @@
 # ServiceMonitor scrapes native metrics or a statsd/JMX exporter.
 #
 #
-# Utilize `prometheus.io/scheme`, `prometheus.io/port`, `prometheus.io/path` annotations set by the operators
-# to scrape all Stackable products.
+# Utilize `prometheus.io/scheme`, `prometheus.io/port`, `prometheus.io/path` (and optionally `prometheus.io/clusterdomain`)
+# annotations set by the operators to scrape all Stackable products.
+#
 # [x] Airflow - relabel drop filter on airflow container
 # [x] Druid
 # [x] HBase
