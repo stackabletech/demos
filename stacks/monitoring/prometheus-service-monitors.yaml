@@ -40,12 +40,17 @@ spec:
         - sourceLabels:
             - __meta_kubernetes_pod_container_name
           # Pods show up twice due to multiple containers, we only keep the main / product container.
-          # Except for Airflow and Superset, where we chose the metrics container.
+          # Except for Airflow and Superset, where we choose the metrics container.
           # - airflow: airflow
           # - superset: superset
           # - empty: filter when container label does not exist: hdfs
           regex: ^(airflow|superset|)$
           action: drop
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_clusterdomain
+          targetLabel: __cluster_domain__
+          regex: ^$
+          replacement: "cluster.local"
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_scheme
           action: replace
@@ -59,12 +64,12 @@ spec:
         - sourceLabels:
             - __meta_kubernetes_service_name
             - __meta_kubernetes_namespace
+            - __cluster_domain__
             - __meta_kubernetes_service_annotation_prometheus_io_port
           action: replace
           targetLabel: __address__
-          regex: (.+);(.+);(\d+)
-          # TODO: We could set the cluster domain via annotation as well and pick it up here.
-          replacement: $1.$2.svc.cluster.local:$3
+          regex: (.+);(.+);(.+);(\d+)
+          replacement: $1.$2.svc.$3:$4
       tlsConfig:
         ca:
           secret:
