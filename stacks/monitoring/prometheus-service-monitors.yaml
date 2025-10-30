@@ -58,7 +58,7 @@ spec:
           targetLabel: __tmp_clusterdomain__
           regex: ^$
           replacement: "cluster.local"
-          # Scheme and port extraction
+          # Scheme and path extraction
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_scheme
           targetLabel: __scheme__
