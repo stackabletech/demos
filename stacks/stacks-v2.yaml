@@ -437,39 +437,6 @@ stacks:
       - name: jupyterLabToken
         description: Token for JupyterLab UI access
         default: adminadmin
-  dual-hive-hdfs-s3:
-    description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
-    stackableRelease: dev
-    stackableOperators:
-      - commons
-      - listener
-      - secret
-      - zookeeper
-      - hdfs
-      - hive
-      - trino
-      - opa
-    labels:
-      - trino
-      - hive
-      - hdfs
-      - s3
-    manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hivehdfs.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hives3.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hive.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/trino.yaml
-    supportedNamespaces: []
-    resourceRequests:
-      cpu: 7750m
-      memory: 19974Mi
-      pvc: 44Gi
-    parameters:
-      - name: minioAdminPassword
-        description: Password of the Minio admin user
-        default: adminadmin
   tutorial-openldap:
     description: >-
       An OpenLDAP instance with two users (alice:alice, bob:bob) and TLS enabled.
