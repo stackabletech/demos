@@ -112,5 +112,5 @@ Some stacks are not used by demos, but still need testing in some way.
 You can install the stack via:
 
 ```shell
-stackablectl stack install <STACK_NAME>
+stackablectl stack install <STACK_NAME> --release dev
 ```
