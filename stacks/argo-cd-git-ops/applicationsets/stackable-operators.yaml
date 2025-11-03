@@ -24,7 +24,7 @@ spec:
                 - operator: opensearch
                 - operator: spark-k8s
                 - operator: superset
-                - operator: trino
+                - operator: trinov
                 - operator: zookeeper
           - list:
               elements:
