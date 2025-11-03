@@ -6,34 +6,38 @@ name: grafana
 repo:
   name: grafana
   url: https://grafana.github.io/helm-charts
-version: 10.1.2 # 12.2.0
+# To find the latest version:
+# helm repo add grafana https://grafana.github.io/helm-charts --force-update
+# helm search repo grafana/grafana
+version: 10.1.4 # 12.2.1
 options:
   admin:
     existingSecret: grafana-admin-credentials
   service:
     type: NodePort
+    port: 443
   datasources:
     datasources.yaml:
       apiVersion: 1
       datasources:
         - name: Loki
           type: loki
-          url: https://loki.default.svc.cluster.local:3100
+          url: http://loki:3100
           access: proxy
           isDefault: false
           jsonData:
-            tlsAuthWithCACert: true
-          secureJsonData:
-            tlsCACert: $__file{/etc/grafana/certs/ca.crt}
+            tlsAuthWithCACert: false
+          # secureJsonData:
+          #   tlsCACert: $__file{/etc/grafana/certs/ca.crt}
         - name: Tempo
           type: tempo
-          url: https://tempo.default.svc.cluster.local:3100
+          url: http://tempo:3100
           access: proxy
           isDefault: false
           jsonData:
-            tlsAuthWithCACert: true
-          secureJsonData:
-            tlsCACert: $__file{/etc/grafana/certs/ca.crt}
+            tlsAuthWithCACert: false
+          # secureJsonData:
+          #   tlsCACert: $__file{/etc/grafana/certs/ca.crt}
   readinessProbe:
     httpGet:
       scheme: HTTPS
