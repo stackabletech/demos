@@ -77,7 +77,7 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
-    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/demos/data-lakehouse-iceberg-trino-spark/LakehouseKafkaIngest.json")
+    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/release-25.7/demos/data-lakehouse-iceberg-trino-spark/LakehouseKafkaIngest.json")
 
     filename = "/tmp/LakehouseKafkaIngest.json"
     with open(filename, "wb") as f:
