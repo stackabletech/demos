@@ -45,8 +45,8 @@ spec:
         endpoint: tempo:4317
         tls:
           insecure: true
-      otlp/loki:
-        endpoint: loki:9095
+      otlphttp/loki:
+        endpoint: http://loki:3100/otlp
         tls:
           insecure: true
       #     auth:
@@ -127,7 +127,7 @@ spec:
           - resource/logs
           - attributes/logs
           exporters:
-          - otlp/loki
+          - otlphttp/loki
           # - debug
       # Set the log level of the opentelemetry-collector application.
       # You can also expose the collector metrcics (separate from the metrics receivers/exporters).
