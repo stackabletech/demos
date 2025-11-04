@@ -53,6 +53,7 @@ options:
         ruler: ruler
         admin: admin
     schemaConfig:
+      # See: https://grafana.com/docs/loki/latest/operations/storage/schema/
       configs:
         - from: "2024-04-01"
           store: tsdb
