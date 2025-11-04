@@ -35,7 +35,7 @@ spec:
       # When added to a logs/metrics/traces pipeline, the collector will print to stdout.
       debug: {}
         # verbosity: detailed
-      otlp:
+      otlp/jaeger:
         endpoint: jaeger-collector:4317
         tls:
           insecure: true
