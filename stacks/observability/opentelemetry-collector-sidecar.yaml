@@ -7,10 +7,11 @@ metadata:
 spec:
   mode: sidecar
   # See: https://github.com/open-telemetry/opentelemetry-collector-releases/pkgs/container/opentelemetry-collector-releases%2Fopentelemetry-collector-contrib/versions?filters%5Bversion_type%5D=tagged
+  # See: https://github.com/open-telemetry/opentelemetry-collector-releases/pkgs/container/opentelemetry-collector-releases%2Fopentelemetry-collector-contrib/550448680?tag=latest
   # Using the contrib image so we get all of the useful plugins
-  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.97.0
+  image: ghcr.io/open-telemetry/opentelemetry-collector-releases/opentelemetry-collector-contrib:0.138.0
   config:
-    # Configure the collector to receove via OTLP, and export to various "sinks".
+    # Configure the collector to receive via OTLP, and export to various "sinks".
     # For configuration structure, see: https://opentelemetry.io/docs/collector/configuration/
     #
     # A receiver for logs/metrics/traces via OTLP
@@ -18,7 +19,7 @@ spec:
     # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/receiver
     # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/receiver
     receivers:
-      otlp/insecure:
+      otlp:
         protocols:
           grpc:
             # In sidecar mode, we don't want, nor need the sidecar to be
@@ -26,26 +27,26 @@ spec:
             # TLS on the receiver(s) because only containers in the same pod can
             # connect, and so network traffic will not leave the host.
             endpoint: 127.0.0.1:4317
-    # Exporters to separate logs/metrics/taces
+    # Exporters to separate logs/metrics/traces
     # See all available exporters:
     # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/exporter
     # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/exporter
     exporters:
       # When added to a logs/metrics/traces pipeline, the collector will print to stdout.
-      debug:
+      debug: {}
         # verbosity: detailed
-      otlp/jaeger-insecure:
+      otlp/jaeger:
         endpoint: jaeger-collector:4317
         tls:
           insecure: true
       otlp/tempo:
-        endpoint: tempo.default.svc.cluster.local:4317
+        endpoint: tempo:4317
         tls:
-          ca_file: /certs/ca.crt
-      loki:
-        endpoint: https://loki.default.svc.cluster.local:3100/loki/api/v1/push
+          insecure: true
+      otlphttp/loki:
+        endpoint: http://loki:3100/otlp
         tls:
-          ca_file: /certs/ca.crt
+          insecure: true
       #     auth:
       #       authenticator: basicauth/loki
     # Processors to enrich logs/metrics/traces. For example, adding Kubernetes node/pod/deployment information
@@ -96,7 +97,7 @@ spec:
     # See all available extensions:
     # - https://github.com/open-telemetry/opentelemetry-collector/tree/main/extension
     # - https://github.com/open-telemetry/opentelemetry-collector-contrib/tree/main/extension
-    extensions:
+    extensions: {}
       # basicauth/loki:
       #   client_auth:
       #     username: loki
@@ -106,17 +107,17 @@ spec:
       # extensions: [basicauth/loki]
       pipelines:
         traces:
-          receivers: [otlp/insecure]
+          receivers: [otlp]
           processors:
           - memory_limiter
           - batch/every-second
           - resourcedetection/env
           exporters:
-          - otlp/jaeger-insecure
+          - otlp/jaeger
           - otlp/tempo
           # - debug
         logs:
-          receivers: [otlp/insecure]
+          receivers: [otlp]
           processors:
           - memory_limiter
           - batch/every-second
@@ -124,11 +125,11 @@ spec:
           - resource/logs
           - attributes/logs
           exporters:
-          - loki
+          - otlphttp/loki
           # - debug
       # Set the log level of the opentelemetry-collector application.
       # You can also expose the collector metrcics (separate from the metrics receivers/exporters).
-      telemetry:
+      telemetry: {}
         # logs:
         #   level: DEBUG
         # metrics:
@@ -141,22 +142,3 @@ spec:
     requests:
       cpu: 250m
       memory: 64Mi
-  volumeMounts:
-    # We mount a certificate from the secret-operator so that we have the CA
-    # cert for exporters to trust what they connect to.
-    - name: tls
-      mountPath: /certs
-  volumes:
-    - name: tls
-      ephemeral:
-        volumeClaimTemplate:
-          metadata:
-            annotations:
-              secrets.stackable.tech/class: tls
-          spec:
-            storageClassName: secrets.stackable.tech
-            accessModes:
-              - ReadWriteOnce
-            resources:
-              requests:
-                storage: 1

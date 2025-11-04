@@ -4,7 +4,7 @@ name: grafana
 repo:
   name: grafana
   url: https://grafana.github.io/helm-charts
-version: 8.15.0 # 11.6.1
+version: 10.1.2 # 12.2.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
