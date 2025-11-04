@@ -384,6 +384,7 @@ stacks:
       - hive
       - trino
       - opa
+      - airflow
     labels:
       - trino
       - opa
@@ -396,11 +397,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
-    supportedNamespaces: ["default"] # until namespace can be templates, the minio FQDN hard-codes the namespace
-    resourceRequests:
-      cpu: 6000m # Measured 5600m
-      memory: 21Gi
-      pvc: 110Gi # 100Gi for MinIO
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
+      - plainYaml: stacks/trino-iceberg/airflow.yaml
+    supportedNamespaces: ["default"]
     parameters:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
@@ -408,6 +407,12 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
+      - name: airflowAdminPassword
+        description: Password of the MinIO admin user
+        default: adminadmin
+      - name: airflowSecretKey
+        description: Airflow's secret key used to generate e.g. user session tokens
+        default: airflowSecretKey
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
     stackableRelease: dev

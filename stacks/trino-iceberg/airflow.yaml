@@ -1,0 +1,57 @@
+---
+apiVersion: airflow.stackable.tech/v1alpha1
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  image:
+    productVersion: 3.0.6
+    pullPolicy: IfNotPresent
+  clusterConfig:
+    loadExamples: false
+    credentialsSecret: airflow-credentials
+  webservers:
+    roleConfig:
+      listenerClass: external-stable
+    config:
+      resources:
+        cpu:
+          min: "2"
+          max: "3"
+        memory:
+          limit: 3Gi
+    configOverrides:
+      webserver_config.py:
+        # Allow "POST /login/" without CSRF token
+        WTF_CSRF_ENABLED: "False"
+    roleGroups:
+      default:
+        replicas: 1
+  kubernetesExecutors:
+    config: {}
+  schedulers:
+    roleGroups:
+      default:
+        replicas: 1
+  dagProcessors:
+    roleGroups:
+      default:
+        replicas: 1
+  triggerers:
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-credentials
+type: Opaque
+stringData:
+  adminUser.username: admin
+  adminUser.firstname: Airflow
+  adminUser.lastname: Admin
+  adminUser.email: airflow@airflow.com
+  adminUser.password: "adminadmin"
+  connections.secretKey: "airflowSecretKey"
+  connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow/airflow

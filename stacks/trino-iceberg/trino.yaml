@@ -17,27 +17,12 @@ spec:
         configMapName: opa
         package: trino
   coordinators:
-    config:
-      queryMaxMemory: 10TB
-      resources:
-        cpu:
-          min: "500m"
-          max: "2"
-        memory:
-          limit: '4Gi'
     roleGroups:
       default:
         replicas: 1
     roleConfig:
       listenerClass: external-stable
   workers:
-    config:
-      resources:
-        cpu:
-          min: "1"
-          max: "4"
-        memory:
-          limit: '8Gi'
     roleGroups:
       default:
         replicas: 1
