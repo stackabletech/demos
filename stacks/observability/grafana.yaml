@@ -27,8 +27,6 @@ options:
           isDefault: false
           jsonData:
             tlsAuthWithCACert: false
-          # secureJsonData:
-          #   tlsCACert: $__file{/etc/grafana/certs/ca.crt}
         - name: Tempo
           type: tempo
           url: http://tempo:3100
@@ -36,8 +34,6 @@ options:
           isDefault: false
           jsonData:
             tlsAuthWithCACert: false
-          # secureJsonData:
-          #   tlsCACert: $__file{/etc/grafana/certs/ca.crt}
   readinessProbe:
     httpGet:
       scheme: HTTPS
@@ -78,16 +74,3 @@ options:
         volumeAttributes:
           secrets.stackable.tech/class: tls
           secrets.stackable.tech/scope: node,pod,service=grafana
-      # ephemeral:
-      #   volumeClaimTemplate:
-      #     metadata:
-      #       annotations:
-      #         secrets.stackable.tech/class: tls
-      #         secrets.stackable.tech/scope: pod #,service=grafana
-      #     spec:
-      #       storageClassName: secrets.stackable.tech
-      #       accessModes:
-      #         - ReadWriteOnce
-      #       resources:
-      #         requests:
-      #           storage: 1
