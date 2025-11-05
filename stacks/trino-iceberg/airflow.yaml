@@ -5,6 +5,8 @@ metadata:
   name: airflow
 spec:
   image:
+    # N.B. KubernetesPodOperator does not appear to work properly with
+    # Airflow 3.x, returning a failed state even when the job is successful.
     productVersion: 2.10.5
     pullPolicy: IfNotPresent
   clusterConfig:
