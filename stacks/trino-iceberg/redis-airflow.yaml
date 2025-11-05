@@ -1,0 +1,25 @@
+---
+releaseName: redis-airflow
+name: redis
+repo:
+  name: bitnami
+  url: https://charts.bitnami.com/bitnami/
+version: 17.11.3
+options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
+  auth:
+    password: redis
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    repository: bitnamilegacy/redis
+  volumePermissions:
+    image:
+      repository: bitnamilegacy/os-shell
+  metrics:
+    image:
+      repository: bitnamilegacy/redis-exporter
+  replica:
+    replicaCount: 1

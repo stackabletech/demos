@@ -165,6 +165,7 @@ demos:
       - iceberg
       - minio
       - s3
+      - airflow
     manifests: []
     supportedNamespaces: []
   trino-taxi-data:

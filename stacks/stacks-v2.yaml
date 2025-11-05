@@ -394,11 +394,12 @@ stacks:
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small-tls/rendered-chart.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: stacks/trino-iceberg/airflow.yaml
+      - helmChart: stacks/trino-iceberg/redis-airflow.yaml
     supportedNamespaces: ["default"]
     parameters:
       - name: trinoAdminPassword

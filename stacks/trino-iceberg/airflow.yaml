@@ -5,14 +5,26 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 3.0.6
+    productVersion: 2.10.5
     pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
     credentialsSecret: airflow-credentials
+    volumes:
+      - name: airflow-dags
+        configMap:
+          name: airflow-dags
+    volumeMounts:
+      - name: airflow-dags
+        mountPath: /stackable/airflow/dags/dbt_trino.py
+        subPath: dbt_trino.py
   webservers:
     roleConfig:
       listenerClass: external-stable
+    envOverrides: &envOverrides
+      TZ: "Europe/Berlin"
+      #AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+      #AIRFLOW_CONN_KUBERNETES_DEFAULT: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
     config:
       resources:
         cpu:
@@ -20,27 +32,60 @@ spec:
           max: "3"
         memory:
           limit: 3Gi
-    configOverrides:
-      webserver_config.py:
-        # Allow "POST /login/" without CSRF token
-        WTF_CSRF_ENABLED: "False"
     roleGroups:
       default:
         replicas: 1
-  kubernetesExecutors:
-    config: {}
+  celeryExecutors:
+    envOverrides: *envOverrides
+    roleGroups:
+      default:
+        replicas: 1
   schedulers:
+    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1
-  dagProcessors:
-    roleGroups:
-      default:
-        replicas: 1
-  triggerers:
-    roleGroups:
-      default:
-        replicas: 1
+  # dagProcessors:
+  #   envOverrides: *envOverrides
+  #   roleGroups:
+  #     default:
+  #       replicas: 1
+  # triggerers:
+  #   envOverrides: *envOverrides
+  #   roleGroups:
+  #     default:
+  #       replicas: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-dags
+data:
+  dbt_trino.py: |
+    from airflow import DAG
+    from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+    import pendulum
+    from datetime import datetime
+
+    with DAG(
+        dag_id="run_dbt_check_via_pod_operator",
+        schedule=None,
+        start_date=pendulum.datetime(2024, 9, 1),
+        tags=["Demo", "DBT"],
+        catchup=False
+    ) as dag:
+      run_dbt_check = KubernetesPodOperator(
+          namespace="default",
+          image="my-dbt-trino:0.0.1",
+          image_pull_policy="IfNotPresent",
+          cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
+          arguments=["dbt debug"],
+          name="run-dbt-debug",
+          task_id="task",
+          #on_finish_action="keep_pod",
+          startup_timeout_seconds=600
+      )
+      run_dbt_check
 ---
 apiVersion: v1
 kind: Secret
@@ -55,3 +100,5 @@ stringData:
   adminUser.password: "adminadmin"
   connections.secretKey: "airflowSecretKey"
   connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow/airflow
+  connections.celeryResultBackend: db+postgresql://airflow:airflow@postgresql-airflow/airflow
+  connections.celeryBrokerUrl: redis://:redis@redis-airflow-master:6379/0
