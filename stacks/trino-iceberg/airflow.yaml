@@ -22,7 +22,6 @@ spec:
     roleConfig:
       listenerClass: external-stable
     envOverrides: &envOverrides
-      TZ: "Europe/Berlin"
       #AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       #AIRFLOW_CONN_KUBERNETES_DEFAULT: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
     config:
@@ -64,25 +63,21 @@ data:
   dbt_trino.py: |
     from airflow import DAG
     from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
-    import pendulum
-    from datetime import datetime
 
     with DAG(
         dag_id="run_dbt_check_via_pod_operator",
         schedule=None,
-        start_date=pendulum.datetime(2024, 9, 1),
         tags=["Demo", "DBT"],
         catchup=False
     ) as dag:
       run_dbt_check = KubernetesPodOperator(
-          namespace="default",
           image="my-dbt-trino:0.0.1",
           image_pull_policy="IfNotPresent",
           cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
           arguments=["dbt debug"],
           name="run-dbt-debug",
-          task_id="task",
-          #on_finish_action="keep_pod",
+          task_id="dbt-task",
+          get_logs=True,
           startup_timeout_seconds=600
       )
       run_dbt_check
