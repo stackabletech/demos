@@ -44,7 +44,7 @@ spec:
             - bash
           args:
             - -c
-            - curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb
+            - curl https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/jupyterhub-pyspark-hdfs/notebook.ipynb -o /notebook/notebook.ipynb
           volumeMounts:
             - mountPath: /notebook
               name: notebook

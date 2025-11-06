@@ -15,7 +15,7 @@ spec:
             - pipefail
             - -c
             - |
-              curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/superset-assets.zip
+              curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/release-25.11/demos/data-lakehouse-iceberg-trino-spark/superset-assets.zip
               python -u /tmp/script/script.py
           volumeMounts:
             - name: script

@@ -29,7 +29,7 @@ spec:
             - pipefail
             - -c
             - |
-              curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-earthquake-data/superset-assets.zip
+              curl -o superset-assets.zip https://raw.githubusercontent.com/stackabletech/demos/release-25.11/demos/nifi-kafka-druid-earthquake-data/superset-assets.zip
               python -u /tmp/script/script.py
           volumeMounts:
             - name: script
