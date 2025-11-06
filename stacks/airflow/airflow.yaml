@@ -67,7 +67,7 @@ spec:
       spec:
         containers:
           - name: airflow
-            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable25.11.0
             imagePullPolicy: IfNotPresent
             env:
             - name: NAMESPACE

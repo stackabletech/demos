@@ -18,7 +18,7 @@ spec:
       serviceAccountName: create-prometheus-tls-certificate-serviceaccount
       containers:
       - name: create-prometheus-tls-certificate
-        image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        image: oci.stackable.tech/sdp/tools:1.0.0-stackable25.11.0
         env:
           - name: POD_NAME
             valueFrom:

@@ -30,7 +30,7 @@ spec:
   image:
     # Using an image that includes scikit-learn (among other things)
     # because this package needs to be available on the executors.
-    custom: oci.stackable.tech/stackable/spark-connect-client:4.0.1-stackable0.0.0-dev
+    custom: oci.stackable.tech/stackable/spark-connect-client:4.0.1-stackable25.11.0
     productVersion: 4.0.1
     pullPolicy: IfNotPresent
   args:

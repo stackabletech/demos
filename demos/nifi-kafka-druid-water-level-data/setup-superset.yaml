@@ -9,7 +9,7 @@ spec:
       serviceAccountName: demo-serviceaccount
       initContainers:
         - name: wait-for-superset
-          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable25.11.0
           command:
             - bash
             - -euo
@@ -22,7 +22,7 @@ spec:
               kubectl wait --for=condition=Ready pod/superset-node-default-0 --timeout=30m
       containers:
         - name: setup-superset
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable25.11.0
           command:
             - bash
             - -euo
