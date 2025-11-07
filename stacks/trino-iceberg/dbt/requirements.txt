@@ -1,0 +1,3 @@
+dbt-core
+dbt-trino
+trino==0.329

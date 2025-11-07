@@ -1,0 +1,21 @@
+name: 'my_dbt_project'
+version: '1.0.0'
+config-version: 2
+
+# This links to the profile name in profiles.yml
+profile: 'my_project'
+
+model-paths: ["models"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+clean-targets:
+  - "target"
+
+models:
+  my_dbt_project:
+    +materialized: view
+    +file_format: parquet
+
+flags:
+  require_certificate_validation: True

@@ -1,0 +1,18 @@
+my_project:
+  target: prod
+  outputs:
+    prod:
+      type: trino
+      #method: none
+      user: admin
+      password: adminadmin
+      host: trino-coordinator-default-headless.default.svc.cluster.local
+      port: 8443
+      database: lakehouse
+      schema: my_schema
+      threads: 4
+      http_scheme: https
+      cert: /dbt/trusted/ca.crt
+      session_properties:
+        query_max_run_time: "4h"
+        query_priority: 1
