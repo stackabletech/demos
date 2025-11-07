@@ -5,9 +5,7 @@ metadata:
   name: airflow
 spec:
   image:
-    # N.B. KubernetesPodOperator does not appear to work properly with
-    # Airflow 3.x, returning a failed state even when the job is successful.
-    productVersion: 2.10.5
+    productVersion: 3.0.6
     pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
@@ -23,9 +21,6 @@ spec:
   webservers:
     roleConfig:
       listenerClass: external-stable
-    envOverrides: &envOverrides
-      #AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
-      #AIRFLOW_CONN_KUBERNETES_DEFAULT: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
     config:
       resources:
         cpu:
@@ -37,25 +32,21 @@ spec:
       default:
         replicas: 1
   celeryExecutors:
-    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1
   schedulers:
-    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1
-  # dagProcessors:
-  #   envOverrides: *envOverrides
-  #   roleGroups:
-  #     default:
-  #       replicas: 1
-  # triggerers:
-  #   envOverrides: *envOverrides
-  #   roleGroups:
-  #     default:
-  #       replicas: 1
+  dagProcessors:
+    roleGroups:
+      default:
+        replicas: 1
+  triggerers:
+    roleGroups:
+      default:
+        replicas: 1
 ---
 apiVersion: v1
 kind: ConfigMap
