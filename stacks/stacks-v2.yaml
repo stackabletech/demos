@@ -35,8 +35,8 @@ stacks:
     parameters:
       - name: stackableReleaseVersion
         description: The Stackable release to be installed via Argo. This replaces the demo `stackableRelease` parameter.
-        # TODO(@maltesander): Must be adapted in case of release !
-        default: 25.11
+        # TODO(@maltesander): Must be adapted in case of release YY.MM.X !
+        default: 25.11.0
       - name: argocdAdminPassword
         description: Password of the ArgoCD admin user.
         # generated via: `htpasswd -nbBC 10 "" adminadmin | tr -d ':\n'`
