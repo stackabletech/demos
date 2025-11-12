@@ -22,8 +22,9 @@ This is testing that the new release demos work as documented from scratch.
 > Eg:
 >
 > ```md
-> :green_circle: **airflow-scheduled-job**
+> ## :green_circle: airflow-scheduled-job
 >
+> Notes can be left here, for example:
 > The CRD had been updated and I needed to change the following in the manifest:
 > ...
 > ```
@@ -66,6 +67,17 @@ GitHub handle next to the demo to indicate a particular demo was picked up for t
 - [ ] [spark-k8s-anomaly-detection-taxi-data](https://docs.stackable.tech/home/nightly/demos/spark-k8s-anomaly-detection-taxi-data)
 - [ ] [trino-iceberg](https://docs.stackable.tech/home/nightly/demos/trino-iceberg)
 - [ ] [trino-taxi-data](https://docs.stackable.tech/home/nightly/demos/trino-taxi-data)
+
+### Additional stacks
+
+If we have time (otherwise they can be tested and patched after the release)
+
+- [ ] monitoring
+- [ ] logging
+- [ ] dual-hive-hdfs-s3
+- [ ] observability @NickLarsenNZ
+- [ ] tutorial-openldap
+- [ ] openldap
 
 ### YY.M.X from Scratch Testing Instructions
 
