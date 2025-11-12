@@ -4,6 +4,7 @@ kind: ApplicationSet
 metadata:
   name: stackable-operators
 spec:
+  goTemplate: true
   generators:
     - matrix:
         generators:
@@ -20,8 +21,7 @@ spec:
                 - operator: kafka
                 - operator: nifi
                 - operator: opa
-                # TODO: enable Opensearch operator
-                # - opensearch
+                - operator: opensearch
                 - operator: spark-k8s
                 - operator: superset
                 - operator: trino
@@ -34,7 +34,7 @@ spec:
   # {% raw %}
   template:
     metadata:
-      name: "{{ operator }}-operator"
+      name: "{{ .operator }}-operator"
     spec:
       project: stackable-operators
       ignoreDifferences:
@@ -47,12 +47,12 @@ spec:
             - .spec.versions[].additionalPrinterColumns | select(. == [])
       source:
         repoURL: "oci.stackable.tech"
-        targetRevision: "{{ targetRevision }}"
-        chart: "sdp-charts/{{ operator }}-operator"
+        targetRevision: "{{ .targetRevision }}"
+        chart: "sdp-charts/{{ .operator }}-operator"
         helm:
-          releaseName: "{{ operator }}-operator"
+          releaseName: "{{ .operator }}-operator"
       destination:
-        server: "{{ server }}"
+        server: "{{ .server }}"
         namespace: stackable-operators
       syncPolicy:
         syncOptions:
@@ -62,4 +62,12 @@ spec:
         automated:
           selfHeal: true
           prune: true
+  templatePatch: |
+    {{- if eq .operator "listener" }}
+    spec:
+      source:
+        helm:
+          values: |
+            preset: stable-nodes
+    {{- end }}
   # {% endraw %}

@@ -17,7 +17,7 @@ spec:
             - -c
             - |
               echo 'Waiting for Druid Coordinator to be created'
-              kubectl wait --for=create pod/druid-coordinator-default-0
+              kubectl wait --for=create pod/druid-coordinator-default-0 --timeout=30m
               echo 'Waiting for Druid Coordinator to be ready'
               kubectl wait --for=condition=Ready pod/druid-coordinator-default-0 --timeout=30m
       containers:
@@ -52,7 +52,7 @@ data:
         "ioConfig": {
           "type": "kafka",
           "consumerProperties": {
-            "bootstrap.servers": "kafka-broker-default.default.svc.cluster.local:9093",
+            "bootstrap.servers": "kafka-broker-default-headless.default.svc.cluster.local:9093",
             "security.protocol": "SSL",
             "ssl.truststore.location": "/stackable/tls/truststore.p12",
             "ssl.truststore.password": "changeit",

@@ -24,7 +24,7 @@
         "bundle": {
           "group": "org.apache.nifi",
           "artifact": "nifi-standard-nar",
-          "version": "2.2.0"
+          "version": "2.6.0"
         },
         "properties": {
           "Proxy Host": null,
@@ -337,7 +337,7 @@
         "bundle": {
           "group": "org.apache.nifi",
           "artifact": "nifi-standard-nar",
-          "version": "2.2.0"
+          "version": "2.6.0"
         },
         "properties": {
           "put-db-record-allow-multiple-statements": "false",
@@ -538,7 +538,7 @@
         "bundle": {
           "group": "org.apache.nifi",
           "artifact": "nifi-standard-nar",
-          "version": "2.2.0"
+          "version": "2.6.0"
         },
         "properties": {
           "Support Fragmented Transactions": "false",
@@ -729,7 +729,7 @@
         "bundle": {
           "group": "org.apache.nifi",
           "artifact": "nifi-dbcp-service-nar",
-          "version": "2.2.0"
+          "version": "2.6.0"
         },
         "properties": {
           "dbcp-min-idle-conns": "0",
@@ -873,7 +873,7 @@
             "bundle": {
               "group": "org.apache.nifi",
               "artifact": "nifi-standard-services-api-nar",
-              "version": "2.2.0"
+              "version": "2.6.0"
             }
           }
         ],
@@ -891,7 +891,7 @@
         "bundle": {
           "group": "org.apache.nifi",
           "artifact": "nifi-record-serialization-services-nar",
-          "version": "2.2.0"
+          "version": "2.6.0"
         },
         "properties": {
           "ignore-csv-header": "false",
@@ -1064,7 +1064,7 @@
             "bundle": {
               "group": "org.apache.nifi",
               "artifact": "nifi-standard-services-api-nar",
-              "version": "2.2.0"
+              "version": "2.6.0"
             }
           }
         ],

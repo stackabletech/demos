@@ -4,7 +4,7 @@ name: vector
 repo:
   name: vector
   url: https://helm.vector.dev
-version: 0.43.0 # app version 0.47.0
+version: 0.45.0 # app version 0.49.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
@@ -23,7 +23,7 @@ options:
         inputs:
           - vector
         endpoints:
-          - https://opensearch-cluster-master.default.svc.cluster.local:9200
+          - https://opensearch.default.svc.cluster.local:9200
         mode: bulk
         # The auto-detection of the API version does not work in Vector
         # 0.41.1 for OpenSearch, so the version must be set explicitly

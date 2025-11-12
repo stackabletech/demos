@@ -6,15 +6,25 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 3.0.1
+    productVersion: 3.0.6
+    pullPolicy: IfNotPresent
   clusterConfig:
+    authorization:
+      opa:
+        configMapName: opa-airflow
+        package: airflow
+        cache:
+          entryTimeToLive: 5s
+          maxEntries: 10
     loadExamples: false
-    exposeConfig: false
     credentialsSecret: airflow-credentials
     volumes:
       - name: airflow-dags
         configMap:
           name: airflow-dags
+      - name: kafka-tls-pem
+        configMap:
+          name: truststore-pem
     volumeMounts:
       - name: airflow-dags
         mountPath: /dags/date_demo.py
@@ -25,37 +35,71 @@ spec:
       - name: airflow-dags
         mountPath: /dags/pyspark_pi.yaml
         subPath: pyspark_pi.yaml
+      - name: airflow-dags
+        mountPath: /dags/kafka.py
+        subPath: kafka.py
+      - name: airflow-dags
+        mountPath: /dags/triggerer.py
+        subPath: triggerer.py
+      - name: kafka-tls-pem
+        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         cpu:
-          min: 400m
-          max: "1"
+          min: "2"
+          max: "3"
         memory:
-          limit: 2Gi
-      gracefulShutdownTimeout: 30s
+          limit: 3Gi
+    envOverrides: &envOverrides
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      PYTHONPATH: "/stackable/app/log_config:/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
+      # Airflow 3: Disable decision caching for easy debugging
+      AIRFLOW__CORE__AUTH_OPA_CACHE_MAXSIZE: "0"
+    configOverrides:
+      webserver_config.py:
+        # Allow "POST /login/" without CSRF token
+        WTF_CSRF_ENABLED: "False"
+    podOverrides: &podOverrides
+      spec:
+        containers:
+          - name: airflow
+            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            imagePullPolicy: IfNotPresent
+            env:
+            - name: NAMESPACE
+              valueFrom:
+                fieldRef:
+                  fieldPath: metadata.namespace
+            - name: AIRFLOW_CONN_KAFKA_CONN
+              value: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093\", \"security.protocol\": \"SSL\", \"ssl.ca.location\": \"/stackable/kafka-tls-pem/ca.crt\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
     roleGroups:
       default:
-        envOverrides: &envOverrides
-          AIRFLOW__CORE__DAGS_FOLDER: "/dags"
-          AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
         replicas: 1
   kubernetesExecutors:
+    # do not apply the podOverrides here as we don't need and it will interfere
+    # with the pod template
     envOverrides: *envOverrides
   schedulers:
-    config:
-      gracefulShutdownTimeout: 30s
-      resources:
-        cpu:
-          min: 400m
-          max: "1"
-        memory:
-          limit: 1Gi
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
     roleGroups:
       default:
-        envOverrides: *envOverrides
+        replicas: 1
+  dagProcessors:
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
+    roleGroups:
+      default:
+        replicas: 1
+  triggerers:
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
+    roleGroups:
+      default:
         replicas: 1
 ---
 apiVersion: v1
@@ -63,6 +107,97 @@ kind: ConfigMap
 metadata:
   name: airflow-dags
 data:
+  kafka.py: |
+    from airflow.providers.apache.kafka.triggers.msg_queue import KafkaMessageQueueTrigger
+    from airflow.providers.standard.operators.empty import EmptyOperator
+    from airflow.sdk import DAG, Asset, AssetWatcher
+
+    import logging
+    logger = logging.getLogger(__name__)
+
+    logger.info("✅ kafka.apply_function module imported")
+
+    def apply_function(message):
+      try:
+        logger.info("apply_function called")
+        logger.info("message payload: %r", message.value())
+        return True
+      except Exception:
+        logger.exception("apply_function failed")
+        return False
+
+    # Define a trigger that listens to an Apache Kafka message queue
+    trigger = KafkaMessageQueueTrigger(
+      topics=["test-topic"],
+      apply_function="kafka.apply_function",
+      kafka_config_id="kafka_conn",
+      apply_function_args=None,
+      apply_function_kwargs=None,
+      poll_timeout=1,
+      poll_interval=5,
+    )
+
+    # Define an asset that watches for messages on the queue
+    asset = Asset("kafka_queue_asset", watchers=[AssetWatcher(name="kafka_watcher", trigger=trigger)])
+
+    with DAG(dag_id="kafka_watcher", schedule=[asset]) as dag:
+      EmptyOperator(task_id="task")
+
+  triggerer.py: |
+    from datetime import datetime, timedelta
+
+    from airflow import DAG
+    from airflow.models.baseoperator import BaseOperator
+    from airflow.triggers.temporal import TimeDeltaTrigger
+    from airflow.utils.context import Context
+    from airflow.operators.empty import EmptyOperator
+
+    # ------------------------------------------------------
+    # Custom deferrable operator - does a simple async sleep
+    # ------------------------------------------------------
+    class CoreDeferrableSleepOperator(BaseOperator):
+        """
+        Sleeps for ``duration`` seconds without occupying a worker.
+        The async hand-off happens via ``self.defer`` + ``TimeDeltaTrigger``.
+        """
+        ui_color = "#ffefeb"
+
+        def __init__(self, *, duration: int, **kwargs):
+            super().__init__(**kwargs)
+            self.duration = duration
+
+        def execute(self, context: Context):
+            """Run on a worker, then hand control to the Triggerer."""
+            # Build the trigger that will fire after `duration` seconds.
+            trigger = TimeDeltaTrigger(timedelta(seconds=self.duration))
+
+            # *** Asynchronous hand-off ***
+            # This tells the scheduler: “pause this task, let the Triggerer watch the timer”.
+            self.defer(trigger=trigger, method_name="execute_complete")
+
+        def execute_complete(self, context: Context, event=None):
+            """Resumes here once the Triggerer fires."""
+            self.log.info("Deferrable sleep of %s seconds finished.", self.duration)
+            return "DONE"
+
+    default_args = {"owner": "stackable", "retries": 0}
+
+    with DAG(
+        dag_id="core_deferrable_sleep_demo",
+        schedule=None,
+        # N.B. this be earlier than the current timestamp!
+        start_date=datetime(2025, 8, 1),
+        catchup=False,
+        default_args=default_args,
+        tags=["example", "triggerer"],
+    ) as dag:
+
+        sleep = CoreDeferrableSleepOperator(
+            task_id="deferrable_sleep",
+            duration=10,
+        )
+
+        sleep
   date_demo.py: |
     """Example DAG returning the current date"""
     from datetime import datetime, timedelta
@@ -302,7 +437,7 @@ data:
     spec:
       version: "1.0"
       sparkImage:
-        productVersion: 3.5.6
+        productVersion: 4.0.1
       mode: cluster
       mainApplicationFile: local:///stackable/spark/examples/src/main/python/pi.py
       job:
@@ -330,6 +465,8 @@ data:
             memory:
               limit: 1024Mi
         replicas: 3
+
+
 # {% endraw %}
 ---
 apiVersion: v1

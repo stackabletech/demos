@@ -99,7 +99,7 @@ are structured in dedicated queues called topics. The test data will be put into
 are produced (put in) by the test data generator and consumed (read) by Druid afterwards in the same order they were
 created.
 
-As Kafka has no web interface, you must use a Kafka client like {kcat}[kcat]. Kafka uses mutual TLS, so clients
+To interact with Kafka you will use the client scripts shipped with the Kafka image. Kafka uses mutual TLS, so clients
 wanting to connect to Kafka must present a valid TLS certificate. The easiest way to obtain this is to shell into the
 `kafka-broker-default-0` Pod, as we will do in the following section for demonstration purposes. For a production setup,
 you should spin up a dedicated Pod provisioned with a certificate acting as a Kafka client instead of shell-ing into the
@@ -109,34 +109,32 @@ Kafka Pod.
 
 You can execute a command on the Kafka broker to list the available topics as follows:
 
-// In the following commands the kcat-prober container instead of the kafka container is used to send requests to Kafka.
-// This is necessary because kcat cannot use key- and truststore files with empty passwords, which are mounted here to the kafka container.
-// However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -L"
-Metadata for all topics (from broker -1: ssl://localhost:9093/bootstrap):
- 1 brokers:
-  broker 1001 at 172.19.0.3:31041 (controller)
- 2 topics:
-  topic "stations" with 8 partitions:
-    partition 0, leader 1001, replicas: 1001, isrs: 1001
-    partition 1, leader 1001, replicas: 1001, isrs: 1001
-    partition 2, leader 1001, replicas: 1001, isrs: 1001
-    partition 3, leader 1001, replicas: 1001, isrs: 1001
-    partition 4, leader 1001, replicas: 1001, isrs: 1001
-    partition 5, leader 1001, replicas: 1001, isrs: 1001
-    partition 6, leader 1001, replicas: 1001, isrs: 1001
-    partition 7, leader 1001, replicas: 1001, isrs: 1001
-  topic "measurements" with 8 partitions:
-    partition 0, leader 1001, replicas: 1001, isrs: 1001
-    partition 1, leader 1001, replicas: 1001, isrs: 1001
-    partition 2, leader 1001, replicas: 1001, isrs: 1001
-    partition 3, leader 1001, replicas: 1001, isrs: 1001
-    partition 4, leader 1001, replicas: 1001, isrs: 1001
-    partition 5, leader 1001, replicas: 1001, isrs: 1001
-    partition 6, leader 1001, replicas: 1001, isrs: 1001
-    partition 7, leader 1001, replicas: 1001, isrs: 1001
+$ kubectl k exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-topics.sh \
+--describe \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties
+...
+Topic: measurements     TopicId: w9qYb3GaTvCMZj4G8pkPPQ PartitionCount: 8       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
+        Topic: measurements     Partition: 0    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 1    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 2    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 3    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 4    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 5    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 6    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: measurements     Partition: 7    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+Topic: stations TopicId: QkKmvOagQkG4QbeS0IZ_Tg PartitionCount: 8       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
+        Topic: stations Partition: 0    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 1    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 2    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 3    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 4    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 5    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 6    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
+        Topic: stations Partition: 7    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
 ----
 
 You can see that Kafka consists of one broker, and the topics `stations` and `measurements` have been created with eight
@@ -145,11 +143,18 @@ partitions each.
 === Show Sample Records
 
 To see some records sent to Kafka, run the following commands. You can change the number of records to
-print via the `-c` parameter.
+print via the `--max-messages` parameter.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t stations -c 2"
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic stations \
+--offset earliest \
+--partition 0 \
+--max-messages 2
 ----
 
 Below is an example of the output of two records:
@@ -188,7 +193,14 @@ Below is an example of the output of two records:
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t measurements -c 3"
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic measurements \
+--offset earliest \
+--partition 0 \
+--max-messages 3
 ----
 
 Below is an example of the output of three records:
@@ -253,21 +265,42 @@ The given pattern will print some metadata of the record.
 
 [source,console]
 ----
-$ kubectl exec -it kafka-broker-default-0 -c kcat-prober -- /bin/bash -c "/stackable/kcat -b localhost:9093 -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -C -t measurements -o -8 -c 8 -f 'Topic %t / Partition %p / Offset: %o / Timestamp: %T\n'"
-Topic measurements / Partition 0 / Offset: 1324098 / Timestamp: 1680606104652
-Topic measurements / Partition 1 / Offset: 1346816 / Timestamp: 1680606100462
-Topic measurements / Partition 2 / Offset: 1339363 / Timestamp: 1680606100461
-Topic measurements / Partition 3 / Offset: 1352787 / Timestamp: 1680606104652
-Topic measurements / Partition 4 / Offset: 1330144 / Timestamp: 1680606098368
-Topic measurements / Partition 5 / Offset: 1340226 / Timestamp: 1680606104652
-Topic measurements / Partition 6 / Offset: 1320125 / Timestamp: 1680606100462
-Topic measurements / Partition 7 / Offset: 1317719 / Timestamp: 1680606098368
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-get-offsets.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
+--topic measurements
+...
+measurements:0:1366665
+measurements:1:1364930
+measurements:2:1395607
+measurements:3:1390762
+measurements:4:1368829
+measurements:5:1362539
+measurements:6:1344362
+measurements:7:1369651
 ----
 
-If you calculate `1,324,098` records * `8` partitions, you end up with ~ 10,592,784 records. The output also shows that
-the last measurement record was produced at the timestamp `1680606104652`, translating to
-`Di 4. Apr 13:01:44 CEST 2023` (using the command `date -d @1680606104`).
+Multiplying `1,324,098` records by `8` partitions, we end up with ~ 10,592,784 records.
 
+To inspect the last produced records, use the following command. Here, we consume the last three records from partition
+`0` of the `measurements` topic.
+
+[source,console]
+----
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
+/stackable/kafka/bin/kafka-console-consumer.sh \
+--bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--consumer.config /stackable/config/client.properties \
+--topic measurements \
+--offset latest \
+--partition 0 \
+--max-messages 3
+-...
+{"timestamp":"2025-10-21T11:00:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
+{"timestamp":"2025-10-21T11:15:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
+{"timestamp":"2025-10-21T11:00:00+02:00","value":8.0,"station_uuid":"7deedc21-2878-40cc-ab47-f6da0d9002f1"}
+----
 == NiFi
 
 NiFi fetches water-level data from the internet and ingests it into Kafka in real time. This demo includes a workflow

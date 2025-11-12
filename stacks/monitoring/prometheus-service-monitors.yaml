@@ -1,24 +1,27 @@
+---
 # Use something like this to check for metrics:
 # count by (app_kubernetes_io_name, app_kubernetes_io_instance, pod) ({app_kubernetes_io_name!="",pod!=""})
 #
 # Products metrics covered by the ServiceMonitors below. The list also includes whether the
 # ServiceMonitor scrapes native metrics or a statsd/JMX exporter.
 #
-# [x] Airflow - exporter
-# [x] Druid - native
-# [x] HBase - native
-# [x] Hadoop HDFS - native
-# [x] Hive - exporter
-# [x] Kafka - exporter
-# [x] NiFi 1 - native
-# [x] NiFi 2 - native
-# [x] OpenSearch - native
-# [ ] Spark - native - partially done, see comment on it below
-# [x] Superset - exporter
-# [x] Trino - native
-# [x] ZooKeeper - native
-# [x] OPA - native
----
+#
+# Utilize `prometheus.io/scheme`, `prometheus.io/port`, `prometheus.io/path` (and optionally `prometheus.io/clusterdomain`)
+# annotations set by the operators to scrape all Stackable products.
+#
+# [x] Airflow - relabel drop filter on airflow container
+# [x] Druid
+# [x] HBase
+# [X] Hadoop HDFS - relabel drop filter on empty container
+# [x] Hive
+# [x] Kafka - TODO: listener services have metrics?
+# [x] NiFi 1 + 2
+# [x] OpenSearch
+# [x] Spark: Connect, HistoryServer
+# [x] Superset - relabel drop filter on superset container
+# [x] Trino
+# [x] ZooKeeper
+# [x] OPA
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -33,218 +36,47 @@ spec:
     matchLabels:
       stackable.tech/vendor: Stackable
       prometheus.io/scrape: "true"
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - airflow
-          - druid
-          - hive
-          - nifi # This only works for NiFi 1, NiFi 2 has a special ServiceMonitor below
-          - opa
-          - superset
-          - trino
-  endpoints:
-    - scheme: http
-      port: metrics
-      path: /metrics
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-native-metrics
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - zookeeper
-  endpoints:
-    - scheme: http
-      port: native-metrics
-      path: /metrics
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-# Kafka is special in that the operator totally messes up services:
-# 1. The metrics Service is missing
-# 2. The role level simple-kafka-broker-default has the prometheus.io/scrape label, but exposes no ports...
-# 3. The role level simple-kafka-broker-default is labeled with app.kubernetes.io/name: listener???
-# So we have a dedicated config for it
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-kafka
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      app.kubernetes.io/name: listener # Dafuq?
-      app.kubernetes.io/component: broker # We need to filter on brokers instead, as the app.kubernetes.io/name is messed up
-  endpoints:
-    - scheme: http
-      port: metrics
-      path: /metrics
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-# We prefer the native metrics over the statsd-exporter
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-hdfs
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-      app.kubernetes.io/name: hdfs
-  endpoints:
-    - scheme: http
-      port: http # Don't use the "metrics" exporter port, we want native metrics instead
-      path: /prom
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-hbase
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-      app.kubernetes.io/name: hbase
-  endpoints:
-    - scheme: http
-      port: ui-http
-      path: /prometheus
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-opensearch
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-      app.kubernetes.io/name: opensearch
   endpoints:
     - relabelings:
         - sourceLabels:
+            - __meta_kubernetes_pod_container_name
+          # Pods show up twice due to multiple containers, we only keep the main / product container.
+          # Except for Airflow and Superset, where we choose the metrics container.
+          # - airflow: airflow
+          # - superset: superset
+          # - empty: filter when container label does not exist: hdfs
+          regex: ^(airflow|superset|)$
+          action: drop
+          # Add empty label if not existing or pass-through existing value
+        - sourceLabels:
+            - __meta_kubernetes_service_annotation_prometheus_io_clusterdomain
+          targetLabel: __tmp_clusterdomain__
+          replacement: $1
+          # Use default value if empty
+        - sourceLabels:
+            - __tmp_clusterdomain__
+          targetLabel: __tmp_clusterdomain__
+          regex: ^$
+          replacement: "cluster.local"
+          # Scheme and path extraction
+        - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_scheme
-          action: replace
           targetLabel: __scheme__
           regex: (https?)
         - sourceLabels:
             - __meta_kubernetes_service_annotation_prometheus_io_path
-          action: replace
           targetLabel: __metrics_path__
           regex: (.+)
-        # Use the FQDN instead of the IP address because the IP address
-        # is not contained in the certificate.
+          # Build metrics service address
         - sourceLabels:
-            - __meta_kubernetes_pod_name
             - __meta_kubernetes_service_name
             - __meta_kubernetes_namespace
+            - __tmp_clusterdomain__
             - __meta_kubernetes_service_annotation_prometheus_io_port
-          action: replace
           targetLabel: __address__
           regex: (.+);(.+);(.+);(\d+)
-          replacement: $1.$2.$3.svc.cluster.local:$4
-      tlsConfig:
-        ca:
-          secret:
-            name: prometheus-tls-certificate
-            key: ca.crt
-  podTargetLabels:
-    - app.kubernetes.io/name
-    - app.kubernetes.io/instance
-    - app.kubernetes.io/component
-    - app.kubernetes.io/role-group
-    - app.kubernetes.io/version
----
-# NiFI 2 is a beast on it's own...
-# We need to use mTLS (otherwise we get a 401) and can not use the PodIP
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-nifi-2
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      stackable.tech/vendor: Stackable
-      prometheus.io/scrape: "true"
-    matchExpressions:
-      - key: app.kubernetes.io/name
-        operator: In
-        values:
-          - nifi
-  endpoints:
-    - scheme: https
-      port: https
-      path: /nifi-api/flow/metrics/prometheus
-      # See https://github.com/prometheus-operator/prometheus-operator/blob/main/Documentation/api-reference/api.md#monitoring.coreos.com/v1.TLSConfig
+          # <service-name>.<namespace>.svc.<cluster-domain>:<port>
+          replacement: $1.$2.svc.$3:$4
       tlsConfig:
         ca:
           secret:
@@ -257,18 +89,6 @@ spec:
         keySecret:
           name: prometheus-tls-certificate
           key: tls.key
-      # We need to talk to the Pod via the FQDN of the Pod because of the stupid SNI check of NiFi.
-      # We can not use the typical PodIP, as it is not contained in the NiFi certificate,
-      # see https://github.com/stackabletech/secret-operator/issues/620
-      relabelings:
-        - sourceLabels:
-            - __meta_kubernetes_pod_name
-            - __meta_kubernetes_service_name
-            - __meta_kubernetes_namespace
-            - __meta_kubernetes_pod_container_port_number
-          targetLabel: __address__
-          replacement: ${1}.${2}-headless.${3}.svc.cluster.local:${4}
-          regex: (.+);(.+?)(?:-metrics)?;(.+);(.+)
   podTargetLabels:
     - app.kubernetes.io/name
     - app.kubernetes.io/instance
@@ -276,9 +96,8 @@ spec:
     - app.kubernetes.io/role-group
     - app.kubernetes.io/version
 ---
-# spark-k8s-operator does not deploy any Services at all (at least for SparkApplications).
 # We currently only scrape the driver, going forward we might want to scrape the executors as well.
-# In the future we might also want to scrape SparkConnect and HistoryServers.
+# SparkConnect and HistoryServers are scraped via the `stackable` ServiceMonitor.
 apiVersion: monitoring.coreos.com/v1
 kind: PodMonitor
 metadata:
@@ -305,26 +124,6 @@ spec:
     - app.kubernetes.io/component
     - app.kubernetes.io/role-group
     - app.kubernetes.io/version
----
-apiVersion: monitoring.coreos.com/v1
-kind: ServiceMonitor
-metadata:
-  name: stackable-minio-http
-  labels:
-    stackable.tech/vendor: Stackable
-    release: prometheus
-spec:
-  namespaceSelector:
-    any: true
-  selector:
-    matchLabels:
-      # stackable.tech/vendor: Stackable # This is not always set, e.g. missing in the nifi-kafka-druid-water-level-data demo
-      app: minio
-      monitoring: "true"
-  endpoints:
-    - scheme: http
-      port: http
-      path: /minio/v2/metrics/cluster
 ---
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor

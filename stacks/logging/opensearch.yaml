@@ -1,0 +1,179 @@
+apiVersion: opensearch.stackable.tech/v1alpha1
+kind: OpenSearchCluster
+metadata:
+  name: opensearch
+spec:
+  image:
+    productVersion: {{ opensearchVersion }}
+    pullPolicy: IfNotPresent
+  clusterConfig:
+    vectorAggregatorConfigMapName: vector-aggregator-discovery
+  nodes:
+    config:
+      logging:
+        enableVectorAgent: true
+    roleGroups:
+      default:
+        config:
+          listenerClass: cluster-internal
+        replicas: 1
+    configOverrides:
+      opensearch.yml:
+        # Disable memory mapping in this stack; If memory mapping were activated, the kernel setting
+        # vm.max_map_count would have to be increased to 262144 on the node.
+        node.store.allow_mmap: "false"
+        # Disable the disk allocation decider in this stack; Otherwise depending on the disk
+        # usage of the node and if the relative watermark set in
+        # `cluster.routing.allocation.disk.watermark.high` is reached the security index can't
+        # be created even if enough disk space would be available.
+        cluster.routing.allocation.disk.threshold_enabled: "false"
+        plugins.security.allow_default_init_securityindex: "true"
+        plugins.security.ssl.transport.enabled: "true"
+        plugins.security.ssl.transport.pemcert_filepath: /stackable/opensearch/config/tls/tls.crt
+        plugins.security.ssl.transport.pemkey_filepath: /stackable/opensearch/config/tls/tls.key
+        plugins.security.ssl.transport.pemtrustedcas_filepath: /stackable/opensearch/config/tls/ca.crt
+        plugins.security.ssl.http.enabled: "true"
+        plugins.security.ssl.http.pemcert_filepath: /stackable/opensearch/config/tls/tls.crt
+        plugins.security.ssl.http.pemkey_filepath: /stackable/opensearch/config/tls/tls.key
+        plugins.security.ssl.http.pemtrustedcas_filepath: /stackable/opensearch/config/tls/ca.crt
+    podOverrides:
+      spec:
+        containers:
+          - name: opensearch
+            volumeMounts:
+              - name: security-config
+                mountPath: /stackable/opensearch/config/opensearch-security
+                readOnly: true
+              - name: tls
+                mountPath: /stackable/opensearch/config/tls
+                readOnly: true
+        volumes:
+          - name: security-config
+            secret:
+              secretName: opensearch-security-config
+              defaultMode: 0o660
+          - name: tls
+            ephemeral:
+              volumeClaimTemplate:
+                metadata:
+                  annotations:
+                    secrets.stackable.tech/class: tls
+                    secrets.stackable.tech/scope: node,pod,service=opensearch,service=opensearch-nodes-default-headless
+                spec:
+                  storageClassName: secrets.stackable.tech
+                  accessModes:
+                    - ReadWriteOnce
+                  resources:
+                    requests:
+                      storage: "1"
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opensearch-security-config
+stringData:
+  action_groups.yml: |
+    ---
+    _meta:
+      type: actiongroups
+      config_version: 2
+  allowlist.yml: |
+    ---
+    _meta:
+      type: allowlist
+      config_version: 2
+
+    config:
+      enabled: false
+  audit.yml: |
+    ---
+    _meta:
+      type: audit
+      config_version: 2
+
+    config:
+      enabled: false
+  config.yml: |
+    ---
+    _meta:
+      type: config
+      config_version: 2
+
+    config:
+      dynamic:
+        authc:
+          basic_internal_auth_domain:
+            description: Authenticate via HTTP Basic against internal users database
+            http_enabled: true
+            transport_enabled: true
+            order: 1
+            http_authenticator:
+              type: basic
+              challenge: true
+            authentication_backend:
+              type: intern
+        authz: {}
+  internal_users.yml: |
+    ---
+    _meta:
+      type: internalusers
+      config_version: 2
+
+    admin:
+      hash: {{ bcrypt(password=openSearchAdminPassword) }}
+      reserved: true
+      backend_roles:
+        - admin
+      description: OpenSearch admin user
+
+    kibanaserver:
+      hash: {{ bcrypt(password=openSearchDashboardPassword) }}
+      reserved: true
+      description: OpenSearch Dashboards user
+  nodes_dn.yml: |
+    ---
+    _meta:
+      type: nodesdn
+      config_version: 2
+  roles.yml: |
+    ---
+    _meta:
+      type: roles
+      config_version: 2
+  roles_mapping.yml: |
+    ---
+    _meta:
+      type: rolesmapping
+      config_version: 2
+
+    all_access:
+      reserved: false
+      backend_roles:
+        - admin
+
+    kibana_server:
+      reserved: true
+      users:
+        - kibanaserver
+  tenants.yml: |
+    ---
+    _meta:
+      type: tenants
+      config_version: 2
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opensearch-user
+stringData:
+  username: admin
+  password: {{ openSearchAdminPassword }}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: opensearch-dashboard-user
+stringData:
+  username: kibanaserver
+  password: {{ openSearchDashboardPassword }}
+  cookie: {{ random_password() }}

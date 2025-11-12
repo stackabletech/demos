@@ -5,7 +5,7 @@ metadata:
   name: druid
 spec:
   image:
-    productVersion: 33.0.0
+    productVersion: 34.0.0
   clusterConfig:
     zookeeperConfigMapName: druid-znode
     metadataStorageDatabase:
@@ -29,13 +29,13 @@ spec:
         baseKey: data
   brokers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
   coordinators:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1
@@ -67,7 +67,7 @@ spec:
               limit: 16Gi
   routers:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     roleGroups:
       default:
         replicas: 1

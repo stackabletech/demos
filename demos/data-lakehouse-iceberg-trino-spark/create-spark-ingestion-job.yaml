@@ -26,7 +26,7 @@ spec:
               echo 'Waiting for all nifi instances to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi
         - name: wait-for-kafka-topics
-          image: oci.stackable.tech/sdp/kafka:3.9.1-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/kafka:4.1.0-stackable0.0.0-dev
           command:
             - bash
             - -euo
@@ -144,13 +144,13 @@ data:
         stackable.tech/vendor: Stackable
     spec:
       sparkImage:
-        productVersion: 3.5.6
+        productVersion: 4.0.1
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.8.1
-          - org.apache.spark:spark-sql-kafka-0-10_2.12:3.5.6
+          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1
       s3connection:
         reference: minio
       sparkConf:

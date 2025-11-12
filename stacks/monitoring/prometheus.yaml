@@ -4,7 +4,7 @@ name: kube-prometheus-stack
 repo:
   name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-version: 75.10.0 # 0.83.0
+version: 77.12.0 # 0.85.0
 options:
   commonMetaLabels:
     stackable.tech/vendor: Stackable

@@ -5,7 +5,7 @@ metadata:
   name: nifi
 spec:
   image:
-    productVersion: 2.4.0
+    productVersion: 2.6.0
   clusterConfig:
     authentication:
       - authenticationClass: nifi-admin-credentials
@@ -14,7 +14,7 @@ spec:
       autoGenerate: true
   nodes:
     roleConfig:
-      listenerClass: external-unstable
+      listenerClass: external-stable
     config:
       resources:
         cpu:
@@ -33,6 +33,10 @@ spec:
             capacity: "4Gi"
           stateRepo:
             capacity: "1Gi"
+    configOverrides:
+      nifi.properties:
+        nifi.web.https.sni.required: "false"
+        nifi.web.https.sni.host.check: "false"
     roleGroups:
       default:
         replicas: 2

@@ -74,6 +74,7 @@ stacks:
       - commons
       - listener
       - secret
+      - opensearch
       - zookeeper # demo does install a zookeeper to produce logs
     labels:
       - logging
@@ -81,11 +82,11 @@ stacks:
       - opensearch-dashboards
       - vector
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/opensearch.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/setup-opensearch-dashboards.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 5150m
@@ -98,9 +99,12 @@ stacks:
       - name: openSearchDashboardPassword
         description: Password of OpenSearch Dashboard user
         default: kibanaserverkibanaserver
-      - name: setSysctlMaxMapCount
-        description: Wether an init-container should be used to increase 'sysctl -w vm.max_map_count'. This requires to spawn an init-container with runsAsUser 0 privileges, which some clusters prohibit. You can increase 'vm.max_map_count' on all of the kubernetes nodes manually and set this to 'false'.
-        default: "true"
+      - name: opensearchVersion
+        description: Version of OpenSearch and OpenSearch Dashboards to deploy
+        default: 3.1.0
+      - name: stackableReleaseVersion
+        description: The Stackable release to be used for the OpenSearch Dashboards image tag
+        default: 0.0.0-dev
   observability:
     description: >-
       An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
@@ -135,12 +139,17 @@ stacks:
       - listener
       - secret
       - airflow
-      - spark-k8s # Some demo does schedule a Spark job
+      - spark-k8s
+      - kafka
+      - opa
     labels:
       - airflow
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/kafka.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa-rules.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
@@ -185,7 +194,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/zookeeper.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
@@ -429,39 +437,6 @@ stacks:
       - name: jupyterLabToken
         description: Token for JupyterLab UI access
         default: adminadmin
-  dual-hive-hdfs-s3:
-    description: Dual stack Hive on HDFS and S3 for Hadoop/Hive to Trino migration
-    stackableRelease: dev
-    stackableOperators:
-      - commons
-      - listener
-      - secret
-      - zookeeper
-      - hdfs
-      - hive
-      - trino
-      - opa
-    labels:
-      - trino
-      - hive
-      - hdfs
-      - s3
-    manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hivehdfs.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hives3.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/hive.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/dual-hive-hdfs-s3/trino.yaml
-    supportedNamespaces: []
-    resourceRequests:
-      cpu: 7750m
-      memory: 19974Mi
-      pvc: 44Gi
-    parameters:
-      - name: minioAdminPassword
-        description: Password of the Minio admin user
-        default: adminadmin
   tutorial-openldap:
     description: >-
       An OpenLDAP instance with two users (alice:alice, bob:bob) and TLS enabled.
@@ -509,74 +484,6 @@ stacks:
       pvc: 0Gi
     # TODO: Parameterize
     parameters: []
-  keycloak-opa-poc:
-    description: >-
-      A Superset, Trino, Druid, Keycloak and OPA instance.
-      Superset, Trino and Druid have single sign-on with Keycloak enabled.
-      Trino and Druid have OPA authorization enabled.
-      3 users are created in Keycloak: admin:adminadmin, alice:alicealice, bob:bobbob. admin and alice are admins with
-      full authorization in Druid and Trino, bob is not authorized.
-      This is a proof-of-concept and the mechanisms used here are subject to change.
-    stackableRelease: dev
-    stackableOperators:
-      - commons
-      - listener
-      - secret
-      - trino
-      - superset
-      - zookeeper
-      - druid
-      - hdfs
-      - opa
-    labels:
-      - authentication
-      - sso
-    manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/keycloak.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/setup-keycloak.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/opa.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/policies.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/zookeeper.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/hdfs.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/druid.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/keycloak-opa-poc/superset.yaml
-    supportedNamespaces: ["default"] # ClusterRoleBinding needs explicit namespace
-    resourceRequests:
-      cpu: 7850m
-      memory: 23142Mi
-      pvc: 34Gi
-    parameters:
-      - name: alicePassword
-        description: Password of the user alice, which can log into Trino and Superset
-        default: alicealice
-      - name: bobPassword
-        description: Password of the user bob, which can log into Trino and Superset
-        default: bobbob
-      - name: keycloakAdminPassword
-        description: Password of the Keycloak admin user
-        default: adminadmin
-      - name: keycloakSupersetClientSecret
-        description: Secret ID of the Keycloak Superset client that is used by Superset to connect to Keycloak to authenticate users
-        default: supersetsuperset
-      - name: keycloakTrinoClientSecret
-        description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
-        default: trinotrino
-      - name: keycloakDruidClientSecret
-        description: Secret ID of the Keycloak Druid client that is used by Druid to connect to Keycloak to authenticate users
-        default: druiddruid
-      - name: keycloakDruidCookiePassphrase
-        description: Passphrase for encrypting the cookies used to manage authentication session with browser.
-        default: druiddruidcookiepassphrase
-      - name: druidSystemUserPassword
-        description: Password for the Druid user druid_system
-        default: druidsystemuserpassword
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
   end-to-end-security:
     description: >-
       A stack used to demonstrate an end-to-end security concept.
