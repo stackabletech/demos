@@ -3,12 +3,12 @@ my_project:
   outputs:
     prod:
       type: trino
-      #method: none
+      method: ldap
       user: admin
       password: adminadmin
       host: trino-coordinator-default-headless.default.svc.cluster.local
       port: 8443
-      database: lakehouse
+      database: iceberg
       schema: my_schema
       threads: 4
       http_scheme: https

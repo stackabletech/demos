@@ -1,4 +1,4 @@
-FROM python:3.11-slim AS builder
+FROM python:3.12-slim-bullseye AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -16,7 +16,7 @@ RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
 # Final stage
-FROM python:3.11-slim
+FROM python:3.12-slim-bullseye
 
 RUN apt-get update && apt-get install -y \
     git \
@@ -31,7 +31,11 @@ ENV PATH="/opt/venv/bin:$PATH"
 WORKDIR /dbt
 
 # Copy dbt project
-COPY dbt_project.yml profiles.yml ./
+#COPY dbt_project.yml profiles.yml ./
+#COPY tc_agentur ./tc_agentur
+#COPY tc_person ./tc_person
+#COPY tc_schadenfall ./tc_schadenfall
+#COPY tc_schadennrsrv ./tc_schadennrsrv
 
 # Security: non-root user
 RUN useradd -m -u 1000 dbt && chown -R dbt:dbt /dbt
