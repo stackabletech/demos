@@ -1,0 +1,12 @@
+---
+apiVersion: opa.stackable.tech/v1alpha1
+kind: OpaCluster
+metadata:
+  name: opa
+spec:
+  image:
+    productVersion: 1.8.0
+  servers:
+    roleGroups:
+      default:
+        replicas: 1

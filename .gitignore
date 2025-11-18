@@ -1,3 +1,4 @@
 .env
 .envrc
 .direnv/
+stacks/trino-iceberg/dbt/
