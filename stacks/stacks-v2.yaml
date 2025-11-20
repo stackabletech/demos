@@ -384,7 +384,6 @@ stacks:
       - hive
       - trino
       - opa
-      - airflow
     labels:
       - trino
       - opa
@@ -394,12 +393,50 @@ stacks:
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small-tls/rendered-chart.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
-      - plainYaml: stacks/trino-iceberg/airflow.yaml
+    supportedNamespaces: ["default"] # until namespace can be templates, the minio FQDN hard-codes the namespace
+    resourceRequests:
+      cpu: 6000m # Measured 5600m
+      memory: 21Gi
+      pvc: 110Gi # 100Gi for MinIO
+    parameters:
+      - name: trinoAdminPassword
+        description: Password of the Trino admin user
+        default: adminadmin
+      - name: minioAdminPassword
+        description: Password of the MinIO admin user
+        default: adminadmin
+  airflow-trino-iceberg:
+    description: Stack containing Airflow and Trino using Apache Iceberg as a S3 backend for dbt jobs
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - hive
+      - trino
+      - opa
+      - airflow
+    labels:
+      - trino
+      - opa
+      - iceberg
+      - minio
+      - s3
+    manifests:
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - helmChart: stacks/trino-iceberg/redis-airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
+      - plainYaml: stacks/trino-iceberg/hive-metastores.yaml
+      - plainYaml: stacks/trino-iceberg/trino.yaml
+      - plainYaml: stacks/trino-iceberg/airflow.yaml
+      - plainYaml: stacks/trino-iceberg/rbac.yaml
+      - plainYaml: stacks/trino-iceberg/opa-rules.yaml
+      - plainYaml: stacks/trino-iceberg/opa.yaml
     supportedNamespaces: ["default"]
     parameters:
       - name: trinoAdminPassword

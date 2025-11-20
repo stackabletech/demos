@@ -16,31 +16,45 @@ spec:
       opa:
         configMapName: opa
         package: trino
+    tls:
+      serverSecretClass: trino-tls
+      internalSecretClass: trino-internal-tls
   coordinators:
-    config:
-      queryMaxMemory: 10TB
-      resources:
-        cpu:
-          min: "500m"
-          max: "2"
-        memory:
-          limit: '4Gi'
     roleGroups:
       default:
         replicas: 1
     roleConfig:
       listenerClass: external-stable
   workers:
-    config:
-      resources:
-        cpu:
-          min: "1"
-          max: "4"
-        memory:
-          limit: '8Gi'
     roleGroups:
       default:
         replicas: 1
+---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: SecretClass
+metadata:
+  name: trino-tls
+spec:
+  backend:
+    autoTls:
+      ca:
+        secret:
+          name: secret-provisioner-trino-tls-ca
+          namespace: default
+        autoGenerate: true
+---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: SecretClass
+metadata:
+  name: trino-internal-tls
+spec:
+  backend:
+    autoTls:
+      ca:
+        secret:
+          name: secret-provisioner-trino-internal-tls-ca
+          namespace: default
+        autoGenerate: true
 ---
 apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
@@ -52,18 +66,10 @@ spec:
       userCredentialsSecret:
         name: trino-users
 ---
-apiVersion: v1
-kind: Secret
-metadata:
-  name: trino-users
-type: kubernetes.io/opaque
-stringData:
-  admin: "{{ trinoAdminPassword }}"
----
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCatalog
 metadata:
-  name: lakehouse
+  name: iceberg
   labels:
     trino: trino
 spec:
@@ -77,34 +83,24 @@ spec:
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCatalog
 metadata:
-  name: tpcds
+  name: dpx
   labels:
     trino: trino
 spec:
   connector:
-    tpcds: {}
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: tpch
-  labels:
-    trino: trino
-spec:
-  connector:
-    tpch: {}
----
-apiVersion: opa.stackable.tech/v1alpha1
-kind: OpaCluster
-metadata:
-  name: opa
-spec:
-  image:
-    productVersion: 1.8.0
-  servers:
-    roleGroups:
-      default:
-        replicas: 1
+    generic:
+      connectorName: postgresql
+      properties:
+        connection-url:
+          value: jdbc:postgresql://140.238.212.205:55432/suva
+        connection-user:
+          valueFromSecret:
+            name: dpx-credentials
+            key: username
+        connection-password:
+          valueFromSecret:
+            name: dpx-credentials
+            key: password
 ---
 apiVersion: v1
 kind: ConfigMap
