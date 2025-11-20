@@ -8,7 +8,6 @@ spec:
     productVersion: 3.0.6
     pullPolicy: IfNotPresent
   clusterConfig:
-    vectorAggregatorConfigMapName: vector-aggregator-discovery
     authorization:
       opa:
         configMapName: opa
@@ -30,8 +29,6 @@ spec:
     roleConfig:
       listenerClass: external-stable
     config:
-      logging:
-        enableVectorAgent: true
       resources:
         cpu:
           min: "2"
@@ -43,8 +40,6 @@ spec:
         replicas: 1
   celeryExecutors:
     config:
-      logging:
-        enableVectorAgent: true
       resources:
         cpu:
           min: "2"
@@ -57,23 +52,14 @@ spec:
   # kubernetesExecutors:
   #   config: {}
   schedulers:
-    config:
-      logging:
-        enableVectorAgent: true
     roleGroups:
       default:
         replicas: 1
   dagProcessors:
-    config:
-      logging:
-        enableVectorAgent: true
     roleGroups:
       default:
         replicas: 1
   triggerers:
-    config:
-      logging:
-        enableVectorAgent: true
     roleGroups:
       default:
         replicas: 1
@@ -139,8 +125,8 @@ data:
                   name="TRINO_PASSWORD",
                   value_from=V1EnvVarSource(
                       secret_key_ref=V1SecretKeySelector(
-                          name="demo-password",
-                          key="password"
+                          name="airflow-credentials",
+                          key="adminUser.password"
                       )
                   )
               ),

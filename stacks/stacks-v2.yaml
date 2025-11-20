@@ -408,7 +408,7 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-  airflow-trino-iceberg:
+  airflow-trino-dbt:
     description: Stack containing Airflow and Trino using Apache Iceberg as a S3 backend for dbt jobs
     stackableRelease: dev
     stackableOperators:
@@ -428,15 +428,15 @@ stacks:
     manifests:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - helmChart: stacks/trino-iceberg/redis-airflow.yaml
+      - helmChart: stacks/airflow-trino-dbt/redis-airflow.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
-      - plainYaml: stacks/trino-iceberg/hive-metastores.yaml
-      - plainYaml: stacks/trino-iceberg/trino.yaml
-      - plainYaml: stacks/trino-iceberg/airflow.yaml
-      - plainYaml: stacks/trino-iceberg/rbac.yaml
-      - plainYaml: stacks/trino-iceberg/opa-rules.yaml
-      - plainYaml: stacks/trino-iceberg/opa.yaml
+      - plainYaml: stacks/airflow-trino-dbt/hive-metastores.yaml
+      - plainYaml: stacks/airflow-trino-dbt/trino.yaml
+      - plainYaml: stacks/airflow-trino-dbt/airflow.yaml
+      - plainYaml: stacks/airflow-trino-dbt/rbac.yaml
+      - plainYaml: stacks/airflow-trino-dbt/opa-rules.yaml
+      - plainYaml: stacks/airflow-trino-dbt/opa.yaml
     supportedNamespaces: ["default"]
     parameters:
       - name: trinoAdminPassword
