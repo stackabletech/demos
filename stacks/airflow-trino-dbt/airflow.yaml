@@ -111,10 +111,10 @@ data:
         catchup=False
     ) as dag:
       run_dbt = KubernetesPodOperator(
-          image="oci.stackable.tech/sandbox/andrew/dbt-trino:0.0.1",
+          image="oci.stackable.tech/sandbox/andrew/dbt-demo:0.0.1",
           image_pull_policy="IfNotPresent",
           cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
-          arguments=["cd /dbt && export DBT_PROFILES_DIR=/dbt && dbt debug"],
+          arguments=["cd /dbt/dbt_test && export DBT_PROFILES_DIR=/dbt/dbt_test && dbt debug && dbt run && dbt test"],
           name="run-dbt",
           task_id="dbt-test",
           get_logs=True,
