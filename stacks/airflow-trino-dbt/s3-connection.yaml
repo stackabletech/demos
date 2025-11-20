@@ -24,3 +24,13 @@ spec:
     k8sSearch:
       searchNamespace:
         pod: {}
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: minio-s3-credentials
+  labels:
+    secrets.stackable.tech/class: minio-s3-credentials
+stringData:
+  accessKey: admin
+  secretKey: {{ minioAdminPassword }}

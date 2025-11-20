@@ -153,3 +153,19 @@ data:
           startup_timeout_seconds=600
       )
       run_dbt
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-credentials
+type: Opaque
+stringData:
+  adminUser.username: admin
+  adminUser.firstname: Airflow
+  adminUser.lastname: Admin
+  adminUser.email: airflow@airflow.com
+  adminUser.password: {{ airflowAdminPassword }}
+  connections.secretKey: "airflowSecretKey"
+  connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow/airflow
+  connections.celeryResultBackend: db+postgresql://airflow:airflow@postgresql-airflow/airflow
+  connections.celeryBrokerUrl: redis://:redis@redis-airflow-master:6379/0

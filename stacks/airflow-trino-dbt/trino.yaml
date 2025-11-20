@@ -66,6 +66,14 @@ spec:
       userCredentialsSecret:
         name: trino-users
 ---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-users
+type: kubernetes.io/opaque
+stringData:
+  admin: "{{ trinoAdminPassword }}"
+---
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCatalog
 metadata:
@@ -79,28 +87,6 @@ spec:
         configMap: hive-iceberg
       s3:
         reference: minio
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: dpx
-  labels:
-    trino: trino
-spec:
-  connector:
-    generic:
-      connectorName: postgresql
-      properties:
-        connection-url:
-          value: jdbc:postgresql://140.238.212.205:55432/suva
-        connection-user:
-          valueFromSecret:
-            name: dpx-credentials
-            key: username
-        connection-password:
-          valueFromSecret:
-            name: dpx-credentials
-            key: password
 ---
 apiVersion: v1
 kind: ConfigMap
