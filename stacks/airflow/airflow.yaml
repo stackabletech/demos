@@ -66,8 +66,6 @@ spec:
       AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "s3_conn"
       AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://airflow/logs"
       AIRFLOW__LOGGING__ENCRYPT_S3_LOGS: "FALSE"
-      AWS_ACCESS_KEY_ID: admin
-      AWS_SECRET_ACCESS_KEY: adminadmin # {{ airflowAdminPassword }}
     configOverrides:
       webserver_config.py:
         # Allow "POST /login/" without CSRF token
@@ -83,6 +81,13 @@ spec:
                 valueFrom:
                   fieldRef:
                     fieldPath: metadata.namespace
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                 secretKeyRef:
+                   name: airflow-credentials
+                   key: adminUser.password
+              - name: AWS_ACCESS_KEY_ID
+                value: admin
               - name: AIRFLOW_CONN_KAFKA_CONN
                 value: '{"conn_type": "kafka", "extra": {"bootstrap.servers": "kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093", "security.protocol": "SSL", "ssl.ca.location": "/stackable/tls-pem/ca.crt", "group.id": "airflow_group", "auto.offset.reset": "latest"}}'
               - name: AIRFLOW_CONN_S3_CONN
@@ -91,9 +96,22 @@ spec:
       default:
         replicas: 1
   kubernetesExecutors:
-    # do not apply the podOverrides here as we don't need and it will interfere
-    # with the pod template
+    # apply the podOverrides to the *base* container
     envOverrides: *envOverrides
+    podOverrides:
+      spec:
+        containers:
+          - name: base
+            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                 secretKeyRef:
+                   name: airflow-credentials
+                   key: adminUser.password
+              - name: AWS_ACCESS_KEY_ID
+                value: admin
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
