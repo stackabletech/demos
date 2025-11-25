@@ -1,4 +1,13 @@
 ---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: TrustStore
+metadata:
+  name: truststore-pem
+spec:
+  secretClassName: tls
+  format: tls-pem
+  targetKind: ConfigMap
+---
 apiVersion: airflow.stackable.tech/v1alpha1
 kind: AirflowCluster
 metadata:
@@ -21,10 +30,15 @@ spec:
       - name: airflow-dags
         configMap:
           name: airflow-dags
+      - name: s3-tls-pem
+        configMap:
+          name: truststore-pem
     volumeMounts:
       - name: airflow-dags
         mountPath: /stackable/airflow/dags/dbt.py
         subPath: dbt.py
+      - name: s3-tls-pem
+        mountPath: /stackable/s3-tls-pem
   webservers:
     roleConfig:
       listenerClass: external-stable
@@ -35,31 +49,31 @@ spec:
           max: "3"
         memory:
           limit: 3Gi
+    envOverrides: &envOverrides
+      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "s3_conn"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://airflow/logs"
+      AIRFLOW__LOGGING__ENCRYPT_S3_LOGS: "FALSE"
+      AWS_ACCESS_KEY_ID: admin
+      AWS_SECRET_ACCESS_KEY: adminadmin # {{ airflowAdminPassword }}
+      AIRFLOW_CONN_S3_CONN: "{\"conn_type\": \"aws\", \"extra\": {\"endpoint_url\": \"https://minio.default.svc.cluster.local:9000\", \"verify\": \"/stackable/s3-tls-pem/ca.crt\"}}"
     roleGroups:
       default:
         replicas: 1
-  celeryExecutors:
-    config:
-      resources:
-        cpu:
-          min: "2"
-          max: "3"
-        memory:
-          limit: 4Gi
-    roleGroups:
-      default:
-        replicas: 1
-  # kubernetesExecutors:
-  #   config: {}
+  kubernetesExecutors:
+    envOverrides: *envOverrides
   schedulers:
+    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1
   dagProcessors:
+    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1
   triggerers:
+    envOverrides: *envOverrides
     roleGroups:
       default:
         replicas: 1

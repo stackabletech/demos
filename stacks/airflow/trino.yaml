@@ -1,0 +1,124 @@
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCluster
+metadata:
+  name: trino
+spec:
+  image:
+    productVersion: "477"
+  clusterConfig:
+    catalogLabelSelector:
+      matchLabels:
+        trino: trino
+    authentication:
+      - authenticationClass: trino-users
+    authorization:
+      opa:
+        configMapName: opa
+        package: trino
+    tls:
+      serverSecretClass: trino-tls
+      internalSecretClass: trino-internal-tls
+  coordinators:
+    roleGroups:
+      default:
+        replicas: 1
+    roleConfig:
+      listenerClass: external-stable
+  workers:
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: SecretClass
+metadata:
+  name: trino-tls
+spec:
+  backend:
+    autoTls:
+      ca:
+        secret:
+          name: secret-provisioner-trino-tls-ca
+          namespace: default
+        autoGenerate: true
+---
+apiVersion: secrets.stackable.tech/v1alpha1
+kind: SecretClass
+metadata:
+  name: trino-internal-tls
+spec:
+  backend:
+    autoTls:
+      ca:
+        secret:
+          name: secret-provisioner-trino-internal-tls-ca
+          namespace: default
+        autoGenerate: true
+---
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: trino-users
+spec:
+  provider:
+    static:
+      userCredentialsSecret:
+        name: trino-users
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-users
+type: kubernetes.io/opaque
+stringData:
+  admin: "{{ trinoAdminPassword }}"
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: iceberg
+  labels:
+    trino: trino
+spec:
+  connector:
+    iceberg:
+      metastore:
+        configMap: hive-iceberg
+      s3:
+        reference: minio
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: trino-opa-bundle
+  labels:
+    opa.stackable.tech/bundle: "trino"
+data:
+  trino.rego: |
+    package trino
+
+    default allow = false
+
+    # Allow non-batched access
+    allow if {
+      is_admin
+    }
+    # Allow batched access
+    batch contains i if {
+      some i
+      input.action.filterResources[i]
+      is_admin
+    }
+    # Corner case: filtering columns is done with a single table item, and many columns inside
+    batch contains i if {
+      some i
+      input.action.operation == "FilterColumns"
+      count(input.action.filterResources) == 1
+      input.action.filterResources[0].table.columns[i]
+      is_admin
+    }
+
+    is_admin() if {
+      input.context.identity.user == "admin"
+    }
