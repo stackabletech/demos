@@ -52,8 +52,8 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/04-enable-and-run-date-dag.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/05-enable-and-run-kafka-dag.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/06-create-opa-users.yaml
-      - plainYaml: demos/airflow-trino-dbt/serviceaccount.yaml
-      - plainYaml: demos/airflow-trino-dbt/create-trino-tables.yaml
+      - plainYaml: demos/airflow-scheduled-job/serviceaccount.yaml
+      - plainYaml: demos/airflow-scheduled-job/create-trino-tables.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 2401m
@@ -286,17 +286,3 @@ demos:
       cpu: 6400m
       memory: 12622Mi
       pvc: 20Gi
-  airflow-trino-dbt:
-    description: Airflow DAG calling DBT jobs to write data to Trino table via iceberg
-    documentation: https://docs.stackable.tech/home/stable/demos/airflow-trino-dbt
-    stackableStack: airflow-trino-dbt
-    labels:
-      - iceberg
-      - trino
-      - minio
-      - s3
-      - airflow
-    manifests:
-      - plainYaml: demos/airflow-trino-dbt/serviceaccount.yaml
-      - plainYaml: demos/airflow-trino-dbt/create-trino-tables.yaml
-    supportedNamespaces: ["default"]
