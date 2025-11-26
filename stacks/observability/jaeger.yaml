@@ -6,6 +6,9 @@ name: jaeger
 repo:
   name: jaeger
   url: https://jaegertracing.github.io/helm-charts
+# To find the latest version:
+# helm repo add jaegertracing https://jaegertracing.github.io/helm-charts --force-update
+# helm search repo jaegertracing/jaeger
 version: 3.4.1 # 1.53.0
 options:
   # labels:

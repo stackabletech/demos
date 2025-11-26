@@ -54,6 +54,7 @@ GitHub handle next to the demo to indicate a particular demo was picked up for t
 <!-- TODO (@Techassi): Test stacks which don't have a demo -->
 
 - [ ] [airflow-scheduled-job](https://docs.stackable.tech/home/nightly/demos/airflow-scheduled-job)
+- [ ] [argo-cd-git-ops](https://docs.stackable.tech/home/nightly/demos/argo-cd-git-ops)
 - [ ] [data-lakehouse-iceberg-trino-spark](https://docs.stackable.tech/home/nightly/demos/data-lakehouse-iceberg-trino-spark)
 - [ ] [end-to-end-security](https://docs.stackable.tech/home/nightly/demos/end-to-end-security)
 - [ ] [hbase-hdfs-load-cycling-data](https://docs.stackable.tech/home/nightly/demos/hbase-hdfs-load-cycling-data)
