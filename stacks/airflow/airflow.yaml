@@ -84,8 +84,8 @@ spec:
               - name: AWS_SECRET_ACCESS_KEY
                 valueFrom:
                  secretKeyRef:
-                   name: airflow-credentials
-                   key: adminUser.password
+                   name: minio-s3-credentials
+                   key: secretKey
               - name: AWS_ACCESS_KEY_ID
                 value: admin
               - name: AIRFLOW_CONN_KAFKA_CONN
@@ -108,8 +108,8 @@ spec:
               - name: AWS_SECRET_ACCESS_KEY
                 valueFrom:
                  secretKeyRef:
-                   name: airflow-credentials
-                   key: adminUser.password
+                   name: minio-s3-credentials
+                   key: secretKey
               - name: AWS_ACCESS_KEY_ID
                 value: admin
   schedulers:
@@ -178,7 +178,7 @@ data:
         catchup=False
     ) as dag:
       run_dbt = KubernetesPodOperator(
-          image="oci.stackable.tech/sandbox/andrew/dbt-demo:0.0.1",
+          image="oci.stackable.tech/demos/dbt-demo:0.0.1",
           image_pull_policy="IfNotPresent",
           cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
           arguments=["cd /dbt/dbt_test && export DBT_PROFILES_DIR=/dbt/dbt_test && dbt debug && dbt run && dbt test"],
@@ -192,8 +192,8 @@ data:
                   name="TRINO_PASSWORD",
                   value_from=V1EnvVarSource(
                       secret_key_ref=V1SecretKeySelector(
-                          name="airflow-credentials",
-                          key="adminUser.password"
+                          name="trino-users",
+                          key="admin"
                       )
                   )
               ),

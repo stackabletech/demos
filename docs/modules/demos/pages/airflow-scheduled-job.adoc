@@ -35,10 +35,13 @@ This demo will
 
 * Install the required Stackable operators
 * Spin up the following data products
-** *Postgresql*: An open-source database used for Airflow cluster and job metadata.
-** *Airflow*: An open-source workflow management platform for data engineering pipelines.
-** *Kafka*: An open-source messaging broker that will be used to trigger an Airflow DAG.
-** *Open Policy Agent*: An open-source policy engine used for user authorization.
+** *Postgresql*: An open-source database used for Airflow cluster and job metadata
+** *Airflow*: An open-source workflow management platform for data engineering pipelines
+** *Kafka*: An open-source messaging broker that will be used to trigger an Airflow DAG
+** *Open Policy Agent*: An open-source policy engine used for user authorization
+** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This
+   demo uses it to enable SQL access to the data
+** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage to store the Trino data and Airflow logs
 * Mount several Airflow jobs (referred to as Directed Acyclic Graphs, or DAGs) for the cluster to use
 * Enable and schedule the jobs
 * Verify the job status with the Airflow Webserver UI
@@ -55,26 +58,34 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list -n airflow-demo
+$ stackablectl stacklet list
 
-┌─────────┬─────────────┬──────────────┬────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT ┆ NAME        ┆ NAMESPACE    ┆ ENDPOINTS                                                                                                              ┆ CONDITIONS                      │
-╞═════════╪═════════════╪══════════════╪════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ airflow ┆ airflow     ┆ airflow-demo ┆ webserver-http                              http://172.19.0.6:32111                                                    ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka   ┆ kafka       ┆ airflow-demo ┆ broker-default-0-listener-broker-kafka-tls  kafka-broker-default-0-listener-broker.airflow-demo.svc.cluster.local:9093 ┆ Available, Reconciling, Running │
-│         ┆             ┆              ┆ broker-default-0-listener-broker-metrics    kafka-broker-default-0-listener-broker.airflow-demo.svc.cluster.local:9606 ┆                                 │
-│         ┆             ┆              ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.airflow-demo.svc.cluster.local:9093         ┆                                 │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa     ┆ opa-airflow ┆ airflow-demo ┆                                                                                                                        ┆ Available, Reconciling, Running │
-└─────────┴─────────────┴──────────────┴────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌─────────┬───────────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                                 ┆ CONDITIONS                      │
+╞═════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow       ┆ default   ┆ webserver-http                              http://172.19.0.3:31483                                       ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive    ┆ hive-iceberg  ┆ default   ┆ metastore-hive                              hive-iceberg-metastore.default.svc.cluster.local:9083         ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka   ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls                                                                ┆ Available, Reconciling, Running │
+│         ┆               ┆           ┆ kafka-broker-default-0-listener-broker.default.svc.cluster.local:9093                                     ┆                                 │
+│         ┆               ┆           ┆ broker-default-0-listener-broker-metrics                                                                  ┆                                 │
+│         ┆               ┆           ┆ kafka-broker-default-0-listener-broker.default.svc.cluster.local:9606                                     ┆                                 │
+│         ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.default.svc.cluster.local:9093 ┆                                 │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa     ┆ opa           ┆ default   ┆                                                                                                           ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino   ┆ trino         ┆ default   ┆ coordinator-https                           https://172.19.0.5:31087                                      ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ minio   ┆ minio-console ┆ default   ┆ https                                       https://172.19.0.4:31792                                      ┆                                 │
+└─────────┴───────────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
 == Airflow Webserver UI
 
-Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.0.6:32111` in this case).
+Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.0.3:31483` in this case).
 
 image::airflow-scheduled-job/airflow_1.png[]
 
@@ -116,10 +127,12 @@ Click on the `run_every_minute` box in the centre of the page to select the logs
 
 [WARNING]
 ====
-In this demo, the logs are not available when the KubernetesExecutor is deployed.
+In this demo, the KubernetesExecutor is deployed which means that logs are only preserved (and available in the UI) if either remote logging or the SDP logging framework is configured.
+In this demo we set up remote logging using S3/Minio.
+Since Minio in this case is set up with TLS, the Airflow connection requires that the webserver has access to a relevant certificate and that every pod has environment variables containing the access and secret keys.
 See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/executor/kubernetes.html#managing-dags-and-logs[Airflow Documentation] for more details.
 
-If you are interested in persisting the logs, take a look at the xref:logging.adoc[] demo.
+If you are interested in persisting the logs using the SDP logging framework, take a look at the xref:logging.adoc[] demo.
 ====
 
 image::airflow-scheduled-job/airflow_8.png[]
@@ -215,14 +228,48 @@ image::airflow-scheduled-job/deferrable_04_queued.png[]
 image::airflow-scheduled-job/deferrable_05_running.png[]
 image::airflow-scheduled-job/deferrable_06_success.png[]
 
-Now log out and log in again as `richard.roe`. On the home screen no DAGs are visible, as expected by the authorization rules defined for this user:
+Now log out and log in again as `richard.roe`.
+On the home screen no DAGs are visible, as expected by the authorization rules defined for this user:
 
 image::airflow-scheduled-job/opa_01.png[]
 
+=== `run_dbt` DAG
+
+Log back into the UI as `admin`.
+Select the DAGs view, making sure the filter is set to `All`.
+Trigger a run on the `run_dbt` DAG (clicking on the trigger button will automatically activate a disabled DAG).
+Switch to the task view and click on the `dbt-test` under Task ID.
+It takes a few moments before the logs appear: this is because Airflow is configured to use the KubernetesExecutor - which creates new Pods for each DAG task - and as the DAG itself uses the KubernetesPodOperator, this means that _another_ Pod is spawned.
+Both of these are terminated on DAG completion.
+The pattern is probably overkill for simple scenarios, but we use it in this demo to show that logs from the final task are written to and retrievable from the S3 location defined in the Airflow cluster.
+
+image::airflow-scheduled-job/airflow_18.png[]
+
+[NOTE]
+====
+If you are tracking the logs in the UI from the task as it is running, you may need to fresh the screen on task completion to see the final logs.
+This is because they are written to the running Pod while the task is running, but are then written to S3 upon completion.
+====
+
+If you switch to the `Code` tab you will see the following:
+
+[source,python]
+----
+  run_dbt = KubernetesPodOperator(
+      image="oci.stackable.tech/demos/dbt-demo:0.0.1",
+      image_pull_policy="IfNotPresent",
+      cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
+      arguments=["cd /dbt/dbt_test && export DBT_PROFILES_DIR=/dbt/dbt_test && dbt debug && dbt run && dbt test"],
+      ...
+      )
+----
+
+The task checks the configuration, runs a task that inserts some dummy data into a table, and then runs some tests to verify the result.
+The details of the simple DBT project can be found https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/dbt[in the docs].
 
 == Patching Airflow to stress-test DAG parsing using relevant environment variables
 
-Log back into the UI as `admin`.
+Make sure you are still logged in as `admin`.
 The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
 This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
 To show these individual DAGs in the overall list (and to remove the existing ones), adjust the volumeMounts as shown below.
