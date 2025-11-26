@@ -1,0 +1,17 @@
+---
+trino_demo:
+  outputs:
+    iceberg:
+      type: trino
+      method: ldap
+      user: "{{ env_var('TRINO_USER') }}"
+      password: "{{ env_var('TRINO_PASSWORD') }}"
+      catalog: iceberg
+      host: "{{ env_var('TRINO_HOST') }}"
+      port: "{{ env_var('TRINO_PORT') | int }}"
+      schema: dbt_schema
+      threads: 1
+      cert: "{{ env_var('CERT_PATH') }}"
+      verify: true
+
+  target: iceberg
