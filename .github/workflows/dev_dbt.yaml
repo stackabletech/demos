@@ -1,0 +1,28 @@
+---
+name: Build and publish dbt-demo
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+      # TODO (@NickLarsenNZ): Also build on release branches, but with a stackable0.0.0-dev or stackableXX.X.X tag.
+      # - release-*
+    paths:
+      - demos/airflow-scheduled-job/dbt/Dockerfile
+      - demos/airflow-scheduled-job/dbt/requirements.txt
+      - .github/workflows/dev_dbt.yaml
+
+jobs:
+  build_image:
+    name: Reusable Workflow
+    uses: ./.github/workflows/reusable_build_image.yaml
+    secrets:
+      harbor-robot-secret: ${{ secrets.HARBOR_ROBOT_DEMOS_GITHUB_ACTION_BUILD_SECRET }}
+      slack-token: ${{ secrets.SLACK_CONTAINER_IMAGE_TOKEN }}
+    with:
+      image-name: dbt-demo
+      # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
+      # the demo is reproducable for the release and it will be automatically replaced for the release branch.
+      image-version: 0.0.1
+      containerfile-path: demos/airflow-scheduled-job/dbt/Dockerfile
