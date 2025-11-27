@@ -123,6 +123,12 @@ In the left-side pane the DAG is displayed either as a graph (this job is so sim
 
 image::airflow-scheduled-job/airflow_7.png[]
 
+[NOTE]
+====
+The first couple of runs of this DAG _may_ result in the tasks not being ready and being skipped, resulting in an error in the UI.
+This is a side-effect of the scheduling mechanism within Airflow: for example, due to the rapid succession of task runs triggered by frequent scheduling. These errors should not appear on later task runs.
+====
+
 Click on the `run_every_minute` box in the centre of the page to select the logs:
 
 [WARNING]
