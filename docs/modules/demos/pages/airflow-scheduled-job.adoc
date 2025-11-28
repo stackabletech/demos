@@ -271,7 +271,7 @@ If you switch to the `Code` tab you will see the following:
 ----
 
 The task checks the configuration, runs a task that inserts some dummy data into a table, and then runs some tests to verify the result.
-The details of the simple DBT project can be found https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/dbt[in the docs].
+The details of the simple DBT project can be found https://github.com/stackabletech/demos/tree/main/demos/airflow-scheduled-job/dbt/dbt_test[in the demos repository].
 
 == Patching Airflow to stress-test DAG parsing using relevant environment variables
 
