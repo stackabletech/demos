@@ -156,13 +156,13 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/kafka.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
-      - plainYaml: stacks/airflow/hive-metastores.yaml
-      - plainYaml: stacks/airflow/trino.yaml
-      - plainYaml: stacks/airflow/airflow.yaml
-      - plainYaml: stacks/airflow/rbac.yaml
-      - plainYaml: stacks/airflow/opa-rules.yaml
-      - plainYaml: stacks/airflow/opa.yaml
-      - plainYaml: stacks/airflow/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/hive-metastores.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/trino.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/airflow.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/rbac.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa-rules.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/minio.yaml
     supportedNamespaces: ["default"] # auto-generated secret classes need to be templated
     resourceRequests:
       cpu: 3400m

@@ -52,8 +52,8 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/04-enable-and-run-date-dag.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/05-enable-and-run-kafka-dag.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/06-create-opa-users.yaml
-      - plainYaml: demos/airflow-scheduled-job/serviceaccount.yaml
-      - plainYaml: demos/airflow-scheduled-job/create-trino-tables.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/serviceaccount.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/airflow-scheduled-job/create-trino-tables.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 2401m
