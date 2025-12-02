@@ -2,7 +2,7 @@
 apiVersion: opa.stackable.tech/v1alpha1
 kind: OpaCluster
 metadata:
-  name: opa-airflow
+  name: opa
 spec:
   image:
     productVersion: 1.8.0

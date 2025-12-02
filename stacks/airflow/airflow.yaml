@@ -11,7 +11,7 @@ spec:
   clusterConfig:
     authorization:
       opa:
-        configMapName: opa-airflow
+        configMapName: opa
         package: airflow
         cache:
           entryTimeToLive: 5s
@@ -22,7 +22,7 @@ spec:
       - name: airflow-dags
         configMap:
           name: airflow-dags
-      - name: kafka-tls-pem
+      - name: tls-pem
         configMap:
           name: truststore-pem
     volumeMounts:
@@ -41,8 +41,11 @@ spec:
       - name: airflow-dags
         mountPath: /dags/triggerer.py
         subPath: triggerer.py
-      - name: kafka-tls-pem
-        mountPath: /stackable/kafka-tls-pem
+      - name: airflow-dags
+        mountPath: /dags/dbt.py
+        subPath: dbt.py
+      - name: tls-pem
+        mountPath: /stackable/tls-pem
   webservers:
     roleConfig:
       listenerClass: external-stable
@@ -59,6 +62,10 @@ spec:
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       # Airflow 3: Disable decision caching for easy debugging
       AIRFLOW__CORE__AUTH_OPA_CACHE_MAXSIZE: "0"
+      AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: "s3_conn"
+      AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: "s3://airflow/logs"
+      AIRFLOW__LOGGING__ENCRYPT_S3_LOGS: "FALSE"
     configOverrides:
       webserver_config.py:
         # Allow "POST /login/" without CSRF token
@@ -70,19 +77,41 @@ spec:
             image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
-            - name: NAMESPACE
-              valueFrom:
-                fieldRef:
-                  fieldPath: metadata.namespace
-            - name: AIRFLOW_CONN_KAFKA_CONN
-              value: "{\"conn_type\": \"kafka\", \"extra\": {\"bootstrap.servers\": \"kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093\", \"security.protocol\": \"SSL\", \"ssl.ca.location\": \"/stackable/kafka-tls-pem/ca.crt\", \"group.id\": \"airflow_group\", \"auto.offset.reset\": \"latest\"}}"
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                 secretKeyRef:
+                   name: minio-s3-credentials
+                   key: secretKey
+              - name: AWS_ACCESS_KEY_ID
+                value: admin
+              - name: AIRFLOW_CONN_KAFKA_CONN
+                value: '{"conn_type": "kafka", "extra": {"bootstrap.servers": "kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093", "security.protocol": "SSL", "ssl.ca.location": "/stackable/tls-pem/ca.crt", "group.id": "airflow_group", "auto.offset.reset": "latest"}}'
+              - name: AIRFLOW_CONN_S3_CONN
+                value: '{"conn_type": "aws", "extra": {"endpoint_url": "https://minio.$(NAMESPACE).svc.cluster.local:9000", "verify": "/stackable/tls-pem/ca.crt"}}'
     roleGroups:
       default:
         replicas: 1
   kubernetesExecutors:
-    # do not apply the podOverrides here as we don't need and it will interfere
-    # with the pod template
+    # apply the podOverrides to the *base* container
     envOverrides: *envOverrides
+    podOverrides:
+      spec:
+        containers:
+          - name: base
+            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            imagePullPolicy: IfNotPresent
+            env:
+              - name: AWS_SECRET_ACCESS_KEY
+                valueFrom:
+                 secretKeyRef:
+                   name: minio-s3-credentials
+                   key: secretKey
+              - name: AWS_ACCESS_KEY_ID
+                value: admin
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
@@ -107,6 +136,77 @@ kind: ConfigMap
 metadata:
   name: airflow-dags
 data:
+  dbt.py: |
+    from airflow import DAG
+    from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
+    from kubernetes.client import models as k8s
+    from kubernetes.client import V1EnvVar, V1EnvVarSource, V1SecretKeySelector
+
+    tls_volume = k8s.V1Volume(
+        name="server-tls-mount",
+        ephemeral=k8s.V1EphemeralVolumeSource(
+            volume_claim_template=k8s.V1PersistentVolumeClaimTemplate(
+                metadata=k8s.V1ObjectMeta(
+                    annotations={
+                        "secrets.stackable.tech/class": "trino-tls",
+                        "secrets.stackable.tech/scope": "pod,node"
+                    }
+                ),
+                spec=k8s.V1PersistentVolumeClaimSpec(
+                    access_modes=["ReadWriteOnce"],
+                    resources=k8s.V1ResourceRequirements(
+                        requests={"storage": "1"}
+                    ),
+                    storage_class_name="secrets.stackable.tech"
+                )
+            )
+        )
+    )
+
+    tls_volume_mount = k8s.V1VolumeMount(
+      name="server-tls-mount", mount_path="/dbt/trusted"
+    )
+
+    pod_security_context = k8s.V1PodSecurityContext(
+        fs_group=1000
+    )
+
+    with DAG(
+        dag_id="run_dbt",
+        schedule=None,
+        tags=["Demo", "DBT"],
+        catchup=False
+    ) as dag:
+      run_dbt = KubernetesPodOperator(
+          image="oci.stackable.tech/demos/dbt-demo:0.0.1",
+          image_pull_policy="IfNotPresent",
+          cmds=["/bin/bash", "-x", "-euo", "pipefail", "-c"],
+          arguments=["cd /dbt/dbt_test && export DBT_PROFILES_DIR=/dbt/dbt_test && dbt debug && dbt run && dbt test"],
+          name="run-dbt",
+          task_id="dbt-test",
+          get_logs=True,
+          volumes=[tls_volume],
+          volume_mounts=[tls_volume_mount],
+          env_vars=[
+              V1EnvVar(
+                  name="TRINO_PASSWORD",
+                  value_from=V1EnvVarSource(
+                      secret_key_ref=V1SecretKeySelector(
+                          name="trino-users",
+                          key="admin"
+                      )
+                  )
+              ),
+              V1EnvVar(name="TRINO_USER", value="admin"),
+              V1EnvVar(name="TRINO_HOST", value="trino-coordinator-default-headless.default.svc.cluster.local"),
+              V1EnvVar(name="TRINO_PORT", value="8443"),
+              V1EnvVar(name="CERT_PATH", value="/dbt/trusted/ca.crt"),
+          ],
+          security_context=pod_security_context,
+          startup_timeout_seconds=600
+      )
+      run_dbt
+
   kafka.py: |
     from airflow.providers.apache.kafka.triggers.msg_queue import KafkaMessageQueueTrigger
     from airflow.providers.standard.operators.empty import EmptyOperator
@@ -465,7 +565,6 @@ data:
             memory:
               limit: 1024Mi
         replicas: 3
-
 
 # {% endraw %}
 ---

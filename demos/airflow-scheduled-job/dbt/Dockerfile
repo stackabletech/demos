@@ -11,7 +11,7 @@ RUN python -m venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 
 # Install Python packages
-COPY requirements.txt .
+COPY demos/airflow-scheduled-job/dbt/requirements.txt .
 RUN pip install --no-cache-dir --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt
 
@@ -30,7 +30,7 @@ ENV PATH="/opt/venv/bin:$PATH"
 
 WORKDIR /dbt
 
-COPY dbt_test ./dbt_test
+COPY demos/airflow-scheduled-job/dbt/dbt_test ./dbt_test
 
 # Security: non-root user
 RUN useradd -m -u 1000 dbt && chown -R dbt:dbt /dbt
