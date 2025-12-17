@@ -584,11 +584,12 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/krb5.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/kerberos-secretclass.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/opa.yaml
+      - plainYaml: stacks/end-to-end-security/opa.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/zookeeper.yaml # TODO: Add authentication
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs-regorules.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hive-metastore.yaml
+      - plainYaml: stacks/end-to-end-security/hive-metastore.yaml
+      - plainYaml: stacks/end-to-end-security/hive-metastore-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
