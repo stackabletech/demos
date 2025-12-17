@@ -25,6 +25,10 @@ spec:
       logging:
         containers:
           opa:
+            console:
+              level: INFO
+            file:
+              level: INFO
             loggers:
               decision:
                 level: INFO

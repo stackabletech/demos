@@ -7,6 +7,10 @@ spec:
   image:
     productVersion: 4.0.0
   clusterConfig:
+    authorization:
+      opa:
+        configMapName: opa
+        package: hms
     database:
       connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
       credentialsSecret: postgres-credentials

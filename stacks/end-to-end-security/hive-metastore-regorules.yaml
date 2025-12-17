@@ -1,0 +1,66 @@
+---
+# {% raw %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-metastore-regorules
+  labels:
+    opa.stackable.tech/bundle: "true"
+data:
+  actual_permissions.rego: |
+    package hms
+
+    trino_user := "trino"
+    spark_user := "spark"
+    customer_analytics_db := "customer_analytics"
+    compliance_analytics_db := "compliance_analytics"
+
+    default database_allow = false
+    default table_allow = false
+    default column_allow = false
+    default partition_allow = false
+    default user_allow = false
+
+    database_allow if {
+      input.identity.username == spark_user
+      input.resources.database.name == customer_analytics_db
+    }
+
+    # Allow 'SELECT * FROM lakehouse.customer_analytics.customer'
+    table_allow if {
+      input.identity.username == spark_user
+      input.resources.table.dbName == customer_analytics_db
+      input.resources.table.tableName == "customer"
+      input.privileges.readRequiredPriv[0].priv == "SELECT"
+    }
+
+    # Allow: 'CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.spark_report AS SELECT c_birth_country, count(*) FROM ..'
+    table_allow if {
+      input.identity.username == spark_user
+      input.resources.table.dbName == customer_analytics_db
+      input.resources.table.tableName == "spark_report"
+      input.privileges.writeRequiredPriv[0].priv == "CREATE"
+    }
+
+    # Trino
+    database_allow if {
+      input.identity.username == trino_user
+    }
+
+    table_allow if {
+      input.identity.username == trino_user
+    }
+
+    column_allow if {
+      input.identity.username == trino_user
+    }
+
+    partition_allow if {
+      input.identity.username == trino_user
+    }
+
+    user_allow if {
+      input.identity.username == trino_user
+    }
+
+# {% endraw %}
