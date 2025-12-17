@@ -10,7 +10,7 @@ spec:
     authorization:
       opa:
         configMapName: opa
-        package: hive-iceberg
+        package: hive_iceberg
     database:
       connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
       credentialsSecret: postgres-credentials

@@ -8,7 +8,7 @@ metadata:
     opa.stackable.tech/bundle: "true"
 data:
   actual_permissions.rego: |
-    package hive-iceberg
+    package hive_iceberg
 
     trino_user := "trino"
     spark_user := "spark"
