@@ -21,12 +21,16 @@ data:
     default partition_allow = false
     default user_allow = false
 
+    ### SPARK ###
+    # These rules are tailored for the create-spark-report job.
+
+    # Allow the spark user access to the 'customer_analytics_db'
     database_allow if {
       input.identity.username == spark_user
       input.resources.database.name == customer_analytics_db
     }
 
-    # Allow 'SELECT * FROM lakehouse.customer_analytics.customer'
+    # Allow the 'SELECT * FROM lakehouse.customer_analytics.customer' query in create-spark-report
     table_allow if {
       input.identity.username == spark_user
       input.resources.table.dbName == customer_analytics_db
@@ -34,7 +38,8 @@ data:
       input.privileges.readRequiredPriv[0].priv == "SELECT"
     }
 
-    # Allow: 'CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.spark_report AS SELECT c_birth_country, count(*) FROM ..'
+    # Allow the 'CREATE TABLE IF NOT EXISTS lakehouse.customer_analytics.spark_report AS SELECT c_birth_country, count(*) FROM ..'
+    # query in create-spark-report
     table_allow if {
       input.identity.username == spark_user
       input.resources.table.dbName == customer_analytics_db
@@ -42,7 +47,8 @@ data:
       input.privileges.writeRequiredPriv[0].priv == "CREATE"
     }
 
-    # Trino
+    ### TRINO ###
+    # We allow everything here for the technical trino user in order to still do data exploration
     database_allow if {
       input.identity.username == trino_user
     }
