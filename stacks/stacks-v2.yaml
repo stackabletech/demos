@@ -589,6 +589,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hdfs-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hive-metastore.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/hive-metastore-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
