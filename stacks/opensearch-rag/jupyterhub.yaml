@@ -1,0 +1,132 @@
+---
+releaseName: jupyterhub
+name: jupyterhub
+repo:
+  name: jupyterhub
+  url: https://jupyterhub.github.io/helm-chart/
+version: 4.3.1
+options:
+  hub:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 256Mi
+      limits:
+        cpu: 500m
+        memory: 1Gi
+    config:
+      JupyterHub:
+        authenticator_class: dummy
+      DummyAuthenticator:
+        password: "adminadmin"
+    extraConfig:
+      01-drop-security-context-hook: |
+        from kubespawner import KubeSpawner
+
+        async def modify_pod_hook(spawner: KubeSpawner, pod: dict):
+          pod.spec.security_context = None
+          for container in pod.spec.containers:
+            container.security_context = None
+
+          return pod
+
+        c.KubeSpawner.modify_pod_hook = modify_pod_hook
+      02-increase-spawn-timeout: |
+        # Increase timeout for slow-starting notebooks
+        c.Spawner.http_timeout = 120
+        c.Spawner.start_timeout = 120
+    service:
+      type: NodePort
+  proxy:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 500m
+        memory: 512Mi
+    service:
+      type: NodePort
+  rbac:
+    create: true
+  prePuller:
+    hook:
+      enabled: false
+    continuous:
+      enabled: false
+  scheduling:
+    userScheduler:
+      enabled: false
+  singleuser:
+    cmd: null
+    networkPolicy:
+      enabled: false
+    extraLabels:
+      stackable.tech/vendor: Stackable
+    extraEnv:
+      OPENSEARCH_HOST:
+        value: "opensearch"
+      OPENSEARCH_PORT:
+        value: "9200"
+      OPENSEARCH_USER:
+        value: "admin"
+      OPENSEARCH_PASSWORD:
+        valueFrom:
+          secretKeyRef:
+            name: opensearch-user
+            key: password
+      OLLAMA_HOST:
+        value: "ollama"
+      OLLAMA_PORT:
+        value: "11434"
+    storage:
+      type: none
+      extraVolumes:
+        - name: home
+          emptyDir: {}
+        - name: notebook
+          configMap:
+            name: rag-demo-notebook
+      extraVolumeMounts:
+        - name: home
+          mountPath: /home/jovyan
+        - name: notebook
+          mountPath: /home/jovyan/notebook
+    profileList:
+      - display_name: "RAG Demo Environment"
+        description: "Python environment with OpenSearch and Ollama clients"
+        default: true
+        profile_options:
+          cpu:
+            display_name: CPU
+            choices:
+              "1":
+                display_name: "1"
+                kubespawner_override:
+                  cpu_guarantee: 1
+                  cpu_limit: 1
+              "2":
+                display_name: "2"
+                kubespawner_override:
+                  cpu_guarantee: 2
+                  cpu_limit: 2
+          memory:
+            display_name: Memory
+            choices:
+              "2 GB":
+                display_name: "2 GB"
+                kubespawner_override:
+                  mem_guarantee: "2G"
+                  mem_limit: "2G"
+              "4 GB":
+                display_name: "4 GB"
+                kubespawner_override:
+                  mem_guarantee: "4G"
+                  mem_limit: "4G"
+          image:
+            display_name: Image
+            choices:
+              "quay.io/jupyter/scipy-notebook:latest":
+                display_name: "Scipy Notebook (Latest)"
+                kubespawner_override:
+                  image: "quay.io/jupyter/scipy-notebook:latest"

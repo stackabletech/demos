@@ -286,3 +286,24 @@ demos:
       cpu: 6400m
       memory: 12622Mi
       pvc: 20Gi
+  opensearch-rag:
+    description: Retrieval Augmented Generation (RAG) demo with OpenSearch vector search and Mistral 7B for semantic question answering
+    documentation: https://docs.stackable.tech/home/stable/demos/opensearch-rag
+    stackableStack: opensearch-rag
+    labels:
+      - opensearch
+      - rag
+      - vector-search
+      - ai
+      - llm
+      - mistral
+      - ollama
+      - jupyterhub
+      - semantic-search
+    manifests:
+      - plainYaml: ./demos/opensearch-rag/stackable-docs-ingestion.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 8000m
+      memory: 16384Mi
+      pvc: 35Gi

@@ -1,0 +1,434 @@
+= opensearch-rag
+:description: Deploy a RAG (Retrieval Augmented Generation) demo with OpenSearch vector search and Mistral 7B for semantic question answering in Kubernetes.
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:opensearch-knn: https://opensearch.org/docs/latest/search-plugins/knn/index/
+:mistral: https://mistral.ai/news/announcing-mistral-7b/
+:ollama: https://ollama.ai/
+
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install opensearch-rag
+----
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 16GiB memory
+* 35GiB disk storage
+
+[#prerequisites]
+=== Prerequisites
+
+==== MacOS and Windows
+
+If you use MacOS or Windows and use Docker to run Kubernetes, set the RAM to at least 16 GB in _Preferences > Resources_.
+
+==== Sufficient Resources
+
+This demo runs Mistral 7B, a large language model that requires significant memory. Ensure your cluster has sufficient resources available.
+
+== Overview
+
+This demo showcases Retrieval Augmented Generation (RAG), an AI framework that combines semantic search with language model generation to provide accurate, context-aware answers to questions.
+
+This demo will:
+
+* Install the required Stackable operators.
+* Spin up the following data products:
+** *OpenSearch*: A distributed search engine with k-NN vector search capabilities. This demo uses it to store document embeddings and perform semantic similarity searches.
+** *OpenSearch Dashboards*: A visualization and user interface for OpenSearch. This demo uses it to inspect indexed documents and test queries.
+** *Ollama*: A local LLM runtime. This demo uses it to run Mistral 7B (text generation) and nomic-embed-text (embeddings).
+** *JupyterHub*: A multi-user Jupyter notebook server. This demo uses it to provide an interactive environment for exploring RAG functionality.
+* Ingest sample documents about OpenSearch, RAG, AI, and the Stackable Platform with vector embeddings.
+* Provide a pre-configured Jupyter notebook for interactive RAG queries.
+
+The RAG workflow operates as follows:
+
+. User submits a question
+. Question is converted to a vector embedding
+. OpenSearch performs k-NN search to find semantically similar documents
+. Retrieved documents provide context for the language model
+. Mistral 7B generates an answer based on the context and question
+
+You can see the deployed products and their relationship in the following diagram:
+
+image::opensearch-rag/overview.png[]
+
+== What is RAG?
+
+Retrieval Augmented Generation (RAG) addresses a key limitation of large language models: they can only generate responses based on their training data. RAG enhances LLMs by retrieving relevant information from a knowledge base in real-time and using it as context for generation.
+
+Key benefits:
+
+* *Up-to-date information*: Access current data not in the model's training set
+* *Reduced hallucinations*: Answers grounded in retrieved facts
+* *Transparency*: See which documents informed the answer
+* *Domain-specific knowledge*: Use your own document corpus
+
+== List the deployed Stackable services
+
+To list the installed Stackable services run the following command:
+
+[source,console]
+----
+$ stackablectl stacklet list
+----
+
+You should see OpenSearch, Ollama (as a regular Deployment), and JupyterHub listed among the services.
+
+include::partial$instance-hint.adoc[]
+
+== Ingest Sample Documents
+
+After the stack is deployed and all pods are running, ingest the sample documents with their embeddings:
+
+[source,console]
+----
+$ kubectl apply -f https://raw.githubusercontent.com/stackabletech/demos/main/demos/opensearch-rag/data-ingestion.yaml
+----
+
+Monitor the ingestion job:
+
+[source,console]
+----
+$ kubectl logs -f job/opensearch-rag-ingestion
+----
+
+The ingestion process:
+
+. Waits for OpenSearch and Ollama to be ready
+. Creates an OpenSearch index with k-NN vector field mappings
+. Loads 8 sample documents about OpenSearch, RAG, and AI
+. Generates 768-dimensional embeddings for each document using nomic-embed-text
+. Indexes documents with their embeddings in OpenSearch
+
+Once complete, you should see:
+
+[source,console]
+----
+Ingestion complete! Total documents in index: 8
+----
+
+== Access JupyterHub
+
+Find the JupyterHub URL:
+
+[source,console]
+----
+$ kubectl get svc proxy-public
+----
+
+Open the URL in your browser and log in:
+
+* *Username*: Any username (the demo uses DummyAuthenticator)
+* *Password*: `adminadmin`
+
+== Start a Jupyter Server
+
+After logging in:
+
+. Select the *RAG Demo Environment* profile
+. Choose your resource allocation:
+** *CPU*: 1 or 2 cores recommended
+** *Memory*: 2 GB or 4 GB recommended
+** *Image*: Scipy Notebook (Latest)
+. Click *Start*
+
+The spawner will:
+
+* Create a dedicated Kubernetes pod for your session
+* Download the RAG demo notebook
+* Configure environment variables for OpenSearch and Ollama
+* Mount necessary volumes
+
+== Explore the RAG Demo Notebook
+
+Once your server starts, navigate to `notebook/rag-demo.ipynb` and open it.
+
+The notebook contains:
+
+=== Setup and Configuration
+
+Install required Python packages and connect to OpenSearch and Ollama:
+
+[source,python]
+----
+pip install opensearch-py requests urllib3
+----
+
+=== Helper Functions
+
+Pre-configured functions for:
+
+* *get_embedding(text)*: Generate vector embeddings using nomic-embed-text
+* *search_documents(query, k=3)*: Perform k-NN vector search in OpenSearch
+* *generate_response(query, context_docs)*: Generate answers with Mistral 7B
+* *rag_query(query, k=3)*: Complete RAG workflow (search + generate)
+
+=== Example Queries
+
+Try the included examples:
+
+[source,python]
+----
+# Ask about OpenSearch
+rag_query("What is OpenSearch and what are its key features?")
+
+# Ask about RAG
+rag_query("How does RAG work and what components does it need?")
+
+# Ask about Mistral
+rag_query("Tell me about Mistral 7B")
+
+# Ask about vector search
+rag_query("How do embeddings enable semantic search?")
+----
+
+=== Custom Questions
+
+Use the provided functions to ask your own questions:
+
+[source,python]
+----
+my_query = "Your question here"
+result = rag_query(my_query)
+----
+
+The notebook displays:
+
+* The retrieved context documents with similarity scores
+* The generated answer from Mistral 7B
+* Document categories and titles
+
+== Understanding k-NN Vector Search
+
+This demo uses {opensearch-knn}[OpenSearch's k-NN plugin] for semantic search.
+
+=== How It Works
+
+. Documents are converted to 768-dimensional vectors (embeddings) that capture semantic meaning
+. Vectors are stored in OpenSearch with a special `knn_vector` field type
+. At query time, your question is also converted to a vector
+. OpenSearch uses the HNSW (Hierarchical Navigable Small World) algorithm to find the k nearest neighbor vectors
+. Documents with similar vectors are semantically similar, even without keyword matches
+
+=== Index Configuration
+
+The demo creates an index with this k-NN mapping:
+
+[source,json]
+----
+{
+  "mappings": {
+    "properties": {
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 768,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib"
+        }
+      }
+    }
+  }
+}
+----
+
+* *dimension*: Vector size (768 for nomic-embed-text)
+* *space_type*: Distance metric (cosine similarity for text)
+* *hnsw*: Approximate nearest neighbor algorithm (fast and accurate)
+
+== Inspect Documents in OpenSearch Dashboards
+
+Find the OpenSearch Dashboards URL:
+
+[source,console]
+----
+$ kubectl get svc opensearch-dashboards
+----
+
+Log in with:
+
+* *Username*: `admin`
+* *Password*: `adminadmin`
+
+Navigate to *Discover* to browse the `rag-documents` index and inspect:
+
+* Document titles and content
+* Categories (opensearch, rag, llm, stackable)
+* Vector embeddings (768-dimensional arrays)
+* Timestamps
+
+You can also test queries using the *Dev Tools* console.
+
+== Architecture Details
+
+=== Components
+
+*OpenSearch*::
+* Single-node cluster with k-NN plugin enabled
+* Stores documents with vector embeddings
+* Performs semantic similarity search
+* Resources: 2 CPU, 4 GB RAM
+
+*Ollama*::
+* Runs two models:
+** *nomic-embed-text*: Generates 768-dim embeddings (~274MB)
+** *mistral:7b*: 7 billion parameter LLM for generation (~4.1GB)
+* Resources: 2-4 CPU, 4-8 GB RAM
+* Persistent storage: 15 GB for models
+
+*JupyterHub*::
+* Multi-user notebook environment
+* Spawns individual pods per user
+* Pre-configured with OpenSearch and Ollama clients
+* Resources per user: 1-2 CPU, 2-4 GB RAM
+
+*OpenSearch Dashboards*::
+* Web UI for OpenSearch
+* Index management and query testing
+* Document inspection
+
+=== Data Flow
+
+[source,text]
+----
+User Query
+    ↓
+nomic-embed-text (Ollama)
+    ↓
+Query Vector [768 dims]
+    ↓
+OpenSearch k-NN Search
+    ↓
+Top-k Similar Documents
+    ↓
+Mistral 7B (Ollama) + Context
+    ↓
+Generated Answer
+----
+
+== Customization
+
+=== Using Different Models
+
+Edit `stacks/opensearch-rag/ollama.yaml` to use alternative models:
+
+[source,yaml]
+----
+ollama:
+  models:
+    - nomic-embed-text  # Or: all-MiniLM-L6-v2
+    - llama3.2          # Or: phi3, gemma
+----
+
+NOTE: If you change the embedding model, ensure the dimension in the index mapping matches the model's output size.
+
+=== Adding Your Own Documents
+
+From the Jupyter notebook, you can add custom documents:
+
+[source,python]
+----
+# Your document
+doc = {
+    'title': 'My Document',
+    'content': 'Document content...',
+    'category': 'custom',
+    'embedding': get_embedding('Document content...'),
+    'timestamp': '2025-01-01T00:00:00'
+}
+
+# Index it
+opensearch_client.index(
+    index='rag-documents',
+    body=doc
+)
+----
+
+=== Tuning Retrieval
+
+Adjust the number of retrieved documents:
+
+[source,python]
+----
+# More context = better answers but slower
+result = rag_query("Your question", k=5)
+
+# Less context = faster but may miss relevant info
+result = rag_query("Your question", k=1)
+----
+
+== Troubleshooting
+
+=== Ollama Models Not Loading
+
+If you see "model not found" errors:
+
+[source,console]
+----
+# Check if models are pulled
+$ kubectl exec deployment/ollama -- ollama list
+
+# Manually pull if needed
+$ kubectl exec deployment/ollama -- ollama pull nomic-embed-text
+$ kubectl exec deployment/ollama -- ollama pull mistral:7b
+----
+
+=== Data Ingestion Failed
+
+[source,console]
+----
+# Check job logs
+$ kubectl logs job/opensearch-rag-ingestion
+
+# Delete and retry
+$ kubectl delete job opensearch-rag-ingestion
+$ kubectl apply -f https://raw.githubusercontent.com/stackabletech/demos/main/demos/opensearch-rag/data-ingestion.yaml
+----
+
+=== Slow Response Times
+
+The first query to Mistral 7B may be slow as the model loads into memory. Subsequent queries should be faster.
+
+Consider:
+
+* Reducing context window (use fewer documents)
+* Using a smaller model (llama3.2-1b)
+* Increasing Ollama pod resources
+
+=== OpenSearch Connection Issues
+
+[source,console]
+----
+# Verify OpenSearch is running
+$ kubectl get pods -l app.kubernetes.io/name=opensearch
+
+# Test connectivity from Jupyter pod
+$ kubectl exec jupyter-<username> -- curl -k https://opensearch:9200 -u admin:adminadmin
+----
+
+== Learn More
+
+* {opensearch-knn}[OpenSearch k-NN Plugin Documentation]
+* {ollama}[Ollama - Run LLMs Locally]
+* {mistral}[Mistral 7B Announcement]
+* https://docs.stackable.tech/home/stable/opensearch/[Stackable OpenSearch Operator]
+
+== Summary
+
+This demo demonstrates a complete RAG system using:
+
+* Semantic search with OpenSearch k-NN
+* Local LLM inference with Ollama and Mistral 7B
+* Interactive exploration through JupyterHub
+* Production-grade deployment with Stackable operators
+
+You can extend this demo by adding your own document corpus, experimenting with different models, or building a custom application on top of the RAG infrastructure.

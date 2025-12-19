@@ -691,3 +691,41 @@ stacks:
       - name: jupyterhubClientPassword
         description: Password of the JupyterHub client user
         default: jupyterhubjupyterhub
+  opensearch-rag:
+    description: OpenSearch RAG (Retrieval Augmented Generation) demo with vector search
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - opensearch
+    labels:
+      - opensearch
+      - rag
+      - vector-search
+      - ai
+      - llm
+    manifests:
+      - plainYaml: ./stacks/opensearch-rag/opensearch.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
+      - plainYaml: ./stacks/opensearch-rag/ollama.yaml
+      - helmChart: ./stacks/opensearch-rag/jupyterhub.yaml
+      - plainYaml: ./stacks/opensearch-rag/jupyterhub-notebook.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 8000m
+      memory: 16384Mi
+      pvc: 35Gi
+    parameters:
+      - name: openSearchAdminPassword
+        description: Password of the OpenSearch admin user
+        default: adminadmin
+      - name: openSearchDashboardPassword
+        description: Password of OpenSearch Dashboard user
+        default: kibanaserverkibanaserver
+      - name: opensearchVersion
+        description: Version of OpenSearch and OpenSearch Dashboards to deploy
+        default: 3.1.0
+      - name: stackableReleaseVersion
+        description: The Stackable release to be used for the OpenSearch Dashboards image tag
+        default: 0.0.0-dev
