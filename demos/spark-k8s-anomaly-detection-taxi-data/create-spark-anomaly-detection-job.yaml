@@ -8,7 +8,7 @@ spec:
     spec:
       initContainers:
         - name: wait-for-testdata
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
           command:
             - bash
             - -euo
@@ -19,7 +19,7 @@ spec:
               kubectl wait --for=condition=complete --timeout=30m job/load-ny-taxi-data
       containers:
         - name: create-spark-anomaly-detection-job
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
           command:
             - bash
             - -euo
