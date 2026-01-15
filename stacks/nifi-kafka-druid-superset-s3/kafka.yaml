@@ -5,7 +5,7 @@ metadata:
   name: kafka
 spec:
   image:
-    productVersion: 4.1.0
+    productVersion: 4.1.1
   clusterConfig:
     authentication:
       - authenticationClass: kafka-client-tls
