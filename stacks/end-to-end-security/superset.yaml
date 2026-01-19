@@ -5,7 +5,7 @@ metadata:
   name: superset
 spec:
   image:
-    productVersion: 4.1.4
+    productVersion: 6.0.0
   clusterConfig:
     credentialsSecret: superset-credentials
     mapboxSecret: superset-mapbox-api-key
@@ -24,7 +24,7 @@ spec:
       spec:
         initContainers:
           - name: wait-for-setup-db-job
-            image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
             command:
               - bash
               - -c

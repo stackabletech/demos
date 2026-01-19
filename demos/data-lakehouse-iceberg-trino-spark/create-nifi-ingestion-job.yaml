@@ -22,7 +22,7 @@ spec:
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/instance=kafka,app.kubernetes.io/name=kafka
       containers:
         - name: create-nifi-ingestion-job
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools/nifi:0.3.0-stackable0.0.0-dev
           command:
             - bash
             - -euo

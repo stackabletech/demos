@@ -22,7 +22,7 @@ spec:
               kubectl wait --for=condition=Ready pod/druid-coordinator-default-0 --timeout=30m
       containers:
         - name: create-druid-ingestion-job
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
           command:
             - bash
             - -euo

@@ -5,7 +5,7 @@ metadata:
   name: opa
 spec:
   image:
-    productVersion: 1.8.0
+    productVersion: 1.12.2
   clusterConfig:
     userInfo:
       backend:
@@ -25,6 +25,10 @@ spec:
       logging:
         containers:
           opa:
+            console:
+              level: INFO
+            file:
+              level: INFO
             loggers:
               decision:
                 level: INFO

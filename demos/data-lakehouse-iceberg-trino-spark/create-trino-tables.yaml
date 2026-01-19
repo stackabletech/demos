@@ -20,7 +20,7 @@ spec:
               kubectl wait --for=condition=complete --timeout=30m job/load-test-data
       containers:
         - name: create-tables-in-trino
-          image: oci.stackable.tech/sdp/testing-tools:0.2.0-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/testing-tools/trino:0.3.0-stackable0.0.0-dev
           command: ["bash", "-c", "python -u /tmp/script/script.py"]
           volumeMounts:
             - name: script
