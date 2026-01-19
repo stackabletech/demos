@@ -301,7 +301,7 @@ demos:
       - jupyterlab
       - semantic-search
     manifests:
-      - plainYaml: ./demos/opensearch-rag/load-embeddings-from-git.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/opensearch-rag/load-embeddings-from-git.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 8000m

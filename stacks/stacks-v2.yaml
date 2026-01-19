@@ -706,9 +706,9 @@ stacks:
       - ai
       - llm
     manifests:
-      - plainYaml: ./stacks/opensearch-rag/opensearch.yaml
-      - plainYaml: ./stacks/opensearch-rag/ollama.yaml
-      - plainYaml: ./stacks/opensearch-rag/jupyterlab.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/opensearch-rag/opensearch.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/opensearch-rag/ollama.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/opensearch-rag/jupyterlab.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
     supportedNamespaces: []
     resourceRequests:
