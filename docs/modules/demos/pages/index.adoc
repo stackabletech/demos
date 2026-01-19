@@ -20,10 +20,11 @@ Below is an incomplete list of third-party components referenced in these demos:
 
 * Grafana
 * JupyterHub
+* JupyterLab
 * Keycloak
 * MinIO
+* Ollama
 * OpenLDAP
-* OpenSearch
 * OpenSearch Dashboards
 * PostgreSQL
 * Prometheus

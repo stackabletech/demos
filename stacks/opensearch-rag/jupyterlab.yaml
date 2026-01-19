@@ -1,0 +1,93 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: jupyterlab
+  labels:
+    app: jupyterlab
+    stackable.tech/vendor: Stackable
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: jupyterlab
+      stackable.tech/vendor: Stackable
+  template:
+    metadata:
+      labels:
+        app: jupyterlab
+        stackable.tech/vendor: Stackable
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: jupyterlab
+          image: quay.io/jupyter/scipy-notebook:latest
+          imagePullPolicy: IfNotPresent
+          command:
+            - bash
+          args:
+            - -c
+            - jupyter lab --ServerApp.token='{{ jupyterLabToken }}' --ServerApp.port=8888 --no-browser --notebook-dir /home/jovyan
+          env:
+            - name: JUPYTER_PORT
+              value: "8888"
+            - name: OPENSEARCH_HOST
+              value: "opensearch"
+            - name: OPENSEARCH_PORT
+              value: "9200"
+            - name: OPENSEARCH_USER
+              value: "admin"
+            - name: OPENSEARCH_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: opensearch-user
+                  key: password
+            - name: OLLAMA_HOST
+              value: "ollama"
+            - name: OLLAMA_PORT
+              value: "11434"
+            - name: OLLAMA_LLM_MODEL
+              value: "{{ ollamaLlmModel }}"
+          ports:
+            - name: http
+              containerPort: 8888
+          resources:
+            requests:
+              cpu: 200m
+              memory: 500Mi
+            limits:
+              cpu: 500m
+              memory: 1Gi
+          volumeMounts:
+            - mountPath: /home/jovyan
+              name: notebook
+      initContainers:
+        - name: download-notebook
+          image: quay.io/jupyter/scipy-notebook:latest
+          command:
+            - bash
+          args:
+            - -c
+            - curl https://raw.githubusercontent.com/stackabletech/demos/{{ branch }}/stacks/opensearch-rag/opensearch-rag.ipynb -o /home/jovyan/opensearch-rag.ipynb
+          volumeMounts:
+            - mountPath: /home/jovyan
+              name: notebook
+      volumes:
+        - name: notebook
+          emptyDir:
+            sizeLimit: 500Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: jupyterlab
+  labels:
+    app: jupyterlab
+spec:
+  type: ClusterIP
+  selector:
+    app: jupyterlab
+  ports:
+    - name: http
+      port: 8888
+      targetPort: 8888

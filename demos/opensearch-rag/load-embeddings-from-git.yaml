@@ -1,0 +1,312 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: load-embeddings-script
+data:
+  load.py: |
+    #!/usr/bin/env python3
+    """
+    Load pre-generated embeddings from git into OpenSearch.
+    This replaces the slow crawling/embedding generation with a fast data load.
+    """
+    import os
+    import json
+    import time
+    import requests
+    from opensearchpy import OpenSearch, helpers
+    from requests.auth import HTTPBasicAuth
+
+    # Configuration
+    OPENSEARCH_HOST = os.getenv('OPENSEARCH_HOST', 'opensearch')
+    OPENSEARCH_PORT = int(os.getenv('OPENSEARCH_PORT', '9200'))
+    OPENSEARCH_USER = os.getenv('OPENSEARCH_USER', 'admin')
+    OPENSEARCH_PASSWORD = os.getenv('OPENSEARCH_PASSWORD', 'adminadmin')
+    INDEX_NAME = os.getenv('INDEX_NAME', 'rag-documents')
+    EMBEDDINGS_FILE = os.getenv('EMBEDDINGS_FILE', '/data/stackable-docs-embeddings.json')
+
+    def wait_for_opensearch():
+        """Wait for OpenSearch to be ready."""
+        print("Waiting for OpenSearch to be ready...")
+        for i in range(60):
+            try:
+                response = requests.get(
+                    f'https://{OPENSEARCH_HOST}:{OPENSEARCH_PORT}',
+                    auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASSWORD),
+                    verify=False,
+                    timeout=5
+                )
+                if response.status_code == 200:
+                    print("[OK] OpenSearch is ready!")
+                    return True
+            except Exception:
+                print(f"Waiting for OpenSearch... ({i+1}/60)")
+                time.sleep(5)
+
+        print("[ERROR] OpenSearch did not become ready in time")
+        return False
+
+    def index_needs_loading(client):
+        """Check if index exists and has documents. Returns True if loading is needed."""
+        if not client.indices.exists(index=INDEX_NAME):
+            return True
+
+        count = client.count(index=INDEX_NAME)['count']
+        if count > 0:
+            print(f"[OK] Index {INDEX_NAME} already exists with {count} documents, skipping load")
+            return False
+
+        return True
+
+    def create_index(client):
+        """Create OpenSearch index with k-NN mapping if it doesn't exist."""
+        if client.indices.exists(index=INDEX_NAME):
+            print(f"[OK] Index {INDEX_NAME} already exists")
+            return
+
+        index_body = {
+            'settings': {
+                'index': {
+                    'knn': True,
+                    'number_of_shards': 1,
+                    'number_of_replicas': 0
+                }
+            },
+            'mappings': {
+                'properties': {
+                    'title': {'type': 'text'},
+                    'content': {'type': 'text'},
+                    'embedding': {
+                        'type': 'knn_vector',
+                        'dimension': 768,
+                        'method': {
+                            'name': 'hnsw',
+                            'space_type': 'cosinesimil',
+                            'engine': 'lucene',
+                            'parameters': {'ef_construction': 128, 'm': 24}
+                        }
+                    },
+                    'category': {'type': 'keyword'},
+                    'section': {'type': 'keyword'},
+                    'operator': {'type': 'keyword'},
+                    'url': {'type': 'keyword'},
+                    'hierarchy': {'type': 'keyword'},
+                    'timestamp': {'type': 'date'},
+                    'char_count': {'type': 'integer'},
+                    'has_code_block': {'type': 'boolean'}
+                }
+            }
+        }
+
+        client.indices.create(index=INDEX_NAME, body=index_body)
+        print(f"[OK] Created index: {INDEX_NAME}")
+
+    def load_embeddings_from_file(filepath):
+        """Load embeddings from JSON file."""
+        print(f"Loading embeddings from {filepath}...")
+        with open(filepath, 'r') as f:
+            documents = json.load(f)
+        print(f"[OK] Loaded {len(documents)} documents from file")
+        return documents
+
+    def bulk_ingest(client, documents):
+        """Bulk ingest documents into OpenSearch."""
+        print(f"\nStarting bulk ingestion of {len(documents)} documents...")
+
+        actions = []
+        for doc in documents:
+            actions.append({
+                '_index': INDEX_NAME,
+                '_source': doc
+            })
+
+        # Bulk insert in batches
+        batch_size = 100
+        total_batches = (len(actions) + batch_size - 1) // batch_size
+
+        for i in range(0, len(actions), batch_size):
+            batch = actions[i:i + batch_size]
+            helpers.bulk(client, batch)
+            current_batch = (i // batch_size) + 1
+            if current_batch % 10 == 0 or current_batch == total_batches:
+                print(f"  Progress: {current_batch}/{total_batches} batches ({i + len(batch)}/{len(actions)} documents)")
+
+        print(f"[OK] Successfully ingested {len(documents)} documents!")
+
+    def create_index_pattern():
+        """Create index pattern in OpenSearch Dashboards and set as default."""
+        dashboards_host = os.getenv('DASHBOARDS_HOST', 'opensearch-dashboards')
+        dashboards_port = os.getenv('DASHBOARDS_PORT', '5601')
+        base_url = f'http://{dashboards_host}:{dashboards_port}'
+        headers = {"osd-xsrf": "true"}
+        auth = HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASSWORD)
+
+        # Create index pattern
+        response = requests.put(
+            f'{base_url}/api/saved_objects/index-pattern/{INDEX_NAME}?overwrite=true',
+            json={"attributes": {"title": INDEX_NAME, "timeFieldName": "timestamp"}},
+            auth=auth, headers=headers, timeout=10
+        )
+        if response.status_code not in (200, 201, 409):
+            print(f"[ERROR] Failed to create index pattern: {response.status_code} - {response.text}")
+            return False
+        print(f"[OK] Created index pattern: {INDEX_NAME}")
+
+        # Set as default
+        response = requests.post(
+            f'{base_url}/api/opensearch-dashboards/settings',
+            json={"changes": {"defaultIndex": INDEX_NAME}},
+            auth=auth, headers=headers, timeout=10
+        )
+        if response.status_code in (200, 201):
+            print(f"[OK] Set {INDEX_NAME} as default index pattern")
+
+        return True
+
+    def print_summary(client):
+        """Print ingestion summary."""
+        time.sleep(2)
+        count = client.count(index=INDEX_NAME)['count']
+
+        print(f"\n{'='*60}")
+        print(f"Ingestion Summary")
+        print(f"{'='*60}")
+        print(f"Total chunks indexed: {count}")
+
+        agg_query = {
+            "size": 0,
+            "aggs": {
+                "operators": {"terms": {"field": "operator", "size": 50}},
+                "categories": {"terms": {"field": "category", "size": 20}}
+            }
+        }
+        result = client.search(index=INDEX_NAME, body=agg_query)
+
+        print(f"\nChunks by operator:")
+        for bucket in sorted(result['aggregations']['operators']['buckets'],
+                            key=lambda x: x['doc_count'], reverse=True)[:15]:
+            print(f"  {bucket['key']:30} {bucket['doc_count']:4} chunks")
+
+        print(f"\nChunks by category:")
+        for bucket in result['aggregations']['categories']['buckets']:
+            print(f"  {bucket['key']:20} {bucket['doc_count']:4} chunks")
+
+    def main():
+        """Main ingestion workflow."""
+        print("="*60)
+        print("Load Pre-generated Embeddings into OpenSearch")
+        print("="*60)
+        print(f"Embeddings file: {EMBEDDINGS_FILE}")
+
+        if not wait_for_opensearch():
+            return 1
+
+        client = OpenSearch(
+            hosts=[{'host': OPENSEARCH_HOST, 'port': OPENSEARCH_PORT}],
+            http_auth=(OPENSEARCH_USER, OPENSEARCH_PASSWORD),
+            use_ssl=True,
+            verify_certs=False,
+            ssl_show_warn=False
+        )
+
+        if index_needs_loading(client):
+            create_index(client)
+
+            documents = load_embeddings_from_file(EMBEDDINGS_FILE)
+            if not documents:
+                print("[ERROR] No documents loaded from file!")
+                return 1
+
+            bulk_ingest(client, documents)
+
+        if not create_index_pattern():
+            return 1
+
+        print_summary(client)
+
+        print(f"\n{'='*60}")
+        print("[OK] Ingestion complete!")
+        print(f"{'='*60}")
+        return 0
+
+    if __name__ == '__main__':
+        exit(main())
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: load-embeddings-from-git
+spec:
+  backoffLimit: 3
+  template:
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+      - name: download-embeddings
+        image: curlimages/curl:latest
+        command:
+        - /bin/sh
+        - -c
+        - |
+          echo "Downloading embeddings file from GitHub..."
+          echo "URL: ${RAW_FILE_URL}"
+
+          curl -L -f -o /data/stackable-docs-embeddings.json "${RAW_FILE_URL}"
+
+          if [ $? -ne 0 ]; then
+            echo "[ERROR] Failed to download embeddings file"
+            exit 1
+          fi
+
+          FILE_SIZE=$(du -h /data/stackable-docs-embeddings.json | cut -f1)
+          echo "[OK] Downloaded embeddings file (size: ${FILE_SIZE})"
+        env:
+        - name: RAW_FILE_URL
+          value: "https://github.com/stackabletech/demos/raw/refs/heads/{{ branch }}/demos/opensearch-rag/embeddings/stackable-docs-embeddings.json"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      containers:
+      - name: load-embeddings
+        image: python:3.11-slim
+        command:
+        - /bin/bash
+        - -c
+        - |
+          apt-get update -qq
+          pip install -q opensearch-py requests urllib3
+          python -u /scripts/load.py
+        env:
+        - name: OPENSEARCH_HOST
+          value: "opensearch"
+        - name: OPENSEARCH_PORT
+          value: "9200"
+        - name: OPENSEARCH_USER
+          value: "admin"
+        - name: OPENSEARCH_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: opensearch-user
+              key: password
+        - name: INDEX_NAME
+          value: "rag-documents"
+        - name: EMBEDDINGS_FILE
+          value: "/data/stackable-docs-embeddings.json"
+        volumeMounts:
+        - name: script
+          mountPath: /scripts
+        - name: data
+          mountPath: /data
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+      volumes:
+      - name: script
+        configMap:
+          name: load-embeddings-script
+      - name: data
+        emptyDir: {}
