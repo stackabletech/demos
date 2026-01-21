@@ -5,7 +5,7 @@ metadata:
   name: hive
 spec:
   image:
-    productVersion: 4.0.0
+    productVersion: 4.2.0
   clusterConfig:
     database:
       connString: jdbc:postgresql://postgresql-hive:5432/hive
@@ -24,6 +24,8 @@ metadata:
   name: hive-iceberg
 spec:
   image:
+    # Cannot upgrade to 4.0.1 because we run into the same problem
+    # as this https://github.com/apache/iceberg-python/issues/1222
     productVersion: 4.0.0
   clusterConfig:
     database:
