@@ -59,7 +59,7 @@ spec:
               while :
               do
                 echo "Determining Keycloak public reachable address"
-                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argfile endpoints <(kubectl get endpoints keycloak -o json) --argfile nodes <(kubectl get nodes -o json) '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
+                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --slurpfile endpoints <(kubectl get endpoints keycloak -o json) --slurpfile nodes <(kubectl get nodes -o json) '($nodes[0].items[] | select(.metadata.name == $endpoints[0].subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
                 echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
 
                 if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
