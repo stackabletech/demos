@@ -286,3 +286,28 @@ demos:
       cpu: 6400m
       memory: 12622Mi
       pvc: 20Gi
+  opensearch-rag:
+    description: Retrieval Augmented Generation (RAG) demo with OpenSearch vector search and Llama 3.1 8B for semantic question answering
+    documentation: https://docs.stackable.tech/home/stable/demos/opensearch-rag
+    stackableStack: opensearch-rag
+    labels:
+      - opensearch
+      - rag
+      - vector-search
+      - ai
+      - llm
+      - llama
+      - ollama
+      - jupyterlab
+      - semantic-search
+    manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/opensearch-rag/load-embeddings-from-git.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 8000m
+      memory: 16Gi
+      pvc: 10Gi
+    parameters:
+      - name: branch
+        description: Git branch to download demo files from
+        default: main

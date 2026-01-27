@@ -1,0 +1,467 @@
+= opensearch-rag
+:description: Deploy a RAG (Retrieval Augmented Generation) demo with OpenSearch vector search and Llama 3.1 8B for semantic question answering in Kubernetes.
+
+:k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:opensearch-vector: https://opensearch.org/platform/vector-engine/
+:opensearch-knn: https://opensearch.org/docs/latest/search-plugins/knn/index/
+:llama31: https://github.com/meta-llama/llama-models/blob/main/models/llama3_1/MODEL_CARD.md
+:ollama: https://ollama.com/
+:nomic-embed: https://huggingface.co/nomic-ai/nomic-embed-text-v1.5
+:jupyterlab: https://jupyterlab.readthedocs.io/en/stable/
+
+Install this demo on an existing Kubernetes cluster:
+
+[source,console]
+----
+$ stackablectl demo install opensearch-rag
+----
+
+NOTE: This demo runs on CPU only, making it portable to any Kubernetes cluster including local development environments (minikube, kind, Docker Desktop). RAG systems running in production typically use GPU acceleration for faster inference.
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 8 {k8s-cpu}[cpu units] (core/hyperthread)
+* 16GiB memory
+* 10GiB persistent storage + 20GiB ephemeral storage
+
+For optimal performance (faster LLM responses, reduced query latency):
+
+* 12 {k8s-cpu}[cpu units] (core/hyperthread)
+* 24GiB memory
+* 10GiB persistent storage + 20GiB ephemeral storage
+
+== Overview
+
+This demo showcases Retrieval Augmented Generation (RAG) with OpenSearch, a technique that grounds large language model responses in a specific knowledge base using semantic search.
+Unlike traditional LLMs that rely solely on training data, RAG systems retrieve relevant documents at query time and use them as context for generation.
+
+This demo will:
+
+* Install the required Stackable operators
+* Spin up the following data products:
+** *OpenSearch*: A distributed search and analytics engine. This demo uses its {opensearch-vector}[vector engine] for k-NN similarity search on document embeddings, combined with BM25 keyword search for hybrid retrieval. The k-NN plugin enables vector search using approximate nearest neighbor algorithms.
+** *OpenSearch Dashboards*: A visualization and user interface for OpenSearch. Use it to inspect indexed documents and query vectors.
+** *Ollama*: A local LLM runtime. This demo runs two models: {nomic-embed}[nomic-embed-text] (768-dim embeddings, open-source with strong retrieval performance) and {llama31}[Llama 3.1 8B] (text generation, open weights model balancing quality and resource efficiency).
+** *JupyterLab*: A web-based interactive development environment. This demo provides a pre-configured notebook that implements a complete RAG pipeline.
+* Load pre-generated embeddings for Stackable documentation into OpenSearch
+* Provide an interactive notebook for exploring RAG queries
+
+The RAG workflow operates as follows:
+
+. User submits a question in the Jupyter notebook
+. Question is converted to a 768-dimensional vector embedding via nomic-embed-text
+. OpenSearch performs hybrid search combining k-NN vector similarity with BM25 keyword matching to find semantically relevant documentation chunks
+. Retrieved documents from OpenSearch provide context for the language model
+. Llama 3.1 8B generates an answer based on the context and question
+
+== What is RAG?
+
+Retrieval Augmented Generation (RAG) addresses a key limitation of large language models: they can only generate responses based on their training data, which becomes outdated and cannot include private or domain-specific information.
+
+RAG enhances LLMs by:
+
+* Retrieving relevant information from a knowledge base in real-time
+* Providing this information as context to the LLM
+* Generating responses grounded in the retrieved facts
+
+Key benefits:
+
+* *Up-to-date information*: Access current data not in the model's training set
+* *Reduced hallucinations*: Answers constrained to retrieved documents
+* *Transparency*: See which documents informed the answer
+* *Domain-specific knowledge*: Use your own document corpus without retraining the model
+
+== List the deployed Stackable services
+
+To list the installed Stackable services run the following command:
+
+[source,console]
+----
+$ stackablectl stacklet list
+----
+
+You should see OpenSearch listed among the services.
+Ollama and JupyterLab run as standard Kubernetes Deployments and will not be listed.
+
+include::partial$instance-hint.adoc[]
+
+== Documentation Embeddings
+
+The demo automatically loads pre-generated embeddings from GitHub into OpenSearch.
+A Job downloads the embeddings file (~89 MB containing ~4200 documentation chunks) and indexes them into OpenSearch with k-NN vector mappings.
+
+Check the Job status:
+
+[source,console]
+----
+$ kubectl get job
+NAME                         COMPLETIONS   DURATION   AGE
+load-embeddings-from-git     1/1           45s        2m
+----
+
+The Job typically completes within a minute. Monitor progress if needed:
+
+[source,console]
+----
+$ kubectl logs -f job/load-embeddings-from-git
+----
+
+The notebook will verify the index and document count when you connect to OpenSearch.
+
+== Access JupyterLab
+
+Find the JupyterLab URL:
+
+[source,console]
+----
+$ kubectl get svc jupyterlab
+NAME          TYPE       CLUSTER-IP     EXTERNAL-IP   PORT(S)          AGE
+jupyterlab    NodePort   10.96.123.45   <none>        8888:30123/TCP   5m
+----
+
+Create a port-forward to access it:
+
+[source,console]
+----
+$ kubectl port-forward service/jupyterlab 8888:8888
+----
+
+Open http://localhost:8888 in your browser and log in with token `adminadmin`.
+
+== Explore the RAG Demo Notebook
+
+Once JupyterLab loads, open `opensearch-rag.ipynb` from the file browser.
+
+The notebook is divided into sections that explain each step of the RAG pipeline:
+
+=== Setup and Connection
+
+The notebook connects to OpenSearch and Ollama, then verifies the index exists and displays the document count.
+
+=== Query Embedding
+
+The notebook demonstrates converting text queries to 768-dimensional vectors using nomic-embed-text.
+
+=== OpenSearch Hybrid Search
+
+The notebook demonstrates OpenSearch's hybrid search combining:
+
+* *k-NN vector search*: Semantic similarity using cosine distance on OpenSearch's k-NN index
+* *BM25 keyword search*: Exact term matching with TF-IDF weighting using OpenSearch's text fields
+
+Search queries are enhanced with:
+
+* Product detection (e.g., "Kafka" → filter OpenSearch results to kafka-operator docs)
+* Implementation query detection (e.g., "how to deploy" → boost code examples in OpenSearch scoring)
+
+The notebook shows how to search for relevant documentation using OpenSearch hybrid search with configurable result counts.
+
+=== Response Generation
+
+The notebook formats retrieved documents with metadata (title, operator, relevance score, URL) and provides them as context to Llama 3.1 8B.
+Responses stream in real-time, showing:
+
+* Detected product filters
+* Retrieved document chunks with relevance scores
+* Generated answer from Llama 3.1 8B
+
+=== Example Queries
+
+The notebook includes example queries demonstrating:
+
+* Product-specific queries (filters to specific operator documentation)
+* Implementation queries (boosts code examples)
+* Conceptual queries (semantic search)
+
+== Understanding OpenSearch Vector Search
+
+This demo uses {opensearch-knn}[OpenSearch's k-NN plugin] for semantic search.
+
+=== Index Configuration
+
+The `rag-documents` index is configured with a k-NN vector field:
+
+[source,json]
+----
+{
+  "mappings": {
+    "properties": {
+      "embedding": {
+        "type": "knn_vector",
+        "dimension": 768,
+        "method": {
+          "name": "hnsw",
+          "space_type": "cosinesimil",
+          "engine": "nmslib"
+        }
+      },
+      "content": { "type": "text" },
+      "title": { "type": "text" },
+      "operator": { "type": "keyword" },
+      "has_code_block": { "type": "boolean" }
+    }
+  }
+}
+----
+
+* *dimension*: 768 (matches nomic-embed-text output)
+* *space_type*: Cosine similarity for text embeddings
+* *hnsw*: Hierarchical Navigable Small World graph for approximate nearest neighbor search (fast with high recall)
+
+=== OpenSearch Hybrid Search Architecture
+
+The notebook implements a two-phase hybrid search using OpenSearch:
+
+. *k-NN retrieval*: OpenSearch finds k*3 candidate documents using vector similarity from its k-NN index
+. *BM25 rescoring*: OpenSearch re-ranks candidates combining semantic (70%) and keyword (30%) scores
+
+This hybrid approach in OpenSearch outperforms either method alone:
+
+* Pure k-NN misses exact product names and specific terminology
+* Pure BM25 misses semantic similarity and paraphrased queries
+
+The hybrid query structure:
+
+[source,json]
+----
+{
+  "query": {
+    "knn": {
+      "embedding": {
+        "vector": [0.123, -0.456, ...],  // 768-dim query vector
+        "k": 30,
+        "filter": { "term": { "operator": "kafka-operator" } }
+      }
+    }
+  },
+  "rescore": {
+    "window_size": 30,
+    "query": {
+      "rescore_query": {
+        "multi_match": {
+          "query": "deploy kafka cluster",
+          "fields": ["title^1.5", "content"]
+        }
+      },
+      "query_weight": 0.7,
+      "rescore_query_weight": 0.3
+    }
+  }
+}
+----
+
+== Inspect Documents in OpenSearch Dashboards
+
+Find the OpenSearch Dashboards URL:
+
+[source,console]
+----
+$ kubectl get svc opensearch-dashboards
+----
+
+Create a port-forward:
+
+[source,console]
+----
+$ kubectl port-forward service/opensearch-dashboards 5601:5601
+----
+
+Log in at http://localhost:5601 with:
+
+* *Username*: `admin`
+* *Password*: `adminadmin`
+
+Select the *Global* tenant, then navigate to *Discover* to browse the `rag-documents` index:
+
+* Document titles and content
+* Categories (airflow-operator, kafka-operator, trino-operator, etc.)
+* Vector embeddings (768-dimensional arrays - click to expand)
+* Code block indicators
+* URLs to source documentation
+
+You can also test queries using *Dev Tools* console to see raw OpenSearch responses.
+
+== Architecture Details
+
+=== Components
+
+*OpenSearch*::
+* Single-node cluster with k-NN plugin enabled
+* Vector search using HNSW (Hierarchical Navigable Small World) algorithm for approximate nearest neighbor retrieval
+* Hybrid search combining k-NN vectors with BM25 text search in a single query
+* Stores ~4200 documentation chunks with 768-dimensional embeddings
+* Resources: 2 CPU, 4 GB RAM, 10 GB storage
+
+*Ollama*::
+* Runs two models loaded during container startup:
+** *nomic-embed-text:v1.5*: 768-dim embeddings (~274MB)
+** *llama3.1:8b*: 8 billion parameter LLM for generation (~4.7GB)
+* Models are pulled via lifecycle postStart hook
+* Resources: 4-8 CPU, 10-16 GB RAM, 20 GB ephemeral storage
+
+*JupyterLab*::
+* Single-Pod notebook server
+* Token-based authentication ()
+* Pre-configured with environment variables for OpenSearch and Ollama
+* Notebook downloaded via initContainer from GitHub
+
+*OpenSearch Dashboards*::
+* Web UI for OpenSearch
+* Index management and document inspection
+* Query testing via Dev Tools
+
+=== Data Flow
+
+[source,text]
+----
+User Question (JupyterLab)
+    ↓
+nomic-embed-text (Ollama)
+    ↓
+Query Vector [768 floats]
+    ↓
+OpenSearch Hybrid Search (k-NN + BM25)
+    ↓
+Top-10 Documentation Chunks + Scores
+    ↓
+Format Context with Metadata
+    ↓
+Llama 3.1 8B (Ollama) + Context + Prompt
+    ↓
+Generated Answer (streamed)
+----
+
+== Customization
+
+=== Using Different Models
+
+Edit `stacks/opensearch-rag/ollama.yaml` to use alternative models:
+
+[source,yaml]
+----
+lifecycle:
+  postStart:
+    exec:
+      command:
+        - /bin/sh
+        - -c
+        - |
+          /bin/ollama pull nomic-embed-text:v1.5  # Don't change the embedding model. The embeddings in OpenSearch were created with this model.
+          /bin/ollama pull llama3.2:3b            # Or: gemma2, qwen2.5
+----
+
+NOTE: If you change the embedding model, update the index mapping dimension to match.
+For example, all-MiniLM-L6-v2 produces 384-dim vectors, not 768.
+
+=== Adjusting Retrieval Parameters
+
+The notebook allows tuning:
+
+* Hybrid search weights between semantic similarity (k-NN) and keyword matching (BM25)
+* Number of retrieved documents (k parameter) to balance answer quality with generation speed
+
+== Troubleshooting
+
+=== Ollama Models Not Loading
+
+If the notebook shows "model not found" errors:
+
+[source,console]
+----
+# Check if models are pulled
+$ kubectl exec deployment/ollama -- ollama list
+NAME                        ID              SIZE
+llama3.1:8b                 42182419e950    4.7 GB
+nomic-embed-text:v1.5       0a109f422b47    274 MB
+
+# If missing, manually pull
+$ kubectl exec deployment/ollama -- ollama pull nomic-embed-text:v1.5
+$ kubectl exec deployment/ollama -- ollama pull llama3.1:8b
+----
+
+The Ollama Pod may be restarting if it ran out of memory pulling models.
+Check Pod events:
+
+[source,console]
+----
+$ kubectl describe pod -l app.kubernetes.io/name=ollama
+----
+
+=== Embeddings Not Loaded
+
+Check if the data loading Job completed:
+
+[source,console]
+----
+$ kubectl get job load-embeddings-from-git
+NAME                       COMPLETIONS   DURATION   AGE
+load-embeddings-from-git   1/1           45s        5m
+
+# If failed, check logs
+$ kubectl logs job/load-embeddings-from-git
+----
+
+If the Job failed, delete and reapply it:
+
+[source,console]
+----
+$ kubectl delete job load-embeddings-from-git
+$ kubectl apply -f https://raw.githubusercontent.com/stackabletech/demos/main/demos/opensearch-rag/load-embeddings-from-git.yaml
+----
+
+=== Slow Response Times
+
+The first query to Llama 3.1 8B may take 10-20 seconds as the model loads into memory.
+Subsequent queries should be faster (2-5 seconds depending on context size).
+
+To improve performance:
+
+* Reduce context window: `rag_query("question", k=5)` instead of `k=10`
+* Use a smaller model: Replace `llama3.1:8b` with `llama3.2:3b` (faster, slightly lower quality)
+* Increase Ollama resources in `stacks/opensearch-rag/ollama.yaml`
+
+=== OpenSearch Connection Issues
+
+Verify OpenSearch is running:
+
+[source,console]
+----
+$ kubectl get pods -l app.kubernetes.io/name=opensearch
+NAME                              READY   STATUS    RESTARTS   AGE
+opensearch-nodes-default-0        1/1     Running   0          10m
+
+# Test connectivity
+$ kubectl exec opensearch-nodes-default-0 -- curl -k -u admin:adminadmin https://localhost:9200
+{
+  "name" : "opensearch-nodes-default-0",
+  "cluster_name" : "opensearch",
+  "version" : { ... }
+}
+----
+
+The notebook includes connection testing code to verify OpenSearch connectivity.
+
+== Learn More
+
+* {opensearch-vector}[OpenSearch Vector Engine]
+* {opensearch-knn}[OpenSearch k-NN Plugin Documentation]
+* {ollama}[Ollama - Run LLMs Locally]
+* {llama31}[Llama 3.1 Model Card]
+* {nomic-embed}[nomic-embed-text Model Documentation]
+* https://docs.stackable.tech/home/stable/opensearch/[Stackable OpenSearch Operator]
+
+== Summary
+
+This demo demonstrates a production-grade RAG system using:
+
+* OpenSearch vector engine for hybrid search (k-NN + BM25)
+* Local LLM inference with Ollama and Llama 3.1 8B
+* Interactive exploration through JupyterLab
+* Documentation-specific query enhancements (product detection, code boosting)
+* Stackable operators for seamless integration
+
+The notebook provides an walkthrough of each RAG component, from embedding generation to hybrid search to response streaming.
+You can extend this demo by adding your own document corpus, experimenting with different models, or integrating the RAG pipeline into a custom application.

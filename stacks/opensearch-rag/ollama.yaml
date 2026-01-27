@@ -1,0 +1,119 @@
+---
+# Source: ollama/templates/serviceaccount.yaml
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: ollama
+  namespace: default
+  labels:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+automountServiceAccountToken: true
+---
+# Source: ollama/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: ollama
+  namespace: default
+  labels:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+spec:
+  type: ClusterIP
+  ports:
+    - port: 11434
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+---
+# Source: ollama/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ollama
+  namespace: default
+  labels:
+    app.kubernetes.io/name: ollama
+    app.kubernetes.io/instance: ollama
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ollama
+      app.kubernetes.io/instance: ollama
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: ollama
+        app.kubernetes.io/instance: ollama
+    spec:
+      serviceAccountName: ollama
+      terminationGracePeriodSeconds: 120
+      securityContext:
+        {}
+      containers:
+        - name: ollama
+          securityContext:
+            {}
+          image: "ollama/ollama:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 11434
+              protocol: TCP
+          env:
+            - name: OLLAMA_HOST
+              value: "0.0.0.0:11434"
+            - name: OLLAMA_DEBUG
+              value: "1"
+          resources:
+            limits:
+              cpu: 8000m
+              memory: 16Gi
+            requests:
+              cpu: 4000m
+              memory: 10Gi
+          volumeMounts:
+            - name: ollama-data
+              mountPath: /root/.ollama
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 60
+            periodSeconds: 10
+            timeoutSeconds: 5
+            successThreshold: 1
+            failureThreshold: 6
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 5
+            timeoutSeconds: 3
+            successThreshold: 1
+            failureThreshold: 6
+          lifecycle:
+            postStart:
+              exec:
+                command:
+                  - /bin/sh
+                  - -c
+                  - |
+                    while ! /bin/ollama ps > /dev/null 2>&1; do
+                      sleep 5
+                    done
+
+                    /bin/ollama pull  nomic-embed-text:v1.5
+                    /bin/ollama pull  "{{ ollamaLlmModel }}"
+      volumes:
+        - name: ollama-data
+          emptyDir:
+            sizeLimit: 20Gi

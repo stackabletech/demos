@@ -8,6 +8,7 @@
 * xref:logging.adoc[]
 * xref:nifi-kafka-druid-earthquake-data.adoc[]
 * xref:nifi-kafka-druid-water-level-data.adoc[]
+* xref:opensearch-rag.adoc[]
 * xref:signal-processing.adoc[]
 * xref:spark-k8s-anomaly-detection-taxi-data.adoc[]
 * xref:trino-iceberg.adoc[]
