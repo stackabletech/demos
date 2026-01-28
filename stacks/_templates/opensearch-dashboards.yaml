@@ -6,7 +6,6 @@ repo:
   url: https://opensearch-project.github.io/helm-charts
 version: {{ opensearchVersion }}
 options:
-  opensearchHosts: https://opensearch:9200
   image:
     repository: oci.stackable.tech/sdp/opensearch-dashboards
     tag: "{{ opensearchVersion }}-stackable{{ stackableReleaseVersion }}"
@@ -21,6 +20,13 @@ options:
       stackable.tech/logging-credentials-secret: opensearch-user
     labels:
       stackable.tech/vendor: Stackable
+  opensearchHosts: null # Use the discovery ConfigMap instead
+  extraEnvs:
+    - name: OPENSEARCH_HOSTS
+      valueFrom:
+        configMapKeyRef:
+          name: opensearch
+          key: OPENSEARCH_HOSTS
   opensearchAccount:
     secret: opensearch-dashboard-user
   serviceAccount:
