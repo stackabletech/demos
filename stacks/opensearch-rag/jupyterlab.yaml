@@ -31,10 +31,6 @@ spec:
           env:
             - name: JUPYTER_PORT
               value: "8888"
-            - name: OPENSEARCH_HOST
-              value: "opensearch"
-            - name: OPENSEARCH_PORT
-              value: "9200"
             - name: OPENSEARCH_USER
               value: "admin"
             - name: OPENSEARCH_PASSWORD
@@ -48,6 +44,9 @@ spec:
               value: "11434"
             - name: OLLAMA_LLM_MODEL
               value: "{{ ollamaLlmModel }}"
+          envFrom:
+            - configMapRef:
+                name: opensearch
           ports:
             - name: http
               containerPort: 8888
