@@ -14,6 +14,7 @@ spec:
       - authenticationClass: trino-users
     authorization:
       opa:
+        enableColumnMasking: false
         configMapName: opa
         package: trino
     tls:
