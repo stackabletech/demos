@@ -56,7 +56,8 @@ $ stackablectl stacklet list
 ┌───────────────────────┬───────────────────────┬───────────┬────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
 │ PRODUCT               ┆ NAME                  ┆ NAMESPACE ┆ ENDPOINTS                                                                          ┆ CONDITIONS                      │
 ╞═══════════════════════╪═══════════════════════╪═══════════╪════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ opensearch            ┆ opensearch            ┆ default   ┆ nodes-default-http  http://opensearch-nodes-default.default.svc.cluster.local:9200 ┆ Available, Reconciling, Running │
+│ opensearch            ┆ opensearch            ┆ default   ┆ -http               http://opensearch.default.svc.cluster.local:9200               ┆ Available, Reconciling, Running │
+│                       ┆                       ┆           ┆ nodes-default-http  http://opensearch-nodes-default.default.svc.cluster.local:9200 ┆                                 │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ zookeeper             ┆ simple-zk             ┆ default   ┆ server-zk           simple-zk-server.default.svc.cluster.local:2282                ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
