@@ -274,7 +274,7 @@ Log in at http://localhost:5601 with:
 * *Username*: `admin`
 * *Password*: `adminadmin`
 
-Select the *Global* tenant, then navigate to *Discover* to browse the `rag-documents` index:
+Navigate to *Discover* to browse the `rag-documents` index:
 
 * Document titles and content
 * Categories (airflow-operator, kafka-operator, trino-operator, etc.)

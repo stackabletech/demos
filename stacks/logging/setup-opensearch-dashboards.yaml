@@ -28,7 +28,6 @@ spec:
                   --retry-delay 5 \
                   --header "Content-Type:application/json" \
                   --header "osd-xsrf:true" \
-                  --header "securitytenant: global" \
                   --data '{
                             "attributes": {
                               "title": "vector-*",
@@ -39,7 +38,6 @@ spec:
               curl \
                   --header "Content-Type:application/json" \
                   --header "osd-xsrf:true" \
-                  --header "securitytenant: global" \
                   --data '{
                             "attributes": {
                               "title":"Logs",
