@@ -88,6 +88,8 @@ stringData:
             authentication_backend:
               type: intern
         authz: {}
+        kibana:
+          multitenancy_enabled: false
   internal_users.yml: |
     ---
     _meta:
