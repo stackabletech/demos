@@ -15,8 +15,7 @@ options:
     type: NodePort
     port: 5601
     annotations:
-      stackable.tech/logging-view-logs: |-
-        /app/discover?security_tenant=global#/view/logs
+      stackable.tech/logging-view-logs: /app/discover#/view/logs
       stackable.tech/logging-credentials-secret: opensearch-user
     labels:
       stackable.tech/vendor: Stackable
@@ -34,3 +33,5 @@ options:
     # Use the ServiceAccount of OpenSearch because its permissions are already configured to work on
     # OpenShift.
     name: opensearch-serviceaccount
+config:
+  opensearch_security.multitenancy.enabled: false
