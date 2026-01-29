@@ -24,8 +24,13 @@ data:
     OPENSEARCH_PROTOCOL = os.getenv('OPENSEARCH_PROTOCOL', 'https')
     OPENSEARCH_USER = os.getenv('OPENSEARCH_USER', 'admin')
     OPENSEARCH_PASSWORD = os.getenv('OPENSEARCH_PASSWORD', 'adminadmin')
+    OPENSEARCH_DASHBOARDS_HOST = os.getenv('DASHBOARDS_HOST', 'opensearch-dashboards')
+    OPENSEARCH_DASHBOARDS_PORT = os.getenv('DASHBOARDS_PORT', '5601')
     INDEX_NAME = os.getenv('INDEX_NAME', 'rag-documents')
     EMBEDDINGS_FILE = os.getenv('EMBEDDINGS_FILE', '/data/stackable-docs-embeddings.json')
+
+    OPENSEARCH_BASIC_AUTH = HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASSWORD)
+    OPENSEARCH_DASHBOARDS_BASE_URL = f'http://{OPENSEARCH_DASHBOARDS_HOST}:{OPENSEARCH_DASHBOARDS_PORT}'
 
     def wait_for_opensearch():
         """Wait for OpenSearch to be ready."""
@@ -34,7 +39,7 @@ data:
             try:
                 response = requests.get(
                     OPENSEARCH_HOSTS,
-                    auth=HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASSWORD),
+                    auth=OPENSEARCH_BASIC_AUTH,
                     verify=False,
                     timeout=5
                 )
@@ -46,6 +51,27 @@ data:
                 time.sleep(5)
 
         print("[ERROR] OpenSearch did not become ready in time")
+        return False
+
+    def wait_for_opensearch_dashboards():
+        """Wait for OpenSearch Dashboards to be ready."""
+        print("Waiting for OpenSearch Dashboards to be ready...")
+        for i in range(60):
+            try:
+                response = requests.get(
+                    OPENSEARCH_DASHBOARDS_BASE_URL,
+                    auth=OPENSEARCH_BASIC_AUTH,
+                    verify=False,
+                    timeout=5
+                )
+                if response.status_code == 200:
+                    print("[OK] OpenSearch Dashboards is ready!")
+                    return True
+            except Exception:
+                print(f"Waiting for OpenSearch Dashboards... ({i+1}/60)")
+                time.sleep(5)
+
+        print("[ERROR] OpenSearch Dashboards did not become ready in time")
         return False
 
     def index_needs_loading(client):
@@ -137,17 +163,13 @@ data:
 
     def create_index_pattern():
         """Create index pattern in OpenSearch Dashboards and set as default."""
-        dashboards_host = os.getenv('DASHBOARDS_HOST', 'opensearch-dashboards')
-        dashboards_port = os.getenv('DASHBOARDS_PORT', '5601')
-        base_url = f'http://{dashboards_host}:{dashboards_port}'
         headers = {"osd-xsrf": "true"}
-        auth = HTTPBasicAuth(OPENSEARCH_USER, OPENSEARCH_PASSWORD)
 
         # Create index pattern
         response = requests.post(
-            f'{base_url}/api/saved_objects/index-pattern/{INDEX_NAME}?overwrite=true',
+            f'{OPENSEARCH_DASHBOARDS_BASE_URL}/api/saved_objects/index-pattern/{INDEX_NAME}?overwrite=true',
             json={"attributes": {"title": INDEX_NAME, "timeFieldName": "timestamp"}},
-            auth=auth, headers=headers, timeout=10
+            auth=OPENSEARCH_BASIC_AUTH, headers=headers, timeout=10
         )
         if response.status_code not in (200, 201, 409):
             print(f"[ERROR] Failed to create index pattern: {response.status_code} - {response.text}")
@@ -156,9 +178,9 @@ data:
 
         # Set as default
         response = requests.post(
-            f'{base_url}/api/opensearch-dashboards/settings',
+            f'{OPENSEARCH_DASHBOARDS_BASE_URL}/api/opensearch-dashboards/settings',
             json={"changes": {"defaultIndex": INDEX_NAME}},
-            auth=auth, headers=headers, timeout=10
+            auth=OPENSEARCH_BASIC_AUTH, headers=headers, timeout=10
         )
         if response.status_code in (200, 201):
             print(f"[OK] Set {INDEX_NAME} as default index pattern")
@@ -201,6 +223,9 @@ data:
         print(f"Embeddings file: {EMBEDDINGS_FILE}")
 
         if not wait_for_opensearch():
+            return 1
+
+        if not wait_for_opensearch_dashboards():
             return 1
 
         client = OpenSearch(
