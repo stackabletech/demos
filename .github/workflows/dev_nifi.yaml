@@ -25,5 +25,5 @@ jobs:
       image-name: nifi
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
-      image-version: 2.6.0-postgresql
+      image-version: 2.7.2-postgresql
       containerfile-path: demos/signal-processing/Dockerfile-nifi
