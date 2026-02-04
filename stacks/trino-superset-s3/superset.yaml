@@ -8,7 +8,6 @@ spec:
     productVersion: 6.0.0
   clusterConfig:
     credentialsSecret: superset-credentials
-    mapboxSecret: superset-mapbox-api-key
   nodes:
     roleConfig:
       listenerClass: external-stable
@@ -29,14 +28,6 @@ stringData:
   adminUser.password: "{{ supersetAdminPassword }}"
   connections.secretKey: "{{ supersetSecretKey }}"
   connections.sqlalchemyDatabaseUri: postgresql://superset:superset@postgresql-superset/superset
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: superset-mapbox-api-key
-type: Opaque
-stringData:
-  connections.mapboxApiKey: "pk.eyJ1IjoibXVlbGxlcmNlbGluZSIsImEiOiJjbDZwM3llMTAwNGpmM2psdHU0Y21wZHJwIn0.kXFJKBbeyhbwf0z460JcTQ"
 # ---
 # TODO Use when available (https://github.com/stackabletech/superset-operator/issues/3)
 # apiVersion: superset.stackable.tech/v1alpha1

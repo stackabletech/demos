@@ -8,7 +8,6 @@ spec:
     productVersion: 6.0.0
   clusterConfig:
     credentialsSecret: superset-credentials
-    mapboxSecret: superset-mapbox-api-key
     authentication:
       - authenticationClass: keycloak
         oidc:
@@ -52,11 +51,3 @@ metadata:
 stringData:
   clientId: superset
   clientSecret: "{{ keycloakSupersetClientSecret }}"
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: superset-mapbox-api-key
-type: Opaque
-stringData:
-  connections.mapboxApiKey: "pk.eyJ1IjoibXVlbGxlcmNlbGluZSIsImEiOiJjbDZwM3llMTAwNGpmM2psdHU0Y21wZHJwIn0.kXFJKBbeyhbwf0z460JcTQ"
