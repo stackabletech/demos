@@ -29,7 +29,7 @@ spec:
             - pipefail
             - -c
             - |
-              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/ingestion-job-spec.json https://druid-coordinator:8281/druid/indexer/v1/supervisor
+              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/ingestion-job-spec.json https://druid-coordinator.{{ NAMESPACE }}.svc.cluster.local:8281/druid/indexer/v1/supervisor
           volumeMounts:
             - name: ingestion-job-spec
               mountPath: /tmp/ingestion-job-spec
