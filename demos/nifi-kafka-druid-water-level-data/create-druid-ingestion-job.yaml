@@ -29,9 +29,9 @@ spec:
             - pipefail
             - -c
             - |
-              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/stations-ingestion-job-spec.json https://druid-coordinator:8281/druid/indexer/v1/supervisor
-              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/measurements-ingestion-job-spec.json https://druid-coordinator:8281/druid/indexer/v1/supervisor
-              curl -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/measurements-compaction-job-spec.json https://druid-coordinator:8281/druid/coordinator/v1/config/compaction
+              curl --fail -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/stations-ingestion-job-spec.json https://druid-coordinator.{{ NAMESPACE }}.svc.cluster.local:8281/druid/indexer/v1/supervisor
+              curl --fail -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/measurements-ingestion-job-spec.json https://druid-coordinator.{{ NAMESPACE }}.svc.cluster.local:8281/druid/indexer/v1/supervisor
+              curl --fail -X POST --insecure -H 'Content-Type: application/json' -d @/tmp/ingestion-job-spec/measurements-compaction-job-spec.json https://druid-coordinator.{{ NAMESPACE }}.svc.cluster.local:8281/druid/coordinator/v1/config/compaction
           volumeMounts:
             - name: ingestion-job-spec
               mountPath: /tmp/ingestion-job-spec
