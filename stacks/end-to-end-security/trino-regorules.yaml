@@ -5,7 +5,7 @@ kind: ConfigMap
 metadata:
   name: trino-regorules
   labels:
-    opa.stackable.tech/bundle: true
+    opa.stackable.tech/bundle: "true"
 data:
   actual_permissions.rego: |
     package trino
