@@ -112,7 +112,7 @@ stackablectl demo install <DEMO_NAME>
 stackablectl stack install <STACK_NAME> 
 
 # --- IMPORTANT ---
-# Run through the stable demo instructions (refer to the list above).
+# Run through the (still) nightly demo/stack instructions (refer to the list above).
 
 # Get a list of installed operators
 stackablectl operator installed --output=plain

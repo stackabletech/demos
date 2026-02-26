@@ -112,5 +112,5 @@ stackablectl demo install <DEMO_NAME>
 stackablectl stack install <STACK_NAME> 
 
 # --- IMPORTANT ---
-# Run through the nightly demo instructions (refer to the list above).
+# Run through the (still) nightly demo/stack instructions (refer to the list above).
 ```
