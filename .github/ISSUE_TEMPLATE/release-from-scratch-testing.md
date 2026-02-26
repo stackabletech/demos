@@ -105,9 +105,11 @@ These instructions are for deploying and completing the YY.M.X demo from scratch
 > Be sure to select the _nightly_ docs version on <https://docs.stackable.tech/home/nightly/demos/>.
 
 ```shell
-# Install demo (stable operators) for the nightly release.
-# For stacks use "stackablectl stack install" instead
+# For demo testing, install demo (stable operators) for the YY.M.X release.
 stackablectl demo install <DEMO_NAME>
+
+# For stack testing, install stack via
+stackablectl stack install <STACK_NAME> 
 
 # --- IMPORTANT ---
 # Run through the nightly demo instructions (refer to the list above).

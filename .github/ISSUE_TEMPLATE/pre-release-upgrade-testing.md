@@ -105,9 +105,11 @@ the operators and CRDS.
 > Be sure to select the _stable_ docs version on <https://docs.stackable.tech/home/stable/demos/>.
 
 ```shell
-# Install demo (stable operators) for the stable release (OO.M).
-# For stacks use "stackablectl stack install" instead
+# For demo testing, , install demo (stable operators) for the stable release (OO.M).
 stackablectl demo install <DEMO_NAME>
+
+# For stack testing, install stack via
+stackablectl stack install <STACK_NAME> 
 
 # --- IMPORTANT ---
 # Run through the stable demo instructions (refer to the list above).
