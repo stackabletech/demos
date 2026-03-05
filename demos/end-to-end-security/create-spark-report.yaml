@@ -53,6 +53,9 @@ data:
     kind: SparkApplication
     metadata:
       name: spark-report
+      labels:
+        stackable.tech/vendor: Stackable
+        stackable.tech/demo: end-to-end-security
     spec:
       sparkImage:
         productVersion: 4.0.1
@@ -64,10 +67,10 @@ data:
       sparkConf:
         spark.driver.extraClassPath: /stackable/config/hdfs
         spark.executor.extraClassPath: /stackable/config/hdfs
-        spark.hadoop.hive.metastore.kerberos.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
+        spark.hadoop.hive.metastore.kerberos.principal: hive/hive-iceberg.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM
         spark.hadoop.hive.metastore.sasl.enabled: "true"
         spark.kerberos.keytab: /stackable/kerberos/keytab
-        spark.kerberos.principal: spark/spark.default.svc.cluster.local@KNAB.COM
+        spark.kerberos.principal: spark/spark.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM
         spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
         spark.sql.catalog.lakehouse.type: hive
         spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg-metastore:9083

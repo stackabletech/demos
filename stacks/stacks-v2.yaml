@@ -571,7 +571,7 @@ stacks:
       - superset
       - opa
       - keycloak
-    supportedNamespaces: ["default"] # SecretClass "kerberos" needs explicit namespace in adminKeytabSecret
+    supportedNamespaces: []
     resourceRequests:
       cpu: 7000m
       memory: 19586Mi
@@ -597,6 +597,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/setup-postgresql.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: end-to-end-security
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin

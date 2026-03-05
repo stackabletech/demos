@@ -211,21 +211,21 @@ data:
     }
 
     groups_for_user := {
-        "trino/trino.default.svc.cluster.local@KNAB.COM": [],
-        "spark/spark.default.svc.cluster.local@KNAB.COM": [],
-        "hive/hive.default.svc.cluster.local@KNAB.COM": [],
+        "trino/trino.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM": [],
+        "spark/spark.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM": [],
+        "hive/hive.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM": [],
     }
 
     groups_for_short_user_name := {}
 
     acls := [
         {
-            "identity": "user:trino/trino.default.svc.cluster.local@KNAB.COM",
+            "identity": "user:trino/trino.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM",
             "action": "rw",
             "resource": "hdfs:dir:/lakehouse/",
         },
         {
-            "identity": "user:spark/spark.default.svc.cluster.local@KNAB.COM",
+            "identity": "user:spark/spark.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM",
             "action": "rw",
             "resource": "hdfs:dir:/lakehouse/",
         },
