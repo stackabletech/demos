@@ -424,12 +424,15 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/trino.yaml
-    supportedNamespaces: ["default"] # until namespace can be templates, the minio FQDN hard-codes the namespace
+    supportedNamespaces: []
     resourceRequests:
       cpu: 6000m # Measured 5600m
       memory: 21Gi
       pvc: 110Gi # 100Gi for MinIO
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: trino-iceberg
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
