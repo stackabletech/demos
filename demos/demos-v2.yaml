@@ -133,7 +133,7 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-nifi-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/create-druid-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/nifi-kafka-druid-water-level-data/setup-superset.yaml
-    supportedNamespaces: ["default"]
+    supportedNamespaces: []
     resourceRequests:
       cpu: 8900m
       memory: 42330Mi

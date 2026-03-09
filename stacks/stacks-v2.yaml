@@ -297,6 +297,9 @@ stacks:
       memory: 42330Mi
       pvc: 75Gi
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: nifi-kafka-druid-superset-s3
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
         default: adminadmin

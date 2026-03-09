@@ -111,7 +111,7 @@ You can execute a command on the Kafka broker to list the available topics as fo
 
 [source,console]
 ----
-$ kubectl k exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
 /stackable/kafka/bin/kafka-topics.sh \
 --describe \
 --bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
