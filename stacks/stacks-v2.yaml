@@ -384,12 +384,15 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/hive-metastore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/superset.yaml
-    supportedNamespaces: [default] # until namespace can be templates, the minio FQDN hard-codes the namespace
+    supportedNamespaces: []
     resourceRequests:
       cpu: 6800m
       memory: 15822Mi
       pvc: 28Gi
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: trino-superset-s3
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
