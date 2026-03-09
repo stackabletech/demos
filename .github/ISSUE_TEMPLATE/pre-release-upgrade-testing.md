@@ -109,7 +109,7 @@ the operators and CRDS.
 stackablectl demo install <DEMO_NAME>
 
 # For stack testing, install stack via
-stackablectl stack install <STACK_NAME> 
+stackablectl stack install <STACK_NAME>
 
 # --- IMPORTANT ---
 # Run through the (still) nightly demo/stack instructions (refer to the list above).
