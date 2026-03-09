@@ -8,6 +8,7 @@ version: 10.1.2 # 12.2.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   grafana.ini:
     analytics:
       check_for_updates: false
@@ -38,7 +39,7 @@ options:
       datasources:
         - name: postgres
           type: postgres
-          url: postgresql-timescaledb.default.svc.cluster.local:5432
+          url: postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local:5432
           user: admin
           secureJsonData:
             password: {{ postgresAdminPassword }}

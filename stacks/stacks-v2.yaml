@@ -666,6 +666,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/spark_driver_service.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: signal-processing
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
         default: adminadmin

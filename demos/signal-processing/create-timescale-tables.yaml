@@ -17,10 +17,10 @@ spec:
             - -c
             - |
               echo 'Waiting for timescaleDB to be created'
-              kubectl wait --for=create pod/postgresql-timescaledb-0 --timeout=30m
+              kubectl wait --for=create pod/postgresql-timescaledb-0 --timeout=30m -n {{ NAMESPACE }}
 
               echo 'Waiting for timescaleDB to be ready'
-              kubectl wait --for=condition=ready pod/postgresql-timescaledb-0 --timeout=30m
+              kubectl wait --for=condition=ready pod/postgresql-timescaledb-0 --timeout=30m -n {{ NAMESPACE }}
       containers:
         - name: create-timescale-tables-job
           image: postgres
@@ -32,14 +32,14 @@ spec:
             - |
               export PGPASSWORD=$(cat /timescale-admin-credentials/password)
               echo 'Submitting DDL...'
-              psql -U admin -h postgresql-timescaledb.default.svc.cluster.local postgres \
+              psql -U admin -h postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local postgres \
                 -c '\x' -c 'CREATE DATABASE tsdb' \
                 -c '\c tsdb' \
                 -f /tmp/sql/timescaledb.sql \
                 -c 'select count(*) from conditions' \
                 -c '\q'
               echo 'Creating extension as superuser...'
-              psql -U postgres -h postgresql-timescaledb.default.svc.cluster.local postgres \
+              psql -U postgres -h postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local postgres \
                 -c '\x' \
                 -c '\c tsdb' \
                 -c 'CREATE EXTENSION timescaledb_toolkit' \
