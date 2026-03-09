@@ -11,6 +11,7 @@ options:
     tag: "{{ opensearchVersion }}-stackable{{ stackableReleaseVersion }}"
   labels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   service:
     type: NodePort
     port: 5601
@@ -19,6 +20,7 @@ options:
       stackable.tech/logging-credentials-secret: opensearch-user
     labels:
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ stackLabel }}
   opensearchHosts: null # Use the discovery ConfigMap instead
   extraEnvs:
     - name: OPENSEARCH_HOSTS

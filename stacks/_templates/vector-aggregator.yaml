@@ -8,8 +8,10 @@ version: 0.49.0 # app version 0.52.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   podLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   role: Aggregator
   customConfig:
     sources:
