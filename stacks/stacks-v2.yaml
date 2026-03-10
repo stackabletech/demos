@@ -538,7 +538,7 @@ stacks:
       - ldap
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/authentication/openldap-tls.yaml
-    supportedNamespaces: ["default"]
+    supportedNamespaces: []
     resourceRequests:
       cpu: 1950m
       memory: 2182Mi
