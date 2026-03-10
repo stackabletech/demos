@@ -87,7 +87,6 @@ GitHub handle next to the stack to indicate a particular stack was picked up for
     | xargs -I {} echo "- [ ] {}"
 -->
 
-- [ ] airflow-trino-dbt
 - [ ] monitoring
 - [ ] observability
 - [ ] openldap

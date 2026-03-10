@@ -427,48 +427,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-  airflow-trino-dbt:
-    description: Stack containing Airflow and Trino using Apache Iceberg as a S3 backend for dbt jobs
-    stackableRelease: dev
-    stackableOperators:
-      - commons
-      - listener
-      - secret
-      - hive
-      - trino
-      - opa
-      - airflow
-    labels:
-      - trino
-      - opa
-      - iceberg
-      - minio
-      - s3
-    manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
-      - plainYaml: stacks/airflow-trino-dbt/hive-metastores.yaml
-      - plainYaml: stacks/airflow-trino-dbt/trino.yaml
-      - plainYaml: stacks/airflow-trino-dbt/airflow.yaml
-      - plainYaml: stacks/airflow-trino-dbt/rbac.yaml
-      - plainYaml: stacks/airflow-trino-dbt/opa-rules.yaml
-      - plainYaml: stacks/airflow-trino-dbt/opa.yaml
-      - plainYaml: stacks/airflow-trino-dbt/minio.yaml
-    supportedNamespaces: ["default"]
-    parameters:
-      - name: trinoAdminPassword
-        description: Password of the Trino admin user
-        default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
-      - name: airflowAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
-      - name: airflowSecretKey
-        description: Airflow's secret key used to generate e.g. user session tokens
-        default: airflowSecretKey
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
     stackableRelease: dev
