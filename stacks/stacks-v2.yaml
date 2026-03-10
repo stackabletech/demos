@@ -64,6 +64,9 @@ stacks:
       memory: 1714Mi
       pvc: 110Gi
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: monitoring
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
         default: adminadmin
