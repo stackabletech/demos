@@ -15,12 +15,6 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install nifi-kafka-druid-water-level-data
 ----
 
-[CAUTION]
-====
-This demo only runs in the `default` namespace, as a `ServiceAccount` will be created. Additionally, we have to use the
-FQDN service names (including the namespace), so that the used TLS certificates are valid.
-====
-
 [#system-requirements]
 == System requirements
 
