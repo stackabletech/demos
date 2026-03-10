@@ -707,6 +707,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/s3-connection.yaml
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: jupyterhub-keycloak
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin

@@ -8,8 +8,10 @@ version: 5.4.0 # RELEASE.2024-12-18T13-15-44Z
 options:
   additionalLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   podLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   rootUser: admin
   rootPassword: {{ minioAdminPassword }}
   mode: standalone
