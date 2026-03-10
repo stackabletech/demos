@@ -744,6 +744,9 @@ stacks:
       memory: 16Gi
       pvc: 10Gi
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: opensearch-rag
       - name: openSearchAdminPassword
         description: Password of the OpenSearch admin user
         default: adminadmin

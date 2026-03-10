@@ -12,11 +12,13 @@ spec:
     matchLabels:
       app: jupyterlab
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ stackLabel }}
   template:
     metadata:
       labels:
         app: jupyterlab
         stackable.tech/vendor: Stackable
+        stackable.tech/stack: {{ stackLabel }}
     spec:
       serviceAccountName: default
       containers:
