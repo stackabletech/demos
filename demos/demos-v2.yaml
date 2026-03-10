@@ -218,11 +218,15 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/create-nifi-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/create-spark-ingestion-job.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/data-lakehouse-iceberg-trino-spark/setup-superset.yaml
-    supportedNamespaces: ["default"]
+    supportedNamespaces: []
     resourceRequests:
       cpu: "80"
       memory: 200Gi
       pvc: 300Gi
+    parameters:
+      - name: demoLabel
+        description: Demo label to add to various components
+        default: data-lakehouse-iceberg-trino-spark
   jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data:
     description: Jupyterhub with PySpark and HDFS integration
     documentation: https://docs.stackable.tech/home/stable/demos/jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data

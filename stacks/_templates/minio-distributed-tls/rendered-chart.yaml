@@ -541,7 +541,7 @@ spec:
               cp -v /etc/minio/original_certs/tls.key /etc/minio/certs/private.key
               cp -v /etc/minio/original_certs/ca.crt /etc/minio/certs/CAs/ca.crt
 
-              /usr/bin/docker-entrypoint.sh minio server https://minio-{0...4}.minio-svc.default.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001
+              /usr/bin/docker-entrypoint.sh minio server https://minio-{0...4}.minio-svc.{{ NAMESPACE }}.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001
           volumeMounts:
             - name: export
               mountPath: /export

@@ -20,11 +20,11 @@ spec:
             - -c
             - |
               echo 'Waiting for all minio instances to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app=minio,release=minio,stackable.tech/vendor=Stackable
+              kubectl wait --for=condition=ready --timeout=30m pod -l app=minio,release=minio,stackable.tech/vendor=Stackable -n {{ NAMESPACE }}
               echo 'Waiting for all kafka brokers to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka,app.kubernetes.io/instance=kafka
+              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka,app.kubernetes.io/instance=kafka -n {{ NAMESPACE }}
               echo 'Waiting for all nifi instances to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi
+              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi -n {{ NAMESPACE }}
         - name: wait-for-kafka-topics
           image: oci.stackable.tech/sdp/kafka:4.1.0-stackable0.0.0-dev
           command:
@@ -142,6 +142,7 @@ data:
       name: spark-ingest-into-lakehouse
       labels:
         stackable.tech/vendor: Stackable
+        stackable.tech/demo: {{ demoLabel }}
     spec:
       sparkImage:
         productVersion: 4.0.1
@@ -253,7 +254,7 @@ data:
     spark.sql("CREATE TABLE IF NOT EXISTS lakehouse.smart_city.shared_bikes_station_status (station_id string, num_bikes_available short, is_installed boolean, is_renting boolean, is_returning boolean, last_reported timestamp) USING iceberg PARTITIONED BY (days(last_reported)) TBLPROPERTIES ('format-version' = 2, format = 'PARQUET')")
 
     kafkaOptions = {
-      "kafka.bootstrap.servers": "kafka-broker-default.default.svc.cluster.local:9093",
+      "kafka.bootstrap.servers": "kafka-broker-default.{{ NAMESPACE }}.svc.cluster.local:9093",
       "kafka.security.protocol": "SSL",
       "kafka.ssl.truststore.location": "/stackable/tls/truststore.p12",
       "kafka.ssl.truststore.password": "changeit",

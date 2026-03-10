@@ -231,12 +231,15 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/kafka.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/data-lakehouse-iceberg-trino-spark/nifi.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/superset.yaml # Reuse
-    supportedNamespaces: ["default"] # until namespace can be templates, the minio FQDN hard-codes the namespace
+    supportedNamespaces: []
     resourceRequests:
       cpu: "71"
       memory: 160Gi
       pvc: 1Ti
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: data-lakehouse-iceberg-trino-spark
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
