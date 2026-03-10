@@ -134,6 +134,9 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: observability
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
         default: adminadmin

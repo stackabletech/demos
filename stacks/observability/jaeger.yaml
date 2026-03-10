@@ -11,8 +11,9 @@ repo:
 # helm search repo jaegertracing/jaeger
 version: 3.4.1 # 1.53.0
 options:
-  # labels:
-  #   stackable.tech/vendor: Stackable
+  commonLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ stackLabel }}
   provisionDataStore:
     cassandra: false
   allInOne:
