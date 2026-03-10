@@ -6,7 +6,7 @@ metadata:
 spec:
   provider:
     ldap:
-      hostname: openldap.default.svc.cluster.local
+      hostname: openldap.{{ NAMESPACE }}.svc.cluster.local
       searchBase: ou=users,dc=example,dc=org
       # The bind credentials are used so an application can bind to the LDAP server
       bindCredentials:
