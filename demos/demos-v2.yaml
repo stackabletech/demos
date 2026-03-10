@@ -33,6 +33,9 @@ demos:
       memory: 15Gi
       pvc: 15Gi
     parameters:
+      - name: demoLabel
+        description: Demo label to add to various components
+        default: argo-cd-git-ops
       - name: customGitUrl
         description: The URL to the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
         default: https://github.com/stackabletech/demos/

@@ -33,6 +33,9 @@ stacks:
       cpu: 5000m
       pvc: 5Gi
     parameters:
+      - name: stackLabel
+        description: Stack label to add to various components
+        default: argo-cd-git-ops
       - name: stackableReleaseVersion
         description: The Stackable release to be installed via Argo. This replaces the demo `stackableRelease` parameter.
         # TODO(@maltesander): Must be adapted in case of release !
