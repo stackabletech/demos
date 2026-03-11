@@ -9,7 +9,7 @@ repo:
 # To find the latest version:
 # helm repo add grafana https://grafana.github.io/helm-charts --force-update
 # helm search repo grafana/grafana
-version: 10.5.15 # 12.3.1
+version: 10.1.5 # 12.3.0
 options:
   admin:
     existingSecret: grafana-admin-credentials
