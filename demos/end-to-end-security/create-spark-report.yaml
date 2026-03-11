@@ -55,7 +55,7 @@ data:
       name: spark-report
       labels:
         stackable.tech/vendor: Stackable
-        stackable.tech/demo: end-to-end-security
+        stackable.tech/demo: {{ demoLabel }}
     spec:
       sparkImage:
         productVersion: 4.0.1

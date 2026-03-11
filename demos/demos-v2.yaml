@@ -97,6 +97,10 @@ demos:
       cpu: 9000m
       memory: 19586Mi
       pvc: 40Gi
+    parameters:
+      - name: demoLabel
+        description: Demo label to add to various components
+        default: argo-cd-git-ops
   nifi-kafka-druid-earthquake-data:
     description: Demo ingesting earthquake data into Kafka using NiFi, streaming it into Druid and creating a Superset dashboard
     documentation: https://docs.stackable.tech/home/stable/demos/nifi-kafka-druid-earthquake-data
