@@ -6,7 +6,7 @@ repo:
   name: opentelemetry-operator
   url: https://open-telemetry.github.io/opentelemetry-helm-charts
 # Find the newest chart at https://github.com/open-telemetry/opentelemetry-helm-charts/releases
-version: 0.99.0 # 0.138.0
+version: 0.107.0 # 0.146.0
 options:
   additionalLabels:
     stackable.tech/vendor: Stackable

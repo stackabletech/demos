@@ -1,15 +1,15 @@
 # yamllint disable rule:comments-indentation
 ---
-# https://github.com/grafana/helm-charts/tree/main/charts/grafana
+# https://github.com/grafana-community/helm-charts/tree/main/charts/grafana
 releaseName: grafana
 name: grafana
 repo:
   name: grafana
-  url: https://grafana.github.io/helm-charts
+  url: https://grafana-community.github.io/helm-charts
 # To find the latest version:
-# helm repo add grafana https://grafana.github.io/helm-charts --force-update
-# helm search repo grafana/grafana
-version: 10.1.4 # 12.2.1
+# helm repo add grafana-community https://grafana-community.github.io/helm-charts --force-update
+# helm search repo grafana-community/grafana
+version: 11.3.2 # 12.4.1
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
@@ -47,11 +47,11 @@ options:
     enabled: false
   resources:
     limits:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 2000m
+      memory: 1024Mi
     requests:
-      cpu: 100m
-      memory: 128Mi
+      cpu: 1000m
+      memory: 256Mi
   persistence:
     enabled: true
     # storageClassName: default

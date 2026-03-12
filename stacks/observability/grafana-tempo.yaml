@@ -10,7 +10,7 @@ repo:
 # To find the latest version:
 # helm repo add grafana https://grafana.github.io/helm-charts --force-update
 # helm search repo grafana/tempo
-version: 1.24.0 # 2.9.0
+version: 1.24.4 # 2.9.0
 options:
   global:
     commonLabels:
