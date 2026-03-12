@@ -113,21 +113,14 @@ stackablectl stack install <STACK_NAME>
 # --- IMPORTANT ---
 # Run through the (still) nightly demo/stack instructions (refer to the list above).
 
-# Get a list of installed operators
-stackablectl operator installed --output=plain
-
-# Uninstall operators for the stable release (OO.M)
-stackablectl release uninstall OO.M
-
-# Update CRDs to nightly version (on main)
-# Repeat this for every operator used by the demo (use the list from the earlier step before deleting the operators)
-kubectl replace -f https://raw.githubusercontent.com/stackabletech/commons-operator/main/deploy/helm/commons-operator/crds/crds.yaml
-kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/main/deploy/helm/...-operator/crds/crds.yaml
-
-# Install nightly version of operators (use the list from the earlier step before deleting the operators)
-stackablectl release install dev -i commons -i secret -i listener -i ...
+# Install nightly version of operators
+stackablectl release upgrade dev
 
 # Bump every stacklet to the version that used by the nightly demo.
 # Typically, this is the latest supported version.
 kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "/spec/image/productVersion", "value":"x.x.x"}]' # changed
+
+# Check that the operator logs look good (no unexpected errors etc.)
+
+# Run through the (still) nightly demo/stack instructions again.
 ```
