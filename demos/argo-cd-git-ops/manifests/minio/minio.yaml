@@ -4,6 +4,9 @@ apiVersion: v1
 kind: ServiceAccount
 metadata:
   name: "minio-sa"
+  labels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 ---
 # Source: minio/templates/configmap.yaml
 apiVersion: v1
@@ -15,6 +18,8 @@ metadata:
     chart: minio-5.4.0
     release: minio
     heritage: Helm
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 data:
   initialize: |-
     #!/bin/sh
@@ -408,6 +413,8 @@ metadata:
     chart: minio-5.4.0
     release: minio
     heritage: Helm
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 spec:
   accessModes:
     - "ReadWriteOnce"
@@ -425,6 +432,8 @@ metadata:
     chart: minio-5.4.0
     release: minio
     heritage: Helm
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 spec:
   type: NodePort
   externalTrafficPolicy: "Cluster"
@@ -448,6 +457,8 @@ metadata:
     release: minio
     heritage: Helm
     monitoring: "true"
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 spec:
   type: NodePort
   externalTrafficPolicy: "Cluster"
@@ -471,6 +482,7 @@ metadata:
     release: minio
     heritage: Helm
     stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
 spec:
   strategy:
     type: RollingUpdate
@@ -489,6 +501,7 @@ spec:
         app: minio
         release: minio
         stackable.tech/vendor: Stackable
+        stackable.tech/demo: {{ DEMO }}
       annotations:
         checksum/secrets: fa63e34a92c817c84057e2d452fa683e66462a57b0529388fb96a57e05f38e57
         checksum/config: ebea49cc4c1bfbd1b156a58bf770a776ff87fe199f642d31c2816b5515112e72
@@ -583,6 +596,8 @@ metadata:
     chart: minio-5.4.0
     release: minio
     heritage: Helm
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: {{ DEMO }}
   annotations:
     "helm.sh/hook": post-install,post-upgrade
     "helm.sh/hook-delete-policy": hook-succeeded,before-hook-creation

@@ -5,7 +5,7 @@ metadata:
   name: minio
 spec:
   # Hostname must match secret op's certificate SAN
-  host: minio.default.svc.cluster.local
+  host: minio.{{ NAMESPACE }}.svc.cluster.local
   port: 9000
   accessStyle: Path
   credentials:

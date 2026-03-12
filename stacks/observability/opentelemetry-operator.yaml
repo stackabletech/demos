@@ -8,6 +8,9 @@ repo:
 # Find the newest chart at https://github.com/open-telemetry/opentelemetry-helm-charts/releases
 version: 0.107.0 # 0.146.0
 options:
+  additionalLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
   admissionWebhooks:
     certManager:
       enabled: false

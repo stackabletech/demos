@@ -12,6 +12,10 @@ repo:
 # helm search repo grafana/tempo
 version: 1.24.4 # 2.9.0
 options:
+  global:
+    commonLabels:
+      stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
   tempo:
     receivers:
       otlp:

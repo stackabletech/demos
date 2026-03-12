@@ -1,7 +1,9 @@
 additionalLabels:
   stackable.tech/vendor: Stackable
+  stackable.tech/stack: {{ STACK }}
 podLabels:
   stackable.tech/vendor: Stackable
+  stackable.tech/stack: {{ STACK }}
 rootUser: admin
 rootPassword: adminadmin
 mode: distributed

@@ -741,7 +741,7 @@
           "kerberos-credentials-service": null,
           "dbcp-max-conn-lifetime": "-1",
           "Validation-query": "select count(*) from conditions;",
-          "Database Connection URL": "jdbc:postgresql://postgresql-timescaledb.default.svc.cluster.local:5432/tsdb",
+          "Database Connection URL": "jdbc:postgresql://postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local:5432/tsdb",
           "dbcp-time-between-eviction-runs": "-1",
           "Database User": "admin",
           "kerberos-user-service": null,

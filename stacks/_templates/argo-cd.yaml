@@ -6,6 +6,10 @@ repo:
   url: https://argoproj.github.io/argo-helm
 version: 9.4.10 # v3.3.3
 options:
+  global:
+    additionalLabels:
+      stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
   configs:
     secret:
       argocdServerAdminPassword: "{{ argocdAdminPassword }}"

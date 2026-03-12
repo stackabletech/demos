@@ -54,7 +54,7 @@ data:
         "ioConfig": {
           "type": "kafka",
           "consumerProperties": {
-            "bootstrap.servers": "kafka-broker-default-headless.default.svc.cluster.local:9093",
+            "bootstrap.servers": "kafka-broker-default-headless.{{ NAMESPACE }}.svc.cluster.local:9093",
             "security.protocol": "SSL",
             "ssl.truststore.location": "/stackable/tls/truststore.p12",
             "ssl.truststore.password": "changeit",
@@ -133,7 +133,7 @@ data:
         "ioConfig": {
           "type": "kafka",
           "consumerProperties": {
-            "bootstrap.servers": "kafka-broker-default-headless.default.svc.cluster.local:9093",
+            "bootstrap.servers": "kafka-broker-default-headless.{{ NAMESPACE }}.svc.cluster.local:9093",
             "security.protocol": "SSL",
             "ssl.truststore.location": "/stackable/tls/truststore.p12",
             "ssl.truststore.password": "changeit",

@@ -83,15 +83,15 @@ spec:
   configOverrides:
     # HDFS configuration
     hive.hdfs.authentication.type: KERBEROS
-    hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.hdfs.trino.principal: trino/trino.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM
     hive.hdfs.trino.keytab: /stackable/kerberos/keytab
     hive.hdfs.impersonation.enabled: "false"
     hive.hdfs.wire-encryption.enabled: "true"
     # HMS configuration
     hive.metastore.authentication.type: KERBEROS
-    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.principal: trino/trino.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM
     hive.metastore.client.keytab: /stackable/kerberos/keytab
-    hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
+    hive.metastore.service.principal: hive/hive-iceberg.{{ NAMESPACE }}.svc.cluster.local@KNAB.COM
     hive.metastore.thrift.impersonation.enabled: "false"
     # By default, Hive views are executed with the RUN AS DEFINER security mode. Set the hive.hive-views.run-as-invoker catalog configuration property to true to use RUN AS INVOKER semantics.
     # However, this does *not* work for Iceberg catalogs :/ (I asked on the Trino slack: https://trinodb.slack.com/archives/CJ6UC075E/p1711449384648869)

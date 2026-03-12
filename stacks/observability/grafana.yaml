@@ -11,6 +11,9 @@ repo:
 # helm search repo grafana-community/grafana
 version: 11.3.2 # 12.4.1
 options:
+  extraLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
   admin:
     existingSecret: grafana-admin-credentials
   service:

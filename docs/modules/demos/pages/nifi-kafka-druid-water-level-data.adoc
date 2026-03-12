@@ -15,12 +15,6 @@ Install this demo on an existing Kubernetes cluster:
 $ stackablectl demo install nifi-kafka-druid-water-level-data
 ----
 
-[CAUTION]
-====
-This demo only runs in the `default` namespace, as a `ServiceAccount` will be created. Additionally, we have to use the
-FQDN service names (including the namespace), so that the used TLS certificates are valid.
-====
-
 [#system-requirements]
 == System requirements
 
@@ -111,7 +105,7 @@ You can execute a command on the Kafka broker to list the available topics as fo
 
 [source,console]
 ----
-$ kubectl k exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec kafka-broker-default-0 -c kafka -- \
 /stackable/kafka/bin/kafka-topics.sh \
 --describe \
 --bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \

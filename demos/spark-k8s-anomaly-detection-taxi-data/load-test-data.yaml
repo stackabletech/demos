@@ -17,7 +17,7 @@ spec:
               cd /tmp
               for month in 2020-09 2020-10 2020-11 2020-12; do
                 curl -O https://repo.stackable.tech/repository/misc/ny-taxi-data/fhvhv_tripdata_$month.parquet
-                mc alias set minio https://minio.default.svc.cluster.local:9000/ $(cat /minio-s3-credentials/accessKey) $(cat /minio-s3-credentials/secretKey)
+                mc alias set minio https://minio.{{ NAMESPACE }}.svc.cluster.local:9000/ $(cat /minio-s3-credentials/accessKey) $(cat /minio-s3-credentials/secretKey)
                 mc cp fhvhv_tripdata_$month.parquet minio/demo/ny-taxi-data/raw/
                 mc mb --ignore-existing minio/prediction;
               done

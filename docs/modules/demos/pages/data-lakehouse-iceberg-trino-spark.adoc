@@ -18,12 +18,6 @@ There is also the smaller xref:trino-iceberg.adoc[] demo focusing on the abiliti
 The `trino-iceberg` demo has no streaming data and can be executed on a local workstation.
 ====
 
-[CAUTION]
-====
-This demo only runs in the `default` namespace, as a `ServiceAccount` will be created.
-Additionally, we have to use the FQDN service names (including the namespace), so that the used TLS certificates are valid.
-====
-
 Install this demo on an existing Kubernetes cluster:
 
 [source,console]

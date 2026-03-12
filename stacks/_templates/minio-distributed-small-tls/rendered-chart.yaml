@@ -36,7 +36,7 @@ data:
     set -e # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
     MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
-    
+
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
     connectToMinio() {
@@ -64,7 +64,7 @@ data:
     	set -e # reset `e` as active
     	return 0
     }
-    
+
     # checkBucketExists ($bucket)
     # Check if the bucket exists, by using the exit code of `mc ls`
     checkBucketExists() {
@@ -72,7 +72,7 @@ data:
     	CMD=$(${MC} stat myminio/$BUCKET >/dev/null 2>&1)
     	return $?
     }
-    
+
     # createBucket ($bucket, $policy, $purge)
     # Ensure bucket exists, purging if asked to
     createBucket() {
@@ -81,7 +81,7 @@ data:
     	PURGE=$3
     	VERSIONING=$4
     	OBJECTLOCKING=$5
-    
+
     	# Purge the bucket, if set & exists
     	# Since PURGE is user input, check explicitly for `true`
     	if [ $PURGE = true ]; then
@@ -94,7 +94,7 @@ data:
     			echo "Bucket '$BUCKET' does not exist, skipping purge."
     		fi
     	fi
-    
+
     	# Create the bucket if it does not exist and set objectlocking if enabled (NOTE: versioning will be not changed if OBJECTLOCKING is set because it enables versioning to the Buckets created)
     	if ! checkBucketExists $BUCKET; then
     		if [ ! -z $OBJECTLOCKING ]; then
@@ -112,7 +112,7 @@ data:
     			echo "Bucket '$BUCKET' already exists."
     		fi
     	fi
-    
+
     	# set versioning for bucket if objectlocking is disabled or not set
     	if [ $OBJECTLOCKING = false ]; then
     		if [ ! -z $VERSIONING ]; then
@@ -127,32 +127,32 @@ data:
     	else
     		echo "Bucket '$BUCKET' versioning unchanged."
     	fi
-    
+
     	# At this point, the bucket should exist, skip checking for existence
     	# Set policy on the bucket
     	echo "Setting policy of bucket '$BUCKET' to '$POLICY'."
     	${MC} anonymous set $POLICY myminio/$BUCKET
     }
-    
+
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
-    
-    
-    
+
+
+
     # Create the buckets
     createBucket lakehouse "public" false false false
-    
+
   add-user: |-
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
     MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
-    
+
     # AccessKey and secretkey credentials file are added to prevent shell execution errors caused by special characters.
     # Special characters for example : ',",<,>,{,}
     MINIO_ACCESSKEY_SECRETKEY_TMP="/tmp/accessKey_and_secretKey_tmp"
-    
+
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
     connectToMinio() {
@@ -179,14 +179,14 @@ data:
       set -e ; # reset `e` as active
       return 0
     }
-    
+
     # checkUserExists ()
     # Check if the user exists, by using the exit code of `mc admin user info`
     checkUserExists() {
       CMD=$(${MC} admin user info myminio $(head -1 $MINIO_ACCESSKEY_SECRETKEY_TMP) > /dev/null 2>&1)
       return $?
     }
-    
+
     # createUser ($policy)
     createUser() {
       POLICY=$1
@@ -210,7 +210,7 @@ data:
       fi
       #clean up credentials files.
       rm -f $MINIO_ACCESSKEY_SECRETKEY_TMP
-    
+
       # set policy for user
       if [ ! -z $POLICY -a $POLICY != " " ] ; then
           echo "Adding policy '$POLICY' for '$USER'"
@@ -221,24 +221,24 @@ data:
           echo "User '$USER' has no policy attached."
       fi
     }
-    
+
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
-    
-    
-    
+
+
+
     # Create the users
     echo console > $MINIO_ACCESSKEY_SECRETKEY_TMP
     echo console123 >> $MINIO_ACCESSKEY_SECRETKEY_TMP
     createUser consoleAdmin
-    
+
   add-policy: |-
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
     MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
-    
+
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
     connectToMinio() {
@@ -265,7 +265,7 @@ data:
       set -e ; # reset `e` as active
       return 0
     }
-    
+
     # checkPolicyExists ($policy)
     # Check if the policy exists, by using the exit code of `mc admin policy info`
     checkPolicyExists() {
@@ -273,12 +273,12 @@ data:
       CMD=$(${MC} admin policy info myminio $POLICY > /dev/null 2>&1)
       return $?
     }
-    
+
     # createPolicy($name, $filename)
     createPolicy () {
       NAME=$1
       FILENAME=$2
-    
+
       # Create the name if it does not exist
       echo "Checking policy: $NAME (in /config/$FILENAME.json)"
       if ! checkPolicyExists $NAME ; then
@@ -287,25 +287,25 @@ data:
         echo "Policy '$NAME' already exists."
       fi
       ${MC} admin policy create myminio $NAME /config/$FILENAME.json
-    
+
     }
-    
+
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
-    
-    
-    
+
+
+
   add-svcacct: |-
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
     MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
-    
+
     # AccessKey and secretkey credentials file are added to prevent shell execution errors caused by special characters.
     # Special characters for example : ',",<,>,{,}
     MINIO_ACCESSKEY_SECRETKEY_TMP="/tmp/accessKey_and_secretKey_svcacct_tmp"
-    
+
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
     connectToMinio() {
@@ -332,14 +332,14 @@ data:
       set -e ; # reset `e` as active
       return 0
     }
-    
+
     # checkSvcacctExists ()
     # Check if the svcacct exists, by using the exit code of `mc admin user svcacct info`
     checkSvcacctExists() {
       CMD=$(${MC} admin user svcacct info myminio $(head -1 $MINIO_ACCESSKEY_SECRETKEY_TMP) > /dev/null 2>&1)
       return $?
     }
-    
+
     # createSvcacct ($user)
     createSvcacct () {
       USER=$1
@@ -370,19 +370,19 @@ data:
       #clean up credentials files.
       rm -f $MINIO_ACCESSKEY_SECRETKEY_TMP
     }
-    
+
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
-    
-    
-    
+
+
+
   custom-command: |-
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
     MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
-    
+
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
     connectToMinio() {
@@ -409,14 +409,14 @@ data:
       set -e ; # reset `e` as active
       return 0
     }
-    
+
     # runCommand ($@)
     # Run custom mc command
     runCommand() {
       ${MC} "$@"
       return $?
     }
-    
+
     # Try connecting to MinIO instance
     scheme=https
     connectToMinio $scheme
@@ -543,7 +543,7 @@ spec:
               mkdir -p /etc/minio/certs/CAs
               cp -v /etc/minio/original_certs/ca.crt /etc/minio/certs/CAs/public.crt
 
-              /usr/bin/docker-entrypoint.sh minio server https://minio-{0...1}.minio-svc.default.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001
+              /usr/bin/docker-entrypoint.sh minio server https://minio-{0...1}.minio-svc.{{ NAMESPACE }}.svc.cluster.local/export -S /etc/minio/certs/ --address :9000 --console-address :9001
           volumeMounts:
             - name: export
               mountPath: /export
@@ -573,8 +573,8 @@ spec:
             requests:
               cpu: 500m
               memory: 1Gi
-          securityContext: 
-            readOnlyRootFilesystem: false      
+          securityContext:
+            readOnlyRootFilesystem: false
       volumes:
         - name: minio-user
           secret:
@@ -629,7 +629,7 @@ spec:
         release: minio
         stackable.tech/vendor: Stackable
     spec:
-      restartPolicy: OnFailure      
+      restartPolicy: OnFailure
       volumes:
         - name: etc-path
           emptyDir: {}
