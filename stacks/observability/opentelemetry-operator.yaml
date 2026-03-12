@@ -10,7 +10,7 @@ version: 0.99.0 # 0.138.0
 options:
   additionalLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   admissionWebhooks:
     certManager:
       enabled: false

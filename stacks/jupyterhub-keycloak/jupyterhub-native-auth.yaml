@@ -40,7 +40,7 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ stackLabel }}
+      stackable.tech/stack: {{ STACK }}
     profileList:
       - display_name: "Default"
         description: "Default profile"

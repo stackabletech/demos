@@ -8,7 +8,7 @@ version: 10.1.2 # 12.2.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   grafana.ini:
     analytics:
       check_for_updates: false

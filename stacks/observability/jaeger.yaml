@@ -13,7 +13,7 @@ version: 3.4.1 # 1.53.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   provisionDataStore:
     cassandra: false
   allInOne:

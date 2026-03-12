@@ -79,7 +79,7 @@ spec:
         name: data
         labels:
           stackable.tech/vendor: Stackable
-          stackable.tech/stack: {{ stackLabel }}
+          stackable.tech/stack: {{ STACK }}
       spec:
         accessModes:
           - ReadWriteOnce

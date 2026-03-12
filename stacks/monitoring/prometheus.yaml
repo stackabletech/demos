@@ -8,7 +8,7 @@ version: 77.12.0 # 0.85.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   prometheusOperator:
     kubeletService:
       namespace: {{ NAMESPACE }}

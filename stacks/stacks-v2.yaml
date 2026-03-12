@@ -33,9 +33,6 @@ stacks:
       cpu: 5000m
       pvc: 5Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: argo-cd-git-ops
       - name: stackableReleaseVersion
         description: The Stackable release to be installed via Argo. This replaces the demo `stackableRelease` parameter.
         # TODO(@maltesander): Must be adapted in case of release !
@@ -67,9 +64,6 @@ stacks:
       memory: 1714Mi
       pvc: 110Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: monitoring
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
         default: adminadmin
@@ -99,9 +93,6 @@ stacks:
       memory: 3147Mi
       pvc: 24Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: logging
       - name: openSearchAdminPassword
         description: Password of the OpenSearch admin user
         default: adminadmin
@@ -137,9 +128,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-sidecar.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/observability/opentelemetry-collector-deployment.yaml
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: observability
       - name: grafanaAdminPassword
         description: Password of the Grafana admin user
         default: adminadmin
@@ -181,9 +169,6 @@ stacks:
       memory: 9010Mi
       pvc: 24Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: airflow
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
@@ -237,9 +222,6 @@ stacks:
       memory: 160Gi
       pvc: 1Ti
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: data-lakehouse-iceberg-trino-spark
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
@@ -312,9 +294,6 @@ stacks:
       memory: 42330Mi
       pvc: 75Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: nifi-kafka-druid-superset-s3
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
         default: adminadmin
@@ -360,9 +339,6 @@ stacks:
       memory: 15910Mi
       pvc: 36Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: spark-trino-superset-s3
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
@@ -405,9 +381,6 @@ stacks:
       memory: 15822Mi
       pvc: 28Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: trino-superset-s3
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
@@ -448,9 +421,6 @@ stacks:
       memory: 21Gi
       pvc: 110Gi # 100Gi for MinIO
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: trino-iceberg
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
@@ -585,9 +555,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/setup-postgresql.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: end-to-end-security
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin
@@ -636,9 +603,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/spark_driver_service.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/jupyterhub.yaml
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: signal-processing
       - name: nifiAdminPassword
         description: Password of the NiFI admin user
         default: adminadmin
@@ -677,9 +641,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/s3-connection.yaml
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: jupyterhub-keycloak
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin
@@ -714,9 +675,6 @@ stacks:
       memory: 16Gi
       pvc: 10Gi
     parameters:
-      - name: stackLabel
-        description: Stack label to add to various components
-        default: opensearch-rag
       - name: openSearchAdminPassword
         description: Password of the OpenSearch admin user
         default: adminadmin

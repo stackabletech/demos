@@ -15,7 +15,7 @@ options:
   global:
     commonLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ stackLabel }}
+      stackable.tech/stack: {{ STACK }}
   tempo:
     receivers:
       otlp:

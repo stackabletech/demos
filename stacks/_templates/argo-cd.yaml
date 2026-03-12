@@ -9,7 +9,7 @@ options:
   global:
     additionalLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ stackLabel }}
+      stackable.tech/stack: {{ STACK }}
   configs:
     secret:
       argocdServerAdminPassword: "{{ argocdAdminPassword }}"

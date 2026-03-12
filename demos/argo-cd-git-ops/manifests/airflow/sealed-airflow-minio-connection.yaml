@@ -15,5 +15,5 @@ spec:
       namespace: stackable-airflow
       labels:
         stackable.tech/vendor: Stackable
-        stackable.tech/demo: {{ demoLabel }}
+        stackable.tech/demo: {{ DEMO }}
     type: Opaque

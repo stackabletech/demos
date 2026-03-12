@@ -68,8 +68,6 @@ spec:
                   KEYCLOAK_HOSTNAME="$(echo $KEYCLOAK_ADDRESS | grep -oP '^[^:]+')"
                   KEYCLOAK_PORT="$(echo $KEYCLOAK_ADDRESS | grep -oP '[0-9]+$')"
 
-                  STACK_LABEL=$(kubectl get svc keycloak -n {{ NAMESPACE }} -o json | jq '.metadata.labels."stackable.tech/stack"')
-
                   cat << EOF | kubectl apply -f -
                     apiVersion: v1
                     kind: ConfigMap
@@ -77,7 +75,7 @@ spec:
                       name: keycloak-address
                       labels:
                         stackable.tech/vendor: Stackable
-                        stackable.tech/stack: $STACK_LABEL
+                        stackable.tech/stack: {{ STACK }}
                     data:
                       keycloakAddress: "$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT"
                       keycloakNodeIp: "$KEYCLOAK_HOSTNAME"

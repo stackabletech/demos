@@ -17,7 +17,7 @@ options:
         authenticator_class: dummy
     labels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ stackLabel }}
+      stackable.tech/stack: {{ STACK }}
   proxy:
     service:
       type: NodePort
@@ -40,7 +40,7 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ stackLabel }}
+      stackable.tech/stack: {{ STACK }}
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev

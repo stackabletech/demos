@@ -13,7 +13,7 @@ version: 10.1.4 # 12.2.1
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   admin:
     existingSecret: grafana-admin-credentials
   service:

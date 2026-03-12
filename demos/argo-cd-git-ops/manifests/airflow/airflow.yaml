@@ -5,7 +5,7 @@ metadata:
   name: airflow
   labels:
     stackable.tech/vendor: Stackable
-    stackable.tech/demo: {{ demoLabel }}
+    stackable.tech/demo: {{ DEMO }}
 spec:
   image:
     productVersion: 3.1.6

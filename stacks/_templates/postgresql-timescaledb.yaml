@@ -8,7 +8,7 @@ version: 0.33.1
 options:
   podLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ stackLabel }}
+    stackable.tech/stack: {{ STACK }}
   replicaCount: 1
   secrets:
     credentials:

@@ -142,7 +142,7 @@ data:
       name: spark-ingest-into-lakehouse
       labels:
         stackable.tech/vendor: Stackable
-        stackable.tech/demo: {{ demoLabel }}
+        stackable.tech/demo: {{ DEMO }}
     spec:
       sparkImage:
         productVersion: 4.0.1
