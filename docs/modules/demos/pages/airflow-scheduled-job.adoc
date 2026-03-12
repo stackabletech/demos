@@ -224,7 +224,7 @@ image::airflow-scheduled-job/airflow_17.png[]
 
 Click on the DAG, switching to the task view.
 This DAG uses a deferrable operator which, in conjunction with the triggerer process, "offloads" the DAG from its worker for a specfic period of time, before being picked up and again and executed.
-You will see the task cycle through the following states:
+From the Task Instances view (under Dags), you will see the task cycle through the following states:
 
 image::airflow-scheduled-job/deferrable_01_running.png[]
 image::airflow-scheduled-job/deferrable_02_queued.png[]
@@ -314,12 +314,14 @@ spec:
         envOverrides: *envOverrides
 ----
 
-THe patch can be applied like this:
+The patch can be applied like this:
 
 [source,console]
 ----
 kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-demo
 ----
+
+Wait for Airflow to come back up, and you should now see the generated DAGs.
 
 [NOTE]
 ====
