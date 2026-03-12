@@ -127,6 +127,7 @@ kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/
 # Install nightly version of operators (use the list from the earlier step before deleting the operators)
 stackablectl operator install commons ...
 
-# Optionally update the product versions in the CRDs (to the latest non-experimental version for the new release), e.g.:
+# Bump every stacklet to the version that used by the nightly demo.
+# Typically, this is the latest supported version.
 kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "/spec/image/productVersion", "value":"x.x.x"}]' # changed
 ```
