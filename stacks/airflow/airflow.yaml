@@ -1,6 +1,6 @@
 ---
 # {% raw %}
-apiVersion: airflow.stackable.tech/v1alpha1
+apiVersion: airflow.stackable.tech/v1alpha2
 kind: AirflowCluster
 metadata:
   name: airflow
@@ -74,7 +74,7 @@ spec:
       spec:
         containers:
           - name: airflow
-            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
               - name: NAMESPACE
@@ -102,7 +102,7 @@ spec:
       spec:
         containers:
           - name: base
-            image: oci.stackable.tech/sdp/airflow:3.0.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
               - name: AWS_SECRET_ACCESS_KEY

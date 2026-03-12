@@ -1,5 +1,5 @@
 ---
-apiVersion: airflow.stackable.tech/v1alpha1
+apiVersion: airflow.stackable.tech/v1alpha2
 kind: AirflowCluster
 metadata:
   name: airflow
@@ -9,8 +9,6 @@ spec:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py
         subPath: dag_factory.py
-      - name: kafka-tls-pem
-        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleGroups:
       default:
