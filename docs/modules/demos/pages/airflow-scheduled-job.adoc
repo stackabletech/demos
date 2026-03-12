@@ -3,12 +3,11 @@
 
 Install this demo on an existing Kubernetes cluster:
 
-[source,console]
-----
-$ stackablectl demo install airflow-scheduled-job
-----
-
-You can also deploy it to a specific namespace (the namespace `airflow-demo` will be assumed in this guide):
+[NOTE]
+====
+The namespace `airflow-demo` will be assumed in this guide.
+It will be created if it doesn't exist.
+====
 
 [source,console]
 ----
