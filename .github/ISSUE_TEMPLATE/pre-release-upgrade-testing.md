@@ -125,7 +125,7 @@ kubectl replace -f https://raw.githubusercontent.com/stackabletech/commons-opera
 kubectl replace -f https://raw.githubusercontent.com/stackabletech/...-operator/main/deploy/helm/...-operator/crds/crds.yaml
 
 # Install nightly version of operators (use the list from the earlier step before deleting the operators)
-stackablectl operator install commons ...
+stackablectl release install dev -i commons -i secret -i listener -i ...
 
 # Bump every stacklet to the version that used by the nightly demo.
 # Typically, this is the latest supported version.
