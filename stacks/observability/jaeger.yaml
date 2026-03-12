@@ -9,7 +9,7 @@ repo:
 # To find the latest version:
 # helm repo add jaegertracing https://jaegertracing.github.io/helm-charts --force-update
 # helm search repo jaegertracing/jaeger
-version: 3.4.1 # 1.53.0
+version: 4.5.0 # 2.15.1
 options:
   # labels:
   #   stackable.tech/vendor: Stackable
