@@ -55,12 +55,13 @@ data:
       name: spark-report
     spec:
       sparkImage:
+        # Iceberg 1.10.1 only supports Spark 4.0.x
         productVersion: 4.0.1
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-report.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.0
+          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.10.1
       sparkConf:
         spark.driver.extraClassPath: /stackable/config/hdfs
         spark.executor.extraClassPath: /stackable/config/hdfs
