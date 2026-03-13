@@ -142,31 +142,27 @@ To list the installed Stackable services run the following command:
 [source,console]
 ----
 $ stackablectl stacklet list
-┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                                                                                    ┆ CONDITIONS                      │
-╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ hdfs      ┆ hdfs         ┆ default   ┆ datanode-default-0-listener-data     hdfs-datanode-default-0-listener.default.svc.cluster.local:9866         ┆ Available, Reconciling, Running │
-│           ┆              ┆           ┆ datanode-default-0-listener-https    https://hdfs-datanode-default-0-listener.default.svc.cluster.local:9865 ┆                                 │
-│           ┆              ┆           ┆ datanode-default-0-listener-ipc      hdfs-datanode-default-0-listener.default.svc.cluster.local:9867         ┆                                 │
-│           ┆              ┆           ┆ datanode-default-0-listener-metrics  hdfs-datanode-default-0-listener.default.svc.cluster.local:8082         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-https             https://listener-hdfs-namenode-default-0.default.svc.cluster.local:9871 ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-metrics           listener-hdfs-namenode-default-0.default.svc.cluster.local:8183         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-rpc               listener-hdfs-namenode-default-0.default.svc.cluster.local:8020         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-https             https://listener-hdfs-namenode-default-1.default.svc.cluster.local:9871 ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-metrics           listener-hdfs-namenode-default-1.default.svc.cluster.local:8183         ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-rpc               listener-hdfs-namenode-default-1.default.svc.cluster.local:8020         ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive      ┆ hive-iceberg ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa       ┆ opa          ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset     ┆ default   ┆ external-http                        http://172.18.0.2:30443                                                 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino     ┆ trino        ┆ default   ┆ coordinator-metrics                  172.18.0.2:32156                                                        ┆ Available, Reconciling, Running │
-│           ┆              ┆           ┆ coordinator-https                    https://172.18.0.2:31604                                                ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper    ┆ default   ┆                                                                                                              ┆ Available, Reconciling, Running │
-└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                                                                ┆ CONDITIONS                      │
+╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hdfs      ┆ hdfs         ┆ default   ┆ datanode-default-0-listener-data   172.18.0.2:31942                                      ┆ Available, Reconciling, Running │
+│           ┆              ┆           ┆ datanode-default-0-listener-https  https://172.18.0.2:32525                              ┆                                 │
+│           ┆              ┆           ┆ datanode-default-0-listener-ipc    172.18.0.2:32319                                      ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-https           https://172.18.0.2:30658                              ┆                                 │
+│           ┆              ┆           ┆ namenode-default-0-rpc             172.18.0.2:31140                                      ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-https           https://172.18.0.2:31719                              ┆                                 │
+│           ┆              ┆           ┆ namenode-default-1-rpc             172.18.0.2:30396                                      ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive      ┆ hive-iceberg ┆ default   ┆ metastore-hive                     hive-iceberg-metastore.default.svc.cluster.local:9083 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa       ┆ opa          ┆ default   ┆                                                                                          ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset     ┆ default   ┆ node-http                          http://172.18.0.2:32116                               ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino     ┆ trino        ┆ default   ┆ coordinator-https                  https://172.18.0.2:31154                              ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper    ┆ default   ┆ server-zk                          zookeeper-server.default.svc.cluster.local:2282       ┆ Available, Reconciling, Running │
+└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
