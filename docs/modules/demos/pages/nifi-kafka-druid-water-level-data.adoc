@@ -489,11 +489,7 @@ image::nifi-kafka-druid-water-level-data/superset_3.png[]
 Click on the dashboard called `Water level data`. It might take some time until the dashboard renders all the included
 charts.
 
-image::nifi-kafka-druid-water-level-data/superset_4a.png[]
-
-NOTE: The charts on the right (`Current water level deviation` and `Stations distribution`) are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
-
-image::nifi-kafka-druid-water-level-data/superset_4b.png[]
+image::nifi-kafka-druid-water-level-data/superset_4.png[]
 
 === View the charts
 

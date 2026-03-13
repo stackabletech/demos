@@ -338,27 +338,10 @@ image::nifi-kafka-druid-earthquake-data/superset_6.png[]
 To look at the geographical distribution of the earthquakes you have to click on the tab `Charts` at the top again.
 Afterwards click on the chart `Earthquake distribution`.
 
-image::nifi-kafka-druid-earthquake-data/superset_7a.png[]
+image::nifi-kafka-druid-earthquake-data/superset_7.png[]
 
 The distribution of the earthquakes matches the continental plate margins.
 This is the expected distribution from the {wikipedia}[Wikipedia article on Earthquakes].
-
-NOTE: The earthquakes are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
-
-image::nifi-kafka-druid-earthquake-data/superset_7b.png[]
-
-// N.B. the next 2 screenshots and their explanation do not make sense until a mapbox key is activated,
-// hence commented out.
-
-// You can move and zoom the map with your mouse to interactively explore the map.
-// You can e.g. have a detailed look at the detected earthquakes in Germany.
-
-// image::nifi-kafka-druid-earthquake-data/superset_8.png[]
-
-// You can also click on the magnitudes in the legend on the top right side to enable/disable printing the earthquakes of that magnitude.
-// By only enabling magnitudes greater or equal to 8 you can plot only the most severe earthquakes.
-
-// image::nifi-kafka-druid-earthquake-data/superset_9.png[]
 
 === Execute arbitrary SQL statements
 
