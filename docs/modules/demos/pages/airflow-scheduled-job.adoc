@@ -3,12 +3,11 @@
 
 Install this demo on an existing Kubernetes cluster:
 
-[source,console]
-----
-$ stackablectl demo install airflow-scheduled-job
-----
-
-You can also deploy it to a specific namespace (the namespace `airflow-demo` will be assumed in this guide):
+[NOTE]
+====
+The namespace `airflow-demo` will be assumed in this guide.
+It will be created if it doesn't exist.
+====
 
 [source,console]
 ----
@@ -225,7 +224,7 @@ image::airflow-scheduled-job/airflow_17.png[]
 
 Click on the DAG, switching to the task view.
 This DAG uses a deferrable operator which, in conjunction with the triggerer process, "offloads" the DAG from its worker for a specfic period of time, before being picked up and again and executed.
-You will see the task cycle through the following states:
+From the Task Instances view (under Dags), you will see the task cycle through the following states:
 
 image::airflow-scheduled-job/deferrable_01_running.png[]
 image::airflow-scheduled-job/deferrable_02_queued.png[]
@@ -284,7 +283,7 @@ The patch also sets some environment variables that can be used to change the fr
 [source,yaml]
 ----
 ---
-apiVersion: airflow.stackable.tech/v1alpha1
+apiVersion: airflow.stackable.tech/v1alpha2
 kind: AirflowCluster
 metadata:
   name: airflow
@@ -294,8 +293,6 @@ spec:
       - name: airflow-dags
         mountPath: /dags/dag_factory.py
         subPath: dag_factory.py
-      - name: kafka-tls-pem
-        mountPath: /stackable/kafka-tls-pem
   webservers:
     roleGroups:
       default:
@@ -315,12 +312,14 @@ spec:
         envOverrides: *envOverrides
 ----
 
-THe patch can be applied like this:
+The patch can be applied like this:
 
 [source,console]
 ----
 kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-demo
 ----
+
+Wait for Airflow to come back up, and you should now see the generated DAGs.
 
 [NOTE]
 ====
