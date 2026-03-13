@@ -11,6 +11,7 @@ The upstream minio chart is also too limited:
 Therefore, we will render the upstream chart here, and then apply the necessary
 customizations on top.
 
-```yaml
+```bash
+helm repo add minio https://charts.min.io/
 helm template minio minio/minio -f values.yaml > rendered-chart.yaml
 ```
