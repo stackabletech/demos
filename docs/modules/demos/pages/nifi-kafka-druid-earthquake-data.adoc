@@ -72,7 +72,6 @@ $ stackablectl stacklet list
 │ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.4:32321                                ┆ Available, Reconciling, Running │
 │           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    172.19.0.4:30556                                ┆                                 │
 │           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          172.19.0.4:31352                                ┆                                 │
-│           ┆               ┆           ┆ broker-default-bootstrap-metrics            172.19.0.4:30241                                ┆                                 │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ nifi      ┆ nifi          ┆ default   ┆ node-https                                  https://172.19.0.2:32348                        ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
@@ -213,8 +212,8 @@ image::nifi-kafka-druid-earthquake-data/nifi_2.png[]
 
 You can see the started ProcessGroup consisting of three processors.
 The first one - `InvokeHTTP`, fetches the CSV file from the Internet and puts it into the queue of the next processor.
-The second processor - `SplitRecords`, takes the single FlowFile (NiFi Record) which contains all CSV records and splits it into chunks of 2000 records, which are then separately put into the queue of the next processor.
-The third one - `PublishKafkaRecord`, parses the CSV chunk, converts it to JSON records and writes them out into Kafka.
+The second processor - `SplitRecord`, takes the single FlowFile (NiFi Record) which contains all CSV records and splits it into chunks of 2000 records, which are then separately put into the queue of the next processor.
+The third one - `PublishKafka`, parses the CSV chunk, converts it to JSON records and writes them out into Kafka.
 
 Double-click on the `InvokeHTTP` processor to show the processor details.
 
@@ -265,8 +264,8 @@ You can see the available data sources by clicking on `Datasources` at the top.
 
 image::nifi-kafka-druid-earthquake-data/druid_4.png[]
 
-You can see the data source's segments by clicking on `segments` under `Availability` for the `earthquake` data source.
-In this case, the `earthquake` data source is partitioned by the year of the earthquakes, resulting in 73 segments.
+You can see the data source's segments by clicking on `segments` under `Availability` for the `earthquakes` data source.
+In this case, the `earthquakes` data source is partitioned by the year of the earthquakes, resulting in 73 segments.
 
 image::nifi-kafka-druid-earthquake-data/druid_5.png[]
 
@@ -338,27 +337,10 @@ image::nifi-kafka-druid-earthquake-data/superset_6.png[]
 To look at the geographical distribution of the earthquakes you have to click on the tab `Charts` at the top again.
 Afterwards click on the chart `Earthquake distribution`.
 
-image::nifi-kafka-druid-earthquake-data/superset_7a.png[]
+image::nifi-kafka-druid-earthquake-data/superset_7.png[]
 
 The distribution of the earthquakes matches the continental plate margins.
 This is the expected distribution from the {wikipedia}[Wikipedia article on Earthquakes].
-
-NOTE: The earthquakes are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
-
-image::nifi-kafka-druid-earthquake-data/superset_7b.png[]
-
-// N.B. the next 2 screenshots and their explanation do not make sense until a mapbox key is activated,
-// hence commented out.
-
-// You can move and zoom the map with your mouse to interactively explore the map.
-// You can e.g. have a detailed look at the detected earthquakes in Germany.
-
-// image::nifi-kafka-druid-earthquake-data/superset_8.png[]
-
-// You can also click on the magnitudes in the legend on the top right side to enable/disable printing the earthquakes of that magnitude.
-// By only enabling magnitudes greater or equal to 8 you can plot only the most severe earthquakes.
-
-// image::nifi-kafka-druid-earthquake-data/superset_9.png[]
 
 === Execute arbitrary SQL statements
 
