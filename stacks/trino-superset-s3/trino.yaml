@@ -1,3 +1,19 @@
+# For now, on K8s 1.35, TrinoCatalogs need to be deployed before the TrinoCluster
+# See: https://github.com/stackabletech/trino-operator/issues/854
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: hive
+  labels:
+    trino: trino
+spec:
+  connector:
+    hive:
+      metastore:
+        configMap: hive
+      s3:
+        reference: minio
 ---
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster
@@ -51,20 +67,6 @@ metadata:
 type: kubernetes.io/opaque
 stringData:
   admin: "{{ trinoAdminPassword }}"
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: hive
-  labels:
-    trino: trino
-spec:
-  connector:
-    hive:
-      metastore:
-        configMap: hive
-      s3:
-        reference: minio
 ---
 apiVersion: opa.stackable.tech/v1alpha1
 kind: OpaCluster

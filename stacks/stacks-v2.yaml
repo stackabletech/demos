@@ -311,8 +311,10 @@ stacks:
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/spark-trino-superset-s3/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/spark-trino-superset-s3/hive-metastore.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/trino-superset-s3/trino.yaml
+      # For now, on K8s 1.35, the TrinoCatalog needs to be deployed before the TrinoCluster
+      # See: https://github.com/stackabletech/trino-operator/issues/854
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/spark-trino-superset-s3/trino-prediction-catalog.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/trino-superset-s3/trino.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/release-25.11/stacks/trino-superset-s3/superset.yaml
     supportedNamespaces: []
     resourceRequests:
