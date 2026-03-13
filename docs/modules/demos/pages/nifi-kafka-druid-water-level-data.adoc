@@ -491,7 +491,7 @@ charts.
 
 image::nifi-kafka-druid-water-level-data/superset_4a.png[]
 
-NOTE: The charts on the right (`Current water level deviation` and `Stations distribution`) are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
+NOTE: The charts on the right (`Current water level deviation` and `Stations distribution`) are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. You can select one of the Open Street Map (OSM) styles on the left. The figure below shows how this would look if the user has their own key:
 
 image::nifi-kafka-druid-water-level-data/superset_4b.png[]
 
