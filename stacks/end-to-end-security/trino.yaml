@@ -1,3 +1,55 @@
+# For now, on K8s 1.35, TrinoCatalogs need to be deployed before the TrinoCluster
+# See: https://github.com/stackabletech/trino-operator/issues/854
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: lakehouse
+  labels:
+    trino: trino
+spec:
+  connector:
+    iceberg:
+      metastore:
+        configMap: hive-iceberg
+      hdfs:
+        configMap: hdfs
+  configOverrides:
+    # HDFS configuration
+    hive.hdfs.authentication.type: KERBEROS
+    hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.hdfs.trino.keytab: /stackable/kerberos/keytab
+    hive.hdfs.impersonation.enabled: "false"
+    hive.hdfs.wire-encryption.enabled: "true"
+    # HMS configuration
+    hive.metastore.authentication.type: KERBEROS
+    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.keytab: /stackable/kerberos/keytab
+    hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
+    hive.metastore.thrift.impersonation.enabled: "false"
+    # By default, Hive views are executed with the RUN AS DEFINER security mode. Set the hive.hive-views.run-as-invoker catalog configuration property to true to use RUN AS INVOKER semantics.
+    # However, this does *not* work for Iceberg catalogs :/ (I asked on the Trino slack: https://trinodb.slack.com/archives/CJ6UC075E/p1711449384648869)
+    # hive.hive-views.run-as-invoker: "true"
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpcds
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpcds: {}
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpch
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpch: {}
 ---
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster
@@ -66,56 +118,6 @@ spec:
     roleGroups:
       default:
         replicas: 1
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: lakehouse
-  labels:
-    trino: trino
-spec:
-  connector:
-    iceberg:
-      metastore:
-        configMap: hive-iceberg
-      hdfs:
-        configMap: hdfs
-  configOverrides:
-    # HDFS configuration
-    hive.hdfs.authentication.type: KERBEROS
-    hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
-    hive.hdfs.trino.keytab: /stackable/kerberos/keytab
-    hive.hdfs.impersonation.enabled: "false"
-    hive.hdfs.wire-encryption.enabled: "true"
-    # HMS configuration
-    hive.metastore.authentication.type: KERBEROS
-    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
-    hive.metastore.client.keytab: /stackable/kerberos/keytab
-    hive.metastore.service.principal: hive/hive-iceberg.default.svc.cluster.local@KNAB.COM
-    hive.metastore.thrift.impersonation.enabled: "false"
-    # By default, Hive views are executed with the RUN AS DEFINER security mode. Set the hive.hive-views.run-as-invoker catalog configuration property to true to use RUN AS INVOKER semantics.
-    # However, this does *not* work for Iceberg catalogs :/ (I asked on the Trino slack: https://trinodb.slack.com/archives/CJ6UC075E/p1711449384648869)
-    # hive.hive-views.run-as-invoker: "true"
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: tpcds
-  labels:
-    trino: trino
-spec:
-  connector:
-    tpcds: {}
----
-apiVersion: trino.stackable.tech/v1alpha1
-kind: TrinoCatalog
-metadata:
-  name: tpch
-  labels:
-    trino: trino
-spec:
-  connector:
-    tpch: {}
 ---
 apiVersion: v1
 kind: Secret
