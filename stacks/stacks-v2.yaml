@@ -2,7 +2,7 @@
 stacks:
   argo-cd-git-ops:
     description: Deploying Stackable Operators with ArgoCD
-    stackableRelease: dev # This does not matter -> managed by ArgoCD
+    stackableRelease: 26.3 # This does not matter -> managed by ArgoCD
     stackableOperators: ["argo-deploys-operators"] # This does not matter -> managed by ArgoCD
     labels:
       - argocd
@@ -43,7 +43,7 @@ stacks:
         default: $2y$10$HhJC3pGHTlk8RyBoS39N/.wC72mdWxV2X8QS1wROUwCFxl.2tGfky
   monitoring:
     description: Stack containing Prometheus and Grafana
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -69,7 +69,7 @@ stacks:
         default: adminadmin
   logging:
     description: Stack containing OpenSearch, OpenSearch Dashboards (Kibana) and Vector aggregator
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -108,7 +108,7 @@ stacks:
   observability:
     description: >-
       An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -133,7 +133,7 @@ stacks:
         default: adminadmin
   airflow:
     description: Stack containing Airflow scheduling platform
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -183,7 +183,7 @@ stacks:
         default: airflowSecretKey
   data-lakehouse-iceberg-trino-spark:
     description: Data lakehouse using Iceberg lakehouse on S3, Trino as query engine, Spark for streaming ingest and Superset for data visualization
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -239,7 +239,7 @@ stacks:
         default: supersetSecretKey
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -262,7 +262,7 @@ stacks:
     parameters: []
   nifi-kafka-druid-superset-s3:
     description: Stack containing NiFi, Kafka, Druid, MinIO and Superset for data visualization
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -308,7 +308,7 @@ stacks:
         default: adminadmin
   spark-trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -355,7 +355,7 @@ stacks:
         default: supersetSecretKey
   trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -397,7 +397,7 @@ stacks:
         default: supersetSecretKey
   trino-iceberg:
     description: Stack containing Trino using Apache Iceberg as a S3 data lakehouse
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -431,7 +431,7 @@ stacks:
         default: adminadmin
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -464,7 +464,7 @@ stacks:
       The bind user credentials are: ldapadmin:ldapadminpassword.
       No AuthenticationClass is configured, The AuthenticationClass is created manually in the tutorial.
       Use the 'openldap' Stack for an OpenLDAD with an AuthenticationClass already installed.
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -487,7 +487,7 @@ stacks:
       The bind user credentials are: ldapadmin:ldapadminpassword.
       The LDAP AuthenticationClass is called 'openldap' and the SecretClass for the bind credentials is called 'openldap-bind-credentials'.
       The stack already creates an appropriate Secret, so referring to the 'openldap' AuthenticationClass in your ProductCluster should be enough.
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -511,7 +511,7 @@ stacks:
 
       Note that this stack is tightly coupled with the demo.
       So if you install the stack you will get demo-specific parts (such as Keycloak users or regorules).
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -584,7 +584,7 @@ stacks:
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -620,7 +620,7 @@ stacks:
   jupyterhub-keycloak:
     description: >-
       A stack used to demonstrate JupyterHub and Keycloak, using parts of the end-to-end security demo.
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
@@ -654,7 +654,7 @@ stacks:
         default: jupyterhubjupyterhub
   opensearch-rag:
     description: OpenSearch RAG (Retrieval Augmented Generation) demo with vector search
-    stackableRelease: dev
+    stackableRelease: 26.3
     stackableOperators:
       - commons
       - listener
