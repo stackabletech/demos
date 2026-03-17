@@ -5,13 +5,12 @@ Install this demo on an existing Kubernetes cluster:
 
 [NOTE]
 ====
-The namespace `airflow-demo` will be assumed in this guide.
-It will be created if it doesn't exist.
+The `default` namespace must be used for this demo.
 ====
 
 [source,console]
 ----
-$ stackablectl demo install airflow-scheduled-job -n airflow-demo
+$ stackablectl demo install airflow-scheduled-job -n default
 ----
 
 [WARNING]
@@ -175,7 +174,7 @@ We can use the kafka-producer script bundled with Kafka to write to this topic (
 
 [source,bash]
 ----
-kubectl exec -n airflow-demo kafka-broker-default-0 -c kafka -- bash -c \
+kubectl exec -n default kafka-broker-default-0 -c kafka -- bash -c \
 'echo "Hello World at: $(date)" | /stackable/kafka/bin/kafka-console-producer.sh \
   --bootstrap-server $BOOTSTRAP_SERVER \
   --topic test-topic \
@@ -187,7 +186,7 @@ You can do this by either displaying the pod logs directly (e.g. if you are usin
 
 [source,bash]
 ----
-kubectl logs -n airflow-demo airflow-triggerer-default-0 --tail=30
+kubectl logs -n default airflow-triggerer-default-0 --tail=30
 ----
 
 The logs show that our message was detected, triggering the job:
@@ -316,7 +315,7 @@ The patch can be applied like this:
 
 [source,console]
 ----
-kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-demo
+kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n default
 ----
 
 Wait for Airflow to come back up, and you should now see the generated DAGs.
