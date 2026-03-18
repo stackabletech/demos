@@ -12,6 +12,9 @@ options:
   labels:
     stackable.tech/vendor: Stackable
     stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+{% endif %}
   service:
     type: NodePort
     port: 5601
@@ -21,6 +24,9 @@ options:
     labels:
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
   opensearchHosts: null # Use the discovery ConfigMap instead
   extraEnvs:
     - name: OPENSEARCH_HOSTS

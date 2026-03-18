@@ -13,12 +13,18 @@ spec:
       app: jupyterlab
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
   template:
     metadata:
       labels:
         app: jupyterlab
         stackable.tech/vendor: Stackable
         stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+        stackable.tech/demo: {{ DEMO }}
+{% endif %}
     spec:
       serviceAccountName: default
       containers:

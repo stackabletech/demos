@@ -18,6 +18,9 @@ options:
     labels:
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
   proxy:
     service:
       type: NodePort
@@ -41,6 +44,9 @@ options:
     extraLabels:
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev

@@ -14,6 +14,9 @@ options:
   extraLabels:
     stackable.tech/vendor: Stackable
     stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+{% endif %}
   admin:
     existingSecret: grafana-admin-credentials
   service:

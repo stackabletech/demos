@@ -10,6 +10,9 @@ options:
     additionalLabels:
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
   configs:
     secret:
       argocdServerAdminPassword: "{{ argocdAdminPassword }}"

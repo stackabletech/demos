@@ -9,9 +9,15 @@ options:
   commonLabels:
     stackable.tech/vendor: Stackable
     stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+{% endif %}
   podLabels:
     stackable.tech/vendor: Stackable
     stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+{% endif %}
   role: Aggregator
   customConfig:
     sources:

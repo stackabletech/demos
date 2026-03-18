@@ -1,4 +1,5 @@
-# TODO: This file does not seem to be used, remove it?
+# Note: As of 20206-03 this file is not in use by a demo, but it showcases how to use JupyterHub
+# without Keycloak, which might be helpful for some customers without a Keycloak.
 ---
 releaseName: jupyterhub
 name: jupyterhub
@@ -41,6 +42,9 @@ options:
     extraLabels:
       stackable.tech/vendor: Stackable
       stackable.tech/stack: {{ STACK }}
+{% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+{% endif %}
     profileList:
       - display_name: "Default"
         description: "Default profile"
