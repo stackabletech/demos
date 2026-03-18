@@ -10,7 +10,6 @@ spec:
   selector:
     matchLabels:
       app: keycloak
-sd
   template:
     metadata:
       labels:
