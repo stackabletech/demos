@@ -71,7 +71,6 @@ $ stackablectl stacklet list
 │ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.3:31041                                ┆ Available, Reconciling, Running │
 │           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    172.19.0.3:31503                                ┆                                 │
 │           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          172.19.0.3:30793                                ┆                                 │
-│           ┆               ┆           ┆ broker-default-bootstrap-metrics            172.19.0.3:32540                                ┆                                 │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ nifi      ┆ nifi          ┆ default   ┆ node-https                                  https://172.19.0.6:32038                        ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
@@ -253,9 +252,8 @@ network traffic and storage usage. The solution is only to send a station's know
 process is called data normalization. The downside is that when analyzing the data, you need to combine the records from
 multiple tables in Druid (`stations` and `measurements`).
 
-If you are interested in how many records have been produced to the Kafka topic so far, use the following command. It
-will print the last record produced to the topic partition, formatted with the pattern specified in the `-f` parameter.
-The given pattern will print some metadata of the record.
+If you are interested in how many records have been produced to the Kafka topic so far, use the following command.
+It prints the current offset for each partition, which tells you how many records have been produced to it.
 
 [source,console]
 ----
@@ -275,7 +273,7 @@ measurements:6:1344362
 measurements:7:1369651
 ----
 
-Multiplying `1,324,098` records by `8` partitions, we end up with ~ 10,592,784 records.
+Summing all partition offsets gives the total number of records produced. In this example, that is roughly 10.9 million measurement records.
 
 To inspect the last produced records, use the following command. Here, we consume the last three records from partition
 `0` of the `measurements` topic.
@@ -290,7 +288,7 @@ $ kubectl exec kafka-broker-default-0 -c kafka -- \
 --offset latest \
 --partition 0 \
 --max-messages 3
--...
+...
 {"timestamp":"2025-10-21T11:00:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
 {"timestamp":"2025-10-21T11:15:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
 {"timestamp":"2025-10-21T11:00:00+02:00","value":8.0,"station_uuid":"7deedc21-2878-40cc-ab47-f6da0d9002f1"}
@@ -483,11 +481,7 @@ image::nifi-kafka-druid-water-level-data/superset_3.png[]
 Click on the dashboard called `Water level data`. It might take some time until the dashboard renders all the included
 charts.
 
-image::nifi-kafka-druid-water-level-data/superset_4a.png[]
-
-NOTE: The charts on the right (`Current water level deviation` and `Stations distribution`) are rendered without a background map, as this is dependent upon a mapbox API key, which cannot be hosted in a public repository. The figure below shows how this would look if the user has their own key:
-
-image::nifi-kafka-druid-water-level-data/superset_4b.png[]
+image::nifi-kafka-druid-water-level-data/superset_4.png[]
 
 === View the charts
 
@@ -500,19 +494,18 @@ effect.
 
 image::nifi-kafka-druid-water-level-data/superset_6.png[]
 
-// Comment out the next section as long as the mapbox api key is not active.
-// === View the Station Distribution on the World Map
+=== View the Station Distribution on the World Map
 
-// To look at the stations' geographical distribution, you have to click on the tab `Charts` at the top again. Afterwards,
-// click on the chart `Stations distribution`.
+To look at the stations' geographical distribution, you have to click on the tab `Charts` at the top again. Afterwards,
+click on the chart `Stations distribution`.
 
-// image::nifi-kafka-druid-water-level-data/superset_7.png[]
+image::nifi-kafka-druid-water-level-data/superset_7.png[]
 
-// The stations are, of course, placed alongside waterways. They are coloured by the waters they measure, so all stations
-// alongside a body of water have the same colour. You can move and zoom the map with your mouse to interactively explore
-// the map. You can, e.g. have a detailed look at the water https://en.wikipedia.org/wiki/Rhine[Rhein].
+The stations are, of course, placed alongside waterways. They are coloured by the waters they measure, so all stations
+alongside a body of water have the same colour. You can move and zoom the map with your mouse to interactively explore
+the map. You can, e.g. have a detailed look at the water https://en.wikipedia.org/wiki/Rhine[Rhein].
 
-// image::nifi-kafka-druid-water-level-data/superset_8.png[]
+image::nifi-kafka-druid-water-level-data/superset_8.png[]
 
 === Execute arbitrary SQL statements
 

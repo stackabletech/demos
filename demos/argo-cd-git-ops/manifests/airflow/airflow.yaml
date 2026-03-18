@@ -66,6 +66,12 @@ spec:
                   secretKeyRef:
                     name: airflow-minio-connection
                     key: airflow-minio-connection
+          - name: git-sync-0
+            resources:
+              limits:
+                memory: "128Mi"
+              requests:
+                memory: "128Mi"
     config:
       gracefulShutdownTimeout: 30s
       resources:
@@ -94,6 +100,13 @@ spec:
                   secretKeyRef:
                     name: airflow-minio-connection
                     key: airflow-minio-connection
+        initContainers:
+          - name: git-sync-0-init
+            resources:
+              limits:
+                memory: "128Mi"
+              requests:
+                memory: "128Mi"
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides

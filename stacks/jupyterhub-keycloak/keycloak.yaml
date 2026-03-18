@@ -10,6 +10,7 @@ spec:
   selector:
     matchLabels:
       app: keycloak
+sd
   template:
     metadata:
       labels:
@@ -61,7 +62,9 @@ spec:
               while :
               do
                 echo "Determining Keycloak public reachable address"
-                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -n {{ NAMESPACE }} -o json | jq -r --slurpfile endpoints <(kubectl get endpoints keycloak -n {{ NAMESPACE }} -o json) --slurpfile nodes <(kubectl get nodes -o json) '($nodes[0].items[] | select(.metadata.name == $endpoints[0].subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
+                ENDPOINTS=$(kubectl -n {{ NAMESPACE }} get endpoints keycloak -o json)
+                NODES=$(kubectl get nodes -o json)
+                KEYCLOAK_ADDRESS=$(kubectl -n {{ NAMESPACE }} get svc keycloak -o json | jq -r --argjson endpoints "$ENDPOINTS" --argjson nodes "$NODES" '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
                 echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
 
                 if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
