@@ -74,9 +74,9 @@ spec:
                       labels:
                         stackable.tech/vendor: Stackable
                         stackable.tech/stack: {{ STACK }}
-{% if DEMO is defined %}
+                        {% if DEMO is defined %}
                         stackable.tech/demo: {{ DEMO }}
-{% endif %}
+                        {% endif %}
                     spec:
                       provider:
                         oidc:
