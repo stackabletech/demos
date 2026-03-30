@@ -61,9 +61,9 @@ spec:
               while :
               do
                 echo "Determining Keycloak public reachable address"
-                ENDPOINTS=$(kubectl get endpoints keycloak -o json)
+                ENDPOINTS=$(kubectl -n {{ NAMESPACE }} get endpoints keycloak -o json)
                 NODES=$(kubectl get nodes -o json)
-                KEYCLOAK_ADDRESS=$(kubectl get svc keycloak -o json | jq -r --argjson endpoints "$ENDPOINTS" --argjson nodes "$NODES" '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
+                KEYCLOAK_ADDRESS=$(kubectl -n {{ NAMESPACE }} get svc keycloak -o json | jq -r --argjson endpoints "$ENDPOINTS" --argjson nodes "$NODES" '($nodes.items[] | select(.metadata.name == $endpoints.subsets[].addresses[].nodeName) | .status.addresses | map(select(.type == "ExternalIP" or .type == "InternalIP")) | min_by(.type) | .address | tostring) + ":" + (.spec.ports[] | select(.name == "https") | .nodePort | tostring)')
                 echo "Found Keycloak running at $KEYCLOAK_ADDRESS"
 
                 if [ ! -z "$KEYCLOAK_ADDRESS" ]; then
@@ -75,6 +75,12 @@ spec:
                     kind: ConfigMap
                     metadata:
                       name: keycloak-address
+                      labels:
+                        stackable.tech/vendor: Stackable
+                        stackable.tech/stack: {{ STACK }}
+                        {% if DEMO is defined %}
+                        stackable.tech/demo: {{ DEMO }}
+                        {% endif %}
                     data:
                       keycloakAddress: "$KEYCLOAK_HOSTNAME:$KEYCLOAK_PORT"
                       keycloakNodeIp: "$KEYCLOAK_HOSTNAME"

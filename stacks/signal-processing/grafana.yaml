@@ -8,6 +8,12 @@ version: 10.5.15 # 12.3.1
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
   grafana.ini:
     analytics:
       check_for_updates: false
@@ -38,7 +44,7 @@ options:
       datasources:
         - name: postgres
           type: postgres
-          url: postgresql-timescaledb.default.svc.cluster.local:5432
+          url: postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local:5432
           user: admin
           secureJsonData:
             password: {{ postgresAdminPassword }}

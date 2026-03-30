@@ -10,7 +10,7 @@ spec:
     userInfo:
       backend:
         keycloak:
-          hostname: keycloak.default.svc.cluster.local
+          hostname: keycloak.{{ NAMESPACE }}.svc.cluster.local
           port: 8443
           tls:
             verification:

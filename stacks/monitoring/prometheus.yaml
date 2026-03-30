@@ -6,8 +6,17 @@ repo:
   url: https://prometheus-community.github.io/helm-charts
 version: 82.10.3 # 0.89.0
 options:
-  commonMetaLabels:
+  commonLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
+  prometheusOperator:
+    kubeletService:
+      namespace: {{ NAMESPACE }}
   prometheus:
     prometheusSpec:
       storageSpec:

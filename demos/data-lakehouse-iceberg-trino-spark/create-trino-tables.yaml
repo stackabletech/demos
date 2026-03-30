@@ -17,7 +17,7 @@ spec:
             - -c
             - |
               echo 'Waiting for job load-test-data to finish'
-              kubectl wait --for=condition=complete --timeout=30m job/load-test-data
+              kubectl wait --for=condition=complete --timeout=30m job/load-test-data -n {{ NAMESPACE }}
       containers:
         - name: create-tables-in-trino
           image: oci.stackable.tech/sdp/testing-tools/trino:0.3.0-stackable0.0.0-dev

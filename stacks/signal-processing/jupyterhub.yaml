@@ -17,6 +17,12 @@ options:
         authenticator_class: dummy
     labels:
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
+      # The following is a Jinja2 template directive, not a regular comment.
+      # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+      # {% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+      # {% endif %}
   proxy:
     service:
       type: NodePort
@@ -39,9 +45,16 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
+      # The following is a Jinja2 template directive, not a regular comment.
+      # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+      # {% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+      # {% endif %}
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        # This file path needs adjustment for versioned demos on release branch
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook

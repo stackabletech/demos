@@ -11,6 +11,14 @@ repo:
 # helm search repo grafana-community/grafana
 version: 11.3.2 # 12.4.1
 options:
+  extraLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
   admin:
     existingSecret: grafana-admin-credentials
   service:

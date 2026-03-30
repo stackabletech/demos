@@ -17,15 +17,15 @@ spec:
             - -c
             - |
               echo 'Waiting for timescaleDB job to be created'
-              until kubectl get job create-timescale-tables-job 2>/dev/null; do sleep 5; done
-              kubectl wait --for=create job/create-timescale-tables-job --timeout=30m
+              until kubectl get job create-timescale-tables-job -n {{ NAMESPACE }} 2>/dev/null; do sleep 5; done
+              kubectl wait --for=create job/create-timescale-tables-job --timeout=30m -n {{ NAMESPACE }}
               echo 'Waiting for timescaleDB job to be completed'
-              kubectl wait --for=condition=complete job/create-timescale-tables-job --timeout=30m
+              kubectl wait --for=condition=complete job/create-timescale-tables-job --timeout=30m -n {{ NAMESPACE }}
 
               echo 'Waiting for NiFi to be created'
-              kubectl wait --for=create pod/nifi-node-default-0 --timeout=30m
+              kubectl wait --for=create pod/nifi-node-default-0 --timeout=30m -n {{ NAMESPACE }}
               echo 'Waiting for NiFi to be ready'
-              kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=30m
+              kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=30m -n {{ NAMESPACE }}
       containers:
         - name: create-nifi-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools/nifi:0.3.0-stackable0.0.0-dev
@@ -87,6 +87,7 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
+    # This file path needs adjustment for versioned demos on release branch
     response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/demos/signal-processing/DownloadAndWriteToDB.json")
 
     filename = "/tmp/DownloadAndWriteToDB.json"

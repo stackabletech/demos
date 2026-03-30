@@ -11,8 +11,14 @@ repo:
 # helm search repo jaegertracing/jaeger
 version: 4.5.0 # 2.15.1
 options:
-  # labels:
-  #   stackable.tech/vendor: Stackable
+  commonLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
   provisionDataStore:
     cassandra: false
   allInOne:

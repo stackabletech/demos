@@ -8,6 +8,12 @@ version: 18.5.6 # 18.3.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
   auth:
     username: hive
     password: hive

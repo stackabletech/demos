@@ -17,7 +17,7 @@ spec:
               # Copy the CA cert from the "tls" SecretClass
               cp -v /etc/minio/mc/original_certs/ca.crt /.mc/certs/CAs/public.crt
 
-              MINIO_ENDPOINT="https://minio.default.svc.cluster.local:9000/"
+              MINIO_ENDPOINT="https://minio.{{ NAMESPACE }}.svc.cluster.local:9000/"
               MINIO_ACCESS_KEY=$(cat /minio-s3-credentials/accessKey)
               MINIO_SECRET_KEY=$(cat /minio-s3-credentials/secretKey)
 

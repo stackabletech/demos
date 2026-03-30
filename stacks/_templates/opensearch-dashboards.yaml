@@ -11,6 +11,12 @@ options:
     tag: "{{ opensearchVersion }}-stackable{{ stackableReleaseVersion }}"
   labels:
     stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # The following is a Jinja2 template directive, not a regular comment.
+    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
   service:
     type: NodePort
     port: 5601
@@ -19,6 +25,12 @@ options:
       stackable.tech/logging-credentials-secret: opensearch-user
     labels:
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
+      # The following is a Jinja2 template directive, not a regular comment.
+      # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+      # {% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+      # {% endif %}
   opensearchHosts: null # Use the discovery ConfigMap instead
   extraEnvs:
     - name: OPENSEARCH_HOSTS

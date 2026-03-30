@@ -198,7 +198,7 @@ data:
                   )
               ),
               V1EnvVar(name="TRINO_USER", value="admin"),
-              V1EnvVar(name="TRINO_HOST", value="trino-coordinator-default-headless.default.svc.cluster.local"),
+              V1EnvVar(name="TRINO_HOST", value="trino-coordinator-default-headless.{{ NAMESPACE }}.svc.cluster.local"),
               V1EnvVar(name="TRINO_PORT", value="8443"),
               V1EnvVar(name="CERT_PATH", value="/dbt/trusted/ca.crt"),
           ],

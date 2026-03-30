@@ -41,7 +41,7 @@ spec:
       ca:
         secret:
           name: secret-provisioner-trino-tls-ca
-          namespace: default
+          namespace: {{ NAMESPACE }}
         autoGenerate: true
 ---
 apiVersion: secrets.stackable.tech/v1alpha1
@@ -54,7 +54,7 @@ spec:
       ca:
         secret:
           name: secret-provisioner-trino-internal-tls-ca
-          namespace: default
+          namespace: {{ NAMESPACE }}
         autoGenerate: true
 ---
 apiVersion: authentication.stackable.tech/v1alpha1

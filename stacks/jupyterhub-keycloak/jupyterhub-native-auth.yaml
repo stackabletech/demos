@@ -1,3 +1,5 @@
+# Note: As of 20206-03 this file is not in use by a demo, but it showcases how to use JupyterHub
+# without Keycloak, which might be helpful for some customers without a Keycloak.
 ---
 releaseName: jupyterhub
 name: jupyterhub
@@ -12,7 +14,7 @@ options:
   hub:
     config:
       Authenticator:
-        allow_all: True
+        allow_all: true
         admin_users:
           - admin
       JupyterHub:
@@ -39,6 +41,12 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
+      # The following is a Jinja2 template directive, not a regular comment.
+      # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+      # {% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+      # {% endif %}
     profileList:
       - display_name: "Default"
         description: "Default profile"
