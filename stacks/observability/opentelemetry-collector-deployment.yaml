@@ -38,7 +38,7 @@ spec:
       debug: {}
         # verbosity: detailed
       otlp/jaeger:
-        endpoint: jaeger-collector:4317
+        endpoint: jaeger:4317
         tls:
           insecure: true
       otlp/tempo:
