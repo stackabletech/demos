@@ -29,7 +29,7 @@ options:
             tlsAuthWithCACert: false
         - name: Tempo
           type: tempo
-          url: http://tempo:3100
+          url: http://tempo:3200
           access: proxy
           isDefault: false
           jsonData:
