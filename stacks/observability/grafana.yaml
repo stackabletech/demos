@@ -30,14 +30,14 @@ options:
       datasources:
         - name: Loki
           type: loki
-          url: http://loki:3100
+          url: http://loki.{{ NAMESPACE }}.svc.cluster.local:3100
           access: proxy
           isDefault: false
           jsonData:
             tlsAuthWithCACert: false
         - name: Tempo
           type: tempo
-          url: http://tempo:3100
+          url: http://tempo.{{ NAMESPACE }}.svc.cluster.local:3200
           access: proxy
           isDefault: false
           jsonData:
