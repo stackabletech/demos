@@ -234,9 +234,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
     stackableRelease: dev
@@ -303,9 +300,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: adminadmin
   spark-trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
     stackableRelease: dev
@@ -350,9 +344,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
   trino-superset-s3:
     description: Stack containing MinIO, Trino and Superset for data visualization
     stackableRelease: dev
@@ -392,9 +383,6 @@ stacks:
       - name: minioAdminPassword
         description: Password of the MinIO admin user
         default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
   trino-iceberg:
     description: Stack containing Trino using Apache Iceberg as a S3 data lakehouse
     stackableRelease: dev
@@ -572,9 +560,6 @@ stacks:
       - name: supersetAdminPassword
         description: Password of the Superset admin user
         default: adminadmin
-      - name: supersetSecretKey
-        description: Superset's secret key used to generate e.g. user session tokens
-        default: supersetSecretKey
       - name: trinoSupersetUserPassword
         description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
         default: supersetsuperset

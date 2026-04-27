@@ -7,7 +7,12 @@ spec:
   image:
     productVersion: 6.0.0
   clusterConfig:
-    credentialsSecret: superset-credentials
+    credentialsSecretName: superset-admin-credentials
+    metadataDatabase:
+      postgresql:
+        host: postgresql-superset
+        database: superset
+        credentialsSecretName: superset-postgresql-credentials
   nodes:
     roleConfig:
       listenerClass: external-stable
@@ -18,7 +23,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: superset-credentials
+  name: superset-admin-credentials
 type: Opaque
 stringData:
   adminUser.username: admin
@@ -26,8 +31,14 @@ stringData:
   adminUser.lastname: Admin
   adminUser.email: admin@superset.com
   adminUser.password: {{ supersetAdminPassword }}
-  connections.secretKey: {{ supersetSecretKey }}
-  connections.sqlalchemyDatabaseUri: postgresql://superset:superset@postgresql-superset/superset
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: superset-postgresql-credentials
+stringData:
+  username: superset
+  password: superset
 ---
 apiVersion: superset.stackable.tech/v1alpha1
 kind: DruidConnection

@@ -12,10 +12,11 @@ spec:
       opa:
         configMapName: opa
         package: hive_iceberg
-    database:
-      connString: jdbc:postgresql://postgresql-hive-iceberg:5432/hive
-      credentialsSecret: postgres-credentials
-      dbType: postgres
+    metadataDatabase:
+      postgresql:
+        host: postgresql-hive-iceberg
+        database: hive
+        credentialsSecretName: hive-postgres-credentials
     hdfs:
       configMap: hdfs
     authentication:
@@ -29,7 +30,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres-credentials
+  name: hive-postgres-credentials
 type: Opaque
 stringData:
   username: hive

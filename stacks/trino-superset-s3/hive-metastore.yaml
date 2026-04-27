@@ -7,10 +7,11 @@ spec:
   image:
     productVersion: 4.2.0
   clusterConfig:
-    database:
-      connString: jdbc:postgresql://postgresql-hive:5432/hive
-      dbType: postgres
-      credentialsSecret: postgres-credentials
+    metadataDatabase:
+      postgresql:
+        host: postgresql-hive
+        database: hive
+        credentialsSecretName: hive-postgres-credentials
     s3:
       reference: minio
   metastore:
@@ -21,7 +22,7 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: postgres-credentials
+  name: hive-postgres-credentials
 type: Opaque
 stringData:
   username: hive
