@@ -24,7 +24,7 @@ This demo should not be run alongside other demos.
 
 To run this demo, your system needs at least:
 
-* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units] (core/hyperthread)
+* 2.5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units{external-link-icon}^] (core/hyperthread)
 * 10GiB memory
 * 24GiB disk storage
 
@@ -135,7 +135,7 @@ Click on the `run_every_minute` box in the centre of the page to select the logs
 In this demo, the KubernetesExecutor is deployed which means that logs are only preserved (and available in the UI) if either remote logging or the SDP logging framework is configured.
 In this demo we set up remote logging using S3/Minio.
 Since Minio in this case is set up with TLS, the Airflow connection requires that the webserver has access to a relevant certificate and that every pod has environment variables containing the access and secret keys.
-See the https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/executor/kubernetes.html#managing-dags-and-logs[Airflow Documentation] for more details.
+See the https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/kubernetes_executor.html#managing-dags-and-logs[Airflow Documentation{external-link-icon}^] for more details.
 
 If you are interested in persisting the logs using the SDP logging framework, take a look at the xref:logging.adoc[] demo.
 ====
@@ -152,7 +152,7 @@ image::airflow-scheduled-job/airflow_9.png[]
 Go back to DAG overview screen.
 The `sparkapp_dag` job has a scheduled entry of `None` and a last-execution time.
 This allows a DAG to be executed exactly once, with neither schedule-based runs nor any
-https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill[backfill].
+https://airflow.apache.org/docs/apache-airflow/stable/core-concepts/dag-run.html#backfill[backfill{external-link-icon}^].
 The DAG can always be triggered manually again via REST or from within the Webserver UI.
 
 image::airflow-scheduled-job/airflow_10.png[]
@@ -270,7 +270,7 @@ If you switch to the `Code` tab you will see the following:
 ----
 
 The task checks the configuration, runs a task that inserts some dummy data into a table, and then runs some tests to verify the result.
-The details of the simple DBT project can be found https://github.com/stackabletech/demos/tree/main/demos/airflow-scheduled-job/dbt/dbt_test[in the demos repository].
+The details of the simple DBT project can be found https://github.com/stackabletech/demos/tree/main/demos/airflow-scheduled-job/dbt/dbt_test[in the demos repository{external-link-icon}^].
 
 == Patching Airflow to stress-test DAG parsing using relevant environment variables
 
@@ -278,7 +278,7 @@ Make sure you are still logged in as `admin`.
 The demo also created a third DAG in the ConfigMap, called `dag_factory.py`, which was not mounted to the cluster and therefore does not appear in the UI.
 This DAG can be used to create a number of individual DAGs on-the-fly, thus allowing a certain degree of stress-testing of the DAG scan/register steps (the generated DAGs themselves are trivial and so this approach will not really increase the burden of DAG _parsing_).
 To show these individual DAGs in the overall list (and to remove the existing ones), adjust the volumeMounts as shown below.
-The patch also sets some environment variables that can be used to change the frequency of certain operations. The descriptions can be found here: https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html[window=_blank].
+The patch also sets some environment variables that can be used to change the frequency of certain operations. The descriptions can be found in the  https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html[Airflow configuration reference{external-link-icon}^].
 
 [source,yaml]
 ----
