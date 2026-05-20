@@ -27,6 +27,11 @@ data:
           "catalog": "lakehouse",
           "allow": "read-only",
         },
+        {
+          "group": "/Customer Service/Analytics",
+          "catalog": "staging",
+          "allow": "all",
+        },
         # Needed for JDBC clients
         {
           "catalog": "system",
@@ -39,6 +44,11 @@ data:
         {
           "user": "data-import",
           "catalog": "lakehouse",
+          "owner": true,
+        },
+        {
+          "group": "/Customer Service/Analytics",
+          "catalog": "staging",
           "owner": true,
         },
       ],
@@ -55,6 +65,11 @@ data:
           "privileges": ["SELECT"],
         },
         # Actual rules start here
+        {
+          "group": "/Customer Service/Analytics",
+          "catalog": "staging",
+          "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
         {
           "group": "/Compliance and Regulation/Analytics",
           "catalog": "lakehouse",

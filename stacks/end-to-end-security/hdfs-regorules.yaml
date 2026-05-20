@@ -225,6 +225,16 @@ data:
             "resource": "hdfs:dir:/lakehouse/",
         },
         {
+            "identity": "user:trino/trino.default.svc.cluster.local@KNAB.COM",
+            "action": "ro",
+            "resource": "hdfs:dir:/staging/",
+        },
+        {
+            "identity": "user:nifi/nifi.default.svc.cluster.local@KNAB.COM",
+            "action": "rw",
+            "resource": "hdfs:dir:/staging/",
+        },
+        {
             "identity": "user:spark/spark.default.svc.cluster.local@KNAB.COM",
             "action": "rw",
             "resource": "hdfs:dir:/lakehouse/",

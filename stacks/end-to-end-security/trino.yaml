@@ -34,6 +34,34 @@ spec:
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCatalog
 metadata:
+  name: staging
+  labels:
+    trino: trino
+spec:
+  connector:
+    hive:
+      metastore:
+        configMap: hive
+      hdfs:
+        configMap: hdfs
+  configOverrides:
+    # HDFS configuration
+    hive.hdfs.authentication.type: KERBEROS
+    hive.hdfs.trino.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.hdfs.trino.keytab: /stackable/kerberos/keytab
+    hive.hdfs.impersonation.enabled: "false"
+    hive.hdfs.wire-encryption.enabled: "true"
+    # HMS configuration
+    hive.metastore.authentication.type: KERBEROS
+    hive.metastore.client.principal: trino/trino.default.svc.cluster.local@KNAB.COM
+    hive.metastore.client.keytab: /stackable/kerberos/keytab
+    hive.metastore.service.principal: hive/hive.default.svc.cluster.local@KNAB.COM
+    hive.metastore.thrift.impersonation.enabled: "false"
+    hive.hive-views.run-as-invoker: "true"
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
   name: tpcds
   labels:
     trino: trino

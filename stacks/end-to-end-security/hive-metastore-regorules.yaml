@@ -7,7 +7,7 @@ metadata:
   labels:
     opa.stackable.tech/bundle: "true"
 data:
-  hive-metastore.rego: |
+  hive-metastore-iceberg.rego: |
     package hive_iceberg
 
     trino_user := "trino"
@@ -46,6 +46,38 @@ data:
       input.resources.table.tableName == "spark_report"
       input.privileges.writeRequiredPriv[0].priv == "CREATE"
     }
+
+    ### TRINO ###
+    # We allow everything here for the technical trino user in order to still do data exploration
+    database_allow if {
+      input.identity.username == trino_user
+    }
+
+    table_allow if {
+      input.identity.username == trino_user
+    }
+
+    column_allow if {
+      input.identity.username == trino_user
+    }
+
+    partition_allow if {
+      input.identity.username == trino_user
+    }
+
+    user_allow if {
+      input.identity.username == trino_user
+    }
+  hive-metastore.rego: |
+    package hive
+
+    trino_user := "trino"
+
+    default database_allow = false
+    default table_allow = false
+    default column_allow = false
+    default partition_allow = false
+    default user_allow = false
 
     ### TRINO ###
     # We allow everything here for the technical trino user in order to still do data exploration

@@ -1,0 +1,118 @@
+apiVersion: nifi.stackable.tech/v1alpha1
+kind: NifiCluster
+metadata:
+  name: simple-nifi
+spec:
+  image:
+    productVersion: 2.7.2
+  clusterConfig:
+    authentication:
+      - authenticationClass: keycloak
+        oidc:
+          clientCredentialsSecret: trino-keycloak-client # yes, we are lazy
+    authorization:
+      opa:
+        configMapName: opa 
+        package: nifi
+    sensitiveProperties:
+      keySecret: nifi-sensitive-property-key
+      autoGenerate: true
+    extraVolumes:
+      - name: hdfs-config
+        configMap:
+          name: hdfs
+      - name: kerberos
+        ephemeral:
+          volumeClaimTemplate:
+            metadata:
+              annotations:
+                secrets.stackable.tech/class: kerberos
+                secrets.stackable.tech/kerberos.service.names: nifi
+                secrets.stackable.tech/scope: service=nifi
+            spec:
+              accessModes:
+                - ReadWriteOnce
+              resources:
+                requests:
+                  storage: "1"
+              storageClassName: secrets.stackable.tech
+  nodes:
+    roleConfig:
+      listenerClass: external-stable
+    roleGroups:
+      default:
+        replicas: 1
+    # When NiFi is exposed through a NodePort Service it's SNI check has to be disabled
+    envOverrides:
+      KERBEROS_REALM: KNAB.COM
+      # Needed e.g. for `kinit`
+      KRB5_CONFIG: /stackable/userdata/kerberos/krb5.conf
+    configOverrides:
+      nifi.properties:
+        nifi.web.https.sni.required: "false"
+        nifi.web.https.sni.host.check: "false"
+        nifi.kerberos.krb5.file: /stackable/userdata/kerberos/krb5.conf
+        nifi.cluster.flow.election.max.wait.time: 5 secs # Time is money
+---
+# Copied and adopted from https://github.com/stackabletech/nifi-operator/blob/main/tests/templates/kuttl/oidc-opa/25-opa-rego.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: opa-nifi-rego-bundle
+  labels:
+    opa.stackable.tech/bundle: "true"
+data:
+  nifi.rego: |
+    package nifi
+
+    nifi_node_proxy := "CN=generated certificate for pod"
+
+    # Setting "resourceNotFound" to true results in the parent resource being evaluated for authorization,
+    # e.g. the parent of a processor is the processor-group.
+    # If a resource is matched by a rego rule that is not the default the parent resource will be ignored.
+    default allow := {
+      "resourceNotFound": true
+    }
+
+    # The Customer Service Analytics group has access to everything
+    allow := {
+      "allowed": true,
+    } if {
+      some group in user_groups
+      group == "Customer Service/Analytics"
+    }
+
+    ### NiFi Node permissions
+
+    # NiFi Nodes need this permission to communicate with each other
+    allow := {
+      "allowed": true,
+      "dumpCache": true
+    } if {
+      input.identity.name == nifi_node_proxy
+      input.resource.id == "/proxy"
+    }
+
+    # Check processor queues
+    allow := {
+      "allowed": true,
+      "dumpCache": true
+    } if {
+      input.identity.name == nifi_node_proxy
+      startswith(input.resource.id, "/data/processors/")
+    }
+
+    ### Helper functions
+
+    user_groups := get_user_groups(input.identity.name)
+
+    get_user_groups(name) = groups if {
+      not startswith(name, nifi_node_proxy)
+      groups_raw := data.stackable.opa.userinfo.v1.userInfoByUsername(name).groups
+      groups := [trim(g, "/") | g := groups_raw[_]]
+    }
+
+    # filter nifi_node_proxy calls to UIF
+    get_user_groups(name) := [] if {
+      startswith(name, nifi_node_proxy)
+    }

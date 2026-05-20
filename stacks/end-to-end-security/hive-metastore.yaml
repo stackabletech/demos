@@ -27,6 +27,32 @@ spec:
       default:
         replicas: 1
 ---
+apiVersion: hive.stackable.tech/v1alpha1
+kind: HiveCluster
+metadata:
+  name: hive
+spec:
+  image:
+    productVersion: 4.0.0
+  clusterConfig:
+    authorization:
+      opa:
+        configMapName: opa
+        package: hive
+    database:
+      connString: jdbc:postgresql://postgresql-hive:5432/hive
+      credentialsSecret: postgres-credentials
+      dbType: postgres
+    hdfs:
+      configMap: hdfs
+    authentication:
+      kerberos:
+        secretClass: kerberos
+  metastore:
+    roleGroups:
+      default:
+        replicas: 1
+---
 apiVersion: v1
 kind: Secret
 metadata:
