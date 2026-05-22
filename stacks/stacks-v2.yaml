@@ -563,6 +563,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/nifi.yaml
       - plainYaml: stacks/end-to-end-security/airflow.yaml
+      - plainYaml: stacks/end-to-end-security/airflow-regorules.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user

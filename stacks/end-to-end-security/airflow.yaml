@@ -11,11 +11,18 @@ spec:
     loadExamples: false
     exposeConfig: false
     credentialsSecret: simple-airflow-credentials
+    authorization:
+      opa:
+        configMapName: opa
+        package: airflow
+        cache:
+          entryTimeToLive: 5s
+          maxEntries: 10
     authentication:
       - authenticationClass: keycloak
         oidc:
           clientCredentialsSecret: airflow-keycloak-client
-        UserRegistrationRole: Admin
+        userRegistrationRole: Admin
     volumes:
       - name: airflow-dags
         configMap:
