@@ -226,8 +226,15 @@ data:
         },
         {
             "identity": "user:trino/trino.default.svc.cluster.local@KNAB.COM",
-            "action": "ro",
+            "action": "rw",
             "resource": "hdfs:dir:/staging/",
+        },
+        {
+            # Trino writes CTAS staging files to /tmp/presto-<user>/<uuid> and
+            # calls setPermission on the staging dir, which requires "full".
+            "identity": "user:trino/trino.default.svc.cluster.local@KNAB.COM",
+            "action": "full",
+            "resource": "hdfs:dir:/tmp/",
         },
         {
             "identity": "user:nifi/nifi.default.svc.cluster.local@KNAB.COM",

@@ -1,0 +1,153 @@
+---
+apiVersion: airflow.stackable.tech/v1alpha1
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  image:
+    productVersion: 3.1.6
+    pullPolicy: IfNotPresent
+  clusterConfig:
+    loadExamples: false
+    exposeConfig: false
+    credentialsSecret: simple-airflow-credentials
+    volumes:
+      - name: airflow-dags
+        configMap:
+          name: airflow-dags
+    volumeMounts:
+      - name: airflow-dags
+        mountPath: /dags/trino_dag.py
+        subPath: trino_dag.py
+  webservers:
+    roleConfig:
+      listenerClass: external-stable
+    roleGroups:
+      default:
+        replicas: 1
+    envOverrides:
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      PYTHONPATH: "/stackable/app/log_config:/dags"
+  kubernetesExecutors:
+    envOverrides:
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      PYTHONPATH: "/stackable/app/log_config:/dags"
+    config:
+      resources:
+        cpu:
+          min: "100m"
+          max: "200m"
+        memory:
+          limit: 500Mi
+  schedulers:
+    roleGroups:
+      default:
+        replicas: 1
+    envOverrides:
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      PYTHONPATH: "/stackable/app/log_config:/dags"
+  dagProcessors:
+    roleGroups:
+      default:
+        replicas: 1
+    envOverrides:
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      PYTHONPATH: "/stackable/app/log_config:/dags"
+
+---
+# {% raw %}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-dags
+data:
+  trino_dag.py: |
+    from airflow import DAG
+    from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+    from datetime import datetime
+
+    with DAG(
+        dag_id="materialize_exchange_rate_aggregation",
+        start_date=datetime(2026, 1, 1),
+        catchup=False,
+    ) as dag:
+        drop_table = SQLExecuteQueryOperator(
+            task_id="drop_table",
+            conn_id="trino",
+            sql="drop table if exists staging.exchange_rates.rates_to_euros_tb",
+        )
+
+        statement = """
+        CREATE TABLE staging.exchange_rates.rates_to_euros_tb AS
+        WITH base_rates AS (
+          SELECT
+            CAST(time_period AS INT) AS time_period,
+            currency,
+            obs_value
+          FROM staging.exchange_rates.rates
+          WHERE time_format = 'P1Y'
+            AND collection = 'E'
+            AND currency_denom = 'EUR'
+        ),
+        rolling AS (
+          SELECT
+            time_period,
+            currency,
+            obs_value,
+            AVG(obs_value) OVER (
+              PARTITION BY currency ORDER BY time_period
+              ROWS BETWEEN 0 PRECEDING AND CURRENT ROW
+            ) AS rolling_avg_1y,
+            AVG(obs_value) OVER (
+              PARTITION BY currency ORDER BY time_period
+              ROWS BETWEEN 2 PRECEDING AND CURRENT ROW
+            ) AS rolling_avg_3y,
+            AVG(obs_value) OVER (
+              PARTITION BY currency ORDER BY time_period
+              ROWS BETWEEN 4 PRECEDING AND CURRENT ROW
+            ) AS rolling_avg_5y,
+            AVG(obs_value) OVER (
+              PARTITION BY currency ORDER BY time_period
+              ROWS BETWEEN 9 PRECEDING AND CURRENT ROW
+            ) AS rolling_avg_10y
+          FROM base_rates
+        )
+        SELECT
+          time_period,
+          currency,
+          obs_value,
+          rolling_avg_1y,
+          rolling_avg_3y,
+          rolling_avg_5y,
+          rolling_avg_10y,
+          (obs_value - rolling_avg_3y)  / rolling_avg_3y  * 100 AS pct_change_vs_3y_avg,
+          (obs_value - rolling_avg_5y)  / rolling_avg_5y  * 100 AS pct_change_vs_5y_avg,
+          (obs_value - rolling_avg_10y) / rolling_avg_10y * 100 AS pct_change_vs_10y_avg
+        FROM rolling;
+        """
+
+        run_trino_query = SQLExecuteQueryOperator(
+            task_id="run_trino_query",
+            conn_id="trino",
+            sql=statement,
+        )
+        drop_table >> run_trino_query
+
+
+# {% endraw %}
+---
+
+apiVersion: v1
+kind: Secret
+metadata:
+  name: simple-airflow-credentials
+type: Opaque
+stringData:
+  adminUser.username: airflow
+  adminUser.firstname: Airflow
+  adminUser.lastname: Admin
+  adminUser.email: airflow@airflow.com
+  adminUser.password: airflow
+  connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow.default.svc.cluster.local/airflow
+
+

@@ -19,6 +19,11 @@ data:
         },
         {
           "user": "data-import",
+          "catalog": "staging",
+          "allow": "all",
+        },
+        {
+          "user": "data-import",
           "catalog": "tpcds",
           "allow": "read-only",
         },
@@ -47,6 +52,11 @@ data:
           "owner": true,
         },
         {
+          "user": "data-import",
+          "catalog": "staging",
+          "owner": true,
+        },
+        {
           "group": "/Customer Service/Analytics",
           "catalog": "staging",
           "owner": true,
@@ -58,6 +68,11 @@ data:
           "user": "data-import",
           "catalog": "lakehouse",
           "privileges": ["SELECT", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
+        },
+        {
+          "user": "data-import",
+          "catalog": "staging",
+          "privileges": ["SELECT", "CREATE", "INSERT", "DELETE", "UPDATE", "OWNERSHIP", "GRANT_SELECT"],
         },
         {
           "user": "data-import",

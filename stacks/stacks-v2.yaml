@@ -546,6 +546,7 @@ stacks:
       - helmChart: stacks/_templates/postgresql-hive.yaml
       - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: stacks/_templates/postgresql-superset.yaml
+      - helmChart: stacks/_templates/postgresql-airflow.yaml
       - plainYaml: stacks/end-to-end-security/krb5.yaml
       - plainYaml: stacks/end-to-end-security/kerberos-secretclass.yaml
       - plainYaml: stacks/end-to-end-security/opa.yaml
@@ -561,6 +562,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/setup-postgresql.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/nifi.yaml
+      - plainYaml: stacks/end-to-end-security/airflow.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
