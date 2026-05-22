@@ -6,6 +6,7 @@ metadata:
 stringData:
   superset: "{{ keycloakSupersetClientSecret }}"
   trino: "{{ keycloakTrinoClientSecret }}"
+  airflow: "{{ keycloakAirflowClientSecret }}"
 ---
 apiVersion: v1
 kind: Secret
@@ -260,6 +261,15 @@ stringData:
         "protocol": "openid-connect",
         "clientAuthenticatorType": "client-secret",
         "secret": "{{ keycloakSupersetClientSecret }}",
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
+        "standardFlowEnabled": true
+      }, {
+        "clientId": "airflow",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "clientAuthenticatorType": "client-secret",
+        "secret": "{{ keycloakAirflowClientSecret }}",
         "redirectUris" : [ "*" ],
         "webOrigins" : [ "*" ],
         "standardFlowEnabled": true

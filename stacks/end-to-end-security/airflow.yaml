@@ -11,6 +11,11 @@ spec:
     loadExamples: false
     exposeConfig: false
     credentialsSecret: simple-airflow-credentials
+    authentication:
+      - authenticationClass: keycloak
+        oidc:
+          clientCredentialsSecret: airflow-keycloak-client
+        UserRegistrationRole: Admin
     volumes:
       - name: airflow-dags
         configMap:
@@ -150,4 +155,12 @@ stringData:
   adminUser.password: airflow
   connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow.default.svc.cluster.local/airflow
 
+---
 
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-keycloak-client
+stringData:
+  clientId: airflow
+  clientSecret: "{{ keycloakAirflowClientSecret }}"

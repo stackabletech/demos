@@ -576,6 +576,9 @@ stacks:
       - name: keycloakTrinoClientSecret
         description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
         default: trinotrino
+      - name: keycloakAirflowClientSecret
+        description: Secret ID of the Keycloak Airflow client that is used by Airflow to connect to Keycloak to authenticate users
+        default: V1aSFHjLIdDgT6qO0Dxw3rEFOzvJDST0
       - name: supersetAdminPassword
         description: Password of the Superset admin user
         default: adminadmin
