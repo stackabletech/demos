@@ -30,7 +30,7 @@ spec:
             name: setup-superset-script
         - name: superset-credentials
           secret:
-            secretName: superset-credentials
+            secretName: superset-admin-credentials
         - name: trino-users
           secret:
             secretName: trino-users
