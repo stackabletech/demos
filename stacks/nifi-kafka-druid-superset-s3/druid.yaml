@@ -8,12 +8,11 @@ spec:
     productVersion: 35.0.1
   clusterConfig:
     zookeeperConfigMapName: druid-znode
-    metadataStorageDatabase:
-      dbType: postgresql
-      connString: jdbc:postgresql://postgresql-druid/druid
-      host: postgresql-druid
-      port: 5432
-      credentialsSecret: druid-db-credentials
+    metadataDatabase:
+      postgresql:
+        host: postgresql-druid
+        database: druid
+        credentialsSecretName: druid-db-credentials
     deepStorage:
       s3:
         bucket:
