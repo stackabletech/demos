@@ -28,6 +28,12 @@ spec:
         oidc:
           clientCredentialsSecret: superset-keycloak-client
         userRegistrationRole: Gamma_extended
+    # Superset roles are assigned at every login based on the Keycloak group
+    # memberships, see superset-regorules.yaml
+    authorization:
+      roleMappingFromOpa:
+        configMapName: opa
+        package: superset
   nodes:
     roleConfig:
       listenerClass: external-stable
