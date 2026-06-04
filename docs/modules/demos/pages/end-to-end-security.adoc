@@ -4,6 +4,7 @@
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
 :rego: https://www.openpolicyagent.org/docs/latest/policy-language/
 :trino-policies: https://github.com/stackabletech/demos/blob/main/stacks/end-to-end-security/trino-policies.yaml
+:superset-regorules: https://github.com/stackabletech/demos/blob/main/stacks/end-to-end-security/superset-regorules.yaml
 
 This is a demo to showcase what can be done with Open Policy Agent around authorization in the Stackable Data Platform.
 It covers the following aspects of security:
@@ -16,7 +17,7 @@ This demo will:
 ** *Spark*: A multi-language engine for executing data engineering, data science, and machine learning. This demo uses it to create a (rather simple) report and write the results back into the persistence.
 ** *HDFS*: A distributed file system that is designed to scale up from single servers to thousands of machines, each offering local computation and storage.
 ** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as metadata storage for Trino and Spark.
-** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino and HDFS, which decides which user can query which data.
+** *Open policy agent (OPA)*: An open-source, general-purpose policy engine unifies policy enforcement across the stack. This demo uses it as the authorizer for Trino and HDFS, which decides which user can query which data. It also assigns Superset roles based on the Keycloak group memberships.
 ** *Superset*: A modern data exploration and visualization platform. This demo utilizes Superset to retrieve data from Trino via SQL queries and build dashboards on top of that data.
 * Configure security to showcase the following features
 ** Column- and row-level filtering
@@ -101,6 +102,10 @@ The following user accounts are configured in Keycloak:
 |mark.ketting
 |mark.ketting
 |Head of Marketing
+
+|admin
+|adminadmin
+|Superset administrator, not member of any department
 |===
 
 [#ruleset]
@@ -322,6 +327,24 @@ image::end-to-end-security/superset_1.png[]
 When clicking on the button, you are redirected to the Superset UI being already logged in without the need to enter any credentials. That's because Superset can make use of Single Sign On thanks to already being logged in via Trino.
 
 image::end-to-end-security/superset_2.png[]
+
+=== Superset role assignment via OPA
+
+Which dashboards a user can see in Superset is determined by Superset roles.
+Instead of assigning these roles manually, Superset asks OPA for the roles of a user at every login (configured via `roleMappingFromOpa` on the SupersetCluster).
+OPA derives the roles from the Keycloak group memberships using the user-info-fetcher - the same group lookup the Trino rules are based on.
+The mapping is defined in the {superset-regorules}[superset-regorules ConfigMap]:
+
+* Every user gets the `Gamma` and `sql_lab` roles, granting access to the Superset UI including SQL Lab.
+* Members of a department additionally get the role granting access to the datasets of their department, e.g. members of `/Customer Service/Analytics` get the `Customer Service Analytics` role and with it the `Customer analytics` dashboard.
+* The `admin` user is assigned the Superset `Admin` role, so Superset can be administered via Single Sign On as well.
+
+You can try this out by logging in to Superset as `pamela.scott` (Customer Analytics) and `william.lewis` (Compliance Analytics) and comparing the dashboards each of them sees.
+Adding a user to a department group in Keycloak is all that is needed: on the next login, the user is assigned the matching Superset roles automatically.
+
+Note that the Superset roles only control which dashboards and datasets are visible.
+The data shown in the charts is still protected by Trino and OPA, because Superset impersonates the logged-in user when querying Trino.
+Also note that role assignments made in the Superset UI are overwritten on the next login of the affected user - the Rego rules are the single source of truth.
 
 === Open Policy Agent for the utmost flexibility in building access rules
 

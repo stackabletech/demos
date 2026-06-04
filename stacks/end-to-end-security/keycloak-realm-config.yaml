@@ -46,6 +46,24 @@ stringData:
         "subGroups" : [ ]
       } ],
       "users" : [ {
+        "username" : "admin",
+        "enabled" : true,
+        "totp" : false,
+        "emailVerified" : true,
+        "firstName" : "Superset",
+        "lastName" : "Admin",
+        "email" : "admin@superset.com",
+        "credentials" : [ {
+          "type" : "password",
+          "value" : "{{ supersetAdminPassword }}",
+          "temporary" : false
+        } ],
+        "disableableCredentialTypes" : [ ],
+        "requiredActions" : [ ],
+        "realmRoles" : [ "default-roles-demo" ],
+        "notBefore" : 0,
+        "groups" : [ ]
+      }, {
         "id" : "e44a09fa-bce1-40e8-a1da-28902b79dcf0",
         "createdTimestamp" : 1711375603780,
         "username" : "daniel.king",

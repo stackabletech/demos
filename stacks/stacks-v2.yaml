@@ -526,7 +526,7 @@ stacks:
       pvc: 40Gi
     manifests:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/keycloak-serviceaccount.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/keycloak-realm-config.yaml
+      - plainYaml: stacks/end-to-end-security/keycloak-realm-config.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/keycloak.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
@@ -543,6 +543,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/rbac.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/setup-postgresql.yaml
+      - plainYaml: stacks/end-to-end-security/superset-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
     parameters:
       - name: keycloakAdminPassword
