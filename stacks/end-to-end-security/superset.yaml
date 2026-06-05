@@ -1,4 +1,14 @@
 ---
+# The Superset metadata database is restored from postgres_superset_dump.sql (see
+# setup-postgresql.yaml), which contains rows (e.g. the Trino database connection
+# password) encrypted with the SECRET_KEY below.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: superset-secret-key
+stringData:
+  SECRET_KEY: supersetSecretKey
+---
 apiVersion: superset.stackable.tech/v1alpha1
 kind: SupersetCluster
 metadata:
