@@ -8,7 +8,7 @@ metadata:
     stackable.tech/demo: {{ DEMO }}
 spec:
   image:
-    productVersion: 3.1.6
+    productVersion: 3.2.1
     pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
