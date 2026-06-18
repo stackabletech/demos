@@ -5,7 +5,7 @@ metadata:
   name: druid
 spec:
   image:
-    productVersion: 35.0.1
+    productVersion: 37.0.0
   clusterConfig:
     zookeeperConfigMapName: druid-znode
     metadataDatabase:
@@ -20,11 +20,16 @@ spec:
             bucketName: demo
             connection:
               inline:
-                host: minio
+                host: minio.{{ NAMESPACE }}.svc.cluster.local
                 port: 9000
                 accessStyle: Path
                 credentials:
                   secretClass: druid-s3-credentials
+                tls:
+                  verification:
+                    server:
+                      caCert:
+                        secretClass: tls
         baseKey: data
   brokers:
     roleConfig:
