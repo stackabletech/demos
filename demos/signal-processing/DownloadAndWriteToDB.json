@@ -746,7 +746,7 @@
           "Database User": "admin",
           "kerberos-user-service": null,
           "dbcp-soft-min-evictable-idle-time": "-1",
-          "database-driver-locations": "/stackable/nifi/postgresql-42.7.5.jar",
+          "database-driver-locations": "/stackable/nifi/postgresql-42.7.10.jar",
           "dbcp-max-idle-conns": "8"
         },
         "propertyDescriptors": {
