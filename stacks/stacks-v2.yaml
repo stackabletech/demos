@@ -277,7 +277,7 @@ stacks:
       - minio
       - s3
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
