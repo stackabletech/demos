@@ -315,7 +315,7 @@ image::end-to-end-security/dbeaver_5.png[]
 
 === OIDC support across the board
 
-If you already logged in to Trino, you can try opening up the Superset UI. That is reachable with the `external-http` endpoint provided by `stackablectl stacklet list`. In this case the endpoint is http://172.18.0.2:30443. You should see the `Sign in with Keycloak` button on your screen.
+If you already logged in to Trino, you can try opening up the Superset UI. That is reachable with the `node-http` endpoint provided by `stackablectl stacklet list`. In this case the endpoint is http://172.18.0.2:30443. You should see the `Sign in with Keycloak` button on your screen.
 
 image::end-to-end-security/superset_1.png[]
 
