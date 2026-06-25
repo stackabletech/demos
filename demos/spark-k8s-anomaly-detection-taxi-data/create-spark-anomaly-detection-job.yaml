@@ -52,7 +52,7 @@ data:
     spec:
       sparkImage:
         # Iceberg 1.11.0 only supports Spark 4.1.x
-        productVersion: 4.1.1
+        productVersion: 4.1.2
       mode: cluster
       mainApplicationFile: local:///spark-scripts/spark-ad.py
       deps:
