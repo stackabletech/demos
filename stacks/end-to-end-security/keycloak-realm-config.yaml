@@ -273,5 +273,14 @@ stringData:
         "redirectUris" : [ "*" ],
         "webOrigins" : [ "*" ],
         "standardFlowEnabled": true
+      }, {
+        "clientId": "jupyterhub",
+        "enabled": true,
+        "protocol": "openid-connect",
+        "clientAuthenticatorType": "client-secret",
+        "secret": "{{ jupyterhubClientPassword }}",
+        "redirectUris" : [ "*" ],
+        "webOrigins" : [ "*" ],
+        "standardFlowEnabled": true
       } ]
     }

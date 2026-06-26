@@ -559,11 +559,14 @@ stacks:
       - plainYaml: stacks/end-to-end-security/trino-regorules.yaml
       - plainYaml: stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: stacks/end-to-end-security/rbac.yaml
+      - plainYaml: stacks/end-to-end-security/serviceaccount.yaml
       - plainYaml: stacks/end-to-end-security/setup-postgresql.yaml
       - plainYaml: stacks/end-to-end-security/superset.yaml
       - plainYaml: stacks/end-to-end-security/nifi.yaml
       - plainYaml: stacks/end-to-end-security/airflow.yaml
       - plainYaml: stacks/end-to-end-security/airflow-regorules.yaml
+      - helmChart: stacks/end-to-end-security/jupyterhub.yaml
+      - helmChart: stacks/end-to-end-security/jupyterhub-native-auth.yaml
     parameters:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
@@ -592,6 +595,9 @@ stacks:
       - name: trinoDataImportUserPassword
         description: Password of the service user used to load data into Trino
         default: data-importdata-import
+      - name: jupyterhubClientPassword
+        description: Password of the JupyterHub client user
+        default: g50mJzw8kmevXdn8bt1PXZwJ2kkG08rk
   signal-processing:
     description: >-
       A stack used for creating, streaming and processing in-flight data and persisting it to TimescaleDB before it is displayed in Grafana
