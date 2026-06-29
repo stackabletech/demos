@@ -31,6 +31,12 @@ spec:
       - name: airflow-dags
         mountPath: /dags/trino_dag.py
         subPath: trino_dag.py
+      - name: airflow-dags
+        mountPath: /dags/spark_dag.py
+        subPath: spark_dag.py
+      - name: airflow-dags
+        mountPath: /dags/spark_app.yaml
+        subPath: spark_app.yaml
   webservers:
     roleConfig:
       listenerClass: external-stable
@@ -40,10 +46,12 @@ spec:
     envOverrides:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
   kubernetesExecutors:
     envOverrides:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
     config:
       resources:
         cpu:
@@ -58,6 +66,7 @@ spec:
     envOverrides:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
   dagProcessors:
     roleGroups:
       default:
@@ -65,6 +74,7 @@ spec:
     envOverrides:
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
       PYTHONPATH: "/stackable/app/log_config:/dags"
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
 
 ---
 # {% raw %}
@@ -144,6 +154,271 @@ data:
             sql=statement,
         )
         drop_table >> run_trino_query
+  spark_dag.py: |
+    """Submit the exchange-rates PySpark job as a Stackable SparkApplication and wait for it.
+
+    This is the Spark counterpart to trino_dag.py: same aggregation, computed by
+    Spark-on-Kubernetes against Kerberized HDFS instead of by Trino. It loads the
+    SparkApplication template from spark_app.yaml, gives it a unique name, submits
+    it via the in-cluster Kubernetes API and polls status.phase until completion.
+    """
+    from datetime import datetime, timedelta, timezone
+    from airflow import DAG
+    from typing import TYPE_CHECKING, Optional, Sequence, Dict
+    from kubernetes import client
+    from airflow.exceptions import AirflowException
+    from airflow.sensors.base import BaseSensorOperator
+    from airflow.models import BaseOperator
+    from airflow.providers.cncf.kubernetes.hooks.kubernetes import KubernetesHook
+    from airflow.utils import yaml
+    import os
+
+    if TYPE_CHECKING:
+        from airflow.utils.context import Context
+
+    class SparkKubernetesOperator(BaseOperator):
+        template_fields: Sequence[str] = ('application_file', 'namespace')
+        template_ext: Sequence[str] = ('.yaml', '.yml', '.json')
+        ui_color = '#f4a460'
+
+        def __init__(
+                self,
+                *,
+                application_file: str,
+                namespace: Optional[str] = None,
+                kubernetes_conn_id: str = 'kubernetes_in_cluster',
+                api_group: str = 'spark.stackable.tech',
+                api_version: str = 'v1alpha1',
+                **kwargs,
+        ) -> None:
+            super().__init__(**kwargs)
+            self.application_file = application_file
+            self.namespace = namespace
+            self.kubernetes_conn_id = kubernetes_conn_id
+            self.api_group = api_group
+            self.api_version = api_version
+            self.plural = "sparkapplications"
+
+        def execute(self, context: 'Context'):
+            hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
+            self.log.info("Creating SparkApplication...")
+            response = hook.create_custom_object(
+                group=self.api_group,
+                version=self.api_version,
+                plural=self.plural,
+                body=self.application_file,
+                namespace=self.namespace,
+            )
+            return response
+
+
+    class SparkKubernetesSensor(BaseSensorOperator):
+        template_fields = ("application_name", "namespace")
+        # Unknown is set immediately so it must be excluded from the failed states.
+        FAILURE_STATES = ("Failed")
+        SUCCESS_STATES = ("Succeeded")
+
+        def __init__(
+                self,
+                *,
+                application_name: str,
+                attach_log: bool = False,
+                namespace: Optional[str] = None,
+                kubernetes_conn_id: str = 'kubernetes_in_cluster',
+                api_group: str = 'spark.stackable.tech',
+                api_version: str = 'v1alpha1',
+                poke_interval: float = 60,
+                **kwargs,
+        ) -> None:
+            super().__init__(**kwargs)
+            self.application_name = application_name
+            self.attach_log = attach_log
+            self.namespace = namespace
+            self.kubernetes_conn_id = kubernetes_conn_id
+            self.hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
+            self.api_group = api_group
+            self.api_version = api_version
+            self.poke_interval = poke_interval
+
+        def _log_driver(self, application_state: str, response: dict) -> None:
+            if not self.attach_log:
+                return
+            status_info = response["status"]
+            if "driverInfo" not in status_info:
+                return
+            driver_info = status_info["driverInfo"]
+            if "podName" not in driver_info:
+                return
+            driver_pod_name = driver_info["podName"]
+            namespace = response["metadata"]["namespace"]
+            log_method = self.log.error if application_state in self.FAILURE_STATES else self.log.info
+            try:
+                log = ""
+                for line in self.hook.get_pod_logs(driver_pod_name, namespace=namespace):
+                    log += line.decode()
+                log_method(log)
+            except client.rest.ApiException as e:
+                self.log.warning(
+                    "Could not read logs for pod %s. It may have been disposed.\n"
+                    "Make sure timeToLiveSeconds is set on your SparkApplication spec.\n"
+                    "underlying exception: %s",
+                    driver_pod_name,
+                    e,
+                )
+
+        def poke(self, context: Dict) -> bool:
+            self.log.info("Poking: %s", self.application_name)
+            response = self.hook.get_custom_object(
+                group=self.api_group,
+                version=self.api_version,
+                plural="sparkapplications",
+                name=self.application_name,
+                namespace=self.namespace,
+            )
+            try:
+                application_state = response["status"]["phase"]
+            except KeyError:
+                self.log.debug(f"SparkApplication status could not be established: {response}")
+                return False
+            if self.attach_log and application_state in self.FAILURE_STATES + self.SUCCESS_STATES:
+                self._log_driver(application_state, response)
+            if application_state in self.FAILURE_STATES:
+                raise AirflowException(f"SparkApplication failed with state: {application_state}")
+            elif application_state in self.SUCCESS_STATES:
+                self.log.info("SparkApplication ended successfully")
+                return True
+            else:
+                self.log.info("SparkApplication is still in state: %s", application_state)
+                return False
+
+    with DAG(
+            dag_id='compute_exchange_rate_aggregation_spark',
+            schedule=None,
+            start_date=datetime(2026, 1, 1),
+            catchup=False,
+            dagrun_timeout=timedelta(minutes=60),
+            tags=['spark'],
+    ) as dag:
+
+        def load_body_to_dict(body):
+            try:
+                body_dict = yaml.safe_load(body)
+            except yaml.YAMLError as e:
+                raise AirflowException(f"Exception when loading resource definition: {e}\n")
+            return body_dict
+
+        yaml_path = os.path.join(os.environ.get('AIRFLOW__CORE__DAGS_FOLDER'), 'spark_app.yaml')
+
+        with open(yaml_path, 'r') as file:
+            crd = file.read()
+        with open('/run/secrets/kubernetes.io/serviceaccount/namespace', 'r') as file:
+            ns = file.read()
+
+        document = load_body_to_dict(crd)
+        application_name = 'exchange-rates-' + datetime.now(timezone.utc).strftime('%Y%m%d%H%M%S')
+        document.update({'metadata': {'name': application_name, 'namespace': ns}})
+
+        submit = SparkKubernetesOperator(
+            task_id='spark_submit',
+            namespace=ns,
+            application_file=document,
+            do_xcom_push=True,
+            dag=dag,
+        )
+
+        monitor = SparkKubernetesSensor(
+            task_id='spark_monitor',
+            namespace=ns,
+            application_name="{{ task_instance.xcom_pull(task_ids='spark_submit')['metadata']['name'] }}",
+            poke_interval=5,
+            dag=dag,
+        )
+
+        submit >> monitor
+  spark_app.yaml: |
+    ---
+    apiVersion: spark.stackable.tech/v1alpha1
+    kind: SparkApplication
+    metadata:
+      name: exchange-rates
+    spec:
+      # Keep this in sync with the Spark version shipped in this SDP release
+      # (matches demos/end-to-end-security/create-spark-report.yaml).
+      sparkImage:
+        productVersion: 4.0.1
+      mode: cluster
+      mainApplicationFile: local:///stackable/spark/jobs/exchange-rates.py
+      sparkConf:
+        spark.driver.extraClassPath: /stackable/config/hdfs
+        spark.executor.extraClassPath: /stackable/config/hdfs
+        spark.kerberos.keytab: /stackable/kerberos/keytab
+        spark.kerberos.principal: spark/spark.default.svc.cluster.local@KNAB.COM
+      job:
+        config:
+          volumeMounts: &volumeMounts
+            - name: script
+              mountPath: /stackable/spark/jobs
+            - name: hdfs-config
+              mountPath: /stackable/config/hdfs
+            - name: kerberos
+              mountPath: /stackable/kerberos
+            - name: kerberos
+              mountPath: /etc/krb5.conf
+              subPath: krb5.conf
+        envOverrides: &envOverrides
+          KERBEROS_REALM: KNAB.COM
+        podOverrides:
+          spec:
+            containers:
+              - name: spark-submit
+                env:
+                  - name: KERBEROS_REALM
+                    value: KNAB.COM
+      driver:
+        config:
+          volumeMounts: *volumeMounts
+          resources:
+            cpu:
+              min: 100m
+        envOverrides: *envOverrides
+        podOverrides: &sparkPodOverrides
+          spec:
+            containers:
+              - name: spark
+                env:
+                  - name: KERBEROS_REALM
+                    value: KNAB.COM
+      executor:
+        replicas: 2
+        config:
+          volumeMounts: *volumeMounts
+          resources:
+            cpu:
+              min: 250m
+        envOverrides: *envOverrides
+        podOverrides: *sparkPodOverrides
+      volumes:
+        - name: script
+          configMap:
+            name: exchange-rates-spark-script
+        - name: hdfs-config
+          configMap:
+            name: hdfs
+        - name: kerberos
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: kerberos
+                  secrets.stackable.tech/kerberos.service.names: spark
+                  secrets.stackable.tech/scope: service=spark
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
 
 
 # {% endraw %}

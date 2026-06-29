@@ -566,6 +566,7 @@ stacks:
       - plainYaml: stacks/end-to-end-security/airflow.yaml
       - plainYaml: stacks/end-to-end-security/airflow-regorules.yaml
       - plainYaml: stacks/end-to-end-security/spark-service.yaml
+      - plainYaml: stacks/end-to-end-security/spark-job.yaml
       - helmChart: stacks/end-to-end-security/jupyterhub.yaml
       - helmChart: stacks/end-to-end-security/jupyterhub-native-auth.yaml
     parameters:
