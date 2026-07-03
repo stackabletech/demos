@@ -313,3 +313,21 @@ demos:
       - name: branch
         description: Git branch to download demo files from
         default: main
+  openlineage-trino-airflow:
+    description: Showcase OpenLineage data lineage from Trino and Airflow, visualized in Marquez
+    documentation: https://docs.stackable.tech/home/stable/demos/openlineage-trino-airflow
+    stackableStack: openlineage
+    labels:
+      - trino
+      - airflow
+      - openlineage
+      - marquez
+      - data-lineage
+    manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/openlineage-trino-airflow/rbac.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/openlineage-trino-airflow/enable-and-run-dag.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 5000m
+      memory: 12Gi
+      pvc: 15Gi

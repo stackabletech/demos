@@ -1,0 +1,42 @@
+---
+# Marquez is the OpenLineage reference metadata server + web UI, used here as the consuming
+# application for the lineage that Trino and Airflow emit. It is only part of this *demo* - it is
+# not an SDP product.
+#
+# Chart: https://github.com/MarquezProject/marquez/tree/main/chart (Apache-2.0)
+# NOTE: confirm the latest chart `version` and the resulting Service names before relying on this.
+#       With `fullnameOverride: marquez` the API Service is `marquez:5000` and the web UI Service is
+#       `marquez-web` (targetPort 3000), which is what Trino/Airflow point at.
+releaseName: marquez
+name: marquez
+repo:
+  name: marquez
+  url: https://marquezproject.github.io/marquez/
+version: 0.51.1 # verify latest
+options:
+  fullnameOverride: marquez
+  # Let the chart bring its own PostgreSQL so the demo needs no extra database wiring.
+  postgresql:
+    enabled: true
+    auth:
+      username: marquez
+      password: marquez
+      database: marquez
+    global:
+      security:
+        allowInsecureImages: true
+    image:
+      repository: bitnamilegacy/postgresql
+  marquez:
+    labels:
+      stackable.tech/vendor: Stackable
+      stackable.tech/stack: {{ STACK }}
+      # The following is a Jinja2 template directive, not a regular comment.
+      # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
+      # {% if DEMO is defined %}
+      stackable.tech/demo: {{ DEMO }}
+      # {% endif %}
+  web:
+    enabled: true
+    service:
+      type: NodePort
