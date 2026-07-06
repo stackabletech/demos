@@ -119,7 +119,37 @@ include::partial$instance-hint.adoc[]
 Marquez is not an SDP product, so it does not appear in `stackablectl stacklet list`.
 ====
 
-== Explore the lineage in Marquez
+== Verify the demo worked
+
+The demo automatically triggers the `openlineage_demo` DAG once during installation, so a completed run
+and its lineage should already be present. You can confirm the full flow - Airflow orchestrating, Trino
+executing, and Marquez collecting the lineage - across three UIs.
+
+=== Airflow: the DAG tasks ran
+
+Open the Airflow web UI using the `webserver-http` endpoint from the `stackablectl stacklet list` output
+above, and log in with the username `admin` and the password `adminadmin`.
+
+Under *Dags* -> `openlineage_demo` -> *Task Instances* you should see the four tasks of the pipeline -
+`create_schema`, `load_customers`, `load_orders` and `customer_orders` - all in the `success` state:
+
+image::openlineage/airflow.png[Airflow Task Instances view showing the four openlineage_demo tasks in the success state]
+
+Each task is a `SQLExecuteQueryOperator` that submits a statement to Trino.
+
+=== Trino: the queries finished
+
+Open the Trino web UI using the `coordinator-https` endpoint from the `stackablectl stacklet list`
+output, and log in with the username `admin` and the password `adminadmin`.
+
+The *Query Details* page lists the statements Airflow submitted - the `CREATE SCHEMA`, `DROP TABLE` and
+`CREATE TABLE ... AS SELECT` statements that build the `memory.demo.*` tables from the `tpch.tiny.*`
+source - all in the `FINISHED` state. Their *Source* is `airflow`, confirming they originated from the
+DAG rather than an interactive session:
+
+image::openlineage/trino-queries.png[Trino Query Details page showing the finished CREATE TABLE queries submitted by Airflow]
+
+=== Marquez: the lineage was collected
 
 Marquez does not have an external listener. Forward its web UI to your machine:
 
@@ -130,14 +160,32 @@ $ kubectl -n openlineage-demo port-forward svc/marquez-web 3000:3000
 
 Then open http://localhost:3000 in your browser.
 
-Use the namespace selector at the top to switch between the namespaces that produced the lineage:
+The landing page lists the OpenLineage *Jobs* that Trino and Airflow reported, together with the event,
+dataset and source counts. You should see the `openlineage_demo` DAG job and the per-query jobs such as
+`openlineage_demo.customer_orders.query.*`, all *COMPLETED*:
+
+image::openlineage/marquez.png[Marquez home page listing the collected OpenLineage jobs as COMPLETED]
+
+Selecting a job opens its details. For example, `openlineage_demo.load_orders.query.2` shows the exact
+`CREATE TABLE memory.demo.orders AS SELECT ...` statement along with its OpenLineage *job* and *run*
+facets rendered as JSON - including the `sql` facet, the `AIRFLOW` integration, and the `externalQuery`
+facet that links back to the originating Trino query ID:
+
+image::openlineage/job-details-customer-orders-2.png[Marquez job details for load_orders showing the SQL statement and OpenLineage facets as JSON]
+
+== Explore the lineage in Marquez
+
+With the Marquez UI still open at http://localhost:3000, use the namespace selector at the top to switch
+between the namespaces that produced the lineage:
 
 * the Trino namespace (named after `openlineage-event-listener.trino.uri`, i.e. `http://trino-coordinator:8080`),
   which contains the `tpch.tiny.*` and `memory.demo.*` datasets and the queries connecting them, and
 * `airflow-openlineage-demo`, which contains the `openlineage_demo` DAG and its tasks.
 
 Selecting the `memory.demo.customer_orders` dataset and expanding upstream shows the full graph back to
-`tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries.
+`tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries:
+
+image::openlineage/customer-orders-2.png[Marquez lineage graph tracing memory.demo.customer_orders upstream through the jobs to tpch.tiny.customer and tpch.tiny.orders]
 
 [NOTE]
 ====
