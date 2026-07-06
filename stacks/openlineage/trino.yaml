@@ -42,7 +42,17 @@ data:
     openlineage-event-listener.transport.type=HTTP
     openlineage-event-listener.transport.url=http://marquez:5000
     openlineage-event-listener.transport.endpoint=/api/v1/lineage
-    openlineage-event-listener.trino.uri=http://trino-coordinator:8080
+    # Must be Trino's real serving address (HTTPS on 8443 - TLS is enabled and 8080 is not exposed).
+    # This is the naming string for the *dataset* namespace; matching the address Airflow uses in its
+    # Trino connection makes both producers name the same tables `trino://trino-coordinator:8443`, so
+    # their lineage attaches to one shared set of dataset nodes instead of two duplicate namespaces.
+    openlineage-event-listener.trino.uri=https://trino-coordinator:8443
+    # Set an explicit, colon-free job namespace. Without this the namespace defaults to the dataset
+    # namespace (`trino://trino-coordinator:8443`), and Marquez's NodeId parser cannot split
+    # `job:trino://trino-coordinator:8443:<queryId>` because Trino query IDs start with a digit -
+    # its URI heuristic then treats the `:<queryId>` delimiter as a `host:port` colon and 500s when
+    # a job is opened. A plain namespace keeps job NodeIds parseable.
+    openlineage-event-listener.namespace=trino-openlineage-demo
 ---
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster

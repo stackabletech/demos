@@ -80,10 +80,15 @@ event-listener.name=openlineage
 openlineage-event-listener.transport.type=HTTP
 openlineage-event-listener.transport.url=http://marquez:5000
 openlineage-event-listener.transport.endpoint=/api/v1/lineage
-openlineage-event-listener.trino.uri=http://trino-coordinator:8080
+openlineage-event-listener.trino.uri=https://trino-coordinator:8443
+openlineage-event-listener.namespace=trino-openlineage-demo
 ----
 
-See the {trino-openlineage-docs}[Trino OpenLineage event listener docs{external-link-icon}^] for details.
+`trino.uri` is Trino's own serving address; it names the *dataset* namespace, so pointing it at the same
+`trino-coordinator:8443` that Airflow uses lets both producers report the same tables under one namespace.
+`namespace` sets an explicit, colon-free *job* namespace - without it Marquez cannot parse the node ID of a
+Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[Trino OpenLineage event
+listener docs{external-link-icon}^] for details.
 
 *Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
 
@@ -178,9 +183,12 @@ image::openlineage/job-details-customer-orders-2.png[Marquez job details for loa
 With the Marquez UI still open at http://localhost:3000, use the namespace selector at the top to switch
 between the namespaces that produced the lineage:
 
-* the Trino namespace (named after `openlineage-event-listener.trino.uri`, i.e. `http://trino-coordinator:8080`),
-  which contains the `tpch.tiny.*` and `memory.demo.*` datasets and the queries connecting them, and
-* `airflow-openlineage-demo`, which contains the `openlineage_demo` DAG and its tasks.
+* `trino-openlineage-demo` - the Trino query jobs (one per executed statement), set via
+  `openlineage-event-listener.namespace`, and
+* `trino://trino-coordinator:8443` - the datasets (`tpch.tiny.*` and `memory.demo.*`), named after the Trino
+  coordinator's address. Both the Trino event listener and the Airflow SQL operator report the tables under
+  this shared namespace, and
+* `airflow-openlineage-demo` - the `openlineage_demo` DAG and its tasks.
 
 Selecting the `memory.demo.customer_orders` dataset and expanding upstream shows the full graph back to
 `tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries:
@@ -189,9 +197,10 @@ image::openlineage/customer-orders-2.png[Marquez lineage graph tracing memory.de
 
 [NOTE]
 ====
-Trino and Airflow name datasets independently, so a given table may appear under both the Trino namespace (from the
-Trino event listener) and the Airflow namespace (from the SQL operator's extractor). This is expected - each producer
-reports lineage from its own perspective.
+Trino and Airflow report lineage independently but, because `trino.uri` matches the address Airflow uses for its
+Trino connection, both name the tables under the same `trino://trino-coordinator:8443` namespace. Their lineage
+therefore converges on one shared set of dataset nodes: Trino contributes column-level detail per query, while
+Airflow contributes the task/DAG structure around the same tables.
 ====
 
 == Summary
