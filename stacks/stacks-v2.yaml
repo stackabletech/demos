@@ -700,10 +700,12 @@ stacks:
       - marquez
       - data-lineage
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/marquez.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/openlineage/trino.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/openlineage/airflow.yaml
+      - helmChart: stacks/_templates/postgresql-airflow.yaml
+      # Marquez publishes no Helm repo/OCI chart, so its chart is vendored as rendered plain YAML.
+      # See the header of stacks/openlineage/marquez.yaml for provenance and how to regenerate.
+      - plainYaml: stacks/openlineage/marquez.yaml
+      - plainYaml: stacks/openlineage/trino.yaml
+      - plainYaml: stacks/openlineage/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 5000m
@@ -716,6 +718,3 @@ stacks:
       - name: airflowAdminPassword
         description: Password of the Airflow admin user
         default: adminadmin
-      - name: airflowSecretKey
-        description: Airflow's secret key used to generate e.g. user session tokens
-        default: airflowSecretKey

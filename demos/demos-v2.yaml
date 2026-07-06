@@ -324,8 +324,8 @@ demos:
       - marquez
       - data-lineage
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/openlineage-trino-airflow/rbac.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/openlineage-trino-airflow/enable-and-run-dag.yaml
+      - plainYaml: demos/openlineage-trino-airflow/rbac.yaml
+      - plainYaml: demos/openlineage-trino-airflow/enable-and-run-dag.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 5000m

@@ -101,7 +101,7 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list --namespace openlineage_demo
 
 ┌─────────┬─────────┬───────────────────┬──────────────────────────────────────────┬─────────────────────────────────┐
 │ PRODUCT ┆ NAME    ┆ NAMESPACE         ┆ ENDPOINTS                                  ┆ CONDITIONS                      │
@@ -125,10 +125,10 @@ Marquez does not have an external listener. Forward its web UI to your machine:
 
 [source,console]
 ----
-$ kubectl -n openlineage-demo port-forward svc/marquez-web 3000:3000
+$ kubectl -n openlineage-demo port-forward svc/marquez-web 5000:5000
 ----
 
-Then open http://localhost:3000 in your browser.
+Then open http://localhost:5000 in your browser.
 
 Use the namespace selector at the top to switch between the namespaces that produced the lineage:
 

@@ -6,9 +6,12 @@
 # provider's SQL operator, Airflow also reports dataset-level lineage, which shows up in Marquez next
 # to the query lineage emitted by Trino itself.
 #
-# NOTE: this file is intentionally *not* wrapped in a Jinja `{% raw %}` block (unlike other airflow
-# stacks) so that `{{ NAMESPACE }}` / `{{ ...Password }}` are templated. Keep the DAG code free of
-# `{{ }}` sequences.
+# NOTE: this file is intentionally NOT wrapped in a Jinja raw block (unlike other airflow stacks)
+# so that the NAMESPACE / password placeholders are templated by Tera. Keep this whole file - even
+# comments - free of literal Tera tag sequences (double curly braces and percent-brace tags): Tera
+# processes the raw bytes before YAML parsing, so a tag token in a comment is still interpreted.
+# (An earlier version of this comment quoted a raw-block tag here, which opened an unclosed raw
+# block and broke rendering with "expected tag" at EOF.)
 ---
 apiVersion: airflow.stackable.tech/v1alpha2
 kind: AirflowCluster
@@ -20,7 +23,14 @@ spec:
     pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
-    credentialsSecret: airflow-credentials
+    credentialsSecretName: airflow-credentials
+    # The airflow-operator 'dev' schema moved the metadata DB connection out of the credentials
+    # Secret into its own block. Points at the postgresql-airflow chart deployed by this stack.
+    metadataDatabase:
+      postgresql:
+        host: postgresql-airflow
+        database: airflow
+        credentialsSecretName: airflow-postgresql-credentials
     volumes:
       - name: airflow-dags
         configMap:
@@ -164,5 +174,15 @@ stringData:
   adminUser.lastname: Admin
   adminUser.email: airflow@airflow.com
   adminUser.password: "{{ airflowAdminPassword }}"
-  connections.secretKey: "{{ airflowSecretKey }}"
-  connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow/airflow
+---
+# Credentials for the Airflow metadata database (the postgresql-airflow chart in this stack).
+# The operator reads the `username`/`password` keys and builds the SQLAlchemy URL from the
+# clusterConfig.metadataDatabase block above.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-postgresql-credentials
+type: Opaque
+stringData:
+  username: airflow
+  password: airflow
