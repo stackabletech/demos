@@ -63,7 +63,7 @@ metadata:
 type: Opaque
 data:
   marquez-db-password: "bWFjb25kbw=="
-  
+
 
 ---
 # Source: marquez/templates/marquez/configmap.yaml
@@ -419,10 +419,10 @@ spec:
       annotations:
     spec:
       serviceAccountName: default
-      
+
       affinity:
         podAffinity:
-          
+
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - podAffinityTerm:
@@ -434,7 +434,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
               weight: 1
         nodeAffinity:
-          
+
       securityContext:
         fsGroup: 1001
       hostNetwork: false
@@ -518,7 +518,7 @@ spec:
                 - /bin/sh
                 - -c
                 - -e
-                
+
                 - |
                   exec pg_isready -U "marquez" -d "dbname=marquez" -h 127.0.0.1 -p 5432
           resources:
