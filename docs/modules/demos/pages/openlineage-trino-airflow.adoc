@@ -103,10 +103,15 @@ event-listener.name=openlineage
 openlineage-event-listener.transport.type=HTTP
 openlineage-event-listener.transport.url=http://marquez:5000
 openlineage-event-listener.transport.endpoint=/api/v1/lineage
-openlineage-event-listener.trino.uri=http://trino-coordinator:8080
+openlineage-event-listener.trino.uri=https://trino-coordinator:8443
+openlineage-event-listener.namespace=trino-openlineage-demo
 ----
 
-See the {trino-openlineage-docs}[Trino OpenLineage event listener docs{external-link-icon}^] for details.
+`trino.uri` is Trino's own serving address; it names the *dataset* namespace, so pointing it at the same
+`trino-coordinator:8443` that Airflow uses lets both producers report the same tables under one namespace.
+`namespace` sets an explicit, colon-free *job* namespace - without it Marquez cannot parse the node ID of a
+Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[Trino OpenLineage event
+listener docs{external-link-icon}^] for details.
 
 *Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
 
@@ -221,56 +226,83 @@ and the Spark job runs as a short-lived `SparkApplication` submitted by the Airf
 stacklet.
 ====
 
-== Explore the lineage in Marquez
+== Verify the demo worked
+
+The demo automatically triggers the `openlineage_demo` DAG once during installation, so a completed run
+and its lineage should already be present. You can confirm the full flow - Airflow orchestrating, Trino
+executing, and Marquez collecting the lineage - across three UIs.
+
+=== Airflow: the DAG tasks ran
+
+Open the Airflow web UI using the `webserver-http` endpoint from the `stackablectl stacklet list` output
+above, and log in with the username `admin` and the password `adminadmin`.
+
+Under *Dags* -> `openlineage_demo` -> *Task Instances* you should see the four tasks of the pipeline -
+`create_schema`, `load_customers`, `load_orders` and `customer_orders` - all in the `success` state:
+
+image::openlineage/airflow.png[Airflow Task Instances view showing the four openlineage_demo tasks in the success state]
+
+Each task is a `SQLExecuteQueryOperator` that submits a statement to Trino.
+
+=== Trino: the queries finished
+
+Open the Trino web UI using the `coordinator-https` endpoint from the `stackablectl stacklet list`
+output, and log in with the username `admin` and the password `adminadmin`.
+
+The *Query Details* page lists the statements Airflow submitted - the `CREATE SCHEMA`, `DROP TABLE` and
+`CREATE TABLE ... AS SELECT` statements that build the `memory.demo.*` tables from the `tpch.tiny.*`
+source - all in the `FINISHED` state. Their *Source* is `airflow`, confirming they originated from the
+DAG rather than an interactive session:
+
+image::openlineage/trino-queries.png[Trino Query Details page showing the finished CREATE TABLE queries submitted by Airflow]
+
+=== Marquez: the lineage was collected
 
 Marquez does not have an external listener. Forward its web UI to your machine:
 
 [source,console]
 ----
-$ kubectl -n openlineage-demo port-forward svc/marquez-web 5000:5000
+$ kubectl -n openlineage-demo port-forward svc/marquez-web 3000:3000
 ----
 
-Then open http://localhost:5000 in your browser.
+Then open http://localhost:3000 in your browser.
 
-Use the namespace selector at the top to switch between the namespaces that produced the lineage:
+The landing page lists the OpenLineage *Jobs* that Trino and Airflow reported, together with the event,
+dataset and source counts. You should see the `openlineage_demo` DAG job and the per-query jobs such as
+`openlineage_demo.customer_orders.query.*`, all *COMPLETED*:
 
-* `airflow-openlineage-demo` - the *connected end-to-end graph*. It contains the `openlineage_demo` DAG, its tasks, and
-  the datasets `tpch.tiny.*`, `lakehouse.demo.customers/orders/customer_orders` and `lakehouse.demo.orders_by_nation`.
-* the Trino namespace (named after `openlineage-event-listener.trino.uri`, i.e. `http://trino-coordinator:8080`) - the
-  Trino event listener's own view, with column-level lineage for each query.
-* `spark-openlineage-demo` (plus `s3://lakehouse` and `hive://...`) - the Spark job's own view of its read/write.
+image::openlineage/marquez.png[Marquez home page listing the collected OpenLineage jobs as COMPLETED]
 
-To see the full flow, open the `lakehouse.demo.orders_by_nation` dataset (or the `openlineage_demo.spark_orders_by_nation`
-task) in the `airflow-openlineage-demo` namespace and expand upstream. You get one connected graph:
+Selecting a job opens its details. For example, `openlineage_demo.load_orders.query.2` shows the exact
+`CREATE TABLE memory.demo.orders AS SELECT ...` statement along with its OpenLineage *job* and *run*
+facets rendered as JSON - including the `sql` facet, the `AIRFLOW` integration, and the `externalQuery`
+facet that links back to the originating Trino query ID:
 
-[source]
-----
-tpch.tiny.customer ─▶ load_customers ─▶ customers ─┐
-                                                   ├─▶ customer_orders ─▶ lakehouse.demo.customer_orders
-tpch.tiny.orders   ─▶ load_orders    ─▶ orders   ──┘                              │
-                                                                                  ▼
-                                            spark_orders_by_nation ─▶ lakehouse.demo.orders_by_nation
-----
+image::openlineage/job-details-customer-orders-2.png[Marquez job details for load_orders showing the SQL statement and OpenLineage facets as JSON]
 
-The real Spark job is not lost: because of the parent-run link, the Spark run reports the
-`openlineage_demo.spark_orders_by_nation` task as its *root*, so you can drill from that task into the Spark run itself
-(in the `spark-openlineage-demo` namespace).
+== Explore the lineage in Marquez
 
-[TIP]
-====
-Open a *dataset* or a *task* node - for example `spark_orders_by_nation` or the `orders_by_nation` dataset - not the
-top-level `openlineage_demo` DAG node. Airflow reports the DAG-level job with no inputs/outputs of its own, so that one
-node looks empty; the data flow hangs off the task and dataset nodes.
-====
+With the Marquez UI still open at http://localhost:3000, use the namespace selector at the top to switch
+between the namespaces that produced the lineage:
+
+* `trino-openlineage-demo` - the Trino query jobs (one per executed statement), set via
+  `openlineage-event-listener.namespace`, and
+* `trino://trino-coordinator:8443` - the datasets (`tpch.tiny.*` and `memory.demo.*`), named after the Trino
+  coordinator's address. Both the Trino event listener and the Airflow SQL operator report the tables under
+  this shared namespace, and
+* `airflow-openlineage-demo` - the `openlineage_demo` DAG and its tasks.
+
+Selecting the `memory.demo.customer_orders` dataset and expanding upstream shows the full graph back to
+`tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries:
+
+image::openlineage/customer-orders-2.png[Marquez lineage graph tracing memory.demo.customer_orders upstream through the jobs to tpch.tiny.customer and tpch.tiny.orders]
 
 [NOTE]
 ====
-The Trino event-listener view (`trino://...`) and the Spark job's own view (`spark-openlineage-demo` / `s3://lakehouse`
-/ `hive://...`) are separate, self-contained graphs alongside the Airflow one. Marquez identifies datasets by
-`namespace + name`, and each engine names the same physical Iceberg table differently (Trino by its coordinator URI,
-Spark by the storage location / metastore), so they do not auto-merge. That is expected: each producer reports lineage
-from its own perspective, and the *connected* end-to-end view is the Airflow one, where a single producer (the
-orchestrator) names every dataset consistently.
+Trino and Airflow report lineage independently but, because `trino.uri` matches the address Airflow uses for its
+Trino connection, both name the tables under the same `trino://trino-coordinator:8443` namespace. Their lineage
+therefore converges on one shared set of dataset nodes: Trino contributes column-level detail per query, while
+Airflow contributes the task/DAG structure around the same tables.
 ====
 
 == Summary

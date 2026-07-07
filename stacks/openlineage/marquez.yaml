@@ -16,17 +16,23 @@
 #     | grep -v '^  namespace: "default"$' > marquez.yaml   # strip test hooks + hardcoded ns
 #   # ...then re-add this header.
 #
-# VALUES used (the chart applies one shared service.{type,port} to BOTH Services - there is no
-# per-service override, so the API and web UI necessarily get the same type/port):
+# VALUES used:
 #   fullnameOverride: marquez
-#   service: {type: NodePort, port: 5000}   # API Service becomes marquez:5000 (what Trino/Airflow
-#                                           # target and what the web backend calls); marquez-web
-#                                           # NodePort exposes the UI. Postgres stays ClusterIP.
+#   service: {type: ClusterIP, port: 5000}   # API Service marquez:5000 (Trino/Airflow target it and
+#                                            # the web pod calls it via MARQUEZ_PORT, all internal)
 #   web.enabled: true
 #   postgresql: {enabled: true, auth: marquez/marquez/marquez,
 #                image.repository: bitnamilegacy/postgresql, global...allowInsecureImages: true}
 #
-# Resulting Services: marquez:5000 (API), marquez-web:5000 (UI, NodePort), marquez-postgresql:5432.
+# POST-RENDER EDITS (the chart forces ONE shared service.{type,port} onto both the API and web
+# Services; there is no per-service override, so these two Service specs are hand-adjusted after
+# rendering - see the "POST-RENDER EDIT" markers below):
+#   * marquez     (API): kept ClusterIP :5000  - consumed only cluster-internally.
+#   * marquez-web (UI) : set to NodePort :3000 - the only component end users reach; port now
+#                        matches its container (chart would otherwise publish the UI on :5000).
+#
+# Resulting Services: marquez:5000 (API, ClusterIP), marquez-web:3000 (UI, NodePort),
+#                     marquez-postgresql:5432 (ClusterIP).
 ---
 # Source: marquez/charts/postgresql/templates/secrets.yaml
 apiVersion: v1
@@ -57,7 +63,7 @@ metadata:
 type: Opaque
 data:
   marquez-db-password: "bWFjb25kbw=="
-  
+
 
 ---
 # Source: marquez/templates/marquez/configmap.yaml
@@ -180,7 +186,9 @@ metadata:
     app.kubernetes.io/component: marquez
   annotations:
 spec:
-  type: NodePort
+  # POST-RENDER EDIT: chart default is a single service.type for both Services. The API is only
+  # consumed cluster-internally (Trino, Airflow, and the marquez-web pod), so keep it ClusterIP.
+  type: ClusterIP
   ports:
     - port: 5000
       targetPort: http
@@ -206,9 +214,11 @@ metadata:
     app.kubernetes.io/component: web
   annotations:
 spec:
+  # POST-RENDER EDIT: the web UI is the only component end users reach, so expose it (NodePort) on
+  # its own container port 3000 - not the chart's shared service.port of 5000, which was confusing.
   type: NodePort
   ports:
-    - port: 5000
+    - port: 3000
       targetPort: http
       protocol: TCP
       name: http
@@ -409,10 +419,10 @@ spec:
       annotations:
     spec:
       serviceAccountName: default
-      
+
       affinity:
         podAffinity:
-          
+
         podAntiAffinity:
           preferredDuringSchedulingIgnoredDuringExecution:
             - podAffinityTerm:
@@ -424,7 +434,7 @@ spec:
                 topologyKey: kubernetes.io/hostname
               weight: 1
         nodeAffinity:
-          
+
       securityContext:
         fsGroup: 1001
       hostNetwork: false
@@ -508,7 +518,7 @@ spec:
                 - /bin/sh
                 - -c
                 - -e
-                
+
                 - |
                   exec pg_isready -U "marquez" -d "dbname=marquez" -h 127.0.0.1 -p 5432
           resources:
