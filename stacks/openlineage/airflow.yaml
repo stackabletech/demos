@@ -168,29 +168,25 @@ data:
             self.openlineage_inputs = openlineage_inputs or []
             self.openlineage_outputs = openlineage_outputs or []
 
-        def _link_spark_run_to_this_task(self, context):
-            # CLEAN-LINEAGE KNOB #1: hand the Spark job this task's OpenLineage run identity via
-            # `spark.openlineage.parent*`. That makes Spark report its own run as a CHILD of this Airflow
-            # task (so the real Spark job is reachable from the DAG in Marquez) and, crucially, gives the
-            # Spark run a real parent name instead of the `unknown` OpenLineage falls back to when it
-            # can't resolve one at listener startup.
-            try:
-                from airflow.providers.openlineage.plugins.macros import (
-                    lineage_job_name,
-                    lineage_job_namespace,
-                    lineage_run_id,
-                )
-
-                ti = context["task_instance"]
-                conf = self.application_file["spec"]["sparkConf"]
-                conf["spark.openlineage.parentJobNamespace"] = lineage_job_namespace()
-                conf["spark.openlineage.parentJobName"] = lineage_job_name(ti)
-                conf["spark.openlineage.parentRunId"] = lineage_run_id(ti)
-            except Exception as e:  # never fail the task just because linking didn't work
-                self.log.warning("Could not set OpenLineage parent run on the SparkApplication: %s", e)
+        # CLEAN-LINEAGE KNOB #1: do NOT hand the Spark job this task's OpenLineage run identity via
+        # `spark.openlineage.parent*`. It is tempting (it would nest the Spark run under this Airflow
+        # task), but it actively BREAKS the Spark lineage in Marquez 0.51.x (explained below).
+        #
+        # Why: Spark correctly emits ONE application job named `orders_by_nation` (bare) carrying a
+        # parent facet, and its SQL children reference that same bare parent. But Marquez renames any
+        # job that has a parent facet to `{parentJobName}.{jobName}` UNLESS the name already starts
+        # with the parent. The SQL jobs (`orders_by_nation.<cmd>.<table>`) already do, so they're left
+        # alone; the application job (`orders_by_nation`) does not start with its parent
+        # (`openlineage_demo.spark_orders_by_nation`), so Marquez stores it as
+        # `openlineage_demo.spark_orders_by_nation.orders_by_nation` while the children still point at
+        # bare `orders_by_nation` -> the one run splits into two app nodes and the chain breaks.
+        #
+        # Marquez draws only job<->dataset edges (never job->job parent edges), so the parent facet buys
+        # no visible edge anyway. Airflow<->Spark is stitched via shared DATASET identities instead, in
+        # get_openlineage_facets_on_complete (KNOB #2). `spark.openlineage.appName` (KNOB #3, in the
+        # SparkApplication) still pins a stable, non-`unknown` job name.
 
         def execute(self, context: "Context"):
-            self._link_spark_run_to_this_task(context)
             hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
             name = self.application_file["metadata"]["name"]
             self.log.info("Creating SparkApplication %s ...", name)
@@ -282,8 +278,9 @@ data:
                     "spark.openlineage.transport.type": "http",
                     "spark.openlineage.transport.url": "http://marquez:5000",
                     "spark.openlineage.namespace": "spark-openlineage-demo",
-                    # parentJobNamespace/parentJobName/parentRunId are injected at task runtime by the
-                    # operator (see _link_spark_run_to_this_task) so they carry this run's real identity.
+                    # NB: spark.openlineage.parent* is deliberately NOT set here or at runtime — see
+                    # CLEAN-LINEAGE KNOB #1 above (it triggers a Marquez job-rename that splits the
+                    # Spark app node).
                 },
                 "volumes": [
                     {"name": "script", "configMap": {"name": "spark-openlineage-job"}},
