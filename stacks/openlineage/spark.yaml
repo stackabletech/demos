@@ -1,0 +1,38 @@
+# PySpark job that the Airflow DAG submits as a SparkApplication (see the inlined
+# SparkKubernetesOperator in airflow.yaml).
+#
+# It reads the Iceberg table the Trino ELT produced (`lakehouse.demo.customer_orders`) and writes a
+# small aggregate (`lakehouse.demo.orders_by_nation`) back into the same Iceberg catalog. Because the
+# OpenLineage Spark listener is enabled via sparkConf on the SparkApplication, this read+write is
+# reported to Marquez - the Spark half of the lineage graph, joined to the Trino half through the
+# shared `lakehouse.demo.customer_orders` table.
+#
+# The Iceberg catalog (`lakehouse`), S3 access and the OpenLineage transport are all configured in
+# the SparkApplication's sparkConf, not here.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: spark-openlineage-job
+data:
+  orders-by-nation.py: |
+    from pyspark.sql import SparkSession
+    from pyspark.sql.functions import count, sum as sum_
+
+    spark = SparkSession.builder.appName("orders-by-nation").getOrCreate()
+
+    # Source table written by the Trino ELT steps of the same Airflow DAG.
+    customer_orders = spark.table("lakehouse.demo.customer_orders")
+
+    orders_by_nation = (
+        customer_orders.groupBy("nationkey").agg(
+            count("custkey").alias("num_customers"),
+            sum_("order_count").alias("total_orders"),
+            sum_("total_spent").alias("total_spent"),
+        )
+    )
+
+    # createOrReplace keeps the demo re-runnable: every DAG run rebuilds the table.
+    orders_by_nation.writeTo("lakehouse.demo.orders_by_nation").using("iceberg").createOrReplace()
+
+    spark.stop()
