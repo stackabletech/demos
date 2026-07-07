@@ -262,11 +262,16 @@ data:
                 },
                 "s3connection": {"reference": "minio"},
                 "sparkConf": {
-                    # CLEAN-LINEAGE KNOB #3: set spark.app.name as a Spark *config* (not only via
-                    # SparkSession.builder.appName in the script). The OpenLineage listener reads the app
-                    # name when the SparkContext starts; if it's only set later by the builder, the listener
-                    # has already stamped `null`/`unknown`. Setting it here yields a stable job name.
+                    # CLEAN-LINEAGE KNOB #3: pin the OpenLineage job name.
+                    # `spark.app.name` alone is NOT enough: the OL listener resolves the job name via
+                    # SparkContext.appName() at context-build time, which in cluster mode (esp. on the
+                    # not-yet-officially-covered Spark 4.1) is intermittently still blank -> it falls back
+                    # to the literal "unknown" (observed: same config produced both `orders_by_nation` and
+                    # `unknown` across runs). `spark.openlineage.appName` is parsed straight from SparkConf
+                    # at listener construction (highest-priority job-name provider, timing-independent), so
+                    # it wins unconditionally. Keep spark.app.name too for the Spark UI / general naming.
                     "spark.app.name": "orders-by-nation",
+                    "spark.openlineage.appName": "orders-by-nation",
                     # --- Iceberg catalog `lakehouse` on the shared hive-iceberg metastore ---
                     "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions",
                     "spark.sql.catalog.lakehouse": "org.apache.iceberg.spark.SparkCatalog",
