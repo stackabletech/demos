@@ -1,0 +1,151 @@
+# DataHub ingestion job — pulls Trino catalog metadata into DataHub GMS.
+#
+# Runs once as part of the demo. Ingests the `lakehouse` catalog from Trino
+# into DataHub so that dataset URNs exist for downstream tooling (Resource
+# Info Fetcher / OPA integration).
+#
+# TLS trust: DataHub's Trino source (v1.6.0) does NOT honor `verify: false`
+# from the recipe (the option is silently ignored). And PYTHONHTTPSVERIFY=0
+# is overridden by the Trino Python client's explicit session-level verify.
+# So we do it the reliable way: extract the CA from a secret-operator-
+# provisioned truststore.p12 in an initContainer and point the ingest
+# container's Python HTTP libraries at it via SSL_CERT_FILE / REQUESTS_CA_BUNDLE.
+#
+# Auth: uses the `data-import` static user (same as other demo automation).
+# Metadata Service Authentication is disabled on GMS for this dev setup.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datahub-trino-recipe
+data:
+  recipe.yaml: |
+    pipeline_name: e2e-demo-trino-ingestion
+
+    source:
+      type: trino
+      config:
+        # Use the FQDN that's in the Trino cert SAN.
+        host_port: 'trino-coordinator-default-headless.default.svc.cluster.local:8443'
+        database: lakehouse
+        username: data-import
+        password: data-importdata-import
+        options:
+          connect_args:
+            http_scheme: https
+        include_views: true
+        include_tables: true
+        profiling:
+          enabled: false
+        stateful_ingestion:
+          enabled: true
+
+    sink:
+      type: datahub-rest
+      config:
+        server: 'http://datahub-datahub-gms:8080'
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: datahub-ingest-trino
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: datahub-ingest
+        source: trino
+    spec:
+      restartPolicy: OnFailure
+      initContainers:
+        # Extract the internal CA from a secret-operator-provisioned truststore
+        # so the ingest container can trust Trino's cert. Uses openssl (already
+        # in the datahub-ingestion image) instead of pulling a separate JRE image.
+        - name: extract-ca
+          image: acryldata/datahub-ingestion:v1.6.0
+          # secret-operator provisions truststore.p12 as root:0 mode 0640, so we
+          # need root to read it. This container only reads the file and writes
+          # /trust/ca.crt — no long-running root.
+          securityContext:
+            runAsUser: 0
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              # secret-operator's autoTls backend issues PKCS12 stores with an
+              # EMPTY password AND uses RC2-40-CBC encryption (Java default).
+              # OpenSSL 3.x deprecates RC2 by default, so we need `-legacy` to
+              # re-enable it. `pass:` (nothing after the colon) means empty password.
+              openssl pkcs12 -legacy \
+                -in /stackable/tls/truststore.p12 \
+                -passin pass: \
+                -nokeys \
+                -out /trust/ca.crt
+              # Make the extracted CA readable by the non-root ingest container.
+              chmod 0644 /trust/ca.crt
+              echo "== extracted CA =="
+              head -2 /trust/ca.crt
+              wc -l /trust/ca.crt
+          volumeMounts:
+            - name: tls
+              mountPath: /stackable/tls
+            - name: trust
+              mountPath: /trust
+      containers:
+        - name: ingest
+          image: acryldata/datahub-ingestion:v1.6.0
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "== datahub CLI =="
+              datahub --version || true
+              echo "== running ingestion =="
+              datahub ingest -c /recipe/recipe.yaml
+              echo "== ingestion complete =="
+          env:
+            - name: SSL_CERT_FILE
+              value: /trust/ca.crt
+            - name: REQUESTS_CA_BUNDLE
+              value: /trust/ca.crt
+          volumeMounts:
+            - name: recipe
+              mountPath: /recipe
+            - name: trust
+              mountPath: /trust
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+      volumes:
+        - name: recipe
+          configMap:
+            name: datahub-trino-recipe
+        - name: trust
+          emptyDir: {}
+        # secret-operator ephemeral volume — provisions a truststore.p12 from
+        # the same CA that signs Trino's cert.
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/format: tls-pkcs12
+                  secrets.stackable.tech/scope: pod
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+                volumeMode: Filesystem

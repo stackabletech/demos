@@ -1,0 +1,91 @@
+---
+releaseName: datahub
+name: datahub
+repo:
+  name: datahub
+  url: https://helm.datahubproject.io/
+# Chart version 1.0.3 packages DataHub app version v1.6.0.
+version: 1.0.3
+options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
+  # ---------------------------------------------------------------------------
+  # Global — where subcharts find prerequisite services
+  # ---------------------------------------------------------------------------
+  global:
+    datahub:
+      version: v1.6.0
+      # Dev-only: disable Metadata Service Authentication so ingestion pods don't
+      # need bearer tokens. This is a shortcut for the demo; not for production.
+      metadata_service_authentication:
+        enabled: false
+    elasticsearch:
+      host: "opensearch-cluster-master"
+      port: "9200"
+      useSSL: "false"
+    kafka:
+      bootstrap:
+        server: "prerequisites-kafka:9092"
+      zookeeper:
+        # KRaft-mode Kafka doesn't need ZK, but chart still parses this field.
+        server: "prerequisites-zookeeper:2181"
+      schemaregistry:
+        type: INTERNAL
+    sql:
+      datasource:
+        host: "prerequisites-mysql:3306"
+        hostForMysqlClient: "prerequisites-mysql"
+        port: "3306"
+        url: "jdbc:mysql://prerequisites-mysql:3306/datahub?verifyServerCertificate=false&useSSL=true&useUnicode=yes&characterEncoding=UTF-8&enabledTLSProtocols=TLSv1.2"
+        driver: "com.mysql.cj.jdbc.Driver"
+        username: "root"
+        password:
+          secretRef: mysql-secrets
+          secretKey: mysql-root-password
+    # Route graph queries to OpenSearch (Neo4j is off)
+    graph_service_impl: elasticsearch
+  # ---------------------------------------------------------------------------
+  # GMS — the API server we need for RIF development
+  # ---------------------------------------------------------------------------
+  datahub-gms:
+    enabled: true
+    replicaCount: 1
+    image:
+      tag: v1.6.0
+    # Bumped from the earlier 1CPU/1Gi floor because ingestion of even a small
+    # Trino catalog took ~4 min under those limits. GMS does synchronous
+    # OpenSearch index writes per aspect, so it's the throughput bottleneck.
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "2Gi"
+      limits:
+        cpu: "2"
+        memory: "2Gi"
+    service:
+      type: ClusterIP
+    extraEnvs:
+      - name: GRAPH_SERVICE_IMPL
+        value: elasticsearch
+      - name: ELASTICSEARCH_INDEX_BUILDER_MAPPINGS_REINDEX
+        value: "true"
+      - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX
+        value: "true"
+  # ---------------------------------------------------------------------------
+  # Everything else — disabled for the demo footprint.
+  # Frontend can be enabled later with a single helm upgrade; no state migration.
+  # ---------------------------------------------------------------------------
+  datahub-frontend:
+    enabled: false
+  acryl-datahub-actions:
+    enabled: false
+  datahub-ingestion-cron:
+    enabled: false
+  datahub-mae-consumer:
+    enabled: false
+  datahub-mce-consumer:
+    enabled: false

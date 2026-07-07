@@ -1,0 +1,82 @@
+---
+releaseName: prerequisites
+name: datahub-prerequisites
+repo:
+  name: datahub
+  url: https://helm.datahubproject.io/
+version: 0.3.0
+options:
+  commonLabels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/stack: {{ STACK }}
+    # {% if DEMO is defined %}
+    stackable.tech/demo: {{ DEMO }}
+    # {% endif %}
+  # OpenSearch: the chart's default backing search+graph store (Neo4j is off).
+  opensearch:
+    enabled: true
+    singleNode: true
+    replicas: 1
+    minimumMasterNodes: 1
+    # Bumped from 1Gi because the JVM heap wants roughly half of memory; at 1Gi
+    # total the ES/OS process was CPU-bound on ingestion writes.
+    resources:
+      requests:
+        cpu: "500m"
+        memory: "1500Mi"
+      limits:
+        cpu: "1"
+        memory: "1500Mi"
+    persistence:
+      enabled: false
+  # Elasticsearch: disabled — we use OpenSearch.
+  elasticsearch:
+    enabled: false
+  # Neo4j: disabled — graph queries go through OpenSearch via GMS's graph_service_impl.
+  neo4j-community:
+    enabled: false
+  # MySQL: DataHub's relational metadata store.
+  mysql:
+    enabled: true
+    auth:
+      rootPassword: datahub
+      database: datahub
+    primary:
+      resources:
+        requests:
+          cpu: "100m"
+          memory: "256Mi"
+        limits:
+          cpu: "500m"
+          memory: "512Mi"
+      persistence:
+        enabled: false
+  # Kafka: KRaft mode — no separate ZooKeeper needed.
+  kafka:
+    enabled: true
+    controller:
+      replicaCount: 1
+      resources:
+        requests:
+          cpu: "250m"
+          memory: "512Mi"
+        limits:
+          cpu: "1"
+          memory: "1Gi"
+      persistence:
+        enabled: false
+    broker:
+      replicaCount: 0
+    listeners:
+      client:
+        protocol: PLAINTEXT
+      controller:
+        protocol: PLAINTEXT
+    extraConfig: |
+      auto.create.topics.enable=true
+      default.replication.factor=1
+      offsets.topic.replication.factor=1
+      transaction.state.log.replication.factor=1
+      transaction.state.log.min.isr=1
+  cp-helm-charts:
+    enabled: false
