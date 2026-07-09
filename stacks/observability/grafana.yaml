@@ -4,12 +4,12 @@
 releaseName: grafana
 name: grafana
 repo:
-  name: grafana
+  name: grafana-community
   url: https://grafana-community.github.io/helm-charts
 # To find the latest version:
 # helm repo add grafana-community https://grafana-community.github.io/helm-charts --force-update
 # helm search repo grafana-community/grafana
-version: 11.3.2 # 12.4.1
+version: 12.7.2 # appVersion: 13.1.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
