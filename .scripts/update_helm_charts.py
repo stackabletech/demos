@@ -29,7 +29,7 @@ def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str
         check=True,
     )
     chart_yaml = yaml.safe_load(result.stdout)
-    return chart_yaml["version"], chart_yaml["appVersion"]
+    return chart_yaml["version"], chart_yaml.setdefault("appVersion", "Not present")
 
 
 def process_yaml_files(top_dir: str) -> None:
