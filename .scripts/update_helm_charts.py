@@ -79,6 +79,16 @@ def process_yaml_files(top_dir: str) -> None:
                 if not repo_name or not repo_url:
                     continue
 
+                # At this point, it appears to be a Helm Chart manifest.
+
+                # Skip Vector, as we currently keep it tied to the version that the product sidecars use.abs
+                # Looking forward to swapping the transport with OTLP.
+                if chart_name == "vector":
+                    raise Exception(
+                        "Skipping vector. Ensure it is at the same version as the product sidecars"
+                    )
+                    continue
+
                 chart_version = first_doc["version"]
                 # Skip chart versions which seem to be templated.
                 if chart_version.startswith("{{"):
