@@ -4,20 +4,24 @@ import os
 import subprocess
 import yaml
 from typing import Tuple, Set
+from textwrap import dedent
 
 
 def run_helm_repo_add(repo_name: str, repo_url: str) -> None:
-    try:
-        subprocess.run(["helm", "repo", "add", repo_name, repo_url], check=True)
-    except subprocess.CalledProcessError as e:
-        if "already exists" in e.stderr.decode() if e.stderr else str(e):
-            pass  # Ignore "already exists" error
-        else:
-            raise
+        subprocess.run(
+            ["helm", "repo", "add", repo_name, repo_url, "--force-update"], check=True
+        )
 
 
-def run_helm_repo_update(repo_name: str) -> None:
-    subprocess.run(["helm", "repo", "update", repo_name], check=True)
+def local_repo_list():
+    result = subprocess.run(
+        ["helm", "repo", "list", "-o", "yaml"],
+        capture_output=True,
+        text=True,
+        check=True,
+    )
+    repo_list = yaml.safe_load(result.stdout)
+    return repo_list
 
 
 def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str]:
@@ -34,6 +38,7 @@ def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str
 
 def process_yaml_files(top_dir: str) -> None:
     seen_repos: Set[str] = set()
+    local_repos = local_repo_list()
 
     for root, _, files in os.walk(top_dir):
         for file in files:
@@ -73,11 +78,23 @@ def process_yaml_files(top_dir: str) -> None:
                 if not repo_name or not repo_url:
                     continue
 
+                local_repo = next(
+                    (repo for repo in local_repos if repo["name"] == repo_name), None
+                )
+                if local_repo is not None:
+                    local_repo_url = local_repo["url"]
+                    if local_repo_url != repo_url:
+                        raise Exception(
+                            dedent(f"""
+                            You have a local repo named {repo_name} pointing to {local_repo_url}, but the stack/demo wants {repo_url}
+                            Either delete or update your local repo URL, or update the stack/demo repo name so it doesn't conflict
+                        """)
+                        )
+
                 if repo_name not in seen_repos:
+                    # TODO: If the repo exists locally, but with a different URL, let the user know
                     run_helm_repo_add(repo_name, repo_url)
                     seen_repos.add(repo_name)
-
-                run_helm_repo_update(repo_name)
 
                 # print(f"📦 Updating {filepath} -> {repo_name}/{chart_name}")
                 new_chart_version, new_app_version = get_chart_and_app_version(
@@ -98,6 +115,9 @@ def process_yaml_files(top_dir: str) -> None:
                 print(f"✅ Updated {filepath}")
 
             except Exception as e:
+                # If debugging, you can get the exception line number like this:
+                # _, _, tb = os.sys.exc_info()
+                # lineno = tb.tb_lineno
                 print(f"⚠️ Error processing {filepath}: {e}")
 
 
