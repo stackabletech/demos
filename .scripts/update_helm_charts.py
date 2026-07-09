@@ -128,15 +128,14 @@ def process_yaml_files(top_dir: str) -> None:
 
 if __name__ == "__main__":
     print(
-        '⚠️⚠️⚠️ This script is best-effort! Always check the result using "git diff"! ⚠️⚠️⚠️'
+        dedent("""
+            ⚠️⚠️⚠️ This script is best-effort! Always check the result using "git diff"! ⚠️⚠️⚠️
+            Notably, it skips invalid YAMLs, which can be the case because we sometimes use templating syntax, even for helm-chart definitions.
+            In those cases, use quotes around templated values, or otherwise comments for templated blocks.
+
+            Please judge on the skipped files if they contain a helm-chart and should be manually bumped.
+            The script can be improved to handle such files in the future.
+        """)
     )
-    print(
-        "Notably, it skips invalid YAMLs, which can be the case because we sometimes use templating syntax, even for helm-chart definitions"
-    )
-    print(
-        "Please judge on the skipped files if they contain a helm-chart and should be manually bumped"
-    )
-    print("The script can be improved to handle such files in the future")
-    print()
 
     process_yaml_files(".")
