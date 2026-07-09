@@ -4,7 +4,7 @@ name: timescaledb-single
 repo:
   name: timescale
   url: https://charts.timescale.com/
-version: 0.33.1
+version: 0.33.1 # appVersion: Not present
 options:
   podLabels:
     stackable.tech/vendor: Stackable
