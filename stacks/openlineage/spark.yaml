@@ -49,3 +49,14 @@ data:
     orders_by_nation.writeTo("lakehouse.demo.orders_by_nation").using("iceberg").createOrReplace()
 
     spark.stop()
+---
+# Discovery ConfigMap the Spark operator reads to find the OpenLineage backend. The SparkApplication
+# references it via `spec.openLineage.configMapName: marquez-discovery`, and the operator resolves the
+# endpoint from the `ADDRESS` key (mirroring the vector-aggregator discovery ConfigMap contract).
+# Deployed into the same namespace as the SparkApplication.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marquez-discovery
+data:
+  ADDRESS: http://marquez:5000

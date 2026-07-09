@@ -39,6 +39,11 @@ spec:
       - name: airflow-dags
         mountPath: /dags/openlineage_demo.py
         subPath: openlineage_demo.py
+      # The SparkApplication manifest lives next to the DAG so build_spark_application() can load it.
+      # dag-processor only parses *.py, so a *.yaml in /dags is inert to Airflow.
+      - name: airflow-dags
+        mountPath: /dags/spark-application.yaml
+        subPath: spark-application.yaml
   webservers:
     roleConfig:
       listenerClass: external-stable
@@ -119,7 +124,9 @@ data:
     the Airflow image, so a minimal in-cluster implementation is inlined below. It creates the
     SparkApplication CR *and* waits for it (one operator, so there is no extra empty "sensor" job).
     """
+    import os
     import time
+    import yaml
     from datetime import datetime, timedelta
     from typing import TYPE_CHECKING, Optional, Sequence
 
@@ -185,8 +192,8 @@ data:
         #
         # Marquez draws only job<->dataset edges (never job->job parent edges), so the parent facet buys
         # no visible edge anyway. Airflow<->Spark is stitched via shared DATASET identities instead, in
-        # get_openlineage_facets_on_complete (KNOB #2). `spark.openlineage.appName` (KNOB #3, in the
-        # SparkApplication) still pins a stable, non-`unknown` job name.
+        # get_openlineage_facets_on_complete (KNOB #2). The SparkApplication's `spec.openLineage.appName`
+        # still pins a stable, non-`unknown` job name.
 
         def execute(self, context: "Context"):
             hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
@@ -236,106 +243,20 @@ data:
 
 
     def build_spark_application(name: str, namespace: str) -> dict:
-        """The SparkApplication that reads customer_orders and writes orders_by_nation."""
-        return {
-            "apiVersion": "spark.stackable.tech/v1alpha1",
-            "kind": "SparkApplication",
-            "metadata": {"name": name, "namespace": namespace},
-            "spec": {
-                "sparkImage": {
-                    # Iceberg 1.11.0 only supports Spark 4.1.x (kept in sync with the data-lakehouse
-                    # demo). NOTE: OpenLineage's newest Spark module is `spark40` - the listener on
-                    # Spark 4.1 is not officially covered yet; verify events reach Marquez on a real
-                    # cluster and, if the listener breaks, drop to Spark 4.0.x + Iceberg 1.10.x.
-                    "productVersion": "4.1.2",
-                    "pullPolicy": "IfNotPresent",
-                },
-                "mode": "cluster",
-                "mainApplicationFile": "local:///stackable/spark/jobs/orders-by-nation.py",
-                "deps": {
-                    "packages": [
-                        "org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0",
-                        "io.openlineage:openlineage-spark_2.13:1.51.0",
-                    ]
-                },
-                "s3connection": {"reference": "minio"},
-                "sparkConf": {
-                    # CLEAN-LINEAGE KNOB #3: pin the OpenLineage job name.
-                    # `spark.app.name` alone is NOT enough: the OL listener resolves the job name via
-                    # SparkContext.appName() at context-build time, which in cluster mode (esp. on the
-                    # not-yet-officially-covered Spark 4.1) is intermittently still blank -> it falls back
-                    # to the literal "unknown" (observed: same config produced both `orders_by_nation` and
-                    # `unknown` across runs). `spark.openlineage.appName` is parsed straight from SparkConf
-                    # at listener construction (highest-priority job-name provider, timing-independent), so
-                    # it wins unconditionally. Keep spark.app.name too for the Spark UI / general naming.
-                    "spark.app.name": "orders-by-nation",
-                    "spark.openlineage.appName": "orders-by-nation",
-                    # --- Iceberg catalog `lakehouse` on the shared hive-iceberg metastore ---
-                    "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions",
-                    "spark.sql.catalog.lakehouse": "org.apache.iceberg.spark.SparkCatalog",
-                    "spark.sql.catalog.lakehouse.type": "hive",
-                    "spark.sql.catalog.lakehouse.uri": "thrift://hive-iceberg-metastore:9083",
-                    # --- OpenLineage: the Spark "toggle" - listener + HTTP transport to Marquez ---
-                    "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
-                    "spark.openlineage.transport.type": "http",
-                    "spark.openlineage.transport.url": "http://marquez:5000",
-                    "spark.openlineage.namespace": "spark-openlineage-demo",
-                    # NB: spark.openlineage.parent* is deliberately NOT set here or at runtime — see
-                    # CLEAN-LINEAGE KNOB #1 above (it triggers a Marquez job-rename that splits the
-                    # Spark app node).
-                },
-                "volumes": [
-                    {"name": "script", "configMap": {"name": "spark-openlineage-job"}},
-                    {
-                        "name": "spark-tls",
-                        "ephemeral": {
-                            "volumeClaimTemplate": {
-                                "metadata": {
-                                    "annotations": {
-                                        "secrets.stackable.tech/class": "tls",
-                                        "secrets.stackable.tech/scope": "pod",
-                                        "secrets.stackable.tech/format": "tls-pkcs12",
-                                        "secrets.stackable.tech/format.compatibility.tls-pkcs12.password": "changeit",
-                                        "secrets.stackable.tech/backend.autotls.cert.lifetime": "14d",
-                                    }
-                                },
-                                "spec": {
-                                    "accessModes": ["ReadWriteOnce"],
-                                    "resources": {"requests": {"storage": "1"}},
-                                    "storageClassName": "secrets.stackable.tech",
-                                },
-                            }
-                        },
-                    },
-                ],
-                "job": {"config": {"resources": {"cpu": {"min": "100m", "max": "1"}}}},
-                "driver": {
-                    "config": {
-                        "resources": {
-                            "cpu": {"min": "1", "max": "1"},
-                            "memory": {"limit": "2Gi"},
-                        },
-                        "volumeMounts": [
-                            {"name": "script", "mountPath": "/stackable/spark/jobs"},
-                            {"name": "spark-tls", "mountPath": "/stackable/tls"},
-                        ],
-                    }
-                },
-                "executor": {
-                    "replicas": 1,
-                    "config": {
-                        "resources": {
-                            "cpu": {"min": "1", "max": "2"},
-                            "memory": {"limit": "2Gi"},
-                        },
-                        "volumeMounts": [
-                            {"name": "script", "mountPath": "/stackable/spark/jobs"},
-                            {"name": "spark-tls", "mountPath": "/stackable/tls"},
-                        ],
-                    },
-                },
-            },
-        }
+        """Load the SparkApplication manifest and stamp this run's name + namespace.
+
+        The manifest lives next to this DAG (spark-application.yaml) so the Spark config - including
+        the OpenLineage wiring - is reviewable as ordinary SparkApplication YAML instead of an inline
+        Python dict. Only metadata.name (timestamped per run, so each run is a distinct
+        SparkApplication) and metadata.namespace (the Airflow pod's own namespace) are dynamic.
+        """
+        yaml_path = os.path.join(os.environ["AIRFLOW__CORE__DAGS_FOLDER"], "spark-application.yaml")
+        with open(yaml_path) as f:
+            document = yaml.safe_load(f)
+        document.setdefault("metadata", {})
+        document["metadata"]["name"] = name
+        document["metadata"]["namespace"] = namespace
+        return document
 
 
     with DAG(
@@ -435,6 +356,112 @@ data:
         create_schema >> [load_customers, load_orders, load_nation]
         [load_customers, load_orders] >> customer_orders
         [customer_orders, load_nation] >> spark_orders_by_nation
+  # The SparkApplication the DAG submits (see build_spark_application above). Kept as ordinary
+  # SparkApplication YAML - not an inline Python dict - so the Spark config is reviewable on its own.
+  # metadata.name (timestamped per run) and metadata.namespace are stamped at submit time by the DAG.
+  spark-application.yaml: |
+    ---
+    apiVersion: spark.stackable.tech/v1alpha1
+    kind: SparkApplication
+    metadata:
+      name: orders-by-nation
+    spec:
+      sparkImage:
+        # Iceberg 1.11.0 only supports Spark 4.1.x (kept in sync with the data-lakehouse demo).
+        # NOTE: OpenLineage's newest Spark module is `spark40` - the listener on Spark 4.1 is not
+        # officially covered yet; verify events reach Marquez on a real cluster and, if the listener
+        # breaks, drop to Spark 4.0.x + Iceberg 1.10.x.
+        productVersion: "4.1.2"
+        pullPolicy: IfNotPresent
+      mode: cluster
+      mainApplicationFile: local:///stackable/spark/jobs/orders-by-nation.py
+      # OpenLineage lineage emission, enabled and wired by the Spark operator. Replaces the
+      # hand-written spark.openlineage.* sparkConf keys and the OL --packages entry below. The backend
+      # endpoint comes from the `marquez-discovery` ConfigMap (see spark.yaml).
+      openLineage:
+        enabled: true
+        configMapName: marquez-discovery
+        # Carried over from the dropped spark.openlineage.{namespace,appName} keys to keep the demo's
+        # lineage identity. appName is the timing-independent fix for the intermittent "unknown" job name.
+        namespace: spark-openlineage-demo
+        appName: orders-by-nation
+      deps:
+        # The OpenLineage jar is no longer declared here: it ships in the Spark image and is wired in
+        # by the operator via spec.openLineage (above). Iceberg stays on --packages - the operator
+        # references OpenLineage via spark.jars, which shares Iceberg's (child) classloader, so
+        # OpenLineage's connector probe still succeeds.
+        packages:
+          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0
+      s3connection:
+        reference: minio
+      sparkConf:
+        # Kept for the Spark UI / general naming. The OpenLineage job name is pinned via
+        # spec.openLineage.appName above (the timing-independent fix for the intermittent "unknown"
+        # job name), so this no longer carries lineage duty.
+        spark.app.name: orders-by-nation
+        # --- Iceberg catalog `lakehouse` on the shared hive-iceberg metastore ---
+        spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
+        spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog
+        spark.sql.catalog.lakehouse.type: hive
+        spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg-metastore:9083
+        # NB: the OpenLineage listener, HTTP transport, namespace and appName are all injected by the
+        # operator from spec.openLineage above - no spark.openlineage.* keys are hand-written here
+        # anymore. spark.openlineage.parent* remains deliberately unset (it triggers a Marquez
+        # job-rename that splits the Spark app node).
+      volumes:
+        - name: script
+          configMap:
+            name: spark-openlineage-job
+        - name: spark-tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: pod
+                  secrets.stackable.tech/format: tls-pkcs12
+                  secrets.stackable.tech/format.compatibility.tls-pkcs12.password: changeit
+                  secrets.stackable.tech/backend.autotls.cert.lifetime: 14d
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+      job:
+        config:
+          resources:
+            cpu:
+              min: 100m
+              max: "1"
+      driver:
+        config:
+          resources:
+            cpu:
+              min: "1"
+              max: "1"
+            memory:
+              limit: 2Gi
+          volumeMounts:
+            - name: script
+              mountPath: /stackable/spark/jobs
+            - name: spark-tls
+              mountPath: /stackable/tls
+      executor:
+        replicas: 1
+        config:
+          resources:
+            cpu:
+              min: "1"
+              max: "2"
+            memory:
+              limit: 2Gi
+          volumeMounts:
+            - name: script
+              mountPath: /stackable/spark/jobs
+            - name: spark-tls
+              mountPath: /stackable/tls
 ---
 apiVersion: v1
 kind: Secret
