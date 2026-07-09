@@ -1,11 +1,16 @@
 # PySpark job that the Airflow DAG submits as a SparkApplication (see the inlined
 # SparkKubernetesOperator in airflow.yaml).
 #
-# It reads the Iceberg table the Trino ELT produced (`lakehouse.demo.customer_orders`) and writes a
-# small aggregate (`lakehouse.demo.orders_by_nation`) back into the same Iceberg catalog. Because the
-# OpenLineage Spark listener is enabled via sparkConf on the SparkApplication, this read+write is
-# reported to Marquez - the Spark half of the lineage graph, joined to the Trino half through the
-# shared `lakehouse.demo.customer_orders` table.
+# It reads TWO Iceberg tables the Trino ELT produced (`lakehouse.demo.customer_orders` and the
+# `lakehouse.demo.nation` dimension), JOINS them on `nationkey`, and writes a small aggregate
+# (`lakehouse.demo.orders_by_nation`) back into the same Iceberg catalog. Because the OpenLineage
+# Spark listener is enabled via sparkConf on the SparkApplication, this join+write is reported to
+# Marquez - the Spark half of the lineage graph, joined to the Trino half through the shared
+# `lakehouse.demo.customer_orders` and `lakehouse.demo.nation` tables.
+#
+# The join is what makes this interesting for lineage: OpenLineage reports the resulting Spark job
+# with BOTH source tables as inputs (a fan-in node), and - via the columnLineage facet - which
+# output columns derive from which input columns across the join.
 #
 # The Iceberg catalog (`lakehouse`), S3 access and the OpenLineage transport are all configured in
 # the SparkApplication's sparkConf, not here.
@@ -21,11 +26,19 @@ data:
 
     spark = SparkSession.builder.appName("orders-by-nation").getOrCreate()
 
-    # Source table written by the Trino ELT steps of the same Airflow DAG.
+    # Two source tables written by the Trino ELT steps of the same Airflow DAG: the per-customer
+    # order facts and the nation dimension. Joining them is what produces a two-input lineage node.
     customer_orders = spark.table("lakehouse.demo.customer_orders")
+    nation = spark.table("lakehouse.demo.nation")
 
+    # Join the fact table to the nation dimension so the aggregate carries human-readable nation
+    # names. OpenLineage reports BOTH `customer_orders` and `nation` as inputs of the resulting job,
+    # and (via columnLineage) that `nation_name` derives from `nation` while the measures derive
+    # from `customer_orders`.
     orders_by_nation = (
-        customer_orders.groupBy("nationkey").agg(
+        customer_orders.join(nation, on="nationkey", how="inner")
+        .groupBy("nationkey", "nation_name")
+        .agg(
             count("custkey").alias("num_customers"),
             sum_("order_count").alias("total_orders"),
             sum_("total_spent").alias("total_spent"),

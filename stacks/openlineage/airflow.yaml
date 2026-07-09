@@ -97,13 +97,15 @@ data:
     A layered ELT + Spark pipeline that produces cross-engine lineage in Marquez:
 
         tpch.tiny.customer ─┐
-                            ├─(Trino)─> lakehouse.demo.customer_orders ─(Spark)─> lakehouse.demo.orders_by_nation
-        tpch.tiny.orders  ──┘
+                            ├─(Trino)─> lakehouse.demo.customer_orders ─┐
+        tpch.tiny.orders  ──┘                                          ├─(Spark join)─> lakehouse.demo.orders_by_nation
+        tpch.tiny.nation  ──(Trino)─> lakehouse.demo.nation ───────────┘
 
     The Trino steps read from the built-in `tpch` catalog and write Iceberg tables into the
     `lakehouse` catalog (shared hive-iceberg metastore + MinIO). The final step submits a Spark job
-    that reads `lakehouse.demo.customer_orders` and writes `lakehouse.demo.orders_by_nation` into the
-    *same* Iceberg catalog.
+    that JOINS `lakehouse.demo.customer_orders` with the `lakehouse.demo.nation` dimension and writes
+    `lakehouse.demo.orders_by_nation` into the *same* Iceberg catalog. The two-input Spark join is
+    reported by OpenLineage as a fan-in lineage node (both source tables feed the output).
 
     The single, connected end-to-end graph is the *Airflow* one: Airflow is one producer and names
     every dataset consistently, and the Spark step is stitched in by declaring its I/O under the same
@@ -379,6 +381,19 @@ data:
             ),
         )
 
+        # Nation dimension: the second input to the Spark join. Kept as its own load step (same
+        # single-statement CREATE OR REPLACE pattern as the others) so it is an independent lineage
+        # source that fans into the Spark job alongside customer_orders.
+        load_nation = SQLExecuteQueryOperator(
+            task_id="load_nation",
+            conn_id="trino_default",
+            sql=(
+                "CREATE OR REPLACE TABLE lakehouse.demo.nation AS "
+                "SELECT nationkey, name AS nation_name, regionkey "
+                "FROM tpch.tiny.nation"
+            ),
+        )
+
         customer_orders = SQLExecuteQueryOperator(
             task_id="customer_orders",
             conn_id="trino_default",
@@ -410,11 +425,16 @@ data:
             task_id="spark_orders_by_nation",
             namespace=namespace,
             application_file=build_spark_application(spark_app_name, namespace),
-            openlineage_inputs=[(trino_ol_namespace, "lakehouse.demo.customer_orders")],
+            openlineage_inputs=[
+                (trino_ol_namespace, "lakehouse.demo.customer_orders"),
+                (trino_ol_namespace, "lakehouse.demo.nation"),
+            ],
             openlineage_outputs=[(trino_ol_namespace, "lakehouse.demo.orders_by_nation")],
         )
 
-        create_schema >> [load_customers, load_orders] >> customer_orders >> spark_orders_by_nation
+        create_schema >> [load_customers, load_orders, load_nation]
+        [load_customers, load_orders] >> customer_orders
+        [customer_orders, load_nation] >> spark_orders_by_nation
 ---
 apiVersion: v1
 kind: Secret
