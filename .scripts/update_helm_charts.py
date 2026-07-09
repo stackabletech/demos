@@ -20,8 +20,7 @@ def local_repo_list():
         text=True,
         check=True,
     )
-    repo_list = yaml.safe_load(result.stdout)
-    return repo_list
+    return yaml.safe_load(result.stdout)
 
 
 def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str]:
@@ -33,6 +32,8 @@ def get_chart_and_app_version(repo_name: str, chart_name: str) -> Tuple[str, str
         check=True,
     )
     chart_yaml = yaml.safe_load(result.stdout)
+    # Some charts don't have an appVersion and as such we fallback to a default
+    # value to not cause lookup errors.
     return chart_yaml["version"], chart_yaml.setdefault("appVersion", "Not present")
 
 
@@ -79,6 +80,7 @@ def process_yaml_files(top_dir: str) -> None:
                     continue
 
                 chart_version = first_doc["version"]
+                # Skip chart versions which seem to be templated.
                 if chart_version.startswith("{{"):
                     continue
 
@@ -96,7 +98,6 @@ def process_yaml_files(top_dir: str) -> None:
                         )
 
                 if repo_name not in seen_repos:
-                    # TODO: If the repo exists locally, but with a different URL, let the user know
                     run_helm_repo_add(repo_name, repo_url)
                     seen_repos.add(repo_name)
 
