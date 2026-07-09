@@ -12,16 +12,16 @@ options:
         allowed_users:
           - admin
       DummyAuthenticator:
-        password: {{ jupyterHubAdminPassword }}
+        password: "{{ jupyterHubAdminPassword }}"
       JupyterHub:
         authenticator_class: dummy
     labels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
   proxy:
     service:
@@ -45,11 +45,11 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
     initContainers:
       - name: download-notebook
