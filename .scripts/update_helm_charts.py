@@ -86,7 +86,7 @@ def process_yaml_files(top_dir: str) -> None:
 
                 updated_lines = []
                 for line in raw_lines:
-                    if line.strip().startswith("version:"):
+                    if line.startswith("version:"):
                         new_line = f"version: {new_chart_version} # {new_app_version}\n"
                         updated_lines.append(new_line)
                     else:
