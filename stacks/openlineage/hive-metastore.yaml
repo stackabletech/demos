@@ -1,0 +1,38 @@
+# Hive metastore backing the Trino *and* Spark Iceberg catalog (both named `lakehouse`).
+#
+# Sharing a single metastore is what makes the cross-engine lineage work: the table Trino's ELT
+# writes (`lakehouse.demo.customer_orders`) is the exact same physical Iceberg table Spark reads,
+# so Marquez sees one dataset produced by Trino and consumed by Spark.
+#
+# The metastore's own metadata DB is the postgresql-hive-iceberg chart deployed by this stack.
+---
+apiVersion: hive.stackable.tech/v1alpha1
+kind: HiveCluster
+metadata:
+  name: hive-iceberg
+spec:
+  image:
+    # Cannot upgrade to 4.0.1 because we run into github.com/apache/iceberg/issues/12878
+    # (kept in sync with the data-lakehouse-iceberg-trino-spark stack).
+    productVersion: 4.0.0
+  clusterConfig:
+    metadataDatabase:
+      postgresql:
+        host: postgresql-hive-iceberg
+        database: hive
+        credentialsSecretName: hive-postgres-credentials
+    s3:
+      reference: minio
+  metastore:
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: hive-postgres-credentials
+type: Opaque
+stringData:
+  username: hive
+  password: hive

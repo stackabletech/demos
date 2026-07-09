@@ -57,6 +57,9 @@ spec:
       # Trino connection used by the demo DAG. TLS verification is disabled because Trino uses an
       # auto-generated (self-signed) CA in this demo; the password matches the `trino-users` Secret.
       AIRFLOW_CONN_TRINO_DEFAULT: '{"conn_type": "trino", "host": "trino-coordinator", "port": 8443, "login": "admin", "password": "{{ trinoAdminPassword }}", "extra": {"protocol": "https", "verify": false}}'
+      # In-cluster Kubernetes connection used by the inlined SparkKubernetesOperator/Sensor in the DAG
+      # to create and poll the SparkApplication. Same encoded connection as the airflow stack uses.
+      AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
     configOverrides:
       webserver_config.py:
         # Allow "POST /login/" without CSRF token
@@ -91,77 +94,347 @@ metadata:
 data:
   openlineage_demo.py: |
     """
-    A minimal ELT pipeline against Trino that produces clean, layered lineage:
+    A layered ELT + Spark pipeline that produces cross-engine lineage in Marquez:
 
         tpch.tiny.customer ─┐
-                            ├─> memory.demo.customer_orders
-        tpch.tiny.orders  ──┘
+                            ├─(Trino)─> lakehouse.demo.customer_orders ─┐
+        tpch.tiny.orders  ──┘                                          ├─(Spark join)─> lakehouse.demo.orders_by_nation
+        tpch.tiny.nation  ──(Trino)─> lakehouse.demo.nation ───────────┘
 
-    Airflow emits task/run + dataset lineage (via the Trino SQL operator) and Trino emits
-    per-query table-/column-level lineage. Both land in the same Marquez instance.
+    The Trino steps read from the built-in `tpch` catalog and write Iceberg tables into the
+    `lakehouse` catalog (shared hive-iceberg metastore + MinIO). The final step submits a Spark job
+    that JOINS `lakehouse.demo.customer_orders` with the `lakehouse.demo.nation` dimension and writes
+    `lakehouse.demo.orders_by_nation` into the *same* Iceberg catalog. The two-input Spark join is
+    reported by OpenLineage as a fan-in lineage node (both source tables feed the output).
+
+    The single, connected end-to-end graph is the *Airflow* one: Airflow is one producer and names
+    every dataset consistently, and the Spark step is stitched in by declaring its I/O under the same
+    identities (see get_openlineage_facets_on_complete below). Trino's own event-listener lineage and
+    Spark's own listener lineage are separate, self-contained views (each engine names datasets its
+    own way, so Marquez does not auto-merge them). All producers report to one Marquez.
+
+    The CLEAN-LINEAGE KNOB comments below call out what makes the graph readable and connected.
+
+    NOTE: the Stackable `SparkKubernetesOperator`/`Sensor` from the `stackable.*` package are not in
+    the Airflow image, so a minimal in-cluster implementation is inlined below. It creates the
+    SparkApplication CR *and* waits for it (one operator, so there is no extra empty "sensor" job).
     """
-    from datetime import datetime
+    import time
+    from datetime import datetime, timedelta
+    from typing import TYPE_CHECKING, Optional, Sequence
 
     from airflow import DAG
+    from airflow.exceptions import AirflowException
+    from airflow.models import BaseOperator
+    from airflow.providers.cncf.kubernetes.hooks.kubernetes import KubernetesHook
     from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+
+    if TYPE_CHECKING:
+        from airflow.utils.context import Context
+
+
+    class SparkKubernetesOperator(BaseOperator):
+        template_fields: Sequence[str] = ("application_file", "namespace")
+        ui_color = "#f4a460"
+
+        FAILURE_STATES = ("Failed",)
+        SUCCESS_STATES = ("Succeeded",)
+
+        def __init__(
+            self,
+            *,
+            application_file: dict,
+            namespace: Optional[str] = None,
+            kubernetes_conn_id: str = "kubernetes_in_cluster",
+            api_group: str = "spark.stackable.tech",
+            api_version: str = "v1alpha1",
+            openlineage_inputs: Optional[list] = None,
+            openlineage_outputs: Optional[list] = None,
+            poll_interval: int = 10,
+            timeout: int = 1800,
+            **kwargs,
+        ) -> None:
+            super().__init__(**kwargs)
+            self.application_file = application_file
+            self.namespace = namespace
+            self.kubernetes_conn_id = kubernetes_conn_id
+            self.api_group = api_group
+            self.api_version = api_version
+            self.plural = "sparkapplications"
+            self.poll_interval = poll_interval
+            self.timeout = timeout
+            # (namespace, name) pairs the *Airflow* OpenLineage provider will report as this task's
+            # datasets. Set them to the SAME identities Airflow emits for the Trino tables so the Spark
+            # step joins the ELT flow into one connected graph in the Airflow namespace (Marquez keys
+            # datasets by namespace+name; matching them is what draws the edge). See the DAG below.
+            self.openlineage_inputs = openlineage_inputs or []
+            self.openlineage_outputs = openlineage_outputs or []
+
+        # CLEAN-LINEAGE KNOB #1: do NOT hand the Spark job this task's OpenLineage run identity via
+        # `spark.openlineage.parent*`. It is tempting (it would nest the Spark run under this Airflow
+        # task), but it actively BREAKS the Spark lineage in Marquez 0.51.x (explained below).
+        #
+        # Why: Spark correctly emits ONE application job named `orders_by_nation` (bare) carrying a
+        # parent facet, and its SQL children reference that same bare parent. But Marquez renames any
+        # job that has a parent facet to `{parentJobName}.{jobName}` UNLESS the name already starts
+        # with the parent. The SQL jobs (`orders_by_nation.<cmd>.<table>`) already do, so they're left
+        # alone; the application job (`orders_by_nation`) does not start with its parent
+        # (`openlineage_demo.spark_orders_by_nation`), so Marquez stores it as
+        # `openlineage_demo.spark_orders_by_nation.orders_by_nation` while the children still point at
+        # bare `orders_by_nation` -> the one run splits into two app nodes and the chain breaks.
+        #
+        # Marquez draws only job<->dataset edges (never job->job parent edges), so the parent facet buys
+        # no visible edge anyway. Airflow<->Spark is stitched via shared DATASET identities instead, in
+        # get_openlineage_facets_on_complete (KNOB #2). `spark.openlineage.appName` (KNOB #3, in the
+        # SparkApplication) still pins a stable, non-`unknown` job name.
+
+        def execute(self, context: "Context"):
+            hook = KubernetesHook(conn_id=self.kubernetes_conn_id)
+            name = self.application_file["metadata"]["name"]
+            self.log.info("Creating SparkApplication %s ...", name)
+            hook.create_custom_object(
+                group=self.api_group,
+                version=self.api_version,
+                plural=self.plural,
+                body=self.application_file,
+                namespace=self.namespace,
+            )
+            # Wait inline (no separate sensor task => no extra empty job in the lineage graph).
+            deadline = time.monotonic() + self.timeout
+            while True:
+                response = hook.get_custom_object(
+                    group=self.api_group,
+                    version=self.api_version,
+                    plural=self.plural,
+                    name=name,
+                    namespace=self.namespace,
+                )
+                phase = response.get("status", {}).get("phase")
+                if phase in self.FAILURE_STATES:
+                    raise AirflowException(f"SparkApplication {name} failed with state: {phase}")
+                if phase in self.SUCCESS_STATES:
+                    self.log.info("SparkApplication %s succeeded", name)
+                    return name
+                if time.monotonic() > deadline:
+                    raise AirflowException(f"SparkApplication {name} timed out (state: {phase})")
+                self.log.info("SparkApplication %s is in state: %s", name, phase)
+                time.sleep(self.poll_interval)
+
+        def get_openlineage_facets_on_complete(self, task_instance):
+            # CLEAN-LINEAGE KNOB #2: emit dataset lineage for the Spark step from Airflow's side. Because
+            # the SparkApplication runs out-of-process, Airflow can't introspect it - so we declare the
+            # I/O explicitly. Using the Trino datasets' exact namespace+names makes `customer_orders` the
+            # shared node between the Trino ELT and this Spark step, connecting the whole flow in one
+            # Marquez graph.
+            from airflow.providers.openlineage.extractors import OperatorLineage
+            from airflow.providers.common.compat.openlineage.facet import Dataset
+
+            return OperatorLineage(
+                inputs=[Dataset(namespace=ns, name=name) for ns, name in self.openlineage_inputs],
+                outputs=[Dataset(namespace=ns, name=name) for ns, name in self.openlineage_outputs],
+            )
+
+
+    def build_spark_application(name: str, namespace: str) -> dict:
+        """The SparkApplication that reads customer_orders and writes orders_by_nation."""
+        return {
+            "apiVersion": "spark.stackable.tech/v1alpha1",
+            "kind": "SparkApplication",
+            "metadata": {"name": name, "namespace": namespace},
+            "spec": {
+                "sparkImage": {
+                    # Iceberg 1.11.0 only supports Spark 4.1.x (kept in sync with the data-lakehouse
+                    # demo). NOTE: OpenLineage's newest Spark module is `spark40` - the listener on
+                    # Spark 4.1 is not officially covered yet; verify events reach Marquez on a real
+                    # cluster and, if the listener breaks, drop to Spark 4.0.x + Iceberg 1.10.x.
+                    "productVersion": "4.1.2",
+                    "pullPolicy": "IfNotPresent",
+                },
+                "mode": "cluster",
+                "mainApplicationFile": "local:///stackable/spark/jobs/orders-by-nation.py",
+                "deps": {
+                    "packages": [
+                        "org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0",
+                        "io.openlineage:openlineage-spark_2.13:1.51.0",
+                    ]
+                },
+                "s3connection": {"reference": "minio"},
+                "sparkConf": {
+                    # CLEAN-LINEAGE KNOB #3: pin the OpenLineage job name.
+                    # `spark.app.name` alone is NOT enough: the OL listener resolves the job name via
+                    # SparkContext.appName() at context-build time, which in cluster mode (esp. on the
+                    # not-yet-officially-covered Spark 4.1) is intermittently still blank -> it falls back
+                    # to the literal "unknown" (observed: same config produced both `orders_by_nation` and
+                    # `unknown` across runs). `spark.openlineage.appName` is parsed straight from SparkConf
+                    # at listener construction (highest-priority job-name provider, timing-independent), so
+                    # it wins unconditionally. Keep spark.app.name too for the Spark UI / general naming.
+                    "spark.app.name": "orders-by-nation",
+                    "spark.openlineage.appName": "orders-by-nation",
+                    # --- Iceberg catalog `lakehouse` on the shared hive-iceberg metastore ---
+                    "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions",
+                    "spark.sql.catalog.lakehouse": "org.apache.iceberg.spark.SparkCatalog",
+                    "spark.sql.catalog.lakehouse.type": "hive",
+                    "spark.sql.catalog.lakehouse.uri": "thrift://hive-iceberg-metastore:9083",
+                    # --- OpenLineage: the Spark "toggle" - listener + HTTP transport to Marquez ---
+                    "spark.extraListeners": "io.openlineage.spark.agent.OpenLineageSparkListener",
+                    "spark.openlineage.transport.type": "http",
+                    "spark.openlineage.transport.url": "http://marquez:5000",
+                    "spark.openlineage.namespace": "spark-openlineage-demo",
+                    # NB: spark.openlineage.parent* is deliberately NOT set here or at runtime — see
+                    # CLEAN-LINEAGE KNOB #1 above (it triggers a Marquez job-rename that splits the
+                    # Spark app node).
+                },
+                "volumes": [
+                    {"name": "script", "configMap": {"name": "spark-openlineage-job"}},
+                    {
+                        "name": "spark-tls",
+                        "ephemeral": {
+                            "volumeClaimTemplate": {
+                                "metadata": {
+                                    "annotations": {
+                                        "secrets.stackable.tech/class": "tls",
+                                        "secrets.stackable.tech/scope": "pod",
+                                        "secrets.stackable.tech/format": "tls-pkcs12",
+                                        "secrets.stackable.tech/format.compatibility.tls-pkcs12.password": "changeit",
+                                        "secrets.stackable.tech/backend.autotls.cert.lifetime": "14d",
+                                    }
+                                },
+                                "spec": {
+                                    "accessModes": ["ReadWriteOnce"],
+                                    "resources": {"requests": {"storage": "1"}},
+                                    "storageClassName": "secrets.stackable.tech",
+                                },
+                            }
+                        },
+                    },
+                ],
+                "job": {"config": {"resources": {"cpu": {"min": "100m", "max": "1"}}}},
+                "driver": {
+                    "config": {
+                        "resources": {
+                            "cpu": {"min": "1", "max": "1"},
+                            "memory": {"limit": "2Gi"},
+                        },
+                        "volumeMounts": [
+                            {"name": "script", "mountPath": "/stackable/spark/jobs"},
+                            {"name": "spark-tls", "mountPath": "/stackable/tls"},
+                        ],
+                    }
+                },
+                "executor": {
+                    "replicas": 1,
+                    "config": {
+                        "resources": {
+                            "cpu": {"min": "1", "max": "2"},
+                            "memory": {"limit": "2Gi"},
+                        },
+                        "volumeMounts": [
+                            {"name": "script", "mountPath": "/stackable/spark/jobs"},
+                            {"name": "spark-tls", "mountPath": "/stackable/tls"},
+                        ],
+                    },
+                },
+            },
+        }
+
 
     with DAG(
         dag_id="openlineage_demo",
         schedule=None,
         start_date=datetime(2024, 1, 1),
         catchup=False,
-        tags=["openlineage", "trino"],
+        dagrun_timeout=timedelta(minutes=60),
+        tags=["openlineage", "trino", "spark", "iceberg"],
     ) as dag:
+        # CLEAN-LINEAGE KNOB #4: keep each SQL task a *single* statement. `CREATE OR REPLACE TABLE`
+        # (instead of DROP + CREATE) means one query per task, so each task maps to exactly one lineage
+        # job that carries the datasets - no empty extra `.query.N` job for the throwaway DROP.
+        #
+        # CREATE SCHEMA is pure DDL with no dataset input/output, so its job is intentionally
+        # dataset-less (OpenLineage only tracks data flow, not catalog/namespace management).
         create_schema = SQLExecuteQueryOperator(
             task_id="create_schema",
             conn_id="trino_default",
-            sql="CREATE SCHEMA IF NOT EXISTS memory.demo",
+            # s3a:// (not s3://) so the location scheme matches what the Spark S3A client uses when it
+            # reads the table back - avoids a Trino-writes-s3:// / Spark-reads-s3a:// mismatch.
+            # `demo` is the bucket the standalone MinIO template creates.
+            sql="CREATE SCHEMA IF NOT EXISTS lakehouse.demo WITH (location = 's3a://demo/lakehouse')",
         )
 
         load_customers = SQLExecuteQueryOperator(
             task_id="load_customers",
             conn_id="trino_default",
-            sql=[
-                "DROP TABLE IF EXISTS memory.demo.customers",
-                (
-                    "CREATE TABLE memory.demo.customers AS "
-                    "SELECT custkey, name, nationkey, acctbal "
-                    "FROM tpch.tiny.customer"
-                ),
-            ],
+            sql=(
+                "CREATE OR REPLACE TABLE lakehouse.demo.customers AS "
+                "SELECT custkey, name, nationkey, acctbal "
+                "FROM tpch.tiny.customer"
+            ),
         )
 
         load_orders = SQLExecuteQueryOperator(
             task_id="load_orders",
             conn_id="trino_default",
-            sql=[
-                "DROP TABLE IF EXISTS memory.demo.orders",
-                (
-                    "CREATE TABLE memory.demo.orders AS "
-                    "SELECT orderkey, custkey, orderstatus, totalprice, orderdate "
-                    "FROM tpch.tiny.orders"
-                ),
-            ],
+            sql=(
+                "CREATE OR REPLACE TABLE lakehouse.demo.orders AS "
+                "SELECT orderkey, custkey, orderstatus, totalprice, orderdate "
+                "FROM tpch.tiny.orders"
+            ),
+        )
+
+        # Nation dimension: the second input to the Spark join. Kept as its own load step (same
+        # single-statement CREATE OR REPLACE pattern as the others) so it is an independent lineage
+        # source that fans into the Spark job alongside customer_orders.
+        load_nation = SQLExecuteQueryOperator(
+            task_id="load_nation",
+            conn_id="trino_default",
+            sql=(
+                "CREATE OR REPLACE TABLE lakehouse.demo.nation AS "
+                "SELECT nationkey, name AS nation_name, regionkey "
+                "FROM tpch.tiny.nation"
+            ),
         )
 
         customer_orders = SQLExecuteQueryOperator(
             task_id="customer_orders",
             conn_id="trino_default",
-            sql=[
-                "DROP TABLE IF EXISTS memory.demo.customer_orders",
-                (
-                    "CREATE TABLE memory.demo.customer_orders AS "
-                    "SELECT c.custkey, c.name, c.nationkey, "
-                    "       count(o.orderkey) AS order_count, "
-                    "       sum(o.totalprice) AS total_spent "
-                    "FROM memory.demo.customers c "
-                    "LEFT JOIN memory.demo.orders o ON c.custkey = o.custkey "
-                    "GROUP BY c.custkey, c.name, c.nationkey"
-                ),
-            ],
+            sql=(
+                "CREATE OR REPLACE TABLE lakehouse.demo.customer_orders AS "
+                "SELECT c.custkey, c.name, c.nationkey, "
+                "       count(o.orderkey) AS order_count, "
+                "       sum(o.totalprice) AS total_spent "
+                "FROM lakehouse.demo.customers c "
+                "LEFT JOIN lakehouse.demo.orders o ON c.custkey = o.custkey "
+                "GROUP BY c.custkey, c.name, c.nationkey"
+            ),
         )
 
-        create_schema >> [load_customers, load_orders] >> customer_orders
+        with open("/run/secrets/kubernetes.io/serviceaccount/namespace") as f:
+            namespace = f.read().strip()
+        spark_app_name = "orders-by-nation-" + datetime.utcnow().strftime("%Y%m%d%H%M%S")
+
+        # OpenLineage dataset namespace Airflow uses for Trino tables. It is derived from the
+        # AIRFLOW_CONN_TRINO_DEFAULT connection (host `trino-coordinator`, port 8443), so it must stay
+        # in sync with that connection. Declaring the Spark step's datasets under this same namespace
+        # (and the same table names the Trino SQL tasks produce) is what stitches the Spark step onto
+        # the ELT graph: `lakehouse.demo.customer_orders` becomes the shared input/output node.
+        trino_ol_namespace = "trino://trino-coordinator:8443"
+
+        # Single operator: submits the SparkApplication, waits for it, declares its datasets, and links
+        # the Spark run to this task. No separate sensor => no empty monitor job.
+        spark_orders_by_nation = SparkKubernetesOperator(
+            task_id="spark_orders_by_nation",
+            namespace=namespace,
+            application_file=build_spark_application(spark_app_name, namespace),
+            openlineage_inputs=[
+                (trino_ol_namespace, "lakehouse.demo.customer_orders"),
+                (trino_ol_namespace, "lakehouse.demo.nation"),
+            ],
+            openlineage_outputs=[(trino_ol_namespace, "lakehouse.demo.orders_by_nation")],
+        )
+
+        create_schema >> [load_customers, load_orders, load_nation]
+        [load_customers, load_orders] >> customer_orders
+        [customer_orders, load_nation] >> spark_orders_by_nation
 ---
 apiVersion: v1
 kind: Secret
