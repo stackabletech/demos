@@ -8,9 +8,17 @@ from textwrap import dedent
 
 
 def run_helm_repo_add(repo_name: str, repo_url: str) -> None:
-    subprocess.run(
-        ["helm", "repo", "add", repo_name, repo_url, "--force-update"], check=True
+    result = subprocess.run(
+        ["helm", "repo", "add", repo_name, repo_url, "--force-update"],
+        capture_output=True,
+        check=True,
     )
+    if result.returncode == 0:
+        print(f"✅ Added/Updated {repo_name} ({repo_url})")
+    else:
+        print(
+            f"⚠️ There was a problem Adding/Updating {repo_name} ({repo_url}): {result.stderr}"
+        )
 
 
 def local_repo_list():
