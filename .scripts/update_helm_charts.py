@@ -8,9 +8,9 @@ from textwrap import dedent
 
 
 def run_helm_repo_add(repo_name: str, repo_url: str) -> None:
-        subprocess.run(
-            ["helm", "repo", "add", repo_name, repo_url, "--force-update"], check=True
-        )
+    subprocess.run(
+        ["helm", "repo", "add", repo_name, repo_url, "--force-update"], check=True
+    )
 
 
 def local_repo_list():
@@ -76,6 +76,10 @@ def process_yaml_files(top_dir: str) -> None:
                 repo_url = repo_info.get("url")
 
                 if not repo_name or not repo_url:
+                    continue
+
+                chart_version = first_doc["version"]
+                if chart_version.startswith("{{"):
                     continue
 
                 local_repo = next(
