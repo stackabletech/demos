@@ -8,7 +8,7 @@ repo:
 # Special care should be taken during testing when this version was bumped.
 # There might be cases where this needs to be dropped back, because the chart
 # is not compatible with other components of the stack/images used.
-version: 4.3.2 # 5.4.3
+version: 4.4.0 # appVersion: 5.5.0
 options:
   hub:
     config:
@@ -19,7 +19,7 @@ options:
           - isla.williams
       GenericOAuthenticator:
         client_id: jupyterhub
-        client_secret: {{jupyterhubClientPassword}}
+        client_secret: "{{jupyterhubClientPassword}}"
         username_claim: preferred_username
         scope:
           - openid
@@ -149,11 +149,11 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
     initContainers:
       - name: download-notebook
@@ -199,29 +199,29 @@ options:
           cpu:
             display_name: CPU
             choices:
-{% for cpu in ["1","2","4","8","16","32"] %}
+# {% for cpu in ["1","2","4","8","16","32"] %}
               "{{cpu}}":
                 display_name: "{{cpu}}"
                 kubespawner_override:
-                  cpu_guarantee: {{cpu}}
-                  cpu_limit: {{cpu}}
-{% endfor %}
+                  cpu_guarantee: "{{cpu}}"
+                  cpu_limit: "{{cpu}}"
+# {% endfor %}
           memory:
             display_name: Memory
             choices:
-{% for memory in ["1","2","4","8","16","32","64","128"] %}
+# {% for memory in ["1","2","4","8","16","32","64","128"] %}
               "{{memory}} GB":
                 display_name: "{{memory}} GB"
                 kubespawner_override:
                   mem_guarantee: "{{memory}}G"
                   mem_limit: "{{memory}}G"
-{% endfor %}
+# {% endfor %}
           image:
             display_name: Image
             choices:
-{% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
+# {% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
               "{{image}}":
                 display_name: "{{image}}"
                 kubespawner_override:
                   image: "{{image}}"
-{% endfor %}
+# {% endfor %}
