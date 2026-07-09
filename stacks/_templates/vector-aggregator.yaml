@@ -4,7 +4,7 @@ name: vector
 repo:
   name: vector
   url: https://helm.vector.dev
-version: 0.56.0 # appVersion: 0.56.0-distroless-libc
+version: 0.52.0 # app version 0.55.0
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
