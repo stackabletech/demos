@@ -4,7 +4,7 @@ name: argo-cd
 repo:
   name: argo-cd
   url: https://argoproj.github.io/argo-helm
-version: 10.1.2 # appVersion: v3.4.4
+version: 10.1.3 # appVersion: v3.4.5
 options:
   global:
     additionalLabels:
