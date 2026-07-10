@@ -42,11 +42,11 @@ spec:
                 --password "richard.roe" \
                 --role "User"
           volumeMounts:
-            - name: airflow-credentials
-              mountPath: /airflow-credentials
+            - name: airflow-admin-credentials
+              mountPath: /airflow-admin-credentials
       volumes:
-        - name: airflow-credentials
+        - name: airflow-admin-credentials
           secret:
-            secretName: airflow-credentials
+            secretName: airflow-admin-credentials
       restartPolicy: OnFailure
   backoffLimit: 20 # give some time for the Airflow cluster to be available

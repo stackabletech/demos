@@ -9,6 +9,11 @@ spec:
     productVersion: 3.2.2
     pullPolicy: IfNotPresent
   clusterConfig:
+    metadataDatabase:
+      postgresql:
+        host: airflow-postgresql
+        database: airflow
+        credentialsSecretName: airflow-postgresql-credentials
     authorization:
       opa:
         configMapName: opa
@@ -17,7 +22,7 @@ spec:
           entryTimeToLive: 5s
           maxEntries: 10
     loadExamples: false
-    credentialsSecret: airflow-credentials
+    credentialsSecretName: airflow-admin-credentials
     volumes:
       - name: airflow-dags
         configMap:
@@ -571,7 +576,7 @@ data:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: airflow-credentials
+  name: airflow-admin-credentials
 type: Opaque
 stringData:
   adminUser.username: admin
@@ -579,5 +584,12 @@ stringData:
   adminUser.lastname: Admin
   adminUser.email: airflow@airflow.com
   adminUser.password: "{{ airflowAdminPassword }}"
-  connections.secretKey: "{{ airflowSecretKey }}"
-  connections.sqlalchemyDatabaseUri: postgresql+psycopg2://airflow:airflow@postgresql-airflow/airflow
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-postgresql-credentials
+type: Opaque
+stringData:
+  username: airflow
+  password: airflow
