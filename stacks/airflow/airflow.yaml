@@ -11,7 +11,7 @@ spec:
   clusterConfig:
     metadataDatabase:
       postgresql:
-        host: airflow-postgresql
+        host: postgresql-airflow
         database: airflow
         credentialsSecretName: airflow-postgresql-credentials
     authorization:
