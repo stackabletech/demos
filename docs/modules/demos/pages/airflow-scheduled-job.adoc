@@ -57,7 +57,7 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list -n airflow-demo
 
 ┌─────────┬───────────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
 │ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                                 ┆ CONDITIONS                      │
