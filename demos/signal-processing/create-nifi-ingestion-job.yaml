@@ -87,12 +87,13 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
-    # This file path needs adjustment for versioned demos on release branch
-    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/demos/signal-processing/DownloadAndWriteToDB.json")
+    # This URL must keep the "stackabletech/demos/main/" form (not "refs/heads/main") so that
+    # .scripts/update_refs.sh can rewrite it to the release branch at release time.
+    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.json")
 
     filename = "/tmp/DownloadAndWriteToDB.json"
-    with open(filename, "wb") as f:
-        f.write(response.content)
+    with open(filename, "w") as f:
+        f.write(response.text.replace("{{ NAMESPACE }}", os.environ["NAMESPACE"]))
 
     pg_id = get_root_pg_id()
 
