@@ -87,7 +87,7 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
-    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/demos/signal-processing/DownloadAndWriteToDB.json")
+    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/release-26.3/demos/signal-processing/DownloadAndWriteToDB.json")
 
     filename = "/tmp/DownloadAndWriteToDB.json"
     with open(filename, "wb") as f:
