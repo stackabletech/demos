@@ -2,22 +2,25 @@
 releaseName: grafana
 name: grafana
 repo:
-  name: grafana
-  url: https://grafana.github.io/helm-charts
-version: 10.5.15 # 12.3.1
+  name: grafana-community
+  url: https://grafana-community.github.io/helm-charts
+# To find the latest version:
+# helm repo add grafana-community https://grafana-community.github.io/helm-charts --force-update
+# helm search repo grafana-community/grafana
+version: 12.7.2 # appVersion: 13.1.0
 options:
   extraLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ STACK }}
+    stackable.tech/stack: "{{ STACK }}"
     # The following is a Jinja2 template directive, not a regular comment.
     # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
     # {% if DEMO is defined %}
-    stackable.tech/demo: {{ DEMO }}
+    stackable.tech/demo: "{{ DEMO }}"
     # {% endif %}
   grafana.ini:
     analytics:
       check_for_updates: false
-  adminPassword: {{ grafanaAdminPassword }}
+  adminPassword: "{{ grafanaAdminPassword }}"
   persistence:
     enabled: true
     size: 10Gi
@@ -44,10 +47,10 @@ options:
       datasources:
         - name: postgres
           type: postgres
-          url: postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local:5432
+          url: "postgresql-timescaledb.{{ NAMESPACE }}.svc.cluster.local:5432"
           user: admin
           secureJsonData:
-            password: {{ postgresAdminPassword }}
+            password: "{{ postgresAdminPassword }}"
           jsonData:
             database: tsdb
             sslmode: 'require'

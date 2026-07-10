@@ -124,3 +124,35 @@ kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "
 
 # Run through the (still) nightly demo/stack instructions again.
 ```
+
+### HDFS Rolling Upgrade
+
+For demos that use HDFS, also test a rolling upgrade.
+See <https://docs.stackable.tech/home/nightly/hdfs/usage-guide/upgrading/>.
+
+#### Prepare the upgrade (run in an HDFS superuser container)
+
+```shell
+hdfs dfsadmin -rollingUpgrade prepare
+hdfs dfsadmin -rollingUpgrade query  # repeat until "Proceed with rolling upgrade"
+```
+
+#### Patch the HdfsCluster to the new product version and wait for all pods to restart and reach Ready state
+
+```shell
+kubectl patch hdfs/<CLUSTER_NAME> --type=merge \
+  --patch '{"spec": {"image": {"productVersion": "<NEW_VERSION>"}}}'
+```
+
+#### Finalize the upgrade (run in an HDFS superuser container)
+
+```shell
+hdfs dfsadmin -rollingUpgrade finalize
+```
+
+#### Update the deployed product version status
+
+```shell
+kubectl patch hdfs/<CLUSTER_NAME> --subresource=status --type=merge \
+  --patch '{"status": {"deployedProductVersion": "<NEW_VERSION>"}}'
+```
