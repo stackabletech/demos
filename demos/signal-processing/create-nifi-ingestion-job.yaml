@@ -87,8 +87,9 @@ data:
     service_login(username=USERNAME, password=PASSWORD)
     print("Logged in")
 
-    # This URL must keep the "stackabletech/demos/main/" form (not "refs/heads/main") so that
-    # .scripts/update_refs.sh can rewrite it to the release branch at release time.
+    # At release time, .scripts/update_refs.sh rewrites the branch in this URL to the release
+    # branch. Keep the URL in a form its regex matches, or release-branch installs will
+    # download this file from main (see the 26.3 regression).
     response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.json")
 
     filename = "/tmp/DownloadAndWriteToDB.json"
