@@ -128,6 +128,9 @@ kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "
 <details>
   <summary>HDFS rolling upgrade instructions</summary>
 
+  For demos that use HDFS, also test a rolling upgrade.
+  Also see <https://docs.stackable.tech/home/nightly/hdfs/usage-guide/upgrading/>
+
   ```shell
   # In some cases (eg. in the end-to-end-security demo), HDFS is kerberized.
   # This requires these commands to be run first.
