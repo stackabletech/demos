@@ -3,7 +3,7 @@ name: Release Demo and Upgrade Testing
 about: |
   This template can be used to track the upgrade testing of demos from the outgoing stable to
   the new release, and new release from scratch before officially marking the new release as stable.
-title: "chore(tracking): Test demos on nightly versions for YY.M.X"
+title: "tracking: Test demos on nightly versions for YY.M.X"
 labels: ['epic']
 assignees: ''
 ---
