@@ -58,10 +58,10 @@ metadata:
 type: Opaque
 stringData:
   adminUser.username: admin
-  adminUser.firstname: Superset
+  adminUser.firstname: Admin
   adminUser.lastname: Admin
-  adminUser.email: admin@superset.com
-  adminUser.password: {{ supersetAdminPassword }}
+  adminUser.email: admin@example.com
+  adminUser.password: {{ adminPassword }}
 ---
 apiVersion: v1
 kind: Secret

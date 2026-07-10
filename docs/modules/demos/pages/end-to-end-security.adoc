@@ -105,7 +105,7 @@ The following user accounts are configured in Keycloak:
 
 |admin
 |adminadmin
-|Superset administrator, not member of any department
+|Administrator, not member of any department
 |===
 
 [#ruleset]

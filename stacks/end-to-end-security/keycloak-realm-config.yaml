@@ -50,12 +50,12 @@ stringData:
         "enabled" : true,
         "totp" : false,
         "emailVerified" : true,
-        "firstName" : "Superset",
+        "firstName" : "Admin",
         "lastName" : "Admin",
-        "email" : "admin@superset.com",
+        "email" : "admin@example.com",
         "credentials" : [ {
           "type" : "password",
-          "value" : "{{ supersetAdminPassword }}",
+          "value" : "{{ adminPassword }}",
           "temporary" : false
         } ],
         "disableableCredentialTypes" : [ ],
