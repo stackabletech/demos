@@ -5,6 +5,8 @@ repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
 version: 4.4.0 # appVersion: 5.5.0
+# Find values here: https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml
+# Note, they don't tag the repository, so you need to find _a_ commit where the Chart version matches what you are looking for.
 options:
   hub:
     config:
