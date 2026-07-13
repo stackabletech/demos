@@ -110,6 +110,11 @@ spec:
             image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
+              # Needed by the DAGs run by KubernetesPodOperator
+              - name: NAMESPACE
+                valueFrom:
+                  fieldRef:
+                    fieldPath: metadata.namespace
               - name: AWS_SECRET_ACCESS_KEY
                 valueFrom:
                  secretKeyRef:
@@ -145,7 +150,14 @@ data:
     from airflow import DAG
     from airflow.providers.cncf.kubernetes.operators.pod import KubernetesPodOperator
     from kubernetes.client import models as k8s
-    from kubernetes.client import V1EnvVar, V1EnvVarSource, V1SecretKeySelector
+    from kubernetes.client import V1EnvVar, V1EnvVarSource, V1ObjectFieldSelector, V1SecretKeySelector
+    import os
+
+    # NOTE: This code is executed on the Pod launched by the KubernetesPodOperator
+    # Therefore, the NAMESPACE env must be set on that.
+    # See AirflowCluster.spec.kubernetesExecutor.podOverrides.
+    namespace = os.environ.get("NAMESPACE", "default")
+    trino_coordinator_hostname = f"trino-coordinator-default-headless.{namespace}.svc.cluster.local"
 
     tls_volume = k8s.V1Volume(
         name="server-tls-mount",
@@ -194,6 +206,12 @@ data:
           volume_mounts=[tls_volume_mount],
           env_vars=[
               V1EnvVar(
+                  name="NAMESPACE",
+                  value_from=V1EnvVarSource(
+                    field_ref=V1ObjectFieldSelector(field_path="metadata.namespace")
+                  )
+              ),
+              V1EnvVar(
                   name="TRINO_PASSWORD",
                   value_from=V1EnvVarSource(
                       secret_key_ref=V1SecretKeySelector(
@@ -203,7 +221,7 @@ data:
                   )
               ),
               V1EnvVar(name="TRINO_USER", value="admin"),
-              V1EnvVar(name="TRINO_HOST", value="trino-coordinator-default-headless.{{ NAMESPACE }}.svc.cluster.local"),
+              V1EnvVar(name="TRINO_HOST", value=trino_coordinator_hostname),
               V1EnvVar(name="TRINO_PORT", value="8443"),
               V1EnvVar(name="CERT_PATH", value="/dbt/trusted/ca.crt"),
           ],
