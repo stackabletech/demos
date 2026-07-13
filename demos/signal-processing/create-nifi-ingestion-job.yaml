@@ -94,7 +94,7 @@ data:
 
     filename = "/tmp/DownloadAndWriteToDB.json"
     with open(filename, "w") as f:
-        f.write(response.text.replace("{{ NAMESPACE }}", os.environ["NAMESPACE"]))
+        f.write(response.text.replace("[[ NAMESPACE ]]", os.environ["NAMESPACE"]))
 
     pg_id = get_root_pg_id()
 
