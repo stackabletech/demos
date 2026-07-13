@@ -60,7 +60,7 @@ options:
               fieldRef:
                 fieldPath: metadata.namespace
         # This file path needs adjustment for versioned demos on release branch
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/refs/heads/fix/signal-processing-jupyterhub-chart/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook
