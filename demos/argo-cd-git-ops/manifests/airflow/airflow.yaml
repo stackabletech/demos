@@ -15,7 +15,7 @@ spec:
     exposeConfig: false
     metadataDatabase:
       postgresql:
-        host: airflow-postgresql
+        host: postgresql-airflow
         database: airflow
         credentialsSecretName: airflow-postgresql-credentials
     credentialsSecretName: airflow-admin-credentials
