@@ -5,6 +5,8 @@ repo:
   name: jupyterhub
   url: https://jupyterhub.github.io/helm-chart/
 version: 4.4.0 # appVersion: 5.5.0
+# Find values here: https://github.com/jupyterhub/zero-to-jupyterhub-k8s/blob/main/jupyterhub/values.yaml
+# Note, they don't tag the repository, so you need to find _a_ commit where the Chart version matches what you are looking for.
 options:
   hub:
     config:
@@ -40,6 +42,11 @@ options:
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
       name: oci.stackable.tech/demos/jupyter-pyspark-with-alibi-detect
       tag: python-3.9
+    cloudMetadata:
+      # Disable, otherwise we get Back-off restarting failed container block-cloud-metadata in pod:
+      # block-cloud-metadata iptables v1.8.9 (legacy): can't initialize iptables table `filter': Table does not exist (do you need to insmod?)
+      # I believe this breaks in Kernel 7.x.
+      blockWithIptables: false
     serviceAccountName: spark
     networkPolicy:
       enabled: false
@@ -51,11 +58,19 @@ options:
       # {% if DEMO is defined %}
       stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
+    extraEnv:
+      # Needed because the Notebook runs code to interpolate the Postgres DB hostname with a namespace.
+      # We cannot use the downward API because some python code uses it and expects scalar values.
+      # We also MUST use a dict, otherwise hub shows the following error:
+      # traitlets.traitlets.TraitError: The 'environment' trait of a KubeSpawner instance expected a dict, not the list [{'name': 'NAMESPACE', 'value': 'my-namespace'}].
+      # A helper in the chart formats these properly for any container env vars in Pods.
+      NAMESPACE: "{{ NAMESPACE }}"
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        env:
         # This file path needs adjustment for versioned demos on release branch
-        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
+        command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/refs/heads/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
           - mountPath: /notebook
             name: notebook
