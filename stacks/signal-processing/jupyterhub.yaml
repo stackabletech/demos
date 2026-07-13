@@ -54,6 +54,11 @@ options:
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+        env:
+          - name: NAMESPACE
+            valueFrom:
+              fieldRef:
+                fieldPath: metadata.namespace
         # This file path needs adjustment for versioned demos on release branch
         command: ['sh', '-c', 'curl https://raw.githubusercontent.com/stackabletech/demos/main/stacks/signal-processing/tsdb.ipynb -o /notebook/tsdb.ipynb']
         volumeMounts:
