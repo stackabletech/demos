@@ -203,8 +203,12 @@ options:
               "{{cpu}}":
                 display_name: "{{cpu}}"
                 kubespawner_override:
-                  cpu_guarantee: "{{cpu}}"
-                  cpu_limit: "{{cpu}}"
+                  # We cannot quote these values because both fields MUST be a float, not a string.
+                  # The Kubernetes notation (eg. 500m) is also not supported.
+                  # See https://github.com/jupyterhub/helm-chart/issues/69
+                  # This leads to this file being skipped in the Helm Chart bump script. Beware!
+                  cpu_guarantee: {{cpu}}
+                  cpu_limit: {{cpu}}
 # {% endfor %}
           memory:
             display_name: Memory

@@ -1,0 +1,45 @@
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: superset-regorules
+  labels:
+    opa.stackable.tech/bundle: superset
+data:
+  superset_roles.rego: |
+    package superset
+
+    # Superset roles assigned to users by the OpaSupersetSecurityManager on every
+    # login, replacing any roles assigned via the Superset UI or directly in the
+    # metadata database. The roles must already exist in the Superset metadata
+    # database, otherwise the assignment is skipped and an error is logged.
+
+    # Roles every user gets: Gamma plus SQL Lab access
+    base_roles := ["Gamma", "sql_lab"]
+
+    # Keycloak groups -> additional Superset roles granting dashboard access.
+    # Note that this only controls dashboard visibility in Superset. Access to
+    # the underlying data is enforced by Trino (see trino-policies.yaml) based
+    # on the same Keycloak groups.
+    group_roles := {
+        "/Customer Service/Analytics": ["Customer Service Analytics"],
+        "/Compliance and Regulation/Analytics": ["Compliance and Regulation Analytics"],
+        "/Marketing": ["Marketing"],
+    }
+
+    # The "admin" account is created by the superset-operator in the metadata
+    # database. The Keycloak realm (see keycloak-realm-config.yaml) contains a
+    # matching user, so that the Superset admin can log in via Single Sign On.
+    user_roles := ["Admin"] if {
+        input.username == "admin"
+    }
+
+    user_roles := roles if {
+        input.username != "admin"
+        groups := data.stackable.opa.userinfo.v1.userInfoByUsername(input.username).groups
+        department_roles := [role |
+            some group in groups
+            some role in group_roles[group]
+        ]
+        roles := array.concat(base_roles, department_roles)
+    }

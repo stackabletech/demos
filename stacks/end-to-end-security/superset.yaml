@@ -17,7 +17,7 @@ spec:
   image:
     productVersion: 6.1.0
   clusterConfig:
-    credentialsSecretName: superset-admin-credentials
+    credentialsSecret: superset-admin-credentials
     metadataDatabase:
       postgresql:
         host: postgresql-superset
@@ -27,7 +27,13 @@ spec:
       - authenticationClass: keycloak
         oidc:
           clientCredentialsSecret: superset-keycloak-client
-        userRegistrationRole: Gamma_extended
+        userRegistrationRole: Gamma
+    # Superset roles are assigned at every login based on the Keycloak group
+    # memberships, see superset-regorules.yaml
+    authorization:
+      roleMappingFromOpa:
+        configMapName: opa
+        package: superset
   nodes:
     roleConfig:
       listenerClass: external-stable
@@ -52,10 +58,10 @@ metadata:
 type: Opaque
 stringData:
   adminUser.username: admin
-  adminUser.firstname: Superset
+  adminUser.firstname: Admin
   adminUser.lastname: Admin
-  adminUser.email: admin@superset.com
-  adminUser.password: {{ supersetAdminPassword }}
+  adminUser.email: admin@example.com
+  adminUser.password: {{ adminPassword }}
 ---
 apiVersion: v1
 kind: Secret
