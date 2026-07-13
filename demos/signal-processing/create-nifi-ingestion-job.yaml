@@ -90,7 +90,7 @@ data:
     # At release time, .scripts/update_refs.sh rewrites the branch in this URL to the release
     # branch. Keep the URL in a form its regex matches, or release-branch installs will
     # download this file from main (see the 26.3 regression).
-    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/main/demos/signal-processing/DownloadAndWriteToDB.json")
+    response = requests.get("https://raw.githubusercontent.com/stackabletech/demos/refs/heads/fix/signal-processing-jupyterhub-chart/demos/signal-processing/DownloadAndWriteToDB.json")
 
     filename = "/tmp/DownloadAndWriteToDB.json"
     with open(filename, "w") as f:
