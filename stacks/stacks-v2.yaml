@@ -13,19 +13,19 @@ stacks:
       ################################
       # bootstrap argo
       ################################
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/fix/argo-cd-demo-sealed-secrets/stacks/_templates/argo-cd.yaml
+      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/argo-cd.yaml
       ################################
       # prerequisites
       ################################
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/fix/argo-cd-demo-sealed-secrets/stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applications/sealed-secrets.yaml
       ################################
       # project - operators
       ################################
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/fix/argo-cd-demo-sealed-secrets/stacks/argo-cd-git-ops/projects/stackable-operators.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/projects/stackable-operators.yaml
       ################################
       # applicationset - operators
       ################################
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/fix/argo-cd-demo-sealed-secrets/stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
     supportedNamespaces:
       - argo-cd
     resourceRequests:
