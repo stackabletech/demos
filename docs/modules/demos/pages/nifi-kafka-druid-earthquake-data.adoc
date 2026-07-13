@@ -258,7 +258,7 @@ You can see the available data sources by clicking on `Datasources` at the top.
 
 image::nifi-kafka-druid-earthquake-data/druid_4.png[]
 
-You can see the data source's segments by clicking on `segments` under `Availability` for the `earthquakes` data source.
+You can see the data source's segments by clicking on `Segments` in the menu bar at the top.
 In this case, the `earthquakes` data source is partitioned by the year of the earthquakes, resulting in 73 segments.
 
 image::nifi-kafka-druid-earthquake-data/druid_5.png[]
@@ -343,7 +343,8 @@ On the top click on the tab `SQL` -> `SQL Lab`.
 
 image::nifi-kafka-druid-earthquake-data/superset_10.png[]
 
-On the left select the database `druid`, the schema `druid` and set `See table schema` to `earthquakes`.
+On the left select the database `druid`, the schema `druid` and select `earthquakes` from the `druid` folder.
+Click on `Add a new tab`.
 
 image::nifi-kafka-druid-earthquake-data/superset_11.png[]
 
