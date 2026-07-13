@@ -15,5 +15,5 @@ spec:
       namespace: stackable-airflow
       labels:
         stackable.tech/vendor: Stackable
-        stackable.tech/demo: "{{ DEMO }}"
+        stackable.tech/demo: argo-cd-git-ops
     type: Opaque

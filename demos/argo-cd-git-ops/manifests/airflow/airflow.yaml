@@ -5,7 +5,7 @@ metadata:
   name: airflow
   labels:
     stackable.tech/vendor: Stackable
-    stackable.tech/demo: "{{ DEMO }}"
+    stackable.tech/demo: argo-cd-git-ops
 spec:
   image:
     productVersion: 3.2.2
@@ -13,7 +13,12 @@ spec:
   clusterConfig:
     loadExamples: false
     exposeConfig: false
-    credentialsSecret: airflow-credentials
+    metadataDatabase:
+      postgresql:
+        host: airflow-postgresql
+        database: airflow
+        credentialsSecretName: airflow-postgresql-credentials
+    credentialsSecretName: airflow-admin-credentials
     # NOTE: This cannot be parameterized via stackablectl since it is synced via ArgoCD.
     #
     # In terms of forking the repository, this should not be a problem since the DAGs are the same.
