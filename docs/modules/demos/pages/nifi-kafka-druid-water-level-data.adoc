@@ -428,7 +428,7 @@ The `Avg. row size (bytes)` column shows that a typical `measurement` record has
 `222`, more than 50 times the size. So, by choosing two dedicated topics over a single topic, this demo saved 50x of
 storage and computation costs.
 
-By clicking on `segments` under `Availability` for the `measurements` data source, you can see the segments of the data source.
+Click `Segments` in the menu bar at the top to see the segments of the data source.
 In this case, the `measurements` data source is partitioned by the measurement day, resulting in 32 segments.
 
 image::nifi-kafka-druid-water-level-data/druid_5.png[]
@@ -509,12 +509,13 @@ image::nifi-kafka-druid-water-level-data/superset_8.png[]
 
 === Execute arbitrary SQL statements
 
-Within Superset, you can create dashboards and run arbitrary SQL statements. On the top, click on the tab `SQL` ->
-`SQL Lab`.
+Within Superset, you can create dashboards and run arbitrary SQL statements.
+On the top, click on the tab `SQL` -> `SQL Lab`.
 
 image::nifi-kafka-druid-water-level-data/superset_9.png[]
 
-On the left, select the database `druid`, the schema `druid` and set `See table schema` to `stations` or `measurements`.
+On the left select the database `druid`, the schema `druid` and select `stations` or `measurements` from the `druid` folder.
+Click on `Add a new tab`.
 
 image::nifi-kafka-druid-water-level-data/superset_10.png[]
 
