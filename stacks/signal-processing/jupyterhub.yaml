@@ -42,6 +42,11 @@ options:
       # the demo is reproducable for the release and it will be automatically replaced for the release branch.
       name: oci.stackable.tech/demos/jupyter-pyspark-with-alibi-detect
       tag: python-3.9
+    cloudMetadata:
+      # Disable, otherwise we get Back-off restarting failed container block-cloud-metadata in pod:
+      # block-cloud-metadata iptables v1.8.9 (legacy): can't initialize iptables table `filter': Table does not exist (do you need to insmod?)
+      # I believe this breaks in Kernel 7.x.
+      blockWithIptables: false
     serviceAccountName: spark
     networkPolicy:
       enabled: false
