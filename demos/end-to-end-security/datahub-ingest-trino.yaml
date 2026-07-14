@@ -60,7 +60,18 @@ spec:
         source: trino
     spec:
       restartPolicy: OnFailure
+      serviceAccountName: demo-serviceaccount
       initContainers:
+        - name: wait-for-trino-tables
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo "Waiting for Job create-tables-in-trino to complete"
+              kubectl wait --timeout=30m --for=condition=complete job/create-tables-in-trino
         # Extract the internal CA from a secret-operator-provisioned truststore
         # so the ingest container can trust Trino's cert. Uses openssl (already
         # in the datahub-ingestion image) instead of pulling a separate JRE image.

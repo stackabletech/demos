@@ -75,12 +75,11 @@ options:
         value: "true"
       - name: ELASTICSEARCH_INDEX_BUILDER_SETTINGS_REINDEX
         value: "true"
+  datahub-frontend:
+    enabled: true
   # ---------------------------------------------------------------------------
   # Everything else — disabled for the demo footprint.
-  # Frontend can be enabled later with a single helm upgrade; no state migration.
   # ---------------------------------------------------------------------------
-  datahub-frontend:
-    enabled: false
   acryl-datahub-actions:
     enabled: false
   datahub-ingestion-cron:
