@@ -1,0 +1,217 @@
+= openlineage-trino-airflow
+:description: Demo showcasing OpenLineage data lineage emitted by Trino and Airflow and visualized in Marquez, enabled with minimal configuration.
+
+:openlineage: https://openlineage.io/
+:marquez: https://marquezproject.ai/
+:trino-openlineage-docs: https://trino.io/docs/current/admin/event-listeners-openlineage.html
+:airflow-openlineage-docs: https://airflow.apache.org/docs/apache-airflow-providers-openlineage/stable/index.html
+
+This demo shows how two Stackable Data Platform (SDP) products - Apache Trino and Apache Airflow - can emit
+{openlineage}[OpenLineage{external-link-icon}^] events with a single configuration toggle each, and how those events
+come together in {marquez}[Marquez{external-link-icon}^], the OpenLineage reference metadata server and UI.
+
+Install this demo on an existing Kubernetes cluster:
+
+[NOTE]
+====
+The namespace `openlineage-demo` will be assumed in this guide.
+It will be created if it doesn't exist.
+====
+
+[source,console]
+----
+$ stackablectl demo install openlineage-trino-airflow -n openlineage-demo
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 5 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units{external-link-icon}^] (core/hyperthread)
+* 12GiB memory
+* 15GiB disk storage
+
+== Overview
+
+This demo will
+
+* Install the required Stackable operators
+* Spin up the following products
+** *Trino*: A fast distributed SQL query engine. It is configured with the built-in, first-party `openlineage` event
+   listener so that every query emits table- and column-level lineage.
+** *Airflow*: A workflow orchestrator. The native `apache-airflow-providers-openlineage` provider is enabled so that
+   DAG and task runs - including the datasets they read and write - are reported as lineage.
+** *PostgreSQL*: Metadata database for Airflow.
+** *Marquez*: The OpenLineage reference server + web UI (with its own PostgreSQL), used here as the consuming
+   application that collects and visualizes the lineage. Marquez is only part of this demo, not an SDP product.
+* Mount and trigger a single Airflow DAG (`openlineage_demo`) that runs a small ELT pipeline in Trino
+* Let you explore the resulting lineage graph in the Marquez UI
+
+The DAG builds a layered set of tables using Trino's built-in `tpch` catalog as the source and the in-memory `memory`
+catalog as the sink:
+
+[source]
+----
+tpch.tiny.customer ─┐
+                    ├─> memory.demo.customer_orders
+tpch.tiny.orders  ──┘
+----
+
+Both products report to the *same* Marquez instance (`http://marquez:5000`): Trino emits the per-query dataset lineage,
+while Airflow emits the job/task run events (and dataset lineage via the Trino SQL operator).
+
+== How OpenLineage is enabled
+
+This demo deliberately uses only the existing SDP override mechanisms - there are *no operator or CRD changes*. This
+mirrors how a future "single toggle" feature would behave, while validating the approach today.
+
+*Trino* loads the bundled `openlineage` event listener through a small properties file. A `ConfigMap` supplies the
+file, `podOverrides` mounts it, and `configOverrides` registers it in `config.properties`:
+
+[source,properties]
+----
+event-listener.name=openlineage
+openlineage-event-listener.transport.type=HTTP
+openlineage-event-listener.transport.url=http://marquez:5000
+openlineage-event-listener.transport.endpoint=/api/v1/lineage
+openlineage-event-listener.trino.uri=https://trino-coordinator:8443
+openlineage-event-listener.namespace=trino-openlineage-demo
+----
+
+`trino.uri` is Trino's own serving address; it names the *dataset* namespace, so pointing it at the same
+`trino-coordinator:8443` that Airflow uses lets both producers report the same tables under one namespace.
+`namespace` sets an explicit, colon-free *job* namespace - without it Marquez cannot parse the node ID of a
+Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[Trino OpenLineage event
+listener docs{external-link-icon}^] for details.
+
+*Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
+
+[source]
+----
+AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+AIRFLOW__OPENLINEAGE__NAMESPACE="airflow-openlineage-demo"
+----
+
+See the {airflow-openlineage-docs}[Airflow OpenLineage provider docs{external-link-icon}^] for details.
+
+== List deployed Stackable services
+
+To list the installed Stackable services run the following command:
+
+[source,console]
+----
+$ stackablectl stacklet list --namespace openlineage_demo
+
+┌─────────┬─────────┬───────────────────┬──────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME    ┆ NAMESPACE         ┆ ENDPOINTS                                  ┆ CONDITIONS                      │
+╞═════════╪═════════╪═══════════════════╪══════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow ┆ openlineage-demo  ┆ webserver-http   http://172.19.0.3:31483   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino   ┆ trino   ┆ openlineage-demo  ┆ coordinator-https https://172.19.0.5:31087 ┆ Available, Reconciling, Running │
+└─────────┴─────────┴───────────────────┴──────────────────────────────────────────┴─────────────────────────────────┘
+----
+
+include::partial$instance-hint.adoc[]
+
+[NOTE]
+====
+Marquez is not an SDP product, so it does not appear in `stackablectl stacklet list`.
+====
+
+== Verify the demo worked
+
+The demo automatically triggers the `openlineage_demo` DAG once during installation, so a completed run
+and its lineage should already be present. You can confirm the full flow - Airflow orchestrating, Trino
+executing, and Marquez collecting the lineage - across three UIs.
+
+=== Airflow: the DAG tasks ran
+
+Open the Airflow web UI using the `webserver-http` endpoint from the `stackablectl stacklet list` output
+above, and log in with the username `admin` and the password `adminadmin`.
+
+Under *Dags* -> `openlineage_demo` -> *Task Instances* you should see the four tasks of the pipeline -
+`create_schema`, `load_customers`, `load_orders` and `customer_orders` - all in the `success` state:
+
+image::openlineage/airflow.png[Airflow Task Instances view showing the four openlineage_demo tasks in the success state]
+
+Each task is a `SQLExecuteQueryOperator` that submits a statement to Trino.
+
+=== Trino: the queries finished
+
+Open the Trino web UI using the `coordinator-https` endpoint from the `stackablectl stacklet list`
+output, and log in with the username `admin` and the password `adminadmin`.
+
+The *Query Details* page lists the statements Airflow submitted - the `CREATE SCHEMA`, `DROP TABLE` and
+`CREATE TABLE ... AS SELECT` statements that build the `memory.demo.*` tables from the `tpch.tiny.*`
+source - all in the `FINISHED` state. Their *Source* is `airflow`, confirming they originated from the
+DAG rather than an interactive session:
+
+image::openlineage/trino-queries.png[Trino Query Details page showing the finished CREATE TABLE queries submitted by Airflow]
+
+=== Marquez: the lineage was collected
+
+Marquez does not have an external listener. Forward its web UI to your machine:
+
+[source,console]
+----
+$ kubectl -n openlineage-demo port-forward svc/marquez-web 3000:3000
+----
+
+Then open http://localhost:3000 in your browser.
+
+The landing page lists the OpenLineage *Jobs* that Trino and Airflow reported, together with the event,
+dataset and source counts. You should see the `openlineage_demo` DAG job and the per-query jobs such as
+`openlineage_demo.customer_orders.query.*`, all *COMPLETED*:
+
+image::openlineage/marquez.png[Marquez home page listing the collected OpenLineage jobs as COMPLETED]
+
+Selecting a job opens its details. For example, `openlineage_demo.load_orders.query.2` shows the exact
+`CREATE TABLE memory.demo.orders AS SELECT ...` statement along with its OpenLineage *job* and *run*
+facets rendered as JSON - including the `sql` facet, the `AIRFLOW` integration, and the `externalQuery`
+facet that links back to the originating Trino query ID:
+
+image::openlineage/job-details-customer-orders-2.png[Marquez job details for load_orders showing the SQL statement and OpenLineage facets as JSON]
+
+== Explore the lineage in Marquez
+
+With the Marquez UI still open at http://localhost:3000, use the namespace selector at the top to switch
+between the namespaces that produced the lineage:
+
+* `trino-openlineage-demo` - the Trino query jobs (one per executed statement), set via
+  `openlineage-event-listener.namespace`, and
+* `trino://trino-coordinator:8443` - the datasets (`tpch.tiny.*` and `memory.demo.*`), named after the Trino
+  coordinator's address. Both the Trino event listener and the Airflow SQL operator report the tables under
+  this shared namespace, and
+* `airflow-openlineage-demo` - the `openlineage_demo` DAG and its tasks.
+
+Selecting the `memory.demo.customer_orders` dataset and expanding upstream shows the full graph back to
+`tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries:
+
+image::openlineage/customer-orders-2.png[Marquez lineage graph tracing memory.demo.customer_orders upstream through the jobs to tpch.tiny.customer and tpch.tiny.orders]
+
+[NOTE]
+====
+Trino and Airflow report lineage independently but, because `trino.uri` matches the address Airflow uses for its
+Trino connection, both name the tables under the same `trino://trino-coordinator:8443` namespace. Their lineage
+therefore converges on one shared set of dataset nodes: Trino contributes column-level detail per query, while
+Airflow contributes the task/DAG structure around the same tables.
+====
+
+== Summary
+
+This demo showed that both Trino and Airflow can emit OpenLineage data to Marquez with only a small amount of
+configuration and no changes to the SDP operators or CRDs. It serves as a validation of the approach ahead of adding
+first-class OpenLineage support to the platform.
+
+== Where to go from here
+
+* Trigger the `openlineage_demo` DAG again from the Airflow UI and watch new runs appear in Marquez.
+* Run your own queries against Trino (for example via `stackablectl stacklet list` to find the coordinator endpoint)
+  and see them show up as additional lineage.
+* Read more about {openlineage}[OpenLineage{external-link-icon}^] and {marquez}[Marquez{external-link-icon}^].
