@@ -4,19 +4,19 @@ name: kube-prometheus-stack
 repo:
   name: prometheus-community
   url: https://prometheus-community.github.io/helm-charts
-version: 82.10.3 # 0.89.0
+version: 87.12.2 # appVersion: v0.92.1
 options:
   commonLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ STACK }}
+    stackable.tech/stack: "{{ STACK }}"
     # The following is a Jinja2 template directive, not a regular comment.
     # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
     # {% if DEMO is defined %}
-    stackable.tech/demo: {{ DEMO }}
+    stackable.tech/demo: "{{ DEMO }}"
     # {% endif %}
   prometheusOperator:
     kubeletService:
-      namespace: {{ NAMESPACE }}
+      namespace: "{{ NAMESPACE }}"
   prometheus:
     prometheusSpec:
       storageSpec:
@@ -33,7 +33,7 @@ options:
     grafana.ini:
       analytics:
         check_for_updates: false
-    adminPassword: {{ grafanaAdminPassword }}
+    adminPassword: "{{ grafanaAdminPassword }}"
     persistence:
       enabled: true
       size: 10Gi

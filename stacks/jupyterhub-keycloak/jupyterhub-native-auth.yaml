@@ -9,7 +9,7 @@ repo:
 # Special care should be taken during testing when this version was bumped.
 # There might be cases where this needs to be dropped back, because the chart
 # is not compatible with other components of the stack/images used.
-version: 4.3.2 # 5.4.3
+version: 4.4.0 # appVersion: 5.5.0
 options:
   hub:
     config:
@@ -41,11 +41,11 @@ options:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
     profileList:
       - display_name: "Default"

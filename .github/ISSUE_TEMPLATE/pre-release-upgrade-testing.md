@@ -3,7 +3,7 @@ name: Pre-Release Demo Upgrade Testing
 about: |
   This template can be used to track the upgrade testing of demos from stable to
   nightly leading up to the next Stackable release.
-title: "chore(tracking): Test demo upgrades on nightly versions for YY.M.X"
+title: "tracking: Test demo upgrades to nightly versions for YY.M.X"
 labels: ['epic']
 assignees: ''
 ---
@@ -124,3 +124,34 @@ kubectl patch hbaseclusters/hbase --type='json' -p='[{"op": "replace", "path": "
 
 # Run through the (still) nightly demo/stack instructions again.
 ```
+
+<details>
+  <summary>HDFS rolling upgrade instructions</summary>
+
+  For demos that use HDFS, also test a rolling upgrade.
+  Also see <https://docs.stackable.tech/home/nightly/hdfs/usage-guide/upgrading/>
+
+  ```shell
+  # In some cases (eg. in the end-to-end-security demo), HDFS is kerberized.
+  # This requires these commands to be run first.
+  # Pick "nn/..."
+  klist -kt /stackable/kerberos/keytab
+  kinit -kt /stackable/kerberos/keytab <PRINCIPAL_FROM_ABOVE>
+
+  # These commands need to be executed in a superuser environment (eg. the namenode pod)
+  hdfs dfsadmin -rollingUpgrade prepare
+  hdfs dfsadmin -rollingUpgrade query  # repeat until "Proceed with rolling upgrade"
+
+  # Now patch the productVersion in your regular shell
+  kubectl patch hdfs/<CLUSTER_NAME> --type=merge \
+    --patch '{"spec": {"image": {"productVersion": "<NEW_VERSION>"}}}'
+
+  # Finalize the upgrade in the namenode pod
+  # Needs another kinit because the container was restarted
+  hdfs dfsadmin -rollingUpgrade finalize
+
+  kubectl patch hdfs/<CLUSTER_NAME> --subresource=status --type=merge \
+    --patch '{"status": {"deployedProductVersion": "<NEW_VERSION>"}}'
+  ```
+
+</details>

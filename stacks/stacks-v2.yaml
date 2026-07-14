@@ -543,6 +543,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/trino-policies.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/rbac.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/setup-postgresql.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
       # DataHub — brought in as a metadata catalog for the demo. Installed lightweight
       # (GMS-only, no frontend, no Neo4j) alongside its own OpenSearch + Kafka + MySQL prereqs.
@@ -562,8 +563,8 @@ stacks:
       - name: keycloakTrinoClientSecret
         description: Secret ID of the Keycloak Trino client that is used by Trino to connect to Keycloak to authenticate users
         default: trinotrino
-      - name: supersetAdminPassword
-        description: Password of the Superset admin user
+      - name: adminPassword
+        description: Password of the admin user (used for both the Superset admin and the matching Keycloak user)
         default: adminadmin
       - name: trinoSupersetUserPassword
         description: Password of the service Superset uses to connect to Trino. Superset itself will use impersonation for Trino users
