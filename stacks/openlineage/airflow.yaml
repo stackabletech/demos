@@ -56,8 +56,20 @@ spec:
           limit: 3Gi
     envOverrides: &envOverrides
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
-      # Point the OpenLineage provider at Marquez. This single block is the whole "toggle".
-      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      # Point the OpenLineage provider at Marquez over HTTPS (TLS terminated by the marquez-tls-proxy
+      # nginx in front of the API - see marquez.yaml). Use the FQDN, not the short name `marquez`:
+      # the secret-operator cert's SAN is the full service DNS name (marquez.<ns>.svc.cluster.local),
+      # matching how the S3Connection uses minio.{{ NAMESPACE }}.svc.cluster.local.
+      #
+      # `verify` is false here, deliberately - same as AIRFLOW_CONN_TRINO_DEFAULT below. The
+      # OpenLineage *Python* client's transport `verify` is bool-only (no CA-path option), so the
+      # only way to trust the self-signed `tls` CA would be the global REQUESTS_CA_BUNDLE env var.
+      # But `requests` applies REQUESTS_CA_BUNDLE to *every* connection and it overrides even an
+      # explicit `verify: false` (per-request verify defaults to None, so the env CA bundle wins over
+      # the session setting) - which breaks this DAG's Trino connection (self-signed, short hostname).
+      # So we accept unverified TLS for Airflow's lineage push (events still travel over HTTPS). The
+      # Java producers (Trino, Spark) DO verify properly via the JVM truststore - no such limitation.
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "https://marquez.{{ NAMESPACE }}.svc.cluster.local:5000", "endpoint": "api/v1/lineage", "verify": false}'
       AIRFLOW__OPENLINEAGE__NAMESPACE: "airflow-openlineage-demo"
       # Trino connection used by the demo DAG. TLS verification is disabled because Trino uses an
       # auto-generated (self-signed) CA in this demo; the password matches the `trino-users` Secret.
@@ -412,23 +424,6 @@ data:
         - name: script
           configMap:
             name: spark-openlineage-job
-        - name: spark-tls
-          ephemeral:
-            volumeClaimTemplate:
-              metadata:
-                annotations:
-                  secrets.stackable.tech/class: tls
-                  secrets.stackable.tech/scope: pod
-                  secrets.stackable.tech/format: tls-pkcs12
-                  secrets.stackable.tech/format.compatibility.tls-pkcs12.password: changeit
-                  secrets.stackable.tech/backend.autotls.cert.lifetime: 14d
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: "1"
-                storageClassName: secrets.stackable.tech
       job:
         config:
           resources:
@@ -446,8 +441,6 @@ data:
           volumeMounts:
             - name: script
               mountPath: /stackable/spark/jobs
-            - name: spark-tls
-              mountPath: /stackable/tls
       executor:
         replicas: 1
         config:
@@ -460,8 +453,6 @@ data:
           volumeMounts:
             - name: script
               mountPath: /stackable/spark/jobs
-            - name: spark-tls
-              mountPath: /stackable/tls
 ---
 apiVersion: v1
 kind: Secret

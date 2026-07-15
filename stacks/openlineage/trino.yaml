@@ -50,7 +50,17 @@ data:
   event-listener.properties: |
     event-listener.name=openlineage
     openlineage-event-listener.transport.type=HTTP
-    openlineage-event-listener.transport.url=http://marquez:5000
+    # HTTPS: events are pushed to Marquez over TLS (terminated by the marquez-tls-proxy nginx in
+    # front of the API - see stacks/openlineage/marquez.yaml). The OpenLineage *Java* client has no
+    # "disable verification" switch and never loads a custom truststore for server certs, so it
+    # relies on the JVM default truststore. Trino already trusts the `tls` SecretClass CA there
+    # (it reaches MinIO/S3 over TLS via the same CA), and that CA also signs Marquez's cert - so no
+    # extra trust config is needed here. If a handshake ever fails, add the CA via the operator's
+    # `jvmArgumentOverrides` (never hand-edit extraJavaOptions/jvm.config - operator-managed).
+    # Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service
+    # DNS name (marquez.<ns>.svc.cluster.local), so TLS hostname verification only passes on the FQDN
+    # - exactly as the S3Connection uses minio.{{ NAMESPACE }}.svc.cluster.local for the same reason.
+    openlineage-event-listener.transport.url=https://marquez.{{ NAMESPACE }}.svc.cluster.local:5000
     openlineage-event-listener.transport.endpoint=/api/v1/lineage
     # Must be Trino's real serving address (HTTPS on 8443 - TLS is enabled and 8080 is not exposed).
     # This is the naming string for the *dataset* namespace; matching the address Airflow uses in its

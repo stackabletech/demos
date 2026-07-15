@@ -56,6 +56,9 @@ This demo will
 ** *PostgreSQL*: Metadata databases for Airflow and the Hive metastore.
 ** *Marquez*: The OpenLineage reference server + web UI (with its own PostgreSQL), used here as the consuming
    application that collects and visualizes the lineage. Marquez is only part of this demo, not an SDP product.
+** *nginx*: A reverse-proxy placed in front of Marquez. Marquez itself only serves plain HTTP, so nginx terminates TLS
+   (using a certificate issued by the Stackable secret operator) so that both the lineage API and the web UI are
+   reached over HTTPS.
 * Mount and trigger a single Airflow DAG (`openlineage_demo`) that runs an ELT pipeline in Trino and then a Spark
   aggregation job
 * Let you explore the resulting lineage graph in the Marquez UI
@@ -71,9 +74,10 @@ tpch.tiny.customer ─┐
 tpch.tiny.orders  ──┘
 ----
 
-All three products report to the *same* Marquez instance (`http://marquez:5000`): Trino emits per-query dataset lineage
-(from its event listener), Airflow emits the DAG/task run events _plus_ the dataset lineage of every step, and Spark
-emits the read/write lineage of its job.
+All three products report to the *same* Marquez instance over HTTPS
+(`https://marquez.<namespace>.svc.cluster.local:5000`, fronted by the nginx reverse-proxy - see
+<<transport-security>>): Trino emits per-query dataset lineage (from its event listener), Airflow emits the DAG/task run
+events _plus_ the dataset lineage of every step, and Spark emits the read/write lineage of its job.
 
 The single, connected end-to-end graph lives in the *Airflow* namespace (`airflow-openlineage-demo`). Airflow is the
 orchestrator and a single OpenLineage producer, so it names every dataset consistently: the Trino SQL tasks report
@@ -94,6 +98,21 @@ producer's perspective on the same pipeline. The connected end-to-end flow is th
 This demo deliberately uses only the existing SDP override mechanisms - there are *no operator or CRD changes*. This
 mirrors how a future "single toggle" feature would behave, while validating the approach today.
 
+[#transport-security]
+=== Transport security (HTTPS)
+
+OpenLineage events are pushed to Marquez over *HTTPS*, and the Marquez web UI is served over HTTPS as well. Marquez's
+own API and UI containers only speak plain HTTP, so an https://nginx.org/[nginx{external-link-icon}^] reverse-proxy is
+deployed in front of them and terminates TLS, using a certificate issued by the Stackable secret operator (its built-in
+`tls` `SecretClass`). The real Marquez API and UI become internal HTTP-only backends (`marquez-backend` and
+`marquez-web-backend`), while the client-facing `marquez` and `marquez-web` Kubernetes Services route to the proxy.
+
+Producers address Marquez by its *fully-qualified* service name, `marquez.<namespace>.svc.cluster.local`, rather than
+the short name `marquez`: the certificate's subject alternative name (SAN) is the fully-qualified DNS name, so the short
+name would fail TLS hostname verification. Trino and Spark verify the certificate normally - both are JVM clients and
+already trust the secret operator's `tls` CA through their truststores. Airflow is the exception (see
+<<airflow-tls,below>>).
+
 *Trino* loads the bundled `openlineage` event listener through a small properties file. A `ConfigMap` supplies the
 file, `podOverrides` mounts it, and `configOverrides` registers it in `config.properties`:
 
@@ -101,7 +120,7 @@ file, `podOverrides` mounts it, and `configOverrides` registers it in `config.pr
 ----
 event-listener.name=openlineage
 openlineage-event-listener.transport.type=HTTP
-openlineage-event-listener.transport.url=http://marquez:5000
+openlineage-event-listener.transport.url=https://marquez.<namespace>.svc.cluster.local:5000
 openlineage-event-listener.transport.endpoint=/api/v1/lineage
 openlineage-event-listener.trino.uri=https://trino-coordinator:8443
 openlineage-event-listener.namespace=trino-openlineage-demo
@@ -113,13 +132,27 @@ openlineage-event-listener.namespace=trino-openlineage-demo
 Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[Trino OpenLineage event
 listener docs{external-link-icon}^] for details.
 
+[#airflow-tls]
 *Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
 
 [source]
 ----
-AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "https://marquez.<namespace>.svc.cluster.local:5000", "endpoint": "api/v1/lineage", "verify": false}'
 AIRFLOW__OPENLINEAGE__NAMESPACE="airflow-openlineage-demo"
 ----
+
+The transport `type` is `http` (the name of the OpenLineage HTTP transport), but the `url` is `https`, so events are
+still sent over TLS. Note `"verify": false`: *Airflow does not verify the TLS certificate - neither the CA nor the
+hostname - of its Marquez connection, nor of its Trino connection* (`AIRFLOW_CONN_TRINO_DEFAULT` likewise sets
+`verify: false`).
+
+This is a limitation of the OpenLineage *Python* client: its `verify` option is a boolean only - it cannot be pointed at
+a custom CA file - so the only way to make it trust the self-signed `tls` CA would be the process-wide
+`REQUESTS_CA_BUNDLE` environment variable. That variable applies to *every* HTTP client in the Airflow process and
+overrides an explicit `verify: false`, which would then force certificate verification onto the DAG's Trino connection.
+That verification fails, because the connection uses the short host name `trino-coordinator` while the certificate's SAN
+only contains the fully-qualified service name. Disabling verification for Airflow's two connections keeps the events
+flowing over HTTPS while avoiding this clash; Trino and Spark, as JVM clients, still verify normally.
 
 See the {airflow-openlineage-docs}[Airflow OpenLineage provider docs{external-link-icon}^] for details.
 
@@ -130,7 +163,7 @@ See the {airflow-openlineage-docs}[Airflow OpenLineage provider docs{external-li
 ----
 spark.extraListeners=io.openlineage.spark.agent.OpenLineageSparkListener
 spark.openlineage.transport.type=http
-spark.openlineage.transport.url=http://marquez:5000
+spark.openlineage.transport.url=https://marquez.<namespace>.svc.cluster.local:5000
 spark.openlineage.namespace=spark-openlineage-demo
 spark.app.name=orders-by-nation
 # parent* are injected at task runtime by the Airflow operator (see below) so they carry the

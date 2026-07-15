@@ -25,14 +25,22 @@
 #                image.repository: bitnamilegacy/postgresql, global...allowInsecureImages: true}
 #
 # POST-RENDER EDITS (the chart forces ONE shared service.{type,port} onto both the API and web
-# Services; there is no per-service override, so these two Service specs are hand-adjusted after
-# rendering - see the "POST-RENDER EDIT" markers below):
-#   * marquez     (API): kept ClusterIP :5000  - consumed only cluster-internally.
-#   * marquez-web (UI) : set to NodePort :3000 - the only component end users reach; port now
-#                        matches its container (chart would otherwise publish the UI on :5000).
+# Services; there is no per-service override, so these Service specs are hand-adjusted after
+# rendering - see the "POST-RENDER EDIT" markers below). TLS was also added (see next paragraph):
+#   * marquez     (API): renamed to marquez-backend    (ClusterIP :5000) - internal HTTP backend.
+#   * marquez-web (UI) : renamed to marquez-web-backend (ClusterIP :3000) - internal HTTP backend;
+#                        was NodePort, now internal (the TLS proxy owns the NodePort).
+#   * marquez-web Deployment env MARQUEZ_HOST: marquez -> marquez-backend.
 #
-# Resulting Services: marquez:5000 (API, ClusterIP), marquez-web:3000 (UI, NodePort),
-#                     marquez-postgresql:5432 (ClusterIP).
+# TLS: Marquez serves plain HTTP, so a hand-added nginx reverse-proxy (marquez-tls-proxy, at the
+# very bottom of this file, BELOW the vendored resources) terminates HTTPS in front of both the API
+# and the web UI using a `tls` SecretClass cert. It owns the client-facing `marquez` (API) and
+# `marquez-web` (UI) Service names; the vendored containers are untouched. When regenerating, replace
+# only the rendered resources and keep the hand-added block below the "HAND-ADDED" marker.
+#
+# Resulting client-facing Services: marquez:5000 (API, HTTPS via nginx, ClusterIP),
+#                     marquez-web:3000 (UI, HTTPS via nginx, NodePort);
+# internal backends: marquez-backend:5000, marquez-web-backend:3000, marquez-postgresql:5432.
 ---
 # Source: marquez/charts/postgresql/templates/secrets.yaml
 apiVersion: v1
@@ -177,7 +185,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: marquez
+  # POST-RENDER EDIT: renamed marquez -> marquez-backend. The plaintext-HTTP API is now an internal
+  # backend behind the marquez-tls-proxy nginx (which owns the `marquez` service name and terminates
+  # TLS). Reached only cluster-internally by nginx and by the marquez-web pod's /api proxy.
+  name: marquez-backend
   labels:
     app.kubernetes.io/name: marquez
     helm.sh/chart: marquez-0.51.1
@@ -186,8 +197,6 @@ metadata:
     app.kubernetes.io/component: marquez
   annotations:
 spec:
-  # POST-RENDER EDIT: chart default is a single service.type for both Services. The API is only
-  # consumed cluster-internally (Trino, Airflow, and the marquez-web pod), so keep it ClusterIP.
   type: ClusterIP
   ports:
     - port: 5000
@@ -205,7 +214,11 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: marquez-web
+  # POST-RENDER EDIT: renamed marquez-web -> marquez-web-backend and switched NodePort -> ClusterIP.
+  # The Node web UI serves plain HTTP and is now an internal backend behind the marquez-tls-proxy
+  # nginx (which owns the `marquez-web` service name + NodePort and terminates TLS). Reached only by
+  # nginx.
+  name: marquez-web-backend
   labels:
     app.kubernetes.io/name: marquez
     helm.sh/chart: marquez-0.51.1
@@ -214,9 +227,7 @@ metadata:
     app.kubernetes.io/component: web
   annotations:
 spec:
-  # POST-RENDER EDIT: the web UI is the only component end users reach, so expose it (NodePort) on
-  # its own container port 3000 - not the chart's shared service.port of 5000, which was confusing.
-  type: NodePort
+  type: ClusterIP
   ports:
     - port: 3000
       targetPort: http
@@ -373,8 +384,11 @@ spec:
               path: /healthcheck
               port: http
           env:
+            # POST-RENDER EDIT: marquez -> marquez-backend (the API Service was renamed). The web pod
+            # proxies /api server-side to this internal plaintext-HTTP backend; browser-facing TLS is
+            # handled by the marquez-tls-proxy nginx.
             - name: MARQUEZ_HOST
-              value: marquez
+              value: marquez-backend
             - name: MARQUEZ_PORT
               value: "5000"
             - name: WEB_PORT
@@ -544,3 +558,184 @@ spec:
         resources:
           requests:
             storage: "8Gi"
+
+# =============================================================================================
+# HAND-ADDED (NOT part of the vendored Marquez chart) - keep below the rendered resources so the
+# regenerate step above can overwrite everything above this line without touching this block.
+#
+# TLS termination for Marquez. Marquez's API (Dropwizard) and web UI (Node) do not serve HTTPS in
+# this demo, so a single nginx reverse-proxy terminates TLS in front of both, using a PEM cert from
+# the secret-operator `tls` SecretClass (the same CA that signs MinIO and Trino). The proxy owns the
+# `marquez` (API) and `marquez-web` (UI) Service names/ports that clients use; the upstream Marquez
+# containers are unchanged and stay on the internal *-backend Services over plaintext HTTP.
+#
+#   producers -> https://marquez.<ns>.svc.cluster.local:5000 -> nginx -> http://marquez-backend:5000
+#   browsers  -> https://<node>:<NodePort>                    -> nginx -> http://marquez-web-backend:3000
+# (Producers use the FQDN, not the short name `marquez`: the cert SAN is the full service DNS name,
+#  so TLS hostname verification only passes on the FQDN - as with the minio S3Connection.)
+# =============================================================================================
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marquez-nginx-config
+  labels:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy
+data:
+  nginx.conf: |
+    worker_processes auto;
+    error_log /dev/stderr warn;
+    pid /tmp/nginx.pid;
+    events {
+      worker_connections 1024;
+    }
+    http {
+      access_log /dev/stdout;
+      # nginx needs writable temp paths; /tmp is writable regardless of the runtime user.
+      client_body_temp_path /tmp/client_temp;
+      proxy_temp_path /tmp/proxy_temp;
+      fastcgi_temp_path /tmp/fastcgi_temp;
+      uwsgi_temp_path /tmp/uwsgi_temp;
+      scgi_temp_path /tmp/scgi_temp;
+
+      # Marquez API (what the OpenLineage producers push events to).
+      server {
+        listen 5000 ssl;
+        ssl_certificate     /stackable/tls/tls.crt;
+        ssl_certificate_key /stackable/tls/tls.key;
+        location / {
+          proxy_pass http://marquez-backend:5000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+        }
+      }
+
+      # Marquez web UI (what end users reach via the NodePort).
+      server {
+        listen 3000 ssl;
+        ssl_certificate     /stackable/tls/tls.crt;
+        ssl_certificate_key /stackable/tls/tls.key;
+        location / {
+          proxy_pass http://marquez-web-backend:3000;
+          proxy_set_header Host $host;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto https;
+        }
+      }
+    }
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marquez-tls-proxy
+  labels:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marquez
+      app.kubernetes.io/instance: marquez
+      app.kubernetes.io/component: tls-proxy
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: marquez
+        app.kubernetes.io/instance: marquez
+        app.kubernetes.io/component: tls-proxy
+    spec:
+      containers:
+        - name: nginx
+          image: docker.io/library/nginx:1.27-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https-api
+              containerPort: 5000
+              protocol: TCP
+            - name: https-web
+              containerPort: 3000
+              protocol: TCP
+          readinessProbe:
+            tcpSocket:
+              port: https-api
+          volumeMounts:
+            - name: nginx-config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: tls
+              mountPath: /stackable/tls
+          resources:
+            requests:
+              cpu: 100m
+              memory: 64Mi
+            limits:
+              memory: 128Mi
+      volumes:
+        - name: nginx-config
+          configMap:
+            name: marquez-nginx-config
+        # TLS cert from the secret-operator `tls` SecretClass. Default `tls-pem` format yields
+        # tls.crt / tls.key / ca.crt. The scope requests SANs for both Service names the proxy owns.
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: service=marquez,service=marquez-web
+              spec:
+                storageClassName: secrets.stackable.tech
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+---
+# The `marquez` Service name is what the OpenLineage producers target; it now points at the TLS
+# proxy (HTTPS on 5000) instead of the plaintext API.
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez
+  labels:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy
+spec:
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: https-api
+      protocol: TCP
+      name: https
+  selector:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy
+---
+# The `marquez-web` Service name/NodePort is what end users reach; it now points at the TLS proxy
+# (HTTPS on 3000) instead of the plaintext web UI.
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez-web
+  labels:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy
+spec:
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: https-web
+      protocol: TCP
+      name: https
+  selector:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: tls-proxy

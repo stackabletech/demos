@@ -724,8 +724,8 @@ stacks:
       - plainYaml: stacks/openlineage/airflow.yaml
     supportedNamespaces: []
     resourceRequests:
-      cpu: 10500m # ~8.5 cores steady (Trino, Airflow roles, Hive, MinIO, Marquez) + ~2 for the Spark job
-      memory: 22Gi # measured ~18Gi steady + ~4Gi while the Spark driver/executor run
+      cpu: 10600m # ~8.5 cores steady (Trino, Airflow roles, Hive, MinIO, Marquez) + ~2 for the Spark job + 100m nginx TLS proxy
+      memory: 22656Mi # measured ~18Gi steady + ~4Gi while the Spark driver/executor run + 64Mi nginx TLS proxy
       pvc: 40Gi # 10Gi MinIO + 3x8Gi PostgreSQL (airflow, hive-iceberg, marquez)
     parameters:
       - name: trinoAdminPassword

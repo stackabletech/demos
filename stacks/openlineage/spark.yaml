@@ -54,9 +54,21 @@ data:
 # references it via `spec.openLineage.configMapName: marquez-discovery`, and the operator resolves the
 # endpoint from the `ADDRESS` key (mirroring the vector-aggregator discovery ConfigMap contract).
 # Deployed into the same namespace as the SparkApplication.
+#
+# HTTPS: events go to Marquez over TLS (terminated by the marquez-tls-proxy nginx in front of the
+# API - see stacks/openlineage/marquez.yaml). The OpenLineage *Java* client verifies the server
+# cert against the JVM default truststore (it has no "disable verify" switch). The Spark driver
+# already trusts the `tls` SecretClass CA there - the operator wires that CA into the JVM truststore
+# so Spark can reach MinIO/S3 over TLS - and the same CA signs Marquez's cert, so no extra trust
+# config is needed. If a handshake ever fails, add the CA via the operator's `jvmArgumentOverrides`
+# (never hand-set spark.{driver,executor}.extraJavaOptions - operator-managed).
+#
+# Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service DNS
+# name (marquez.<ns>.svc.cluster.local), so TLS hostname verification only passes on the FQDN - just
+# like the S3Connection uses minio.{{ NAMESPACE }}.svc.cluster.local.
 apiVersion: v1
 kind: ConfigMap
 metadata:
   name: marquez-discovery
 data:
-  ADDRESS: http://marquez:5000
+  ADDRESS: https://marquez.{{ NAMESPACE }}.svc.cluster.local:5000
