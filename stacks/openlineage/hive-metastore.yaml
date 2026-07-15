@@ -15,6 +15,7 @@ spec:
     # Cannot upgrade to 4.0.1 because we run into github.com/apache/iceberg/issues/12878
     # (kept in sync with the data-lakehouse-iceberg-trino-spark stack).
     productVersion: 4.0.0
+    pullPolicy: IfNotPresent
   clusterConfig:
     metadataDatabase:
       postgresql:

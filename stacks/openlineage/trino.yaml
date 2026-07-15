@@ -71,6 +71,7 @@ metadata:
 spec:
   image:
     productVersion: "481"
+    pullPolicy: IfNotPresent
   clusterConfig:
     catalogLabelSelector:
       matchLabels:
