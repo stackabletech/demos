@@ -79,7 +79,7 @@ spec:
       spec:
         containers:
           - name: airflow
-            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable26.7.0
             imagePullPolicy: IfNotPresent
             env:
               - name: NAMESPACE
@@ -107,7 +107,7 @@ spec:
       spec:
         containers:
           - name: base
-            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable26.7.0
             imagePullPolicy: IfNotPresent
             env:
               # Needed by the DAGs run by KubernetesPodOperator
