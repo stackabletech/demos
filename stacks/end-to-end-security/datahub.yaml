@@ -19,10 +19,22 @@ options:
   global:
     datahub:
       version: v1.6.0
-      # Dev-only: disable Metadata Service Authentication so ingestion pods don't
-      # need bearer tokens. This is a shortcut for the demo; not for production.
+      # Metadata Service Authentication: GMS rejects unauthenticated REST/OpenAPI
+      # calls — clients must present a bearer token (JWT) or system Basic auth.
+      # Without this, anyone who can reach datahub-gms:8080 (in-cluster or via a
+      # port-forward) has full read/write on the metadata graph.
+      #
+      # provisionSecrets is turned OFF so the chart does NOT auto-generate random
+      # secrets. Instead we ship a fixed, committed `datahub-auth-secrets` Secret
+      # (see datahub-auth-secret.yaml) so the credentials are known and stable for
+      # local script development. The chart's default secretRef/secretKey already
+      # point at `datahub-auth-secrets` with keys system_client_secret /
+      # token_service_signing_key / token_service_salt, so no further wiring needed.
+      # Dev-only — do not reuse these values in production.
       metadata_service_authentication:
-        enabled: false
+        enabled: true
+        provisionSecrets:
+          enabled: false
     elasticsearch:
       host: "opensearch-cluster-master"
       port: "9200"

@@ -547,7 +547,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
       # DataHub — brought in as a metadata catalog for the demo. Installed lightweight
       # (GMS-only, no frontend, no Neo4j) alongside its own OpenSearch + Kafka + MySQL prereqs.
-      - plainYaml: stacks/end-to-end-security/datahub-mysql-secret.yaml
+      - plainYaml: stacks/end-to-end-security/datahub-secrets.yaml
       - helmChart: stacks/end-to-end-security/datahub-prerequisites.yaml
       - helmChart: stacks/end-to-end-security/datahub.yaml
     parameters:

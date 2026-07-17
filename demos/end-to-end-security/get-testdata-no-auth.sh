@@ -11,40 +11,25 @@
 # Owner URNs (corpGroup/corpuser) are resolved to their display names, e.g. the
 # corpGroup GUID becomes the "Customer Analytics" group.
 #
-# GMS enforces Metadata Service Authentication, so every request carries an
-# HTTP Basic header for the DataHub system user (see AUTH_HEADER below).
-#
 # Run this after `stackablectl demo install end-to-end-security` has completed
 # AND the datahub-ingest-trino Job has finished.
 #
-# Prerequisite: a port-forward to GMS must be running in another terminal, e.g.
-#   kubectl port-forward svc/datahub-datahub-gms 8080:8080
-#
 # Usage:
-#   ./get-testdata.sh
+#   ./get-testdata.sh               # defaults to $KUBECONFIG or ~/.kube/config
+#   KUBECONFIG=/path/to/kc ./get-testdata.sh
 #
-# Optional env overrides:
-#   GMS=http://localhost:8080                                  # GMS base URL
-#   DATAHUB_SYSTEM_CLIENT_ID=__datahub_system                  # system client id
-#   DATAHUB_SYSTEM_CLIENT_SECRET=datahub-demo-system-secret    # system secret
-#
-# Requires: curl, jq
+# Requires: kubectl, jq
 
 set -euo pipefail
 
-# GMS base URL. Reach it via a port-forward (see the header comment); nothing in
-# this script talks to Kubernetes directly.
-GMS="${GMS:-http://localhost:8080}"
-
-# System-user credentials. These are the fixed dev values from the demo's
-# datahub-auth-secrets Secret; override via env if you changed them.
-SYSTEM_CLIENT_ID="${DATAHUB_SYSTEM_CLIENT_ID:-__datahub_system}"
-SYSTEM_CLIENT_SECRET="${DATAHUB_SYSTEM_CLIENT_SECRET:-datahub-demo-system-secret}"
-
-# DataHub's system authenticator strips the leading "Basic " and compares the
-# rest VERBATIM against "<id>:<secret>". It is NOT standard base64 Basic auth —
-# do not base64-encode this value.
-AUTH_HEADER="Authorization: Basic ${SYSTEM_CLIENT_ID}:${SYSTEM_CLIENT_SECRET}"
+GMS_POD="$(kubectl get pod -l app.kubernetes.io/name=datahub-gms -o jsonpath='{.items[0].metadata.name}' 2>/dev/null || true)"
+if [[ -z "${GMS_POD}" ]]; then
+  GMS_POD="$(kubectl get pod -o name 2>/dev/null | grep datahub-gms | head -1 | sed 's|pod/||')"
+fi
+if [[ -z "${GMS_POD}" ]]; then
+  echo "ERROR: no datahub-gms pod found. Is the demo installed and healthy?" >&2
+  exit 1
+fi
 
 # --- helpers ---------------------------------------------------------------
 
@@ -52,43 +37,22 @@ AUTH_HEADER="Authorization: Basic ${SYSTEM_CLIENT_ID}:${SYSTEM_CLIENT_SECRET}"
 # before they can go into a REST path.
 urlencode() { jq -rn --arg s "$1" '$s|@uri'; }
 
-# GET a GMS REST path. DataHub occasionally emits raw control characters inside
-# free-text aspects (e.g. column descriptions), which is invalid JSON; strip
-# them so jq can parse the response.
+# GET a GMS REST path from inside the pod. DataHub occasionally emits raw
+# control characters inside free-text aspects (e.g. column descriptions),
+# which is invalid JSON; strip them so jq can parse the response.
 gms_get() {
-  curl -sS -H "$AUTH_HEADER" "${GMS}/$1" | tr -d '\000-\037'
+  kubectl exec "${GMS_POD}" -- curl -sS "http://localhost:8080/$1" | tr -d '\000-\037'
 }
 
 # Search all entity URNs of a given type (dataset, container, ...), sorted.
 gms_search_urns() {
-  curl -sS -H "$AUTH_HEADER" \
+  kubectl exec "${GMS_POD}" -- curl -sS \
     -H 'Content-Type: application/json' \
-    -X POST "${GMS}/entities?action=search" \
+    -X POST 'http://localhost:8080/entities?action=search' \
     -d "{\"input\":\"*\",\"entity\":\"$1\",\"start\":0,\"count\":1000}" \
     | tr -d '\000-\037' \
     | jq -r '.value.entities[].entity' \
     | sort
-}
-
-# Fail early with an actionable message if GMS is unreachable or rejects auth,
-# instead of letting jq choke on an error body further down.
-preflight() {
-  local code
-  code="$(curl -sS -o /dev/null -w '%{http_code}' \
-    -H "$AUTH_HEADER" -H 'Content-Type: application/json' \
-    -X POST "${GMS}/entities?action=search" \
-    -d '{"input":"*","entity":"dataset","start":0,"count":1}' 2>/dev/null || echo 000)"
-  case "$code" in
-    200) : ;;
-    000) echo "ERROR: cannot reach GMS at ${GMS}. Is your port-forward running?" >&2
-         echo "       e.g.  kubectl port-forward svc/datahub-datahub-gms 8080:8080" >&2
-         exit 1 ;;
-    401|403) echo "ERROR: GMS rejected authentication (HTTP ${code})." >&2
-         echo "       Check DATAHUB_SYSTEM_CLIENT_ID / DATAHUB_SYSTEM_CLIENT_SECRET." >&2
-         exit 1 ;;
-    *)   echo "ERROR: unexpected HTTP ${code} from GMS at ${GMS}." >&2
-         exit 1 ;;
-  esac
 }
 
 # Resolve a corpGroup/corpuser owner URN to a human-readable name, caching the
@@ -168,31 +132,19 @@ describe_entity() {
 
 # --- main ------------------------------------------------------------------
 
-preflight
+echo "== querying GMS ($GMS_POD) =="
+echo
 
-# echo "== querying GMS ($GMS) =="
-# echo
+echo "== datasets (Trino tables/views) =="
+echo
+while read -r urn; do
+  [[ -z "$urn" ]] && continue
+  describe_entity "$urn"
+done < <(gms_search_urns dataset)
 
-# echo "== datasets (Trino tables/views) =="
-# echo
-# while read -r urn; do
-#   [[ -z "$urn" ]] && continue
-#   describe_entity "$urn"
-# done < <(gms_search_urns dataset)
-
-# echo "== containers (Trino catalogs/schemas) =="
-# echo
-# while read -r urn; do
-#   [[ -z "$urn" ]] && continue
-#   describe_entity "$urn"
-# done < <(gms_search_urns container)
-
-# # TEMP testing
-# describe_entity "urn:li:dataset:(urn:li:dataPlatform:trino,lakehouse.customer_analytics.customer,PROD)"
-# describe_entity "urn:li:dataPlatform:trino,lakehouse.employees.employees"
-# describe_entity "urn:li:container:c8531e5a52cacf56768d0bf77ca8787c"
-
-# gms_get "entitiesV2/$(urlencode "urn:li:corpuser:pamela.scott@knab.com")" | jq
-gms_get "entitiesV2/$(urlencode "urn:li:corpGroup:7ade3124-8608-4216-84ec-570cde11b2cc")" | jq
-# gms_get "entitiesV2/$(urlencode "urn:li:container:c8531e5a52cacf56768d0bf77ca8787c")" | jq
-# gms_get "entitiesV2/$(urlencode "urn:li:corpuser:datahub")" | jq
+echo "== containers (Trino catalogs/schemas) =="
+echo
+while read -r urn; do
+  [[ -z "$urn" ]] && continue
+  describe_entity "$urn"
+done < <(gms_search_urns container)

@@ -11,8 +11,12 @@
 # provisioned truststore.p12 in an initContainer and point the ingest
 # container's Python HTTP libraries at it via SSL_CERT_FILE / REQUESTS_CA_BUNDLE.
 #
-# Auth: uses the `data-import` static user (same as other demo automation).
-# Metadata Service Authentication is disabled on GMS for this dev setup.
+# Auth (source): reads from Trino as the `data-import` static user.
+# Auth (sink): GMS enforces Metadata Service Authentication, so the datahub-rest
+# sink authenticates as the DataHub system user. DataHub's system authenticator
+# expects the credentials verbatim as `Basic <id>:<secret>` — NOT standard
+# base64-encoded Basic auth — so we build that header from env vars sourced from
+# the datahub-auth-secrets Secret (see the sink config and env block below).
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -44,6 +48,12 @@ data:
       type: datahub-rest
       config:
         server: 'http://datahub-datahub-gms:8080'
+        # System Basic auth. DataHub's system authenticator compares the header
+        # value after "Basic " verbatim against "<systemClientId>:<secret>", so
+        # this must NOT be base64-encoded. ${VAR} is expanded by DataHub from the
+        # container env (injected from the datahub-auth-secrets Secret).
+        extra_headers:
+          Authorization: 'Basic ${DATAHUB_SYSTEM_CLIENT_ID}:${DATAHUB_SYSTEM_CLIENT_SECRET}'
 ---
 apiVersion: batch/v1
 kind: Job
@@ -124,6 +134,16 @@ spec:
               value: /trust/ca.crt
             - name: REQUESTS_CA_BUNDLE
               value: /trust/ca.crt
+            # Credentials for the datahub-rest sink's system Basic auth header.
+            # systemClientId is the chart default; the secret comes from the same
+            # datahub-auth-secrets Secret that GMS reads.
+            - name: DATAHUB_SYSTEM_CLIENT_ID
+              value: __datahub_system
+            - name: DATAHUB_SYSTEM_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: datahub-auth-secrets
+                  key: system_client_secret
           volumeMounts:
             - name: recipe
               mountPath: /recipe
