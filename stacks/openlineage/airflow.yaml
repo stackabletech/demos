@@ -387,12 +387,28 @@ data:
         pullPolicy: IfNotPresent
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/orders-by-nation.py
-      # OpenLineage lineage emission, enabled and wired by the Spark operator. Replaces the
-      # hand-written spark.openlineage.* sparkConf keys and the OL --packages entry below. The backend
-      # endpoint comes from the `marquez-discovery` ConfigMap (see spark.yaml).
+      # OpenLineage lineage emission, wired by the Spark operator. Replaces the hand-written
+      # spark.openlineage.* sparkConf keys and the OL --packages entry below. Adding the block enables
+      # OpenLineage; the backend connection is defined inline (host/port/tls). Setting
+      # `tls.verification.server` makes the operator emit an https:// transport URL. The `tls`
+      # SecretClass CA is already trusted by the Spark JVM truststore (the operator wires it in for the
+      # S3/MinIO connection, and the same CA signs Marquez's cert), so HTTPS to Marquez just works.
+      #
+      # The connection could instead `reference:` a standalone `OpenLineageConnection` resource, but
+      # that CRD is not installed by the Spark operator, so this demo inlines the connection.
+      #
+      # Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service
+      # DNS name (marquez.<ns>.svc.cluster.local), matching how the S3Connection uses minio.<ns>....
       openLineage:
-        enabled: true
-        configMapName: marquez-discovery
+        connection:
+          inline:
+            host: marquez.{{ NAMESPACE }}.svc.cluster.local
+            port: 5000
+            tls:
+              verification:
+                server:
+                  caCert:
+                    secretClass: tls
         # Carried over from the dropped spark.openlineage.{namespace,appName} keys to keep the demo's
         # lineage identity. appName is the timing-independent fix for the intermittent "unknown" job name.
         namespace: spark-openlineage-demo

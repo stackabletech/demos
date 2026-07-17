@@ -4,16 +4,16 @@
 # It reads TWO Iceberg tables the Trino ELT produced (`lakehouse.demo.customer_orders` and the
 # `lakehouse.demo.nation` dimension), JOINS them on `nationkey`, and writes a small aggregate
 # (`lakehouse.demo.orders_by_nation`) back into the same Iceberg catalog. Because the OpenLineage
-# Spark listener is enabled via sparkConf on the SparkApplication, this join+write is reported to
-# Marquez - the Spark half of the lineage graph, joined to the Trino half through the shared
-# `lakehouse.demo.customer_orders` and `lakehouse.demo.nation` tables.
+# Spark listener is enabled via `spec.openLineage` on the SparkApplication, this join+write is
+# reported to Marquez - the Spark half of the lineage graph, joined to the Trino half through the
+# shared `lakehouse.demo.customer_orders` and `lakehouse.demo.nation` tables.
 #
 # The join is what makes this interesting for lineage: OpenLineage reports the resulting Spark job
 # with BOTH source tables as inputs (a fan-in node), and - via the columnLineage facet - which
 # output columns derive from which input columns across the join.
 #
-# The Iceberg catalog (`lakehouse`), S3 access and the OpenLineage transport are all configured in
-# the SparkApplication's sparkConf, not here.
+# The Iceberg catalog (`lakehouse`) and S3 access are configured in the SparkApplication's sparkConf;
+# the OpenLineage transport is configured via its `spec.openLineage` block - neither is set here.
 ---
 apiVersion: v1
 kind: ConfigMap
@@ -49,26 +49,3 @@ data:
     orders_by_nation.writeTo("lakehouse.demo.orders_by_nation").using("iceberg").createOrReplace()
 
     spark.stop()
----
-# Discovery ConfigMap the Spark operator reads to find the OpenLineage backend. The SparkApplication
-# references it via `spec.openLineage.configMapName: marquez-discovery`, and the operator resolves the
-# endpoint from the `ADDRESS` key (mirroring the vector-aggregator discovery ConfigMap contract).
-# Deployed into the same namespace as the SparkApplication.
-#
-# HTTPS: events go to Marquez over TLS (terminated by the marquez-tls-proxy nginx in front of the
-# API - see stacks/openlineage/marquez.yaml). The OpenLineage *Java* client verifies the server
-# cert against the JVM default truststore (it has no "disable verify" switch). The Spark driver
-# already trusts the `tls` SecretClass CA there - the operator wires that CA into the JVM truststore
-# so Spark can reach MinIO/S3 over TLS - and the same CA signs Marquez's cert, so no extra trust
-# config is needed. If a handshake ever fails, add the CA via the operator's `jvmArgumentOverrides`
-# (never hand-set spark.{driver,executor}.extraJavaOptions - operator-managed).
-#
-# Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service DNS
-# name (marquez.<ns>.svc.cluster.local), so TLS hostname verification only passes on the FQDN - just
-# like the S3Connection uses minio.{{ NAMESPACE }}.svc.cluster.local.
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: marquez-discovery
-data:
-  ADDRESS: https://marquez.{{ NAMESPACE }}.svc.cluster.local:5000
