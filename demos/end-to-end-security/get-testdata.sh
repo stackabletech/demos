@@ -193,6 +193,8 @@ preflight
 # describe_entity "urn:li:container:c8531e5a52cacf56768d0bf77ca8787c"
 
 # gms_get "entitiesV2/$(urlencode "urn:li:corpuser:pamela.scott@knab.com")" | jq
-gms_get "entitiesV2/$(urlencode "urn:li:corpGroup:7ade3124-8608-4216-84ec-570cde11b2cc")" | jq
+# gms_get "entitiesV2/$(urlencode "urn:li:corpuser:daniel.king@knab.com")" | jq
+# gms_get "entitiesV2/$(urlencode "urn:li:corpGroup:7ade3124-8608-4216-84ec-570cde11b2cc")" | jq
 # gms_get "entitiesV2/$(urlencode "urn:li:container:c8531e5a52cacf56768d0bf77ca8787c")" | jq
 # gms_get "entitiesV2/$(urlencode "urn:li:corpuser:datahub")" | jq
+gms_get "entitiesV2/$(urlencode "urn:li:chart:(superset,1)")" | jq

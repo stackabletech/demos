@@ -1,0 +1,31 @@
+---
+apiVersion: kafka.stackable.tech/v1alpha1
+kind: KafkaCluster
+metadata:
+  name: kafka
+spec:
+  image:
+    productVersion: 4.2.1
+  clusterConfig:
+    authentication:
+      - authenticationClass: kafka-client-tls
+  controllers:
+    roleGroups:
+      default:
+        replicas: 1
+  brokers:
+    config:
+      bootstrapListenerClass: external-stable
+      brokerListenerClass: external-unstable
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: kafka-client-tls
+spec:
+  provider:
+    tls:
+      clientCertSecretClass: tls

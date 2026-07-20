@@ -1,0 +1,134 @@
+# DataHub ingestion job — pulls Superset metadata into DataHub GMS.
+#
+# Runs once as part of the demo. Ingests Superset dashboards, charts and datasets
+# into DataHub. Where a Superset dataset sits on top of the Trino `lakehouse`
+# catalog, DataHub links it to the Trino dataset URNs created by the sibling
+# datahub-ingest-trino job (run order between the two jobs does not matter).
+#
+# TLS: unlike Trino, Superset is served over plain HTTP (superset-node:8088, no
+# serverSecretClass on the SupersetCluster), so there is nothing to trust — the
+# CA-extraction initContainer and SSL_CERT_FILE wiring from the Trino job are not
+# needed here.
+#
+# Auth (source): Superset's UI authenticates via Keycloak OIDC, but the DataHub
+# Superset source talks to Superset's REST API (/api/v1/security/login), which
+# needs a `db`/`ldap` provider login. The `admin` user provisioned by the
+# superset-operator lives in the metadata database WITH a password, so we log in
+# as `admin` via `provider: db` — the same path the demo's own setup-superset
+# scripts use. The admin password is templated into the superset-admin-credentials
+# Secret, so we source it from there instead of hardcoding.
+#
+# Auth (sink): identical to the Trino job. GMS enforces Metadata Service
+# Authentication, so the datahub-rest sink authenticates as the DataHub system
+# user. DataHub's system authenticator expects the credentials verbatim as
+# `Basic <id>:<secret>` — NOT standard base64-encoded Basic auth — so we build
+# that header from env vars sourced from the datahub-auth-secrets Secret.
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: datahub-superset-recipe
+data:
+  recipe.yaml: |
+    pipeline_name: e2e-demo-superset-ingestion
+
+    source:
+      type: superset
+      config:
+        connect_uri: 'http://superset-node:8088'
+        # See header: log in as the operator-provisioned admin via the db
+        # provider even though the UI uses Keycloak OIDC. ${SUPERSET_PASSWORD} is
+        # expanded by the DataHub CLI from the container env (see the env block).
+        username: admin
+        password: '${SUPERSET_PASSWORD}'
+        provider: db
+        stateful_ingestion:
+          enabled: true
+
+    sink:
+      type: datahub-rest
+      config:
+        server: 'http://datahub-datahub-gms:8080'
+        # System Basic auth. DataHub's system authenticator compares the header
+        # value after "Basic " verbatim against "<systemClientId>:<secret>", so
+        # this must NOT be base64-encoded. ${VAR} is expanded by DataHub from the
+        # container env (injected from the datahub-auth-secrets Secret).
+        extra_headers:
+          Authorization: 'Basic ${DATAHUB_SYSTEM_CLIENT_ID}:${DATAHUB_SYSTEM_CLIENT_SECRET}'
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: datahub-ingest-superset
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: datahub-ingest
+        source: superset
+    spec:
+      restartPolicy: OnFailure
+      serviceAccountName: demo-serviceaccount
+      initContainers:
+        # Wait until Superset is fully up. The Superset pod itself gates on the
+        # setup-db-job (see stacks/.../superset.yaml podOverrides), so a rolled-out
+        # StatefulSet means the metadata DB has been restored and the admin user
+        # exists — i.e. the REST API login below will succeed.
+        - name: wait-for-superset
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo "Waiting for Superset to be ready"
+              kubectl rollout status --timeout=30m statefulset/superset-node-default
+      containers:
+        - name: ingest
+          image: acryldata/datahub-ingestion:v1.6.0
+          command:
+            - /bin/bash
+            - -c
+            - |
+              set -euo pipefail
+              echo "== datahub CLI =="
+              datahub --version || true
+              echo "== running ingestion =="
+              datahub ingest -c /recipe/recipe.yaml
+              echo "== ingestion complete =="
+          env:
+            # Superset admin password for the source's db-provider login. Sourced
+            # from the same Secret the superset-operator uses to create the admin.
+            - name: SUPERSET_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: superset-admin-credentials
+                  key: adminUser.password
+            # Credentials for the datahub-rest sink's system Basic auth header.
+            # systemClientId is the chart default; the secret comes from the same
+            # datahub-auth-secrets Secret that GMS reads.
+            - name: DATAHUB_SYSTEM_CLIENT_ID
+              value: __datahub_system
+            - name: DATAHUB_SYSTEM_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: datahub-auth-secrets
+                  key: system_client_secret
+          volumeMounts:
+            - name: recipe
+              mountPath: /recipe
+          resources:
+            requests:
+              cpu: "200m"
+              memory: "512Mi"
+            limits:
+              cpu: "1"
+              memory: "1Gi"
+      volumes:
+        - name: recipe
+          configMap:
+            name: datahub-superset-recipe

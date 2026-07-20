@@ -511,6 +511,7 @@ stacks:
       - trino
       - superset
       - spark-k8s
+      - kafka
     labels:
       - security
       - hdfs
@@ -545,8 +546,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/setup-postgresql.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset-regorules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/end-to-end-security/superset.yaml
-      # DataHub — brought in as a metadata catalog for the demo. Installed lightweight
-      # (GMS-only, no frontend, no Neo4j) alongside its own OpenSearch + Kafka + MySQL prereqs.
+      - plainYaml: stacks/end-to-end-security/kafka.yaml
       - plainYaml: stacks/end-to-end-security/datahub-secrets.yaml
       - helmChart: stacks/end-to-end-security/datahub-prerequisites.yaml
       - helmChart: stacks/end-to-end-security/datahub.yaml

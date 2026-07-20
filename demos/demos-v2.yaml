@@ -89,8 +89,8 @@ demos:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/create-trino-tables.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/end-to-end-security/serviceaccount.yaml
       - plainYaml: demos/end-to-end-security/create-spark-report.yaml
-      # One-shot ingestion job that populates DataHub with dataset URNs from the Trino catalog.
       - plainYaml: demos/end-to-end-security/datahub-ingest-trino.yaml
+      - plainYaml: demos/end-to-end-security/datahub-ingest-superset.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 9000m
