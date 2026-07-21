@@ -198,3 +198,4 @@ preflight
 # gms_get "entitiesV2/$(urlencode "urn:li:container:c8531e5a52cacf56768d0bf77ca8787c")" | jq
 # gms_get "entitiesV2/$(urlencode "urn:li:corpuser:datahub")" | jq
 gms_get "entitiesV2/$(urlencode "urn:li:chart:(superset,1)")" | jq
+# gms_get "entitiesV2/$(urlencode "urn:li:ownershipType:__system__business_owner")" | jq

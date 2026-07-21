@@ -1,0 +1,111 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-kafka-topics
+spec:
+  template:
+    spec:
+      securityContext:
+        # The secret-operator mounts the certificate files as root:1000 with
+        # mode 0660. Run with fsGroup 1000 (the "stackable" user) so the Kafka
+        # client can read them.
+        fsGroup: 1000
+      containers:
+        - name: create-kafka-topics
+          image: oci.stackable.tech/sdp/kafka:4.2.1-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              # This Kafka enforces mutual TLS: clients authenticate with a
+              # certificate issued by the "tls" SecretClass (see the
+              # kafka-client-tls AuthenticationClass in
+              # stacks/end-to-end-security/kafka.yaml). Assemble a PEM keystore
+              # (certificate chain + private key) and use the CA certificate as
+              # the truststore.
+              cat /stackable/tls/tls.crt /stackable/tls/tls.key > /stackable/keystore.pem
+              cat > /stackable/client.properties <<'EOF'
+              security.protocol=SSL
+              ssl.keystore.type=PEM
+              ssl.keystore.location=/stackable/keystore.pem
+              ssl.truststore.type=PEM
+              ssl.truststore.location=/stackable/tls/ca.crt
+              EOF
+
+              # Bootstrap via the headless Service: its FQDN is a SAN of the
+              # broker certificate, so TLS hostname verification succeeds. 9093
+              # is the secured ("kafka-tls") port.
+              BOOTSTRAP="kafka-broker-default-headless.{{ NAMESPACE }}.svc.cluster.local:9093"
+              KAFKA=/stackable/kafka/bin
+
+              create_topic_with_data() {
+                topic="$1"; shift
+                echo "==> Creating topic '$topic'"
+                "$KAFKA/kafka-topics.sh" --bootstrap-server "$BOOTSTRAP" \
+                  --create --if-not-exists --topic "$topic" \
+                  --partitions 1 --replication-factor 1 \
+                  --command-config /stackable/client.properties
+
+                # Only produce when the topic is still empty, so re-running this
+                # Job does not append duplicate records.
+                end_offset=$("$KAFKA/kafka-get-offsets.sh" --bootstrap-server "$BOOTSTRAP" \
+                  --topic "$topic" --command-config /stackable/client.properties 2>/dev/null \
+                  | cut -d: -f3)
+                if [ "${end_offset:-0}" -gt 0 ]; then
+                  echo "    Topic '$topic' already contains ${end_offset} records, skipping test data"
+                  return
+                fi
+
+                echo "    Producing test data into '$topic'"
+                printf '%s\n' "$@" \
+                  | "$KAFKA/kafka-console-producer.sh" --bootstrap-server "$BOOTSTRAP" \
+                      --topic "$topic" --command-config /stackable/client.properties
+              }
+
+              create_topic_with_data transactions \
+                '{"txn_id": "T-1001", "account": "NL91KNAB0417164300", "amount": 149.90, "currency": "EUR", "ts": "2026-07-20T08:15:00Z"}' \
+                '{"txn_id": "T-1002", "account": "NL91KNAB0417164301", "amount": 12.49, "currency": "EUR", "ts": "2026-07-20T08:16:32Z"}' \
+                '{"txn_id": "T-1003", "account": "NL91KNAB0417164300", "amount": 2100.00, "currency": "EUR", "ts": "2026-07-20T08:20:05Z"}' \
+                '{"txn_id": "T-1004", "account": "NL91KNAB0417164302", "amount": 59.99, "currency": "EUR", "ts": "2026-07-20T08:22:41Z"}' \
+                '{"txn_id": "T-1005", "account": "NL91KNAB0417164301", "amount": 799.00, "currency": "EUR", "ts": "2026-07-20T08:25:12Z"}'
+
+              create_topic_with_data customer-events \
+                '{"customer_id": "C-42", "event": "login", "channel": "mobile", "ts": "2026-07-20T08:14:58Z"}' \
+                '{"customer_id": "C-42", "event": "profile_update", "field": "email", "ts": "2026-07-20T08:17:10Z"}' \
+                '{"customer_id": "C-77", "event": "login", "channel": "web", "ts": "2026-07-20T08:19:44Z"}' \
+                '{"customer_id": "C-77", "event": "card_blocked", "reason": "customer_request", "ts": "2026-07-20T08:23:01Z"}'
+
+              create_topic_with_data access-logs \
+                '{"user": "sophia.clarke", "resource": "lakehouse.customer_analytics.customer", "action": "SELECT", "allowed": true, "ts": "2026-07-20T08:15:20Z"}' \
+                '{"user": "william.lewis", "resource": "lakehouse.compliance_analytics.customer_enriched", "action": "SELECT", "allowed": false, "ts": "2026-07-20T08:16:05Z"}' \
+                '{"user": "pamela.scott", "resource": "lakehouse.employees.employees", "action": "SELECT", "allowed": true, "ts": "2026-07-20T08:18:37Z"}' \
+                '{"user": "daniel.king", "resource": "lakehouse.employees.employees", "action": "SELECT", "allowed": false, "ts": "2026-07-20T08:21:49Z"}'
+
+              echo "==> Successfully created all Kafka topics with test data"
+          volumeMounts:
+            # Certificate issued by the secret-operator for mutual TLS
+            # authentication against Kafka.
+            - name: tls
+              mountPath: /stackable/tls
+      volumes:
+        # Request a TLS certificate from the "tls" SecretClass.
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: pod
+              spec:
+                storageClassName: secrets.stackable.tech
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+      restartPolicy: OnFailure
+  # Retry while the Kafka cluster is still starting up.
+  backoffLimit: 50
