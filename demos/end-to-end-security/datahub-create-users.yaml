@@ -1,0 +1,195 @@
+# Creates the demo's users and groups in DataHub, and assigns groups as owners.
+#
+# The same users and groups already exist in Keycloak (imported from the realm
+# in stacks/end-to-end-security/keycloak-realm-config.yaml, documented at
+# https://docs.stackable.tech/home/stable/demos/end-to-end-security/#user-credentials).
+# This Job mirrors them into DataHub as CorpUser / CorpGroup entities so the
+# people acting in the demo (and referenced in the Trino/OPA policies and the
+# Kafka access-logs) also show up in DataHub's metadata graph, and it marks the
+# groups as Business Owners of the Trino `lakehouse` schemas they are responsible
+# for.
+#
+# It fires plain HTTP calls at the GMS OpenAPI v3 entity endpoint:
+#   - POST /openapi/v3/entity/corpgroup  -> create a group (corpGroupInfo)
+#   - POST /openapi/v3/entity/corpuser   -> create a user (corpUserInfo) and, in
+#     the same request, its groupMembership aspect (the IsMemberOfGroup edge that
+#     the UI renders under a group's "Members" tab).
+#   - POST /openapi/v3/entity/container  -> write the ownership aspect on a schema.
+# All calls pass `createIfNotExists=false`, which makes GMS UPSERT the aspect
+# (create when absent, overwrite when present) instead of the default CREATE
+# (which errors once the aspect exists). So the Job is idempotent / re-runnable.
+#
+# DataHub groups are flat (no hierarchy), so the Keycloak group paths
+# "/Customer Service/Analytics" etc. become plain display names here.
+#
+# Ordering: ownership targets containers created by the datasource ingestion Jobs
+# (datahub-ingest-{trino,superset,kafka}), so an initContainer waits for all of
+# them to complete before this Job writes anything.
+#
+# Auth (sink): identical to the datahub-ingest-* jobs. GMS enforces Metadata
+# Service Authentication, so we authenticate as the DataHub system user. DataHub's
+# system authenticator expects the credentials verbatim as `Basic <id>:<secret>` —
+# NOT standard base64-encoded Basic auth — built here from env vars sourced from
+# the datahub-auth-secrets Secret.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: datahub-create-users
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  backoffLimit: 10
+  template:
+    metadata:
+      labels:
+        app: datahub-create-users
+    spec:
+      restartPolicy: OnFailure
+      # For the initContainer's `kubectl wait` on the ingestion Jobs (the
+      # demo-serviceaccount ClusterRole grants get/list/watch on batch/jobs).
+      serviceAccountName: demo-serviceaccount
+      initContainers:
+        - name: wait-for-datahub-ingestion
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              # Ownership below is attached to containers/datasets that the
+              # datasource ingestion Jobs create, so wait for all of them first.
+              for job in datahub-ingest-trino datahub-ingest-superset datahub-ingest-kafka; do
+                echo "==> Waiting for Job $job to complete"
+                # The Job may not exist yet when this pod starts, so wait for it
+                # to appear before waiting for completion.
+                until kubectl get "job/$job" >/dev/null 2>&1; do
+                  echo "    $job not created yet, retrying in 5s"
+                  sleep 5
+                done
+                kubectl wait --timeout=30m --for=condition=complete "job/$job"
+              done
+              echo "==> All DataHub ingestion Jobs completed"
+      containers:
+        - name: create-users
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              GMS="http://datahub-datahub-gms:8080"
+              # System Basic auth. DataHub compares the header value after "Basic "
+              # verbatim against "<systemClientId>:<secret>", so it must NOT be
+              # base64-encoded.
+              AUTH="Basic ${DATAHUB_SYSTEM_CLIENT_ID}:${DATAHUB_SYSTEM_CLIENT_SECRET}"
+
+              echo "==> Waiting for DataHub GMS to become healthy"
+              tries=0
+              until curl -fsS -o /dev/null "$GMS/health"; do
+                tries=$((tries + 1))
+                if [ "$tries" -ge 60 ]; then
+                  echo "    GMS still not healthy after 5 minutes, giving up"
+                  exit 1
+                fi
+                echo "    GMS not ready yet (attempt $tries/60), retrying in 5s"
+                sleep 5
+              done
+
+              # UPSERT a JSON array of entities to an OpenAPI v3 entity endpoint.
+              # createIfNotExists=false -> overwrite the aspect if it already
+              # exists (idempotent); async=false -> a failed write returns non-2xx.
+              gms_upsert() { # $1=entity type (corpgroup|corpuser|container)  $2=JSON body
+                local status
+                status=$(curl -sS -o /tmp/gms-resp -w '%{http_code}' -X POST \
+                  -H "Authorization: $AUTH" -H "Content-Type: application/json" \
+                  "$GMS/openapi/v3/entity/$1?async=false&createIfNotExists=false" -d "$2")
+                if [ "$status" -lt 200 ] || [ "$status" -ge 300 ]; then
+                  echo "    ERROR: GMS returned HTTP $status:" >&2
+                  cat /tmp/gms-resp >&2; echo >&2
+                  return 1
+                fi
+              }
+
+              create_group() { # $1=urn id  $2=display name
+                echo "==> Group '$2'"
+                gms_upsert corpgroup "$(jq -n --arg urn "urn:li:corpGroup:$1" --arg dn "$2" '
+                  [{urn: $urn,
+                    corpGroupInfo: {value: {
+                      displayName: $dn,
+                      description: ($dn + " (mirrored from the Keycloak demo realm)"),
+                      admins: [], members: [], groups: []
+                    }}}]')"
+              }
+
+              create_user() { # $1=username  $2=full name  $3=email  $4=group urn id
+                echo "==> User '$2' -> group '$4'"
+                gms_upsert corpuser "$(jq -n \
+                  --arg urn "urn:li:corpuser:$1" --arg dn "$2" --arg email "$3" \
+                  --arg gurn "urn:li:corpGroup:$4" '
+                  [{urn: $urn,
+                    corpUserInfo:         {value: {active: true, displayName: $dn, fullName: $dn, email: $email}},
+                    corpUserEditableInfo: {value: {email: $email}},
+                    groupMembership:      {value: {groups: [$gurn]}}}]')"
+              }
+
+              set_business_owner() { # $1=container urn  $2=group urn id  $3=label (comment only)
+                echo "==> Ownership: '$3' -> Business Owner '$2'"
+                gms_upsert container "$(jq -n --arg urn "$1" --arg g "urn:li:corpGroup:$2" '
+                  [{urn: $urn,
+                    ownership: {value: {
+                      ownerTypes: {"urn:li:ownershipType:__system__business_owner": [$g]},
+                      owners: [{
+                        owner: $g,
+                        typeUrn: "urn:li:ownershipType:__system__business_owner",
+                        type: "NONE",
+                        source: {type: "MANUAL"}
+                      }],
+                      lastModified: {actor: "urn:li:corpuser:__datahub_system", time: 0}
+                    }}}]')"
+              }
+
+              # Groups — display names mirror the Keycloak group paths.
+              create_group marketing                           "Marketing"
+              create_group customer-service-analytics          "Customer Service/Analytics"
+              create_group compliance-and-regulation-analytics "Compliance and Regulation/Analytics"
+
+              # Users — username / full name / email / group. Mirrors the realm at
+              # docs.stackable.tech/.../end-to-end-security/#user-credentials .
+              create_user sophia.clarke "Sophia Clarke" sophia.clarke@knab.com compliance-and-regulation-analytics
+              create_user william.lewis "William Lewis" william.lewis@knab.com compliance-and-regulation-analytics
+              create_user daniel.king   "Daniel King"   daniel.king@knab.com   compliance-and-regulation-analytics
+              create_user pamela.scott  "Pamela Scott"  pamela.scott@knab.com  customer-service-analytics
+              create_user justin.martin "Justin Martin" justin.martin@knab.com customer-service-analytics
+              create_user isla.williams "Isla Williams" isla.williams@knab.com customer-service-analytics
+              create_user mark.ketting  "Mark Ketting"  mark.ketting@knab.com  marketing
+
+              # Ownership — each group is Business Owner of "its" Trino lakehouse
+              # schema. The container URNs are the deterministic GUIDs the Trino
+              # ingestion (platform=trino, catalog=lakehouse) assigns to each
+              # schema; they are stable across demo runs.
+              set_business_owner urn:li:container:41b49dd05f55714d488b39cc1831b556 marketing                           "lakehouse.marketing"
+              set_business_owner urn:li:container:ab5154a592c68f28b7960c48d0547cf8 compliance-and-regulation-analytics "lakehouse.compliance_analytics"
+              set_business_owner urn:li:container:c8531e5a52cacf56768d0bf77ca8787c customer-service-analytics          "lakehouse.customer_analytics"
+
+              echo "==> Successfully created all DataHub users, groups and ownership"
+          env:
+            # Credentials for the system Basic auth header. systemClientId is the
+            # chart default; the secret comes from the same datahub-auth-secrets
+            # Secret that GMS reads.
+            - name: DATAHUB_SYSTEM_CLIENT_ID
+              value: __datahub_system
+            - name: DATAHUB_SYSTEM_CLIENT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: datahub-auth-secrets
+                  key: system_client_secret
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "256Mi"
