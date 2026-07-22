@@ -151,8 +151,8 @@ data:
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0
-          - org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1
+          - org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.11.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.2
       s3connection:
         reference: minio
       sparkConf:
