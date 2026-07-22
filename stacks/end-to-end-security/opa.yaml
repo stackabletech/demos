@@ -6,6 +6,7 @@ metadata:
 spec:
   image:
     productVersion: 1.16.2
+    pullPolicy: IfNotPresent # TODO: Temp to be able to use make run-dev in opa-operator
   clusterConfig:
     userInfo:
       backend:
@@ -20,6 +21,15 @@ spec:
           clientCredentialsSecret: user-info-fetcher-client-credentials
           adminRealm: demo
           userRealm: demo
+    resourceInfo:
+      backend:
+        dataHub:
+          hostname: datahub-datahub-gms.{{ NAMESPACE }}.svc.cluster.local
+          port: 8080
+          clientCredentialsSecretName: resource-info-fetcher-client-credentials
+          env: PROD
+      cache:
+        entryTimeToLive: 0s
   servers:
     config:
       logging:
@@ -35,3 +45,11 @@ spec:
     roleGroups:
       default:
         replicas: 1
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: resource-info-fetcher-client-credentials
+stringData:
+  clientId: __datahub_system
+  clientSecret: datahub-demo-system-secret

@@ -93,6 +93,7 @@ demos:
       - plainYaml: demos/end-to-end-security/datahub-ingest-trino.yaml
       - plainYaml: demos/end-to-end-security/datahub-ingest-superset.yaml
       - plainYaml: demos/end-to-end-security/datahub-ingest-kafka.yaml
+      - plainYaml: demos/end-to-end-security/datahub-create-users.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 9000m
