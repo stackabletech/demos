@@ -684,3 +684,38 @@ stacks:
       - name: branch
         description: Git branch to download demo files from
         default: main
+  openlineage:
+    description: >-
+      Stack for the OpenLineage demo: Trino and Airflow both emitting OpenLineage events to Marquez
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - trino
+      - airflow
+    labels:
+      - trino
+      - airflow
+      - openlineage
+      - marquez
+      - data-lineage
+    manifests:
+      - helmChart: stacks/_templates/postgresql-airflow.yaml
+      # Marquez publishes no Helm repo/OCI chart, so its chart is vendored as rendered plain YAML.
+      # See the header of stacks/openlineage/marquez.yaml for provenance and how to regenerate.
+      - plainYaml: stacks/openlineage/marquez.yaml
+      - plainYaml: stacks/openlineage/trino.yaml
+      - plainYaml: stacks/openlineage/airflow.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 5000m
+      memory: 12Gi
+      pvc: 15Gi
+    parameters:
+      - name: trinoAdminPassword
+        description: Password of the Trino admin user
+        default: adminadmin
+      - name: airflowAdminPassword
+        description: Password of the Airflow admin user
+        default: adminadmin

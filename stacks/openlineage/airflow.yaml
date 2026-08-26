@@ -1,0 +1,188 @@
+# Airflow with the native OpenLineage provider enabled.
+#
+# As with Trino, OpenLineage is switched on here *without* any operator/CRD changes - purely via
+# `envOverrides`. The Airflow OpenLineage provider (`apache-airflow-providers-openlineage`) activates
+# automatically once `AIRFLOW__OPENLINEAGE__TRANSPORT` is set. Because the demo DAG uses the Trino
+# provider's SQL operator, Airflow also reports dataset-level lineage, which shows up in Marquez next
+# to the query lineage emitted by Trino itself.
+#
+# NOTE: this file is intentionally NOT wrapped in a Jinja raw block (unlike other airflow stacks)
+# so that the NAMESPACE / password placeholders are templated by Tera. Keep this whole file - even
+# comments - free of literal Tera tag sequences (double curly braces and percent-brace tags): Tera
+# processes the raw bytes before YAML parsing, so a tag token in a comment is still interpreted.
+# (An earlier version of this comment quoted a raw-block tag here, which opened an unclosed raw
+# block and broke rendering with "expected tag" at EOF.)
+---
+apiVersion: airflow.stackable.tech/v1alpha2
+kind: AirflowCluster
+metadata:
+  name: airflow
+spec:
+  image:
+    productVersion: 3.2.2
+    pullPolicy: IfNotPresent
+  clusterConfig:
+    loadExamples: false
+    credentialsSecretName: airflow-credentials
+    # The airflow-operator 'dev' schema moved the metadata DB connection out of the credentials
+    # Secret into its own block. Points at the postgresql-airflow chart deployed by this stack.
+    metadataDatabase:
+      postgresql:
+        host: postgresql-airflow
+        database: airflow
+        credentialsSecretName: airflow-postgresql-credentials
+    volumes:
+      - name: airflow-dags
+        configMap:
+          name: airflow-dags
+    volumeMounts:
+      - name: airflow-dags
+        mountPath: /dags/openlineage_demo.py
+        subPath: openlineage_demo.py
+  webservers:
+    roleConfig:
+      listenerClass: external-stable
+    config:
+      resources:
+        cpu:
+          min: "2"
+          max: "3"
+        memory:
+          limit: 3Gi
+    envOverrides: &envOverrides
+      AIRFLOW__CORE__DAGS_FOLDER: "/dags"
+      # Point the OpenLineage provider at Marquez. This single block is the whole "toggle".
+      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "http://marquez:5000", "endpoint": "api/v1/lineage"}'
+      AIRFLOW__OPENLINEAGE__NAMESPACE: "airflow-openlineage-demo"
+      # Trino connection used by the demo DAG. TLS verification is disabled because Trino uses an
+      # auto-generated (self-signed) CA in this demo; the password matches the `trino-users` Secret.
+      AIRFLOW_CONN_TRINO_DEFAULT: '{"conn_type": "trino", "host": "trino-coordinator", "port": 8443, "login": "admin", "password": "{{ trinoAdminPassword }}", "extra": {"protocol": "https", "verify": false}}'
+    configOverrides:
+      webserver_config.py:
+        # Allow "POST /login/" without CSRF token
+        WTF_CSRF_ENABLED: "False"
+    roleGroups:
+      default:
+        replicas: 1
+  kubernetesExecutors:
+    # Task pods must carry the same env so the OpenLineage listener fires and the Trino
+    # connection is available when the SQL operator runs.
+    envOverrides: *envOverrides
+  schedulers:
+    envOverrides: *envOverrides
+    roleGroups:
+      default:
+        replicas: 1
+  dagProcessors:
+    envOverrides: *envOverrides
+    roleGroups:
+      default:
+        replicas: 1
+  triggerers:
+    envOverrides: *envOverrides
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: airflow-dags
+data:
+  openlineage_demo.py: |
+    """
+    A minimal ELT pipeline against Trino that produces clean, layered lineage:
+
+        tpch.tiny.customer ─┐
+                            ├─> memory.demo.customer_orders
+        tpch.tiny.orders  ──┘
+
+    Airflow emits task/run + dataset lineage (via the Trino SQL operator) and Trino emits
+    per-query table-/column-level lineage. Both land in the same Marquez instance.
+    """
+    from datetime import datetime
+
+    from airflow import DAG
+    from airflow.providers.common.sql.operators.sql import SQLExecuteQueryOperator
+
+    with DAG(
+        dag_id="openlineage_demo",
+        schedule=None,
+        start_date=datetime(2024, 1, 1),
+        catchup=False,
+        tags=["openlineage", "trino"],
+    ) as dag:
+        create_schema = SQLExecuteQueryOperator(
+            task_id="create_schema",
+            conn_id="trino_default",
+            sql="CREATE SCHEMA IF NOT EXISTS memory.demo",
+        )
+
+        load_customers = SQLExecuteQueryOperator(
+            task_id="load_customers",
+            conn_id="trino_default",
+            sql=[
+                "DROP TABLE IF EXISTS memory.demo.customers",
+                (
+                    "CREATE TABLE memory.demo.customers AS "
+                    "SELECT custkey, name, nationkey, acctbal "
+                    "FROM tpch.tiny.customer"
+                ),
+            ],
+        )
+
+        load_orders = SQLExecuteQueryOperator(
+            task_id="load_orders",
+            conn_id="trino_default",
+            sql=[
+                "DROP TABLE IF EXISTS memory.demo.orders",
+                (
+                    "CREATE TABLE memory.demo.orders AS "
+                    "SELECT orderkey, custkey, orderstatus, totalprice, orderdate "
+                    "FROM tpch.tiny.orders"
+                ),
+            ],
+        )
+
+        customer_orders = SQLExecuteQueryOperator(
+            task_id="customer_orders",
+            conn_id="trino_default",
+            sql=[
+                "DROP TABLE IF EXISTS memory.demo.customer_orders",
+                (
+                    "CREATE TABLE memory.demo.customer_orders AS "
+                    "SELECT c.custkey, c.name, c.nationkey, "
+                    "       count(o.orderkey) AS order_count, "
+                    "       sum(o.totalprice) AS total_spent "
+                    "FROM memory.demo.customers c "
+                    "LEFT JOIN memory.demo.orders o ON c.custkey = o.custkey "
+                    "GROUP BY c.custkey, c.name, c.nationkey"
+                ),
+            ],
+        )
+
+        create_schema >> [load_customers, load_orders] >> customer_orders
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-credentials
+type: Opaque
+stringData:
+  adminUser.username: admin
+  adminUser.firstname: Airflow
+  adminUser.lastname: Admin
+  adminUser.email: airflow@airflow.com
+  adminUser.password: "{{ airflowAdminPassword }}"
+---
+# Credentials for the Airflow metadata database (the postgresql-airflow chart in this stack).
+# The operator reads the `username`/`password` keys and builds the SQLAlchemy URL from the
+# clusterConfig.metadataDatabase block above.
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-postgresql-credentials
+type: Opaque
+stringData:
+  username: airflow
+  password: airflow

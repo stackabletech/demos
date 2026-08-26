@@ -1,0 +1,546 @@
+# Marquez is the OpenLineage reference metadata server + web UI, used here as the consuming
+# application for the lineage that Trino and Airflow emit. It is only part of this *demo* - it is
+# not an SDP product.
+#
+# VENDORED MANIFESTS - do not hand-edit the resources below; regenerate instead.
+# Marquez publishes NO Helm repository or OCI chart (the old
+# https://marquezproject.github.io/marquez/ repo URL 404s), so we render the upstream chart to
+# static YAML and ship that as a plainYaml manifest.
+#
+# Chart:   marquez 0.51.1 (Apache-2.0) - https://github.com/MarquezProject/marquez/tree/main/chart
+# Regenerate:
+#   git clone --depth 1 --branch 0.51.1 https://github.com/MarquezProject/marquez.git
+#   helm repo add bitnami https://charts.bitnami.com/bitnami   # for the postgresql/common subcharts
+#   ( cd marquez/chart && helm dependency build )
+#   helm template marquez ./marquez/chart -f VALUES --skip-tests \
+#     | grep -v '^  namespace: "default"$' > marquez.yaml   # strip test hooks + hardcoded ns
+#   # ...then re-add this header.
+#
+# VALUES used:
+#   fullnameOverride: marquez
+#   service: {type: ClusterIP, port: 5000}   # API Service marquez:5000 (Trino/Airflow target it and
+#                                            # the web pod calls it via MARQUEZ_PORT, all internal)
+#   web.enabled: true
+#   postgresql: {enabled: true, auth: marquez/marquez/marquez,
+#                image.repository: bitnamilegacy/postgresql, global...allowInsecureImages: true}
+#
+# POST-RENDER EDITS (the chart forces ONE shared service.{type,port} onto both the API and web
+# Services; there is no per-service override, so these two Service specs are hand-adjusted after
+# rendering - see the "POST-RENDER EDIT" markers below):
+#   * marquez     (API): kept ClusterIP :5000  - consumed only cluster-internally.
+#   * marquez-web (UI) : set to NodePort :3000 - the only component end users reach; port now
+#                        matches its container (chart would otherwise publish the UI on :5000).
+#
+# Resulting Services: marquez:5000 (API, ClusterIP), marquez-web:3000 (UI, NodePort),
+#                     marquez-postgresql:5432 (ClusterIP).
+---
+# Source: marquez/charts/postgresql/templates/secrets.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: marquez-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.8.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  postgres-password: "b1o2ZjI2OGFWSA=="
+  password: "bWFycXVleg=="
+  # We don't auto-generate LDAP password when it's not provided as we do for other passwords
+---
+# Source: marquez/templates/marquez/secret.yaml
+apiVersion: v1
+kind: Secret
+metadata:
+  name: marquez
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+type: Opaque
+data:
+  marquez-db-password: "bWFjb25kbw=="
+
+
+---
+# Source: marquez/templates/marquez/configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: marquez-config
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: marquez
+  annotations:
+data:
+  ### HTTP SERVER CONFIG ###
+
+  config.yml: |-
+    # Enables HTTP server configuration overrides (see: https://www.dropwizard.io/en/stable/manual/configuration.html#servers)
+    server:
+      applicationConnectors:
+      - type: http
+        port: ${MARQUEZ_PORT}
+        httpCompliance: RFC7230_LEGACY
+      adminConnectors:
+      - type: http
+        port: ${MARQUEZ_ADMIN_PORT}
+
+    ### DATABASE CONFIG ###
+
+    # Enables database configuration overrides (see: https://www.dropwizard.io/en/stable/manual/configuration.html#database)
+    db:
+      driverClass: org.postgresql.Driver
+      url: jdbc:postgresql://${POSTGRES_HOST}:${POSTGRES_PORT}/${POSTGRES_DB}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+    # Enables retention policy configuration for database (default: disabled)
+    dbRetention:
+      frequencyMins: 15
+      numberOfRowsPerBatch: 1000
+      retentionDays: 7
+
+    # Enables database migration on startup (default: true)
+    migrateOnStartup: ${MIGRATE_ON_STARTUP}
+    logging:
+      level: ${LOG_LEVEL}
+      appenders:
+        - type: console
+
+---
+# Source: marquez/charts/postgresql/templates/primary/svc-headless.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez-postgresql-hl
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.8.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+    # Use this annotation in addition to the actual publishNotReadyAddresses
+    # field below because the annotation will stop being respected soon but the
+    # field is broken in some versions of Kubernetes:
+    # https://github.com/kubernetes/kubernetes/issues/58662
+    service.alpha.kubernetes.io/tolerate-unready-endpoints: "true"
+spec:
+  type: ClusterIP
+  clusterIP: None
+  # We want all pods in the StatefulSet to have their addresses published for
+  # the sake of the other Postgresql pods even before they're ready, since they
+  # have to be able to talk to each other in order to become ready.
+  publishNotReadyAddresses: true
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: primary
+
+---
+# Source: marquez/charts/postgresql/templates/primary/svc.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.8.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+spec:
+  type: ClusterIP
+  sessionAffinity: None
+  ports:
+    - name: tcp-postgresql
+      port: 5432
+      targetPort: tcp-postgresql
+      nodePort: null
+  selector:
+    app.kubernetes.io/name: postgresql
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: primary
+
+---
+# Source: marquez/templates/marquez/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: marquez
+  annotations:
+spec:
+  # POST-RENDER EDIT: chart default is a single service.type for both Services. The API is only
+  # consumed cluster-internally (Trino, Airflow, and the marquez-web pod), so keep it ClusterIP.
+  type: ClusterIP
+  ports:
+    - port: 5000
+      targetPort: http
+      protocol: TCP
+      name: http
+
+  selector:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: marquez
+
+---
+# Source: marquez/templates/web/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: marquez-web
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: web
+  annotations:
+spec:
+  # POST-RENDER EDIT: the web UI is the only component end users reach, so expose it (NodePort) on
+  # its own container port 3000 - not the chart's shared service.port of 5000, which was confusing.
+  type: NodePort
+  ports:
+    - port: 3000
+      targetPort: http
+      protocol: TCP
+      name: http
+
+  selector:
+    app.kubernetes.io/name: marquez
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/component: web
+
+---
+# Source: marquez/templates/marquez/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marquez
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: marquez
+  annotations:
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marquez
+      app.kubernetes.io/instance: marquez
+      app.kubernetes.io/component: marquez
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: marquez
+        helm.sh/chart: marquez-0.51.1
+        app.kubernetes.io/instance: marquez
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: marquez
+    spec:
+      serviceAccountName: default
+      # This init container is for avoiding CrashLoopback errors in the Marquez container because the PostgreSQL container is not ready
+      initContainers:
+        - name: wait-for-db
+          image: docker.io/bitnamilegacy/postgresql:12.1.0
+          imagePullPolicy: IfNotPresent
+          command:
+            - /bin/bash
+          args:
+            - -ec
+            - until pg_isready -h ${POSTGRES_HOST} -p ${POSTGRES_PORT} -U ${POSTGRES_USER}; do echo waiting for database; sleep 2; done;
+          env:
+            - name: POSTGRES_HOST
+              value: "marquez-postgresql"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_USER
+              value: "marquez"
+      containers:
+        - name: marquez
+          image: docker.io/marquezproject/marquez:0.51.1
+          imagePullPolicy: IfNotPresent
+          volumeMounts:
+            - name: marquez-volume
+              mountPath: /usr/src/app/config.yml
+              subPath: config.yml
+          ports:
+            - name: http
+              containerPort: 5000
+              protocol: TCP
+            - name: http-admin
+              containerPort: 5001
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http-admin
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http-admin
+          env:
+            - name: MARQUEZ_PORT
+              value: "5000"
+            - name: MARQUEZ_ADMIN_PORT
+              value: "5001"
+            - name: MARQUEZ_CONFIG
+              value: /usr/src/app/config.yml
+            - name: POSTGRES_HOST
+              value: "marquez-postgresql"
+            - name: POSTGRES_PORT
+              value: "5432"
+            - name: POSTGRES_DB
+              value: "marquez"
+            - name: POSTGRES_USER
+              value: "marquez"
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marquez-postgresql
+                  key: password
+            - name: MIGRATE_ON_STARTUP
+              value: "true"
+          resources:
+            limits: {}
+            requests: {}
+      volumes:
+        - name: marquez-volume
+          configMap:
+            name: marquez-config
+
+---
+# Source: marquez/templates/web/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: marquez-web
+  labels:
+    app.kubernetes.io/name: marquez
+    helm.sh/chart: marquez-0.51.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: web
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: marquez
+      app.kubernetes.io/instance: marquez
+      app.kubernetes.io/component: web
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: marquez
+        helm.sh/chart: marquez-0.51.1
+        app.kubernetes.io/instance: marquez
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: web
+    spec:
+      containers:
+        - name: marquez-web
+          image: docker.io/marquezproject/marquez-web:0.51.1
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+          readinessProbe:
+            httpGet:
+              path: /healthcheck
+              port: http
+          env:
+            - name: MARQUEZ_HOST
+              value: marquez
+            - name: MARQUEZ_PORT
+              value: "5000"
+            - name: WEB_PORT
+              value: "3000"
+          resources:
+            limits: {}
+            requests: {}
+
+---
+# Source: marquez/charts/postgresql/templates/primary/statefulset.yaml
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: marquez-postgresql
+  labels:
+    app.kubernetes.io/name: postgresql
+    helm.sh/chart: postgresql-11.8.1
+    app.kubernetes.io/instance: marquez
+    app.kubernetes.io/managed-by: Helm
+    app.kubernetes.io/component: primary
+  annotations:
+spec:
+  replicas: 1
+  serviceName: marquez-postgresql-hl
+  updateStrategy:
+    rollingUpdate: {}
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: postgresql
+      app.kubernetes.io/instance: marquez
+      app.kubernetes.io/component: primary
+  template:
+    metadata:
+      name: marquez-postgresql
+      labels:
+        app.kubernetes.io/name: postgresql
+        helm.sh/chart: postgresql-11.8.1
+        app.kubernetes.io/instance: marquez
+        app.kubernetes.io/managed-by: Helm
+        app.kubernetes.io/component: primary
+      annotations:
+    spec:
+      serviceAccountName: default
+
+      affinity:
+        podAffinity:
+
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                labelSelector:
+                  matchLabels:
+                    app.kubernetes.io/name: postgresql
+                    app.kubernetes.io/instance: marquez
+                    app.kubernetes.io/component: primary
+                topologyKey: kubernetes.io/hostname
+              weight: 1
+        nodeAffinity:
+
+      securityContext:
+        fsGroup: 1001
+      hostNetwork: false
+      hostIPC: false
+      initContainers:
+      containers:
+        - name: postgresql
+          image: docker.io/bitnamilegacy/postgresql:12.1.0
+          imagePullPolicy: "IfNotPresent"
+          securityContext:
+            runAsUser: 1001
+          env:
+            - name: BITNAMI_DEBUG
+              value: "false"
+            - name: POSTGRESQL_PORT_NUMBER
+              value: "5432"
+            - name: POSTGRESQL_VOLUME_DIR
+              value: "/bitnami/postgresql"
+            - name: PGDATA
+              value: "/bitnami/postgresql/data"
+            # Authentication
+            - name: POSTGRES_USER
+              value: "marquez"
+            - name: POSTGRES_POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marquez-postgresql
+                  key: postgres-password
+            - name: POSTGRES_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: marquez-postgresql
+                  key: password
+            - name: POSTGRES_DB
+              value: "marquez"
+            # Replication
+            # Initdb
+            # Standby
+            # LDAP
+            - name: POSTGRESQL_ENABLE_LDAP
+              value: "no"
+            # TLS
+            - name: POSTGRESQL_ENABLE_TLS
+              value: "no"
+            # Audit
+            - name: POSTGRESQL_LOG_HOSTNAME
+              value: "false"
+            - name: POSTGRESQL_LOG_CONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_LOG_DISCONNECTIONS
+              value: "false"
+            - name: POSTGRESQL_PGAUDIT_LOG_CATALOG
+              value: "off"
+            # Others
+            - name: POSTGRESQL_CLIENT_MIN_MESSAGES
+              value: "error"
+            - name: POSTGRESQL_SHARED_PRELOAD_LIBRARIES
+              value: "pgaudit"
+          ports:
+            - name: tcp-postgresql
+              containerPort: 5432
+          livenessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - exec pg_isready -U "marquez" -d "dbname=marquez" -h 127.0.0.1 -p 5432
+          readinessProbe:
+            failureThreshold: 6
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            timeoutSeconds: 5
+            exec:
+              command:
+                - /bin/sh
+                - -c
+                - -e
+
+                - |
+                  exec pg_isready -U "marquez" -d "dbname=marquez" -h 127.0.0.1 -p 5432
+          resources:
+            limits: {}
+            requests:
+              cpu: 250m
+              memory: 256Mi
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+            - name: data
+              mountPath: /bitnami/postgresql
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+  volumeClaimTemplates:
+    - metadata:
+        name: data
+      spec:
+        accessModes:
+          - "ReadWriteOnce"
+        resources:
+          requests:
+            storage: "8Gi"
