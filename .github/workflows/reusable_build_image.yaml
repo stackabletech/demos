@@ -60,7 +60,6 @@ jobs:
           image-registry-username: robot$demos+github-action-build
           image-registry-password: ${{ secrets.harbor-robot-secret }}
           image-repository: demos/${{ env.IMAGE_NAME }}
-          image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
           canonical-image-manifest-tag: ${{ steps.build.outputs.image-manifest-tag }}
           canonical-source-image-uri: ${{ steps.build.outputs.image-manifest-uri }}
 
