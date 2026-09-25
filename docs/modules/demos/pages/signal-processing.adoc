@@ -90,7 +90,7 @@ To achieve the same imports as mentioned in the previous section, build the Dock
 
 [source,console]
 ----
-FROM jupyter/pyspark-notebook:python-3.11
+FROM quay.io/jupyter/pyspark-notebook:python-3.13
 
 COPY demos/signal-processing/requirements.txt .
 

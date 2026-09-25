@@ -1,6 +1,6 @@
 # Find the latest python version here:
-# https://hub.docker.com/r/jupyter/pyspark-notebook/tags?name=python-
-FROM jupyter/pyspark-notebook:python-3.11
+# https://quay.io/repository/jupyter/pyspark-notebook?tab=tags (use the tag search)
+FROM quay.io/jupyter/pyspark-notebook:python-3.13
 
 COPY demos/signal-processing/requirements.txt .
 
