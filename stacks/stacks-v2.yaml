@@ -101,7 +101,7 @@ stacks:
         default: kibanaserverkibanaserver
       - name: opensearchVersion
         description: Version of OpenSearch and OpenSearch Dashboards to deploy
-        default: 3.6.0
+        default: 3.8.0
       - name: stackableReleaseVersion
         description: The Stackable release to be used for the OpenSearch Dashboards image tag
         default: 0.0.0-dev
@@ -671,7 +671,7 @@ stacks:
         default: kibanaserverkibanaserver
       - name: opensearchVersion
         description: Version of OpenSearch and OpenSearch Dashboards to deploy
-        default: 3.6.0
+        default: 3.8.0
       - name: stackableReleaseVersion
         description: The Stackable release to be used for the OpenSearch Dashboards image tag
         default: 0.0.0-dev
