@@ -32,6 +32,11 @@ options:
       stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
   opensearchHosts: null # Use the discovery ConfigMap instead
+  resources:
+    requests:
+      cpu: 500m
+    limits:
+      cpu: "1"
   extraEnvs:
     - name: OPENSEARCH_HOSTS
       valueFrom:
