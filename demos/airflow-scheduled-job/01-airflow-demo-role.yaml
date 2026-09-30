@@ -1,0 +1,45 @@
+---
+# Used by the Airflow cluster itself: the sparkapp_dag DAG creates a SparkApplication
+# (SparkKubernetesOperator) and polls its status (SparkKubernetesSensor). Reading the Spark
+# driver/executor pods and their logs is already covered by the RoleBinding the Airflow operator
+# creates for airflow-serviceaccount.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-demo-spark
+rules:
+- apiGroups:
+    - spark.stackable.tech
+  resources:
+    - sparkapplications
+  verbs:
+    - create
+    - get
+---
+# Used by the setup Jobs (start-*-job): "kubectl rollout status" on the Airflow and Kafka
+# StatefulSets and "kubectl exec" into kafka-broker-default-0 and airflow-webserver-default-0.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: airflow-demo-setup
+rules:
+- apiGroups:
+    - apps
+  resources:
+    - statefulsets
+  verbs:
+    - get
+    - list
+    - watch
+- apiGroups:
+    - ""
+  resources:
+    - pods
+  verbs:
+    - get
+- apiGroups:
+    - ""
+  resources:
+    - pods/exec
+  verbs:
+    - create
