@@ -90,7 +90,7 @@ To achieve the same imports as mentioned in the previous section, build the Dock
 
 [source,console]
 ----
-FROM jupyter/pyspark-notebook:python-3.9
+FROM quay.io/jupyter/pyspark-notebook:python-3.13
 
 COPY demos/signal-processing/requirements.txt .
 
@@ -102,8 +102,8 @@ Where `requirements.txt` contains:
 
 [source,console]
 ----
-psycopg2-binary==2.9.9
-alibi-detect==0.11.4
+psycopg2-binary==2.9.13
+alibi-detect==0.13.0
 ----
 
 NOTE: Using a custom image requires access to a repository where the image can be made available.
