@@ -223,7 +223,7 @@ Enable and run `core_deferrable_sleep_demo`:
 image::airflow-scheduled-job/airflow_17.png[]
 
 Click on the DAG, switching to the task view.
-This DAG uses a deferrable operator which, in conjunction with the triggerer process, "offloads" the DAG from its worker for a specfic period of time, before being picked up and again and executed.
+This DAG uses a deferrable operator which, in conjunction with the triggerer process, "offloads" the DAG from its worker for a specific period of time, before being picked up and again and executed.
 From the Task Instances view (under Dags), you will see the task cycle through the following states:
 
 image::airflow-scheduled-job/deferrable_01_running.png[]

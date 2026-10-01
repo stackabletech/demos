@@ -1253,7 +1253,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_runningqueries{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_runningqueries{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "running",
               "range": true,
               "refId": "A"
@@ -1264,9 +1264,9 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_queuedqueries{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_queuedqueries{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
-              "legendFormat": "queueud",
+              "legendFormat": "queued",
               "range": true,
               "refId": "B"
             }
@@ -1409,7 +1409,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_completedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_completedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "legendFormat": "completed",
               "range": true,
               "refId": "A"
@@ -1420,7 +1420,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_failedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_failedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "failed",
               "range": true,
@@ -1432,7 +1432,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_abandonedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_abandonedqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "abandoned",
               "range": true,
@@ -1444,7 +1444,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by (namespae, job) (trino_execution_querymanager_canceledqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
+              "expr": "sum by (namespace, job) (trino_execution_querymanager_canceledqueries_totalcount{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
               "legendFormat": "canceled",
               "range": true,
@@ -9095,7 +9095,7 @@ data:
               {
                 "matcher": {
                   "id": "byName",
-                  "options": "mssing"
+                  "options": "missing"
                 },
                 "properties": [
                   {
@@ -9183,7 +9183,7 @@ data:
               "editorMode": "code",
               "expr": "max(fs_namesystem_missing_blocks{namespace=~\"$namespace\",app_kubernetes_io_instance=~\"$cluster\"})",
               "hide": false,
-              "legendFormat": "mssing",
+              "legendFormat": "missing",
               "range": true,
               "refId": "B"
             },
