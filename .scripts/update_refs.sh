@@ -46,7 +46,7 @@ if [[ "$CURRENT_BRANCH" == release-* ]]; then
   STACKABLE_RELEASE="${CURRENT_BRANCH#release-}"
   MESSAGE="Update stackableRelease to $STACKABLE_RELEASE"
   echo "$MESSAGE"
-  # NOTE (@NickLarsenNZ): find is not required for such a trivial case, but it is done for consitency
+  # NOTE (@NickLarsenNZ): find is not required for such a trivial case, but it is done for consistency
   find stacks/stacks-v2.yaml \
     -exec grep --color=always -l stackableRelease {} \; \
     -exec sed -i -E "s#(stackableRelease:\s+)(\S+)#\1${STACKABLE_RELEASE}#" {} \; \

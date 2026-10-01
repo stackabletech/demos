@@ -28,6 +28,6 @@ jobs:
     with:
       image-name: jupyter-pyspark-with-alibi-detect
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
-      # the demo is reproducable for the release and it will be automatically replaced for the release branch.
+      # the demo is reproducible for the release and it will be automatically replaced for the release branch.
       image-version: python-3.12
       containerfile-path: demos/signal-processing/Dockerfile-jupyter

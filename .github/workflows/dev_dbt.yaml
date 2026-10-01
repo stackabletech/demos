@@ -28,6 +28,6 @@ jobs:
     with:
       image-name: dbt-demo
       # TODO (@NickLarsenNZ): Use a versioned image with stackable0.0.0-dev or stackableXX.X.X so that
-      # the demo is reproducable for the release and it will be automatically replaced for the release branch.
+      # the demo is reproducible for the release and it will be automatically replaced for the release branch.
       image-version: 0.0.1
       containerfile-path: demos/airflow-scheduled-job/dbt/Dockerfile
