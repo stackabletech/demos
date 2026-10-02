@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: demo-serviceaccount
       containers:
         - name: start-users-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev

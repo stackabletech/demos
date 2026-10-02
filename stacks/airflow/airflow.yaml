@@ -79,7 +79,7 @@ spec:
       spec:
         containers:
           - name: airflow
-            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.3.1-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
               - name: NAMESPACE
@@ -107,7 +107,7 @@ spec:
       spec:
         containers:
           - name: base
-            image: oci.stackable.tech/sdp/airflow:3.1.6-stackable0.0.0-dev
+            image: oci.stackable.tech/sdp/airflow:3.3.1-stackable0.0.0-dev
             imagePullPolicy: IfNotPresent
             env:
               # Needed by the DAGs run by KubernetesPodOperator
@@ -386,6 +386,8 @@ data:
     import yaml
     from airflow.utils import yaml
     import os
+    import threading
+    import time
 
     if TYPE_CHECKING:
         from airflow.utils.context import Context
@@ -430,8 +432,14 @@ data:
         template_fields = ("application_name", "namespace")
         # See https://github.com/stackabletech/spark-k8s-operator/pull/460/files#diff-d737837121132af6b60f50279a78464b05dcfd06c05d1d090f4198a5e962b5f6R371
         # Unknown is set immediately so it must be excluded from the failed states.
-        FAILURE_STATES = ("Failed")
-        SUCCESS_STATES = ("Succeeded")
+        FAILURE_STATES = ["Failed"]
+        SUCCESS_STATES = ["Succeeded"]
+
+        # The Stackable Spark operator sets spark.kubernetes.{driver,executor}.podTemplateContainerName,
+        # so the main container is called "spark" in both driver and executor pods.
+        SPARK_CONTAINER = "spark"
+        # How long the terminal poke waits for the log followers to drain.
+        LOG_DRAIN_TIMEOUT_SECONDS = 30
 
         def __init__(
                 self,
@@ -454,32 +462,103 @@ data:
             self.api_group = api_group
             self.api_version = api_version
             self.poke_interval = poke_interval
+            # One thread per Spark pod, keyed by pod name. This relies on mode="poke"
+            # (the default): with mode="reschedule" every poke gets a new instance.
+            self._log_followers: Dict[str, threading.Thread] = {}
 
-        def _log_driver(self, application_state: str, response: dict) -> None:
-            if not self.attach_log:
-                return
-            status_info = response["status"]
-            if "driverInfo" not in status_info:
-                return
-            driver_info = status_info["driverInfo"]
-            if "podName" not in driver_info:
-                return
-            driver_pod_name = driver_info["podName"]
-            namespace = response["metadata"]["namespace"]
-            log_method = self.log.error if application_state in self.FAILURE_STATES else self.log.info
+        def _start_log_followers(self, namespace: str) -> None:
+            # The Stackable Spark operator's SparkApplicationStatus only exposes
+            # `phase` and `resolvedTemplateRef` - driverInfo is not populated - so
+            # find the driver and executor pods by the labels Spark sets on them.
+            label_selector = (
+                f"app.kubernetes.io/instance={self.application_name},"
+                "spark-role in (driver,executor)"
+            )
             try:
-                log = ""
-                for line in self.hook.get_pod_logs(driver_pod_name, namespace=namespace):
-                    log += line.decode()
-                log_method(log)
-            except client.rest.ApiException as e:
-                self.log.warning(
-                    "Could not read logs for pod %s. It may have been disposed.\n"
-                    "Make sure timeToLiveSeconds is set on your SparkApplication spec.\n"
-                    "underlying exception: %s",
-                    driver_pod_name,
-                    e,
+                pods = self.hook.core_v1_client.list_namespaced_pod(
+                    namespace=namespace, label_selector=label_selector
                 )
+            except client.rest.ApiException as e:
+                self.log.warning("Could not list Spark pods for %s: %s", self.application_name, e)
+                return
+            for pod in pods.items:
+                pod_name = pod.metadata.name
+                if pod_name in self._log_followers:
+                    continue
+                role = (pod.metadata.labels or {}).get("spark-role")
+                prefix = "[spark driver]" if role == "driver" else f"[spark executor {pod_name}]"
+                self.log.info("Following logs of %s pod %s", role, pod_name)
+                follower = threading.Thread(
+                    target=self._follow_pod_log,
+                    args=(namespace, pod_name, prefix),
+                    name=f"log-{pod_name}",
+                    daemon=True,
+                )
+                self._log_followers[pod_name] = follower
+                follower.start()
+
+        def _container_finished(self, namespace: str, pod_name: str) -> bool:
+            try:
+                pod = self.hook.core_v1_client.read_namespaced_pod(name=pod_name, namespace=namespace)
+            except client.rest.ApiException as e:
+                return e.status == 404
+            for status in pod.status.container_statuses or []:
+                if status.name == self.SPARK_CONTAINER:
+                    return status.state.terminated is not None
+            return False
+
+        def _follow_pod_log(self, namespace: str, pod_name: str, prefix: str) -> None:
+            # Streams the log with follow=True. The stream only ends when the
+            # container exits, so the last lines are read before the operator
+            # deletes the pod. If the stream breaks early it is reopened; the log
+            # then starts from the beginning again, so already emitted lines are skipped.
+            emitted = 0
+            while True:
+                try:
+                    # _preload_content=False returns the raw HTTP response. Without it,
+                    # newer kubernetes clients (seen with 36.0.3) return str(bytes), i.e.
+                    # the whole log as a single "b'...'" string.
+                    resp = self.hook.core_v1_client.read_namespaced_pod_log(
+                        name=pod_name,
+                        namespace=namespace,
+                        container=self.SPARK_CONTAINER,
+                        follow=True,
+                        _preload_content=False,
+                    )
+                except client.rest.ApiException as e:
+                    if e.status == 404:
+                        return
+                    # 400 while the container is still being created.
+                    time.sleep(1)
+                    continue
+                seen = 0
+                buffer = b""
+                try:
+                    for chunk in resp.stream(decode_content=True):
+                        buffer += chunk
+                        *lines, buffer = buffer.split(b"\n")
+                        for line in lines:
+                            seen += 1
+                            if seen > emitted:
+                                self.log.info("%s %s", prefix, line.decode(errors="replace"))
+                                emitted = seen
+                    if buffer and seen + 1 > emitted:
+                        self.log.info("%s %s", prefix, buffer.decode(errors="replace"))
+                        emitted = seen + 1
+                except Exception as e:
+                    self.log.debug("Log stream for pod %s interrupted: %s", pod_name, e)
+                finally:
+                    resp.release_conn()
+                if self._container_finished(namespace, pod_name):
+                    return
+                time.sleep(1)
+
+        def _wait_for_log_followers(self) -> None:
+            deadline = time.monotonic() + self.LOG_DRAIN_TIMEOUT_SECONDS
+            for pod_name, follower in self._log_followers.items():
+                follower.join(timeout=max(0.0, deadline - time.monotonic()))
+                if follower.is_alive():
+                    self.log.warning("Log follower for pod %s did not finish in time", pod_name)
 
         def poke(self, context: Dict) -> bool:
             self.log.info("Poking: %s", self.application_name)
@@ -495,8 +574,13 @@ data:
             except KeyError:
                 self.log.debug(f"SparkApplication status could not be established: {response}")
                 return False
-            if self.attach_log and application_state in self.FAILURE_STATES + self.SUCCESS_STATES:
-                self._log_driver(application_state, response)
+
+            if self.attach_log:
+                if application_state in self.FAILURE_STATES + self.SUCCESS_STATES:
+                    self._wait_for_log_followers()
+                else:
+                    self._start_log_followers(response["metadata"]["namespace"])
+
             if application_state in self.FAILURE_STATES:
                 raise AirflowException(f"SparkApplication failed with state: {application_state}")
             elif application_state in self.SUCCESS_STATES:
@@ -547,6 +631,7 @@ data:
             namespace=ns,
             application_name="{{ task_instance.xcom_pull(task_ids='spark_pi_submit')['metadata']['name'] }}",
             poke_interval=5,
+            attach_log=True,
             dag=dag,
         )
 
