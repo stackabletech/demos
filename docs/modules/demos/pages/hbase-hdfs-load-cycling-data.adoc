@@ -42,7 +42,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::hbase-hdfs-load-cycling-data/overview.png[]
+image::hbase-hdfs-load-cycling-data/overview.drawio.png[]
 
 == Listing the deployed Stackable services
 

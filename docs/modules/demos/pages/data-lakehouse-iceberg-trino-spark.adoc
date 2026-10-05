@@ -68,7 +68,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::data-lakehouse-iceberg-trino-spark/overview.png[]
+image::data-lakehouse-iceberg-trino-spark/overview.drawio.png[]
 
 == Apache Iceberg
 

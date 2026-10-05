@@ -46,7 +46,7 @@ This demo will
 The whole data pipeline will have a very low latency, from putting a record into Kafka to showing up in the dashboard
 charts. You can see the deployed products and their relationship in the following diagram:
 
-image::nifi-kafka-druid-earthquake-data/overview.png[]
+image::nifi-kafka-druid-earthquake-data/overview.drawio.png[]
 
 == List the deployed Stackable services
 

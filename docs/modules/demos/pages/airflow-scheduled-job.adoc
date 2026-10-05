@@ -49,7 +49,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::airflow-scheduled-job/overview.png[]
+image::airflow-scheduled-job/overview.drawio.png[]
 
 == List deployed Stackable services
 
