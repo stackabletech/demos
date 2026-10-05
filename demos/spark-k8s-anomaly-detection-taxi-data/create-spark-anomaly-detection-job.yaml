@@ -61,7 +61,7 @@ data:
         requirements:
           - scikit-learn==1.4.0
       s3connection:
-        reference: minio
+        reference: garage
       volumes:
         - name: cm-spark
           configMap:
