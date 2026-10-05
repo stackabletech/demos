@@ -104,7 +104,7 @@ demos:
       - kafka
       - druid
       - superset
-      - minio
+      - garage
       - s3
       - earthquakes
     manifests:
@@ -126,7 +126,7 @@ demos:
       - kafka
       - druid
       - superset
-      - minio
+      - garage
       - s3
       - water-levels
     manifests:
@@ -146,7 +146,7 @@ demos:
     labels:
       - trino
       - superset
-      - minio
+      - garage
       - s3
       - ny-taxi-data
     manifests:
@@ -166,14 +166,14 @@ demos:
     labels:
       - trino
       - iceberg
-      - minio
+      - garage
       - s3
     manifests: []
     supportedNamespaces: []
     resourceRequests:
       cpu: 6000m # Measured 5600m
       memory: 21Gi
-      pvc: 110Gi # 100Gi for MinIO
+      pvc: 60Gi # 50Gi for Garage
   trino-taxi-data:
     description: Demo loading 2.5 years of New York taxi data into S3 bucket, creating a Trino table and a Superset dashboard
     documentation: https://docs.stackable.tech/home/stable/demos/trino-taxi-data/
@@ -181,7 +181,7 @@ demos:
     labels:
       - trino
       - superset
-      - minio
+      - garage
       - s3
       - ny-taxi-data
     manifests:
@@ -204,7 +204,7 @@ demos:
       - superset
       - kafka
       - nifi
-      - minio
+      - garage
       - s3
       - ny-taxi-data
       - water-levels
