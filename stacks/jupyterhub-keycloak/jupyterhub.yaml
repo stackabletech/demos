@@ -178,17 +178,17 @@ options:
                 resources:
                   requests:
                     storage: "1"
-        - name: minio-s3-credentials
+        - name: s3-credentials
           secret:
-            secretName: minio-s3-credentials
+            secretName: s3-credentials
         - name: notebook
           emptyDir:
             sizeLimit: 500Mi
       extraVolumeMounts:
         - name: tls-ca-cert
           mountPath: /stackable/secrets/tls-ca-cert
-        - name: minio-s3-credentials
-          mountPath: /minio-s3-credentials
+        - name: s3-credentials
+          mountPath: /s3-credentials
         - name: notebook
           mountPath: /home/jovyan/notebook
     profileList:
