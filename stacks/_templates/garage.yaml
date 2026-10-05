@@ -1,0 +1,329 @@
+---
+# Garage provides the S3 implementation for the demo stacks.
+#
+# Garage terminates no TLS on any of its endpoints, so an nginx sidecar does it
+# and forwards to Garage on loopback.
+#
+# Parameters (see the stack definition in stacks-v2.yaml):
+#   garageBuckets     space separated list of buckets to create
+#   garageStorageSize size of the PVC backing the object data
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: garage
+  labels:
+    stackable.tech/vendor: Stackable
+data:
+  # https://garagehq.deuxfleurs.fr/documentation/reference-manual/configuration/
+  garage.toml: |
+    metadata_dir = "/var/lib/garage/meta"
+    data_dir = "/var/lib/garage/data"
+    db_engine = "lmdb"
+
+    # Single node, no redundancy. This is a demo, not a production deployment.
+    replication_factor = 1
+
+    # Throwaway value, this cluster is never joined by another node.
+    rpc_secret = "deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef"
+    rpc_bind_addr = "[::]:3901"
+    rpc_public_addr = "127.0.0.1:3901"
+
+    [s3_api]
+    # Garage rejects requests signed for a different region, so this must match
+    # the region every client signs with: the S3Connection (and therefore the
+    # products configured by the operators), the load jobs, and any NiFi flow.
+    # The name is a provider agnostic one, deliberately not an AWS region: the
+    # Hadoop S3 implementation falls back to us-east-2 when none is set, so
+    # leaving it unset would silently sign with the wrong region.
+    s3_region = "region-1"
+    api_bind_addr = "[::]:3900"
+
+    [admin]
+    api_bind_addr = "[::]:3903"
+  # Garage terminates no TLS, so nginx does it and forwards to Garage on
+  # loopback. Mounted over /etc/nginx/nginx.conf, hence the full file.
+  nginx.conf: |
+    events {}
+    http {
+      server {
+        listen 9000 ssl;
+        ssl_certificate /stackable/tls/tls.crt;
+        ssl_certificate_key /stackable/tls/tls.key;
+
+        # Don't buffer or size-limit object uploads.
+        client_max_body_size 0;
+
+        location / {
+          proxy_pass http://127.0.0.1:3900;
+          # Must be the original Host, it is part of the SigV4 signature.
+          proxy_set_header Host $http_host;
+          proxy_http_version 1.1;
+          proxy_buffering off;
+          proxy_request_buffering off;
+        }
+      }
+    }
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: garage
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: {{ garageStorageSize }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  # NodePort so the S3 API can be reached from outside the cluster, e.g. to
+  # inspect the buckets with `aws s3 ls` or `rclone lsf`.
+  type: NodePort
+  selector:
+    app: garage
+  ports:
+    - name: https
+      port: 9000
+      targetPort: https
+---
+# Garage's own S3 port, without the nginx TLS layer in front of it.
+#
+# This exists so that notebooks can talk to S3 with a plain endpoint and no
+# trust store boilerplate. Verifying the secret-operator CA from a notebook
+# means building a JVM trust store for Spark and shipping it to the executors,
+# which drowns the actual content in TLS plumbing. Products configured by the
+# operators use the TLS endpoint on the "garage" Service instead.
+#
+# Deliberately a separate ClusterIP Service: every port of a NodePort Service is
+# reachable from outside the cluster, and this one must not be.
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-plaintext
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  type: ClusterIP
+  selector:
+    app: garage
+  ports:
+    - name: http
+      port: 3900
+      targetPort: s3
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: garage
+  labels:
+    app: garage
+    stackable.tech/vendor: Stackable
+spec:
+  replicas: 1
+  strategy:
+    # The PVC is ReadWriteOnce, so the old Pod has to release it before the new
+    # one can claim it.
+    type: Recreate
+  selector:
+    matchLabels:
+      app: garage
+  template:
+    metadata:
+      labels:
+        app: garage
+        stackable.tech/vendor: Stackable
+    spec:
+      containers:
+        - name: garage
+          image: oci.stackable.tech/stackable/dxflrs/garage:v2.4.1
+          imagePullPolicy: IfNotPresent
+          # The image has no entrypoint. --single-node creates the cluster
+          # layout, --default-access-key creates the access key from the
+          # GARAGE_DEFAULT_* variables below. That key is allowed to create
+          # buckets, which is how the garage-init-buckets Job below creates
+          # every bucket the stack needs.
+          command:
+            - /garage
+            - server
+            - --single-node
+            - --default-access-key
+          env:
+            # Garage requires the GK<24 hex> key id format and a 64 hex char
+            # secret, so this is not a free form password.
+            # Change it here, in the garage-init-buckets Job below, and in the
+            # s3-connection.yaml of each stack.
+            - name: GARAGE_DEFAULT_ACCESS_KEY
+              value: GK31c0ffee31c0ffee31c0ffee
+            - name: GARAGE_DEFAULT_SECRET_KEY
+              value: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+          ports:
+            - name: s3
+              containerPort: 3900
+            - name: rpc
+              containerPort: 3901
+            - name: admin
+              containerPort: 3903
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: admin
+          volumeMounts:
+            - name: config
+              mountPath: /etc/garage.toml
+              subPath: garage.toml
+            - name: data
+              mountPath: /var/lib/garage
+          resources:
+            requests:
+              cpu: 500m
+              memory: 512Mi
+            limits:
+              cpu: "2"
+              memory: 2Gi
+        - name: nginx
+          image: docker.io/library/nginx:1.29-alpine
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: 9000
+          volumeMounts:
+            - name: config
+              mountPath: /etc/nginx/nginx.conf
+              subPath: nginx.conf
+            - name: tls
+              mountPath: /stackable/tls
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        - name: config
+          configMap:
+            name: garage
+        - name: data
+          persistentVolumeClaim:
+            claimName: garage
+        # Request a TLS certificate from the secret-operator for nginx to serve
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: service=garage
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+---
+# Creates every bucket the stack needs. The access key created by
+# --default-bucket is allowed to create buckets, so this needs no admin
+# credentials, only the ordinary S3 key. `rclone mkdir` is idempotent, so
+# re-running the Job is harmless.
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: garage-init-buckets
+  labels:
+    stackable.tech/vendor: Stackable
+spec:
+  template:
+    metadata:
+      labels:
+        stackable.tech/vendor: Stackable
+    spec:
+      containers:
+        - name: init-buckets
+          image: docker.io/rclone/rclone:1.75.1
+          # The image entrypoint is rclone itself, so override it for the loop.
+          command:
+            - /bin/sh
+            - -euo
+            - pipefail
+            - -c
+            - |
+              # Wait for Garage to accept requests. The Deployment readiness
+              # probe covers Garage itself, but not the nginx sidecar in front.
+              # Bounded, so a broken endpoint fails the Job instead of hanging.
+              attempts=0
+              until rclone lsd :s3: >/dev/null 2>&1; do
+                attempts=$((attempts + 1))
+                if [ "$attempts" -gt 150 ]; then
+                  echo "Garage did not become available within 5 minutes" >&2
+                  rclone lsd :s3: # run once more to surface the actual error
+                  exit 1
+                fi
+                echo "Waiting for Garage to become available..."
+                sleep 2
+              done
+
+              for bucket in {{ garageBuckets }}; do
+                echo "Creating bucket '$bucket'"
+                rclone mkdir ":s3:$bucket"
+              done
+
+              rclone lsd :s3:
+          env:
+            # No config file, everything is configured through the environment.
+            - name: RCLONE_CONFIG
+              value: /dev/null
+            - name: RCLONE_S3_PROVIDER
+              value: Other
+            - name: RCLONE_S3_ENDPOINT
+              value: https://garage.{{ NAMESPACE }}.svc.cluster.local:9000
+            # Must match s3_region in the Garage config above.
+            - name: RCLONE_S3_REGION
+              value: region-1
+            # Garage only serves path style, not virtual-hosted style.
+            - name: RCLONE_S3_FORCE_PATH_STYLE
+              value: "true"
+            - name: RCLONE_CA_CERT
+              value: /stackable/tls/ca.crt
+            # Must match the GARAGE_DEFAULT_* variables in the Deployment above.
+            - name: RCLONE_S3_ACCESS_KEY_ID
+              value: GK31c0ffee31c0ffee31c0ffee
+            - name: RCLONE_S3_SECRET_ACCESS_KEY
+              value: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+          volumeMounts:
+            - name: tls
+              mountPath: /stackable/tls
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 256Mi
+      volumes:
+        # Request the CA cert from the secret-operator to verify Garage's
+        # TLS certificate
+        - name: tls
+          ephemeral:
+            volumeClaimTemplate:
+              metadata:
+                annotations:
+                  secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/scope: service=garage,pod
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: "1"
+                storageClassName: secrets.stackable.tech
+      restartPolicy: OnFailure
+  backoffLimit: 50
