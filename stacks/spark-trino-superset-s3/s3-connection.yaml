@@ -2,14 +2,18 @@
 apiVersion: s3.stackable.tech/v1alpha1
 kind: S3Connection
 metadata:
-  name: minio
+  name: garage
 spec:
-  # Hostname must match secret op's certificate SAN
-  host: minio.{{ NAMESPACE }}.svc.cluster.local
+  host: garage.{{ NAMESPACE }}.svc.cluster.local
   port: 9000
+  # Must match s3_region in stacks/_templates/garage.yaml: Garage rejects
+  # requests signed for a different region. Deliberately not an AWS region:
+  # the Hadoop S3 implementation falls back to us-east-2 when none is set.
+  region:
+    name: region-1
   accessStyle: Path
   credentials:
-    secretClass: minio-s3-credentials
+    secretClass: s3-credentials
   tls:
     verification:
       server:
@@ -19,7 +23,7 @@ spec:
 apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
-  name: minio-s3-credentials
+  name: s3-credentials
 spec:
   backend:
     k8sSearch:
@@ -29,9 +33,9 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: minio-s3-credentials
+  name: s3-credentials
   labels:
-    secrets.stackable.tech/class: minio-s3-credentials
+    secrets.stackable.tech/class: s3-credentials
 stringData:
-  accessKey: admin
-  secretKey: {{ minioAdminPassword }}
+  accessKey: GK31c0ffee31c0ffee31c0ffee
+  secretKey: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
