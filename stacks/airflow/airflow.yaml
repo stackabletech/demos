@@ -92,7 +92,14 @@ spec:
                    name: s3-credentials
                    key: secretKey
               - name: AWS_ACCESS_KEY_ID
-                value: admin
+                valueFrom:
+                 secretKeyRef:
+                   name: s3-credentials
+                   key: accessKey
+              # boto3 has no region here otherwise, and Garage rejects requests
+              # signed for a different region than the one it is configured with.
+              - name: AWS_DEFAULT_REGION
+                value: region-1
               - name: AIRFLOW_CONN_KAFKA_CONN
                 value: '{"conn_type": "kafka", "extra": {"bootstrap.servers": "kafka-broker-default-0-listener-broker.$(NAMESPACE).svc.cluster.local:9093", "security.protocol": "SSL", "ssl.ca.location": "/stackable/tls-pem/ca.crt", "group.id": "airflow_group", "auto.offset.reset": "latest"}}'
               - name: AIRFLOW_CONN_S3_CONN
@@ -121,7 +128,12 @@ spec:
                    name: s3-credentials
                    key: secretKey
               - name: AWS_ACCESS_KEY_ID
-                value: admin
+                valueFrom:
+                 secretKeyRef:
+                   name: s3-credentials
+                   key: accessKey
+              - name: AWS_DEFAULT_REGION
+                value: region-1
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
