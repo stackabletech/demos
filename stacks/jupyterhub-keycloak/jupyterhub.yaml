@@ -161,6 +161,15 @@ options:
       # {% if DEMO is defined %}
       stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
+    extraEnv:
+      # Needed because the Notebook passes the namespace to Spark as
+      # spark.kubernetes.namespace. Without it the driver looks for its own Pod
+      # in "default" and the request is rejected by RBAC.
+      # We cannot use the downward API because some python code uses it and expects scalar values.
+      # We also MUST use a dict, otherwise hub shows the following error:
+      # traitlets.traitlets.TraitError: The 'environment' trait of a KubeSpawner instance expected a dict, not the list [{'name': 'NAMESPACE', 'value': 'my-namespace'}].
+      # A helper in the chart formats these properly for any container env vars in Pods.
+      NAMESPACE: "{{ NAMESPACE }}"
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
