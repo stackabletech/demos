@@ -38,7 +38,7 @@ This demo will
    from the internet and ingest it into Kafka.
 ** *Druid*: A real-time database to power modern analytics applications. This demo uses it to ingest the near real-time
    data from Kafka, store it and enable access to the data via SQL.
-** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage for Druid to store all the data.
+** *Garage*: A S3 compatible object store. This demo uses it as persistent storage for Druid to store all the data.
 * Continuously emit approximately 10,000 records/s of https://earthquake.usgs.gov/[earthquake data] into Kafka.
 * Start a Druid ingestion job that ingests the data into the Druid instance.
 * Create Superset dashboards for visualization of the data.
@@ -72,8 +72,6 @@ $ stackablectl stacklet list
 │ superset  ┆ superset      ┆ default   ┆ node-http                                   http://172.19.0.4:30769                         ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ zookeeper ┆ zookeeper     ┆ default   ┆ server-zk                                   zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-console ┆ default   ┆ http                                        http://172.19.0.3:32007                         ┆                                 │
 └───────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
@@ -230,7 +228,7 @@ It uses the `CSVReader` to parse the downloaded CSV and the `JsonRecordSetWriter
 
 Druid is used to ingest the near real-time data from Kafka, store it and enable SQL access.
 The demo has started an ingestion job reading earthquake records from the Kafka topic earthquakes and saving them into Druid's deep storage.
-The Druid deep storage is based on the S3 store provided by MinIO.
+The Druid deep storage is based on the S3 store provided by Garage.
 
 === View the Ingestion job
 
@@ -363,29 +361,30 @@ order by 1 desc
 
 image::nifi-kafka-druid-earthquake-data/superset_12.png[]
 
-== MinIO
+== S3
 
-The S3 provided by MinIO is used as a persistent deep storage for Druid to store all the data used.
-Open the `minio` endpoint `http` in your browser (http://172.19.0.3:32007 in this case).
+The S3 provided by Garage is used as a persistent deep storage for Druid to store all the data used.
 
-image::nifi-kafka-druid-earthquake-data/minio_1.png[]
+include::partial$inspect-s3.adoc[]
 
-Log in with the username `admin` and password `adminadmin`.
+Druid writes its segments into the `demo` bucket, under `data/earthquakes`:
 
-image::nifi-kafka-druid-earthquake-data/minio_2.png[]
+[source,console]
+----
+$ rclone lsf --dirs-only :s3:demo/data/earthquakes
+----
 
-Click on the bucket `demo` and open the folders `data` -> `earthquakes`.
+Each prefix corresponds to one segment, which in turn contains all the data of a year.
+Druid saved roughly 201.5 MiB of data across 73 prefixes.
+If nothing is listed, Druid has not flushed its data from memory to the deep storage yet.
+After waiting for roughly an hour, the data should show up.
 
-image::nifi-kafka-druid-earthquake-data/minio_3.png[]
+Opening up a prefix for a specific year shows the file containing the data of that year:
 
-As you can see Druid saved 201.5 MiB of data within 73 prefixes (folders).
-One prefix corresponds to one segment which in turn contains all the data of a year.
-If you don't see any folders or files, the reason is that Druid has not saved its data from memory to the deep storage yet.
-After waiting for roughly an hour, the data should have been flushed to S3 and show up.
-
-image::nifi-kafka-druid-earthquake-data/minio_4.png[]
-
-If you open up a prefix for a specific year you can see that Druid has placed a file containing the data of that year there.
+[source,console]
+----
+$ rclone lsl :s3:demo/data/earthquakes
+----
 
 == Summary
 
