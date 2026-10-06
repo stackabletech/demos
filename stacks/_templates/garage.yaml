@@ -309,15 +309,13 @@ spec:
               cpu: 500m
               memory: 256Mi
       volumes:
-        # Request the CA cert from the secret-operator to verify Garage's
-        # TLS certificate
         - name: tls
           ephemeral:
             volumeClaimTemplate:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
-                  secrets.stackable.tech/scope: service=garage,pod
+                  secrets.stackable.tech/provision-parts: public
               spec:
                 accessModes:
                   - ReadWriteOnce

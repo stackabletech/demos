@@ -46,6 +46,7 @@ options:
             metadata:
               annotations:
                 secrets.stackable.tech/class: tls
+                secrets.stackable.tech/provision-parts: public
             spec:
               storageClassName: secrets.stackable.tech
               accessModes:
@@ -171,6 +172,7 @@ options:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/provision-parts: public
               spec:
                 storageClassName: secrets.stackable.tech
                 accessModes:
