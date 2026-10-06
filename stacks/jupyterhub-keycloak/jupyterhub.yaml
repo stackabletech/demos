@@ -146,6 +146,11 @@ options:
   singleuser:
     cmd: null
     serviceAccountName: spark
+    cloudMetadata:
+      # Disable, otherwise we get Back-off restarting failed container block-cloud-metadata in pod:
+      # block-cloud-metadata iptables v1.8.9 (legacy): can't initialize iptables table `filter': Table does not exist (do you need to insmod?)
+      # I believe this breaks in Kernel 7.x.
+      blockWithIptables: false
     networkPolicy:
       enabled: false
     extraLabels:
