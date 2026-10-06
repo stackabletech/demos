@@ -229,7 +229,7 @@ options:
           memory:
             display_name: Memory
             choices:
-# {% for memory in ["1","2","4","8","16","32","64","128"] %}
+# {% for memory in ["4","8","16","32","64","128"] %}
               "{{memory}} GB":
                 display_name: "{{memory}} GB"
                 kubespawner_override:
