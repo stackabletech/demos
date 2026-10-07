@@ -114,7 +114,7 @@ The second bucket `prediction` contains the output from the model scoring proces
 
 [source,console]
 ----
-$ rclone lsl :s3:prediction/anomaly-detection/iforest/data
+$ rclone lsl :s3:prediction/anomaly-detection
 ----
 
 This is a much smaller file, as it only contains scores for each aggregated period.
