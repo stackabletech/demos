@@ -56,18 +56,24 @@ $ stackablectl stacklet list
 │ opa     ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ trino   ┆ trino         ┆ default   ┆ coordinator-https    https://172.18.0.2:30856 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio   ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32489  ┆                                 │
 └─────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
 
 ----
 
 include::partial$instance-hint.adoc[]
 
-== MinIO
+== S3
 
-You can view the available buckets and objects (think of files) described in the xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo.
-Currently, the bucket `lakehouse` is still empty, but will be filled during the next steps.
+include::partial$inspect-s3.adoc[]
+
+There is a single bucket, `lakehouse`:
+
+[source,console]
+----
+$ rclone lsd :s3:
+----
+
+It is still empty at this point, but will be filled during the next steps.
 
 == Connect to Trino
 
