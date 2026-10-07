@@ -223,8 +223,8 @@ stacks:
     resourceRequests:
       cpu: "71"
       memory: 160Gi
-      # 250Gi Garage, 250Gi Kafka (5 brokers x 50Gi), 34Gi NiFi, 24Gi PostgreSQL
-      pvc: 600Gi
+      # 250Gi Kafka (5 brokers x 50Gi), 50Gi Garage, 34Gi NiFi, 24Gi PostgreSQL
+      pvc: 400Gi
     parameters:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
@@ -240,7 +240,7 @@ stacks:
         default: staging lakehouse
       - name: garageStorageSize
         description: Size of the PersistentVolumeClaim backing the Garage object data
-        default: 250Gi
+        default: 50Gi
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
     stackableRelease: dev

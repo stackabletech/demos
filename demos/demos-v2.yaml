@@ -220,7 +220,8 @@ demos:
     resourceRequests:
       cpu: "80"
       memory: 200Gi
-      pvc: 300Gi
+      # 250Gi Kafka (5 brokers x 50Gi), 50Gi Garage, 34Gi NiFi, 24Gi PostgreSQL
+      pvc: 400Gi
     parameters: []
   jupyterhub-pyspark-hdfs-anomaly-detection-taxi-data:
     description: Jupyterhub with PySpark and HDFS integration
