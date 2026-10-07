@@ -119,6 +119,23 @@ spec:
       port: 3900
       targetPort: s3
 ---
+# Prometheus metrics, served by Garage's admin API on /metrics.
+apiVersion: v1
+kind: Service
+metadata:
+  name: garage-metrics
+  labels:
+    stackable.tech/vendor: Stackable
+    app: garage
+spec:
+  type: ClusterIP
+  selector:
+    app: garage
+  ports:
+    - name: metrics
+      port: 3903
+      targetPort: admin
+---
 apiVersion: apps/v1
 kind: Deployment
 metadata:

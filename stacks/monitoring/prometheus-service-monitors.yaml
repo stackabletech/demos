@@ -147,3 +147,23 @@ spec:
       # Prevent "tls: failed to verify certificate: x509: cannot validate certificate for 100.96.234.154 because it doesn't contain any IP SANs"
       tlsConfig:
         insecureSkipVerify: true
+---
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: stackable-garage
+  labels:
+    stackable.tech/vendor: Stackable
+    release: prometheus
+spec:
+  namespaceSelector:
+    any: true
+  selector:
+    matchLabels:
+      app: garage
+  endpoints:
+    # Garage terminates no TLS itself. The TLS endpoint in front of it is the S3
+    # API on another Service; this is the admin API, which is HTTP only.
+    - scheme: http
+      port: metrics
+      path: /metrics
