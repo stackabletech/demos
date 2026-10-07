@@ -40,7 +40,7 @@ This demo will
 ** *Open Policy Agent*: An open-source policy engine used for user authorization
 ** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This
    demo uses it to enable SQL access to the data
-** *Garage*: A S3 compatible object store. This demo uses it as persistent storage to store the Trino data and Airflow logs
+** *Garage*: S3 compatible object store. This demo uses it as persistent storage to store the Trino data and Airflow logs
 * Mount several Airflow jobs (referred to as Directed Acyclic Graphs, or DAGs) for the cluster to use
 * Enable and schedule the jobs
 * Verify the job status with the Airflow Webserver UI
