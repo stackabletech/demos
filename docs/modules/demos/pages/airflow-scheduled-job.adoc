@@ -40,7 +40,7 @@ This demo will
 ** *Open Policy Agent*: An open-source policy engine used for user authorization
 ** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This
    demo uses it to enable SQL access to the data
-** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage to store the Trino data and Airflow logs
+** *Garage*: S3 compatible object store. This demo uses it as persistent storage to store the Trino data and Airflow logs
 * Mount several Airflow jobs (referred to as Directed Acyclic Graphs, or DAGs) for the cluster to use
 * Enable and schedule the jobs
 * Verify the job status with the Airflow Webserver UI
@@ -49,7 +49,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::airflow-scheduled-job/overview.png[]
+image::airflow-scheduled-job/overview.drawio.png[]
 
 == List deployed Stackable services
 
@@ -75,8 +75,6 @@ $ stackablectl stacklet list -n airflow-demo
 │ opa     ┆ opa           ┆ default   ┆                                                                                                           ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ trino   ┆ trino         ┆ default   ┆ coordinator-https                           https://172.19.0.5:31087                                      ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio   ┆ minio-console ┆ default   ┆ https                                       https://172.19.0.4:31792                                      ┆                                 │
 └─────────┴───────────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
@@ -133,8 +131,8 @@ Click on the `run_every_minute` box in the centre of the page to select the logs
 [WARNING]
 ====
 In this demo, the KubernetesExecutor is deployed which means that logs are only preserved (and available in the UI) if either remote logging or the SDP logging framework is configured.
-In this demo we set up remote logging using S3/Minio.
-Since Minio in this case is set up with TLS, the Airflow connection requires that the webserver has access to a relevant certificate and that every pod has environment variables containing the access and secret keys.
+In this demo we set up remote logging to S3.
+Since S3 is served over TLS here, the Airflow connection requires that the webserver has access to a relevant certificate and that every pod has environment variables containing the access and secret keys.
 See the https://airflow.apache.org/docs/apache-airflow-providers-cncf-kubernetes/stable/kubernetes_executor.html#managing-dags-and-logs[Airflow Documentation{external-link-icon}^] for more details.
 
 If you are interested in persisting the logs using the SDP logging framework, take a look at the xref:logging.adoc[] demo.

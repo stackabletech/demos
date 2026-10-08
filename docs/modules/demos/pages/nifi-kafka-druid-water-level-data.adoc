@@ -38,7 +38,7 @@ This demo will
    from the internet and ingest it into Kafka.
 ** *Druid*: A real-time database to power modern analytics applications. This demo uses it to ingest the near real-time
    data from Kafka, store it and enable access to the data via SQL.
-** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage for Druid to store all the data.
+** *Garage*: S3 compatible object store. This demo uses it as persistent storage for Druid to store all the data.
 * Ingest water level data from the {pegelonline}[PEGELONLINE web service] into Kafka. The data contains measured water
   levels of different measuring stations all around Germany. If the web service is unavailable, this demo will not work,
   as it needs the web service to ingest the data.
@@ -51,7 +51,7 @@ This demo will
 The whole data pipeline will have a very low latency, from putting a record into Kafka to showing up in the dashboard
 charts. You can see the deployed products and their relationship in the following diagram:
 
-image::nifi-kafka-druid-water-level-data/overview.png[]
+image::nifi-kafka-druid-water-level-data/overview.drawio.png[]
 
 == List the deployed Stackable services
 
@@ -77,8 +77,6 @@ $ stackablectl stacklet list
 │ superset  ┆ superset      ┆ default   ┆ node-http                                   http://172.19.0.3:30435                         ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ zookeeper ┆ zookeeper     ┆ default   ┆ server-zk                                   zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-console ┆ default   ┆ http                                        http://172.19.0.5:30196                         ┆                                 │
 └───────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 
 ----
@@ -395,7 +393,7 @@ corner.
 
 Druid is used to ingest the near real-time data from Kafka, store it and enable SQL access. The demo has started two
 ingestion jobs - one reading from the topic `stations` and the other from `measurements` - and saving it into Druid's
-deep storage. The Druid deep storage is based on the S3 store provided by MinIO.
+deep storage. The Druid deep storage is based on the S3 store provided by Garage.
 
 === View the Ingestion job
 
@@ -564,32 +562,37 @@ order by 2 desc
 
 image::nifi-kafka-druid-water-level-data/superset_13.png[]
 
-== MinIO
+== S3
 
-The S3 MinIO store provides persistent deep storage for Druid to store all the data used. Open the MinIO endpoint
-`http` retrieved by `stackablectl stacklet list` in your browser (http://172.19.0.5:30196 in this case).
+The S3 provided by Garage is used as persistent deep storage for Druid to store all the data used.
 
-image::nifi-kafka-druid-water-level-data/minio_1.png[]
+include::partial$inspect-s3.adoc[]
 
-Log in with the username `admin` and password `adminadmin`.
+Druid writes its segments into the `demo` bucket, under `data`, with one directory per data source:
 
-image::nifi-kafka-druid-water-level-data/minio_2.png[]
+[source,console]
+----
+$ rclone lsf --dirs-only :s3:demo/data
+----
 
-Click on the bucket `demo` and open the folder `data`.
+Look at `measurements`:
 
-image::nifi-kafka-druid-water-level-data/minio_3.png[]
+[source,console]
+----
+$ rclone lsf --dirs-only :s3:demo/data/measurements
+----
 
-You can see that Druid has created a folder for both data sources. Go ahead and open the folder `measurements`.
+Druid saved roughly 51.5 MiB of data across 33 prefixes.
+One prefix corresponds to one segment, which contains all the measurements of a day.
+If nothing is listed, Druid still needs to save its data from memory to the deep storage.
+After waiting for roughly an hour, the data should show up.
 
-image::nifi-kafka-druid-water-level-data/minio_4.png[]
+Opening up a prefix for a specific day shows the file containing that day's data:
 
-Druid saved 51.5 MiB of data within 33 prefixes (folders). One prefix corresponds to one segment, which contains all the
-measurements of a day. If you don't see any folders or files, the reason is that Druid still needs to save its data from
-memory to the deep storage. After waiting for roughly an hour, the data should have been flushed to S3 and show up.
-
-image::nifi-kafka-druid-water-level-data/minio_5.png[]
-
-If you open up a prefix for a specific day, you can see that Druid has placed a file containing that day's data there.
+[source,console]
+----
+$ rclone lsl :s3:demo/data/measurements
+----
 
 == Summary
 

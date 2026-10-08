@@ -22,7 +22,7 @@ Below is an incomplete list of third-party components referenced in these demos:
 * JupyterHub
 * JupyterLab
 * Keycloak
-* MinIO
+* Garage
 * Ollama
 * OpenLDAP
 * OpenSearch Dashboards

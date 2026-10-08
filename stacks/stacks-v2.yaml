@@ -148,10 +148,11 @@ stacks:
       - trino
       - opa
       - iceberg
-      - minio
+      - garage
       - s3
       - airflow
     manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/kafka.yaml
@@ -162,7 +163,6 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/rbac.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa-rules.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/opa.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/minio.yaml
     supportedNamespaces: []
     resourceRequests:
       cpu: 3400m
@@ -172,9 +172,12 @@ stacks:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo airflow
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
       - name: airflowAdminPassword
         description: Password of the Airflow admin user
         default: adminadmin
@@ -203,10 +206,10 @@ stacks:
       - superset
       - kafka
       - nifi
-      - minio
+      - garage
       - s3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-tls/rendered-chart.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
@@ -220,7 +223,8 @@ stacks:
     resourceRequests:
       cpu: "71"
       memory: 160Gi
-      pvc: 1Ti
+      # 250Gi Kafka (5 brokers x 50Gi), 50Gi Garage, 34Gi NiFi, 24Gi PostgreSQL
+      pvc: 400Gi
     parameters:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
@@ -229,11 +233,14 @@ stacks:
         description: Password of the Superset admin user
         default: adminadmin
       - name: nifiAdminPassword
-        description: Password of the MinIO admin user
+        description: Password of the NiFi admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: staging lakehouse
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 50Gi
   hdfs-hbase:
     description: HBase cluster using HDFS as underlying storage
     stackableRelease: dev
@@ -258,7 +265,7 @@ stacks:
       pvc: 21Gi
     parameters: []
   nifi-kafka-druid-superset-s3:
-    description: Stack containing NiFi, Kafka, Druid, MinIO and Superset for data visualization
+    description: Stack containing NiFi, Kafka, Druid, Garage and Superset for data visualization
     stackableRelease: dev
     stackableOperators:
       - commons
@@ -274,10 +281,10 @@ stacks:
       - kafka
       - druid
       - superset
-      - minio
+      - garage
       - s3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-druid.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/nifi-kafka-druid-superset-s3/zookeeper.yaml
@@ -297,11 +304,14 @@ stacks:
       - name: supersetAdminPassword
         description: Password of the Superset admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
   spark-trino-superset-s3:
-    description: Stack containing MinIO, Trino and Superset for data visualization
+    description: Stack containing Garage, Trino and Superset for data visualization
     stackableRelease: dev
     stackableOperators:
       - commons
@@ -315,10 +325,10 @@ stacks:
     labels:
       - trino
       - superset
-      - minio
+      - garage
       - s3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
@@ -341,11 +351,14 @@ stacks:
       - name: supersetAdminPassword
         description: Password of the Superset admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo prediction
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
   trino-superset-s3:
-    description: Stack containing MinIO, Trino and Superset for data visualization
+    description: Stack containing Garage, Trino and Superset for data visualization
     stackableRelease: dev
     stackableOperators:
       - commons
@@ -358,10 +371,10 @@ stacks:
     labels:
       - trino
       - superset
-      - minio
+      - garage
       - s3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-tls/rendered-chart.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-superset.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-superset-s3/s3-connection.yaml
@@ -380,9 +393,12 @@ stacks:
       - name: supersetAdminPassword
         description: Password of the Superset admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
   trino-iceberg:
     description: Stack containing Trino using Apache Iceberg as a S3 data lakehouse
     stackableRelease: dev
@@ -397,10 +413,10 @@ stacks:
       - trino
       - opa
       - iceberg
-      - minio
+      - garage
       - s3
     manifests:
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio-distributed-small-tls/rendered-chart.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/trino-iceberg/hive-metastores.yaml
@@ -409,14 +425,17 @@ stacks:
     resourceRequests:
       cpu: 6000m # Measured 5600m
       memory: 21Gi
-      pvc: 110Gi # 100Gi for MinIO
+      pvc: 60Gi # 50Gi for Garage
     parameters:
       - name: trinoAdminPassword
         description: Password of the Trino admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: lakehouse
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 50Gi
   jupyterhub-pyspark-hdfs:
     description: Jupyterhub with PySpark and HDFS integration
     stackableRelease: dev
@@ -621,7 +640,7 @@ stacks:
       memory: 9010Mi
       pvc: 24Gi
     manifests:
-      - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak-serviceaccount.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak-realm-config.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/jupyterhub-keycloak/keycloak.yaml
@@ -632,9 +651,12 @@ stacks:
       - name: keycloakAdminPassword
         description: Password of the Keycloak admin user
         default: adminadmin
-      - name: minioAdminPassword
-        description: Password of the MinIO admin user
-        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
       - name: jupyterhubClientPassword
         description: Password of the JupyterHub client user
         default: jupyterhubjupyterhub

@@ -11,4 +11,4 @@ spec:
       metastore:
         configMap: hive-iceberg
       s3:
-        reference: minio
+        reference: garage

@@ -35,7 +35,7 @@ Instance types that loosely correspond to this on the Hyperscalers are:
 * *Azure*: `Standard_D4_v2`
 * *AWS*: `m5.2xlarge`
 
-In addition to these nodes the operators will request multiple persistent volumes with a total capacity of about 300Gi.
+In addition to these nodes the operators will request multiple persistent volumes with a total capacity of about 400Gi.
 
 == Overview
 
@@ -47,7 +47,7 @@ This demo will
    This demo uses it to enable SQL access to the data.
 ** *Apache Spark*: A multi-language engine for executing data engineering, data science, and machine learning.
    This demo uses it to stream data from Kafka into the lakehouse.
-** *MinIO*: S3 compatible object store.
+** *Garage*: S3 compatible object store.
    This demo uses it as persistent storage to store all the data used
 ** *Apache Kafka*: A distributed event streaming platform for high-performance data pipelines, streaming analytics and data integration.
    This demo uses it as an event streaming platform to stream the data in near real-time.
@@ -68,7 +68,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::data-lakehouse-iceberg-trino-spark/overview.png[]
+image::data-lakehouse-iceberg-trino-spark/overview.drawio.png[]
 
 == Apache Iceberg
 
@@ -129,28 +129,25 @@ $ stackablectl stacklet list
 │           ┆               ┆           ┆ coordinator-https    https://212.227.194.245:30841 ┆                                 │
 ├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ zookeeper ┆ zookeeper     ┆ default   ┆                                                    ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio     ┆ minio-console ┆ default   ┆ http                 http://217.160.99.235:30238   ┆                                 │
 └───────────┴───────────────┴───────────┴────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
-== MinIO
+== S3
 
 === Listing Buckets
 
-The S3 provided by MinIO is used as persistent storage to store all the data used. Open the `minio` endpoint
-`http` retrieved by the `stackablectl stacklet list` command in your browser (http://217.160.99.235:30238 in
-this case).
+The S3 provided by Garage is used as persistent storage to store all the data used.
 
-image::data-lakehouse-iceberg-trino-spark/minio_1.png[]
+include::partial$inspect-s3.adoc[]
 
-Log in with the username `admin` and password `adminadmin`.
+[source,console]
+----
+$ rclone lsd :s3:
+----
 
-image::data-lakehouse-iceberg-trino-spark/minio_2.png[]
-
-Here, you can see the two buckets contained in the S3:
+There are two buckets:
 
 . `staging`: The demo loads static datasets into this area. It is stored in different formats, such as CSV and Parquet.
   It does contain actual data tables as well as lookup tables.
@@ -159,21 +156,28 @@ Here, you can see the two buckets contained in the S3:
 
 === Inspecting Lakehouse
 
-Click on the bucket `lakehouse`.
+Each prefix in `lakehouse` holds a different dataset:
 
-image::data-lakehouse-iceberg-trino-spark/minio_3.png[]
+[source,console]
+----
+$ rclone lsf :s3:lakehouse
+----
 
-Multiple folders (called prefixes in S3), each containing a different dataset, are displayed. First, select the folder
-`house-sales`, then the folder starting with `house-sales-*`, and lastly, the folder named `data`.
+Look at the `house-sales` dataset.
+Each table lives in a directory named after it followed by a random suffix, such as `house-sales-c381a26d1b8f4f52babc7481ef1dd815`, so list the prefix rather than guessing the name.
+Below that directory, the `data` prefix is partitioned by year:
 
-image::data-lakehouse-iceberg-trino-spark/minio_4.png[]
+[source,console]
+----
+$ rclone lsf --dirs-only --recursive :s3:lakehouse/house-sales
+----
 
-As you can see, the table `house-sales` is partitioned by year. Go ahead and click on any folder.
+Listing one of those partitions shows the files Trino wrote, containing all the house sales for that particular year:
 
-image::data-lakehouse-iceberg-trino-spark/minio_5.png[]
-
-You can see that Trino has data into the selected folder containing all the house sales of that
-particular year.
+[source,console]
+----
+$ rclone lsl :s3:lakehouse/house-sales
+----
 
 == NiFi
 

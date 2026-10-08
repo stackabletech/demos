@@ -13,7 +13,7 @@ spec:
       metastore:
         configMap: hive
       s3:
-        reference: minio
+        reference: garage
 ---
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCluster
