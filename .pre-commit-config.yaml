@@ -5,8 +5,18 @@ default_language_version:
 exclude: '\.(ipynb|svg)$'
 
 repos:
+  - repo: https://github.com/crate-ci/typos
+    rev: 00f422f3b19c57bc6338715ebfe3316d38768461 # v1.50.3
+    hooks:
+      - id: typos
+        # Drop the upstream default `--write-changes` so the hook only
+        # reports failures instead of writing changes.
+        # Keep `--force-exclude` so the excludes in typos.toml still
+        # apply to the paths prek passes in.
+        args: ["--force-exclude"]
+
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v6.0.0 # 4.6.0
+    rev: 3e8a8703264a2f4a69428a0aa4dcb512790b2c8c # 6.0.0
     hooks:
       - id: trailing-whitespace
       - id: end-of-file-fixer
@@ -16,23 +26,23 @@ repos:
         exclude: '^stacks/argo-cd-git-ops/secrets/sealed-secrets-key\.yaml$'
 
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1 # 1.35.1
+    rev: cba56bcde1fdd01c1deb3f945e69764c291a6530 # 1.38.0
     hooks:
       - id: yamllint
 
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.46.0 # 0.41.0
+    rev: a4d5d37e66ebcd6b3705204a1d6dbb56dea66338 # 0.49.0
     hooks:
       - id: markdownlint
 
   - repo: https://github.com/koalaman/shellcheck-precommit
-    rev: v0.11.0 # 0.10.0
+    rev: 99470f5e12208ff0fb17ab81c3c494f7620a1d8d # 0.11.0
     hooks:
       - id: shellcheck
         args: ["--severity=info"]
 
   - repo: https://github.com/rhysd/actionlint
-    rev: e7d448ef7507c20fc4c88a95d0c448b848cd6127 # 1.7.8
+    rev: 914e7df21a07ef503a81201c76d2b11c789d3fca # 1.7.12
     hooks:
       - id: actionlint
 
