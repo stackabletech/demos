@@ -36,7 +36,7 @@ This demo will do the following:
 
 You can see the deployed products as well as their relationship in the following diagram:
 
-image::signal-processing/overview.png[]
+image::signal-processing/overview.drawio.png[]
 
 == Data ingestion
 
@@ -141,7 +141,7 @@ There are two located in the "Stackable Data Platform" folder.
 The _Gas measurements_ dashboard shows the original data. The first graph plots two measurements (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
 These are superimposed on each other for ease of comparison.
 
-image::signal-processing/measurements.drawio.png[]
+image::signal-processing/measurements.png[]
 
 === Predictions
 
