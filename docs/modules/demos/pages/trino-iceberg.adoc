@@ -208,14 +208,14 @@ with
 			min(file_size_in_bytes) as min_file_size,
 			max(file_size_in_bytes) as max_file_size
 		from (
-			select 'nation' as "table", * from "nation$files"
-			union all select 'region' as "table", * from "region$files"
-			union all select 'part' as "table", * from "part$files"
-			union all select 'partsupp' as "table", * from "partsupp$files"
-			union all select 'supplier' as "table", * from "supplier$files"
-			union all select 'customer' as "table", * from "customer$files"
-			union all select 'orders' as "table", * from "orders$files"
-			union all select 'lineitem' as "table", * from "lineitem$files"
+			select 'nation' as "table", file_size_in_bytes from "nation$files"
+			union all select 'region' as "table", file_size_in_bytes from "region$files"
+			union all select 'part' as "table", file_size_in_bytes from "part$files"
+			union all select 'partsupp' as "table", file_size_in_bytes from "partsupp$files"
+			union all select 'supplier' as "table", file_size_in_bytes from "supplier$files"
+			union all select 'customer' as "table", file_size_in_bytes from "customer$files"
+			union all select 'orders' as "table", file_size_in_bytes from "orders$files"
+			union all select 'lineitem' as "table", file_size_in_bytes from "lineitem$files"
 		)
 		group by 1
 	)
