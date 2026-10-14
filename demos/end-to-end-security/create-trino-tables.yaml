@@ -167,11 +167,11 @@ data:
                     min(file_size_in_bytes) as min_file_size,
                     max(file_size_in_bytes) as max_file_size
                 from (
-                    select 'customer' as "table", * from lakehouse.customer_analytics."customer$files"
-                    union all select 'customer_address' as "table", * from lakehouse.customer_analytics."customer_address$files"
-                    union all select 'customer_demographics' as "table", * from lakehouse.customer_analytics."customer_demographics$files"
-                    union all select 'income_band' as "table", * from lakehouse.customer_analytics."income_band$files"
-                    union all select 'household_demographics' as "table", * from lakehouse.customer_analytics."household_demographics$files"
+                    select 'customer' as "table", file_size_in_bytes from lakehouse.customer_analytics."customer$files"
+                    union all select 'customer_address' as "table", file_size_in_bytes from lakehouse.customer_analytics."customer_address$files"
+                    union all select 'customer_demographics' as "table", file_size_in_bytes from lakehouse.customer_analytics."customer_demographics$files"
+                    union all select 'income_band' as "table", file_size_in_bytes from lakehouse.customer_analytics."income_band$files"
+                    union all select 'household_demographics' as "table", file_size_in_bytes from lakehouse.customer_analytics."household_demographics$files"
                 )
                 group by 1
             )
