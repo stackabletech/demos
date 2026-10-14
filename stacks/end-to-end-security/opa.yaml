@@ -6,7 +6,6 @@ metadata:
 spec:
   image:
     productVersion: 1.20.2
-    pullPolicy: Never # LOCAL TEST ONLY - do not commit
   clusterConfig:
     userInfo:
       backend:
