@@ -5,7 +5,7 @@ metadata:
   name: hbase
 spec:
   image:
-    productVersion: 2.6.6
+    productVersion: 2.6.7
   clusterConfig:
     hdfsConfigMapName: hdfs
     zookeeperConfigMapName: hbase-znode
