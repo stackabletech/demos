@@ -6,15 +6,15 @@ repo:
   name: opentelemetry-operator
   url: https://open-telemetry.github.io/opentelemetry-helm-charts
 # Find the newest chart at https://github.com/open-telemetry/opentelemetry-helm-charts/releases
-version: 0.107.0 # 0.146.0
+version: 0.119.0 # appVersion: 0.154.0
 options:
   additionalLabels:
     stackable.tech/vendor: Stackable
-    stackable.tech/stack: {{ STACK }}
+    stackable.tech/stack: "{{ STACK }}"
     # The following is a Jinja2 template directive, not a regular comment.
     # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
     # {% if DEMO is defined %}
-    stackable.tech/demo: {{ DEMO }}
+    stackable.tech/demo: "{{ DEMO }}"
     # {% endif %}
   admissionWebhooks:
     certManager:

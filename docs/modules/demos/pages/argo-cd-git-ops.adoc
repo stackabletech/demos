@@ -91,7 +91,7 @@ When managing all resources and configuration via Git, deploying sensitive data 
 There are multiple solutions to this such as Hashicorp or Bitwarden, which depend heavily on the infrastructure already available.
 
 For the sake of this demo, {sealed-secrets}[Bitnami's Sealed Secrets] are utilized.
-Sensitive data is encrypted as a `SealedSecret` before commiting to the Git repository, synced via ArgoCD and decrypted by the Sealed Secrets controller into a standard Kubernetes `Secret`.
+Sensitive data is encrypted as a `SealedSecret` before committing to the Git repository, synced via ArgoCD and decrypted by the Sealed Secrets controller into a standard Kubernetes `Secret`.
 
 This way, everything will be stored and managed in Git.
 
@@ -121,7 +121,7 @@ Detailed information about the Airflow cluster, the cluster status and deployed 
 Additionally, if the Git repository and the cluster state itself differ, these differences can be previewed in a code diff preview.
 
 Per default in this demo, the ArgoCD `Sync Policy` is set to `auto-sync`.
-This means that changes to the Git repository are immediatly synced into the cluster.
+This means that changes to the Git repository are immediately synced into the cluster.
 This is nice in the demo case, but should be disabled for production use cases.
 
 image::argo-cd-git-ops/argocd-airflow-application-details.png[]

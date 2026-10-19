@@ -8,7 +8,7 @@ repo:
 # Special care should be taken during testing when this version was bumped.
 # There might be cases where this needs to be dropped back, because the chart
 # is not compatible with other components of the stack/images used.
-version: 4.3.2 # 5.4.3
+version: 4.4.0 # appVersion: 5.5.0
 options:
   hub:
     config:
@@ -19,7 +19,7 @@ options:
           - isla.williams
       GenericOAuthenticator:
         client_id: jupyterhub
-        client_secret: {{jupyterhubClientPassword}}
+        client_secret: "{{jupyterhubClientPassword}}"
         username_claim: preferred_username
         scope:
           - openid
@@ -46,6 +46,7 @@ options:
             metadata:
               annotations:
                 secrets.stackable.tech/class: tls
+                secrets.stackable.tech/provision-parts: public
             spec:
               storageClassName: secrets.stackable.tech
               accessModes:
@@ -145,16 +146,30 @@ options:
   singleuser:
     cmd: null
     serviceAccountName: spark
+    cloudMetadata:
+      # Disable, otherwise we get Back-off restarting failed container block-cloud-metadata in pod:
+      # block-cloud-metadata iptables v1.8.9 (legacy): can't initialize iptables table `filter': Table does not exist (do you need to insmod?)
+      # I believe this breaks in Kernel 7.x.
+      blockWithIptables: false
     networkPolicy:
       enabled: false
     extraLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
+    extraEnv:
+      # Needed because the Notebook passes the namespace to Spark as
+      # spark.kubernetes.namespace. Without it the driver looks for its own Pod
+      # in "default" and the request is rejected by RBAC.
+      # We cannot use the downward API because some python code uses it and expects scalar values.
+      # We also MUST use a dict, otherwise hub shows the following error:
+      # traitlets.traitlets.TraitError: The 'environment' trait of a KubeSpawner instance expected a dict, not the list [{'name': 'NAMESPACE', 'value': 'my-namespace'}].
+      # A helper in the chart formats these properly for any container env vars in Pods.
+      NAMESPACE: "{{ NAMESPACE }}"
     initContainers:
       - name: download-notebook
         image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
@@ -171,6 +186,7 @@ options:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
+                  secrets.stackable.tech/provision-parts: public
               spec:
                 storageClassName: secrets.stackable.tech
                 accessModes:
@@ -178,17 +194,17 @@ options:
                 resources:
                   requests:
                     storage: "1"
-        - name: minio-s3-credentials
+        - name: s3-credentials
           secret:
-            secretName: minio-s3-credentials
+            secretName: s3-credentials
         - name: notebook
           emptyDir:
             sizeLimit: 500Mi
       extraVolumeMounts:
         - name: tls-ca-cert
           mountPath: /stackable/secrets/tls-ca-cert
-        - name: minio-s3-credentials
-          mountPath: /minio-s3-credentials
+        - name: s3-credentials
+          mountPath: /s3-credentials
         - name: notebook
           mountPath: /home/jovyan/notebook
     profileList:
@@ -199,29 +215,33 @@ options:
           cpu:
             display_name: CPU
             choices:
-{% for cpu in ["1","2","4","8","16","32"] %}
+# {% for cpu in ["1","2","4","8","16","32"] %}
               "{{cpu}}":
                 display_name: "{{cpu}}"
                 kubespawner_override:
+                  # We cannot quote these values because both fields MUST be a float, not a string.
+                  # The Kubernetes notation (eg. 500m) is also not supported.
+                  # See https://github.com/jupyterhub/helm-chart/issues/69
+                  # This leads to this file being skipped in the Helm Chart bump script. Beware!
                   cpu_guarantee: {{cpu}}
                   cpu_limit: {{cpu}}
-{% endfor %}
+# {% endfor %}
           memory:
             display_name: Memory
             choices:
-{% for memory in ["1","2","4","8","16","32","64","128"] %}
+# {% for memory in ["4","8","16","32","64","128"] %}
               "{{memory}} GB":
                 display_name: "{{memory}} GB"
                 kubespawner_override:
                   mem_guarantee: "{{memory}}G"
                   mem_limit: "{{memory}}G"
-{% endfor %}
+# {% endfor %}
           image:
             display_name: Image
             choices:
-{% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
+# {% for image in ["quay.io/jupyter/pyspark-notebook:python-3.11.9", "quay.io/jupyter/pyspark-notebook:spark-3.5.2"] %}
               "{{image}}":
                 display_name: "{{image}}"
                 kubespawner_override:
                   image: "{{image}}"
-{% endfor %}
+# {% endfor %}

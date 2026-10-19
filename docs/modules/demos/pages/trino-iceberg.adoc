@@ -56,18 +56,24 @@ $ stackablectl stacklet list
 │ opa     ┆ opa           ┆ default   ┆                                               ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ trino   ┆ trino         ┆ default   ┆ coordinator-https    https://172.18.0.2:30856 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio   ┆ minio-console ┆ default   ┆ http                 http://172.18.0.2:32489  ┆                                 │
 └─────────┴───────────────┴───────────┴───────────────────────────────────────────────┴─────────────────────────────────┘
 
 ----
 
 include::partial$instance-hint.adoc[]
 
-== MinIO
+== S3
 
-You can view the available buckets and objects (think of files) described in the xref:data-lakehouse-iceberg-trino-spark.adoc#_minio[data-lakehouse-iceberg-trino-spark] demo.
-Currently, the bucket `lakehouse` is still empty, but will be filled during the next steps.
+include::partial$inspect-s3.adoc[]
+
+There is a single bucket, `lakehouse`:
+
+[source,console]
+----
+$ rclone lsd :s3:
+----
+
+It is still empty at this point, but will be filled during the next steps.
 
 == Connect to Trino
 
@@ -110,7 +116,10 @@ You can list the tables that are part of the dataset using:
 [source,sql]
 ----
 show tables in tpch.sf5;
+----
 
+[source]
+----
   Table
 ----------
  customer
@@ -199,14 +208,14 @@ with
 			min(file_size_in_bytes) as min_file_size,
 			max(file_size_in_bytes) as max_file_size
 		from (
-			select 'nation' as "table", * from "nation$files"
-			union all select 'region' as "table", * from "region$files"
-			union all select 'part' as "table", * from "part$files"
-			union all select 'partsupp' as "table", * from "partsupp$files"
-			union all select 'supplier' as "table", * from "supplier$files"
-			union all select 'customer' as "table", * from "customer$files"
-			union all select 'orders' as "table", * from "orders$files"
-			union all select 'lineitem' as "table", * from "lineitem$files"
+			select 'nation' as "table", file_size_in_bytes from "nation$files"
+			union all select 'region' as "table", file_size_in_bytes from "region$files"
+			union all select 'part' as "table", file_size_in_bytes from "part$files"
+			union all select 'partsupp' as "table", file_size_in_bytes from "partsupp$files"
+			union all select 'supplier' as "table", file_size_in_bytes from "supplier$files"
+			union all select 'customer' as "table", file_size_in_bytes from "customer$files"
+			union all select 'orders' as "table", file_size_in_bytes from "orders$files"
+			union all select 'lineitem' as "table", file_size_in_bytes from "lineitem$files"
 		)
 		group by 1
 	)
@@ -231,7 +240,10 @@ Afterwards you can query the view using:
 [source,sql]
 ----
 select * from table_information order by records desc;
+----
 
+[source]
+----
   table   | records  | size_in_bytes | num_files | avg_file_size | min_file_size | max_file_size | snapshots | avg_record_size
 ----------+----------+---------------+-----------+---------------+---------------+---------------+-----------+-----------------
  lineitem | 29999795 | 832M          |         7 | 119M          | 20.7M         | 220M          |         1 |              27
@@ -270,7 +282,10 @@ select
 from lineitem
 group by returnflag, linestatus
 order by returnflag, linestatus;
+----
 
+[source]
+----
  returnflag | linestatus |     sum_qty      |    sum_base_price     |    sum_disc_price     |      sum_charge       |      avg_qty       |     avg_price     |      avg_disc       | count_order
 ------------+------------+------------------+-----------------------+-----------------------+-----------------------+--------------------+-------------------+---------------------+-------------
  A          | F          | 3.77571137746E11 |  5.661718069977699E14 | 5.3786257473244656E14 | 5.5937697399894625E14 | 25.499847411525963 |   38237.283637033 | 0.05000115102912903 | 14806799886
@@ -353,7 +368,10 @@ First, let's see its current status:
 [source,sql]
 ----
 select * from customer where custkey = 112501;
+----
 
+[source]
+----
  custkey |        name        |    address    | nationkey |      phone      | acctbal | mktsegment |                                                  comment
 ---------+--------------------+---------------+-----------+-----------------+---------+------------+-----------------------------------------------------------------------------------------------------------
   112501 | Customer#000112501 | DWA,dNub2S5a0 |         3 | 13-503-907-7391 | 2490.91 | AUTOMOBILE | onic dependencies. slyly regular waters was among the final packages. asymptotes nod fluffily blithely un
@@ -382,6 +400,10 @@ Let's inspect the `orders` table first:
 [source,sql]
 ----
 describe orders;
+----
+
+[source]
+----
     Column     |  Type   | Extra | Comment
 ---------------+---------+-------+---------
  orderkey      | bigint  |       |
@@ -408,6 +430,10 @@ Each record now has a new column called `orderpriority_prev` with a default valu
 [source,sql]
 ----
 select * from orders limit 1;
+----
+
+[source]
+----
  orderkey | custkey | orderstatus | totalprice | orderdate  | orderpriority |      clerk      | shippriority |                               comment                               | orderpriority_prev
 ----------+---------+-------------+------------+------------+---------------+-----------------+--------------+---------------------------------------------------------------------+--------------------
  11827265 |  367454 | O           |   103958.7 | 1997-02-22 | 1-URGENT      | Clerk#000000162 |            0 | atelets cajole bold packages. carefully silent dolphins cajole fina | NULL
@@ -425,7 +451,10 @@ Let's check the current priority of the orders of the VIP customers:
 [source,sql]
 ----
 select orderpriority, count(*) from orders where custkey in (select custkey from customers_to_prioritize) group by 1 order by 1;
+----
 
+[source]
+----
   orderpriority  | _col1
 -----------------+-------
  1-URGENT        |  7482
@@ -452,7 +481,10 @@ All the orders should now have top priority:
 [source,sql]
 ----
 select orderpriority, count(*) from orders where custkey in (select custkey from customers_to_prioritize) group by 1 order by 1;
+----
 
+[source]
+----
  orderpriority | _col1
 ---------------+-------
  1-URGENT      | 37331
@@ -464,7 +496,10 @@ But you can still access the previous priority. It should return the same counts
 [source,sql]
 ----
 select orderpriority_prev, count(*) from orders where custkey in (select custkey from customers_to_prioritize) group by 1 order by 1;
+----
 
+[source]
+----
  orderpriority_prev | _col1
 --------------------+-------
  1-URGENT           |  7482

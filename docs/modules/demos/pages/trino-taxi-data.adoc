@@ -1,5 +1,5 @@
 = trino-taxi-data
-:description: Install and demo Trino with NYC taxi data: Query with SQL, visualize with Superset, and explore data in MinIO and Trino on Kubernetes.
+:description: Install and demo Trino with NYC taxi data: Query with SQL, visualize with Superset, and explore data in S3 and Trino on Kubernetes.
 
 :superset-docs: https://superset.apache.org/docs/creating-charts-dashboards/creating-your-first-dashboard#creating-charts-in-explore-view
 :nyc-website: https://www1.nyc.gov/assets/tlc/downloads/pdf/data_dictionary_trip_records_yellow.pdf
@@ -40,7 +40,7 @@ This demo will
    Trino via SQL queries and build dashboards on top of that data.
 ** *Trino*: A fast distributed SQL query engine for big data analytics that helps you explore your data universe. This
    demo uses it to enable SQL access to the data.
-** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage to store all the data used
+** *Garage*: S3 compatible object store. This demo uses it as persistent storage to store all the data used
 ** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as
    metadata storage for Trino.
 ** *Open policy agent* (OPA): An open-source, general-purpose policy engine unifying policy enforcement across the
@@ -51,7 +51,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::trino-taxi-data/overview.png[]
+image::trino-taxi-data/overview.drawio.png[]
 
 == List the deployed Stackable services
 
@@ -71,8 +71,6 @@ $ stackablectl stacklet list
 │ superset ┆ superset      ┆ default   ┆ node-http          http://172.18.0.2:31312                       ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ trino    ┆ trino         ┆ default   ┆ coordinator-https  https://172.18.0.2:30755                      ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio    ┆ minio-console ┆ default   ┆ https              https://172.18.0.2:32654                      ┆                                 │
 └──────────┴───────────────┴───────────┴──────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
@@ -80,20 +78,16 @@ include::partial$instance-hint.adoc[]
 
 == Inspect the data in S3
 
-The S3 provided by MinIO is used as a persistent storage to store all the data used. You can look at the test data
-within the MinIO web interface by opening the endpoint `http` from your `stackablectl stacklet list` command
-output. You have to use the endpoint from your command output. In this case, it is https://172.18.0.2:32654. Open it with
-your favourite browser.
+The S3 provided by Garage is used as a persistent storage to store all the data used.
 
-image::trino-taxi-data/minio_1.png[]
+include::partial$inspect-s3.adoc[]
 
-Log in with the username `admin` and password `adminadmin`.
+The test data is in the `demo` bucket, under `ny-taxi-data/raw`:
 
-image::trino-taxi-data/minio_2.png[]
-
-Click on the bucket `demo` and open the folders `ny-taxi-data` -> `raw`.
-
-image::trino-taxi-data/minio_3.png[]
+[source,console]
+----
+$ rclone lsl :s3:demo/ny-taxi-data/raw
+----
 
 The demo uploaded 1GB of parquet files, one file per month. The data contains taxi rides in New York City. The file size
 (and therefore the number of rides) decreased drastically because of the COVID-19 pandemic starting from `2020-03`.
@@ -305,7 +299,7 @@ You also have the possibility to create additional charts and bundle them togeth
 
 === Load Additional Data
 
-You can use the MinIO webinterface to upload additional data. As an alternative you can use the S3 API with an S3 client like https://s3tools.org/s3cmd[s3cmd].
+You can upload additional data with any S3 client, such as the AWS CLI or `rclone` configured as described above.
 It is recommended to put the data into a folder (prefix) in the `demo` bucket.
 
 Have a look at the defined tables inside the `hive.demo` schema on how to inform Trino about the newly available data.

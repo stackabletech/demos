@@ -1,5 +1,5 @@
 = spark-k8s-anomaly-detection-taxi-data
-:description: Deploy a Kubernetes-based Spark demo for anomaly detection using the popular New York taxi dataset, featuring Trino, Spark, MinIO, and Superset.
+:description: Deploy a Kubernetes-based Spark demo for anomaly detection using the popular New York taxi dataset, featuring Trino, Spark, S3, and Superset.
 
 :scikit-lib: https://scikit-learn.org/stable/modules/generated/sklearn.ensemble.IsolationForest.html
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
@@ -38,7 +38,7 @@ This demo will
   it to batch-process data from S3 by training and scoring an unsupervised anomaly detection model and writing the
   results into a Trino table. Spark uses an isolation forest algorithm from the scikit-learn machine learning library in
   this demo.
-** *MinIO*: A S3 compatible object store. This demo uses it as persistent storage to store all the data used
+** *Garage*: S3 compatible object store. This demo uses it as persistent storage to store all the data used
 ** *Hive metastore*: A service that stores metadata related to Apache Hive and other services. This demo uses it as
    metadata storage for Trino and Spark.
 ** *Open policy agent* (OPA): An open-source, general-purpose policy engine unifies policy enforcement across the stack.
@@ -52,7 +52,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::spark-k8s-anomaly-detection-taxi-data/overview.png[]
+image::spark-k8s-anomaly-detection-taxi-data/overview.drawio.png[]
 
 == List the deployed Stackable services
 
@@ -74,34 +74,25 @@ $ stackablectl stacklet list
 │ superset ┆ superset      ┆ default   ┆ node-http          http://superset-node.default.svc.cluster.local:8088      ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ trino    ┆ trino         ┆ default   ┆ coordinator-https  https://trino-coordinator.default.svc.cluster.local:8443 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ minio    ┆ minio-console ┆ default   ┆ https              https://10.0.0.11:31142                                  ┆                                 │
 └──────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
 
-== MinIO
+== S3
 
 === List Buckets
 
-The S3 provided by MinIO is used as persistent storage to store all the data used.
-Open the endpoint `https` retrieved by `stackablectl stacklet list` in your browser (https://10.0.0.11:31142 in this case).
-You need to accept the self-signed certificate in your browser before you can access the MinIO console.
-If the console is not reachable, you can forward the port used by the MinIO console and use https://localhost:9001 instead.
+The S3 provided by Garage is used as persistent storage to store all the data used.
+
+include::partial$inspect-s3.adoc[]
 
 [source,console]
 ----
-$ kubectl port-forward service/minio-console 9001:https
+$ rclone lsd :s3:
 ----
 
-image::spark-k8s-anomaly-detection-taxi-data/minio_0.png[]
-
-Log in with the username `admin` and password `adminadmin`.
-
-image::spark-k8s-anomaly-detection-taxi-data/minio_2.png[]
-
-Here, you can see the two buckets the S3 is split into:
+There are two buckets:
 
 . `demo`: The demo loads static datasets into this area. It is stored in parquet format. It forms the basis for the
   model that Spark will train.
@@ -110,17 +101,21 @@ Here, you can see the two buckets the S3 is split into:
 
 === Inspect raw data
 
-Click on the bucket `demo` and then on `ny-taxi-data` and `raw` respectively.
+[source,console]
+----
+$ rclone lsl :s3:demo/ny-taxi-data/raw
+----
 
-image::spark-k8s-anomaly-detection-taxi-data/minio_3.png[]
-
-This folder (called prefixes in S3) contains a dataset of similarly structured data files.
+This prefix contains a dataset of similarly structured data files.
 The data is partitioned by month and contains several hundred MBs, which may seem small for a dataset.
 Still, the model is a time-series model where the data has decreasing relevance the "older" it is, especially when the data is subject to multiple external factors, many of which are unknown and fluctuating in scope and effect.
 
-The second bucket prediction contains the output from the model scoring process under `prediction/anomaly-detection/iforest/data`:
+The second bucket `prediction` contains the output from the model scoring process:
 
-image::spark-k8s-anomaly-detection-taxi-data/minio_4.png[]
+[source,console]
+----
+$ rclone lsl :s3:prediction/anomaly-detection
+----
 
 This is a much smaller file, as it only contains scores for each aggregated period.
 

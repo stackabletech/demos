@@ -19,14 +19,14 @@ spec:
             - pipefail
             - -c
             - |
-              echo 'Waiting for all minio instances to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app=minio,release=minio,stackable.tech/vendor=Stackable -n {{ NAMESPACE }}
+              echo 'Waiting for Garage to be ready'
+              kubectl wait --for=condition=ready --timeout=30m pod -l app=garage -n {{ NAMESPACE }}
               echo 'Waiting for all kafka brokers to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka,app.kubernetes.io/instance=kafka -n {{ NAMESPACE }}
               echo 'Waiting for all nifi instances to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi -n {{ NAMESPACE }}
         - name: wait-for-kafka-topics
-          image: oci.stackable.tech/sdp/kafka:4.1.1-stackable0.0.0-dev
+          image: oci.stackable.tech/sdp/kafka:4.3.1-stackable0.0.0-dev
           command:
             - bash
             - -euo
@@ -151,10 +151,10 @@ data:
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0
-          - org.apache.spark:spark-sql-kafka-0-10_2.13:4.0.1
+          - org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.11.0
+          - org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.2
       s3connection:
-        reference: minio
+        reference: garage
       sparkConf:
         spark.sql.extensions: org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions
         spark.sql.catalog.lakehouse: org.apache.iceberg.spark.SparkCatalog

@@ -20,8 +20,15 @@ spec:
             bucketName: demo
             connection:
               inline:
-                host: minio.{{ NAMESPACE }}.svc.cluster.local
+                host: garage.{{ NAMESPACE }}.svc.cluster.local
                 port: 9000
+                # Must match s3_region in stacks/_templates/garage.yaml: Garage
+                # rejects requests signed for a different region.
+                # Only honoured for Druid >= 37.0.0, which uses the AWS SDK v2.
+                # Older versions use SDK v1, which ignores the region when an
+                # endpoint is set.
+                region:
+                  name: region-1
                 accessStyle: Path
                 credentials:
                   secretClass: druid-s3-credentials
@@ -108,8 +115,8 @@ metadata:
   labels:
     secrets.stackable.tech/class: druid-s3-credentials
 stringData:
-  accessKey: admin
-  secretKey: {{ minioAdminPassword }}
+  accessKey: GK31c0ffee31c0ffee31c0ffee
+  secretKey: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
 ---
 apiVersion: v1
 kind: Secret

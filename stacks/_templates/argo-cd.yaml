@@ -4,16 +4,16 @@ name: argo-cd
 repo:
   name: argo-cd
   url: https://argoproj.github.io/argo-helm
-version: 9.4.10 # v3.3.3
+version: 10.1.3 # appVersion: v3.4.5
 options:
   global:
     additionalLabels:
       stackable.tech/vendor: Stackable
-      stackable.tech/stack: {{ STACK }}
+      stackable.tech/stack: "{{ STACK }}"
       # The following is a Jinja2 template directive, not a regular comment.
       # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
       # {% if DEMO is defined %}
-      stackable.tech/demo: {{ DEMO }}
+      stackable.tech/demo: "{{ DEMO }}"
       # {% endif %}
   configs:
     secret:

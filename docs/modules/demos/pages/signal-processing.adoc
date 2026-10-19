@@ -36,7 +36,7 @@ This demo will do the following:
 
 You can see the deployed products as well as their relationship in the following diagram:
 
-image::signal-processing/overview.png[]
+image::signal-processing/overview.drawio.png[]
 
 == Data ingestion
 
@@ -90,7 +90,7 @@ To achieve the same imports as mentioned in the previous section, build the Dock
 
 [source,console]
 ----
-FROM jupyter/pyspark-notebook:python-3.9
+FROM quay.io/jupyter/pyspark-notebook:python-3.13
 
 COPY demos/signal-processing/requirements.txt .
 
@@ -102,8 +102,8 @@ Where `requirements.txt` contains:
 
 [source,console]
 ----
-psycopg2-binary==2.9.9
-alibi-detect==0.11.4
+psycopg2-binary==2.9.13
+alibi-detect==0.13.0
 ----
 
 NOTE: Using a custom image requires access to a repository where the image can be made available.
@@ -138,7 +138,7 @@ There are two located in the "Stackable Data Platform" folder.
 
 === Measurements
 
-The _Gas measurements_ dashboard shows the original data. The first graph plots two measurments (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
+The _Gas measurements_ dashboard shows the original data. The first graph plots two measurements (`r1`, `r2`), together with the model scores (`r1_score`, `r2_score`, `r1_score_lttb`).#
 These are superimposed on each other for ease of comparison.
 
 image::signal-processing/measurements.png[]
