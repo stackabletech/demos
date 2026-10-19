@@ -1,4 +1,4 @@
-= openlineage-trino-airflow
+= openlineage
 :description: Demo showcasing OpenLineage data lineage emitted by Trino, Airflow and Spark over a shared Iceberg lakehouse and visualized in Marquez, enabled with minimal configuration.
 
 :openlineage: https://openlineage.io/
@@ -23,7 +23,7 @@ It will be created if it doesn't exist.
 
 [source,console]
 ----
-$ stackablectl demo install openlineage-trino-airflow -n openlineage-demo
+$ stackablectl demo install openlineage -n openlineage-demo
 ----
 
 [WARNING]
