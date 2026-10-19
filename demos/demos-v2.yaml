@@ -314,3 +314,25 @@ demos:
       - name: branch
         description: Git branch to download demo files from
         default: main
+  openlineage:
+    description: Showcase OpenLineage data lineage from Trino, Airflow and Spark over a shared Iceberg lakehouse, visualized in Marquez
+    documentation: https://docs.stackable.tech/home/stable/demos/openlineage
+    stackableStack: openlineage
+    labels:
+      - trino
+      - airflow
+      - spark
+      - openlineage
+      - marquez
+      - data-lineage
+      - iceberg
+      - garage
+      - s3
+    manifests:
+      - plainYaml: demos/openlineage/rbac.yaml
+      - plainYaml: demos/openlineage/enable-and-run-dag.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 10500m
+      memory: 22Gi
+      pvc: 40Gi # 10Gi Garage + 3x8Gi PostgreSQL; data is tiny (tpch.tiny)

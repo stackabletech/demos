@@ -1,0 +1,353 @@
+= openlineage
+:description: Demo showcasing OpenLineage data lineage emitted by Trino, Airflow and Spark over a shared Iceberg lakehouse and visualized in Marquez, enabled with minimal configuration.
+
+:openlineage: https://openlineage.io/
+:marquez: https://marquezproject.ai/
+:trino-openlineage-docs: https://trino.io/docs/current/admin/event-listeners-openlineage.html
+:airflow-openlineage-docs: https://airflow.apache.org/docs/apache-airflow-providers-openlineage/stable/index.html
+:spark-openlineage-docs: https://openlineage.io/docs/integrations/spark/
+
+This demo shows how three Stackable Data Platform (SDP) products - Apache Trino, Apache Airflow and Apache Spark - can
+emit {openlineage}[OpenLineage{external-link-icon}^] events with a single configuration toggle each, and how those events
+come together in {marquez}[Marquez{external-link-icon}^], the OpenLineage reference metadata server and UI. Trino and
+Spark share an Apache Iceberg lakehouse on Garage (S3), so a table written by Trino and read by Spark links the two
+engines' lineage into one graph.
+
+Install this demo on an existing Kubernetes cluster:
+
+[NOTE]
+====
+The namespace `openlineage-demo` will be assumed in this guide.
+It will be created if it doesn't exist.
+====
+
+[source,console]
+----
+$ stackablectl demo install openlineage -n openlineage-demo
+----
+
+[WARNING]
+====
+This demo should not be run alongside other demos.
+====
+
+[#system-requirements]
+== System requirements
+
+To run this demo, your system needs at least:
+
+* 10 https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu[cpu units{external-link-icon}^] (core/hyperthread)
+* 24GiB memory
+* 128GiB disk storage
+
+== Overview
+
+This demo will
+
+* Install the required Stackable operators
+* Spin up the following products
+** *Trino*: A fast distributed SQL query engine. It is configured with the built-in, first-party `openlineage` event
+   listener so that every query emits table- and column-level lineage.
+** *Airflow*: A workflow orchestrator. The native `apache-airflow-providers-openlineage` provider is enabled so that
+   DAG and task runs - including the datasets they read and write - are reported as lineage.
+** *Spark*: A distributed data-processing engine. The `openlineage-spark` listener is enabled via `sparkConf` so that
+   the Spark job's reads and writes are reported as lineage.
+** *Hive metastore* + *Garage* (S3): back the shared Apache Iceberg `lakehouse` catalog that Trino and Spark both use.
+** *PostgreSQL*: Metadata databases for Airflow and the Hive metastore.
+** *Marquez*: The OpenLineage reference server + web UI (with its own PostgreSQL), used here as the consuming
+   application that collects and visualizes the lineage. Marquez is only part of this demo, not an SDP product.
+** *nginx*: A reverse-proxy placed in front of Marquez. Marquez itself only serves plain HTTP, so nginx terminates TLS
+   (using a certificate issued by the Stackable secret operator) so that both the lineage API and the web UI are
+   reached over HTTPS.
+* Mount and trigger a single Airflow DAG (`openlineage_demo`) that runs an ELT pipeline in Trino and then a Spark
+  aggregation job
+* Let you explore the resulting lineage graph in the Marquez UI
+
+The DAG reads from Trino's built-in `tpch` catalog and writes Iceberg tables into the shared `lakehouse` catalog. Trino
+produces `lakehouse.demo.customer_orders`; Spark then reads that same Iceberg table and writes
+`lakehouse.demo.orders_by_nation`:
+
+[source]
+----
+tpch.tiny.customer ─┐
+                    ├─(Trino)─> lakehouse.demo.customer_orders ─(Spark)─> lakehouse.demo.orders_by_nation
+tpch.tiny.orders  ──┘
+----
+
+All three products report to the *same* Marquez instance over HTTPS
+(`https://marquez.<namespace>.svc.cluster.local:5000`, fronted by the nginx reverse-proxy - see
+<<transport-security>>): Trino emits per-query dataset lineage (from its event listener), Airflow emits the DAG/task run
+events _plus_ the dataset lineage of every step, and Spark emits the read/write lineage of its job.
+
+The single, connected end-to-end graph lives in the *Airflow* namespace (`airflow-openlineage-demo`). Airflow is the
+orchestrator and a single OpenLineage producer, so it names every dataset consistently: the Trino SQL tasks report
+`tpch.tiny.*` -> `lakehouse.demo.customers/orders` -> `lakehouse.demo.customer_orders`, and the Spark task is made to
+declare its own input/output (`customer_orders` -> `orders_by_nation`) under the *same* dataset identities. That shared
+`lakehouse.demo.customer_orders` node is what joins the Trino ELT and the Spark step into one graph.
+
+[NOTE]
+====
+Marquez keys datasets by `namespace + name`, and each engine names the *same* physical Iceberg table differently
+(Trino's listener by its coordinator URI, Spark by the S3 location / Hive metastore). So Trino's own event-listener
+lineage and Spark's own job lineage show up as separate, self-contained views next to the unified Airflow graph - each
+producer's perspective on the same pipeline. The connected end-to-end flow is the Airflow one.
+====
+
+== How OpenLineage is enabled
+
+This demo deliberately uses only the existing SDP override mechanisms - there are *no operator or CRD changes*. This
+mirrors how a future "single toggle" feature would behave, while validating the approach today.
+
+[#transport-security]
+=== Transport security (HTTPS)
+
+OpenLineage events are pushed to Marquez over *HTTPS*, and the Marquez web UI is served over HTTPS as well. Marquez's
+own API and UI containers only speak plain HTTP, so an https://nginx.org/[nginx{external-link-icon}^] reverse-proxy is
+deployed in front of them and terminates TLS, using a certificate issued by the Stackable secret operator (its built-in
+`tls` `SecretClass`). The real Marquez API and UI become internal HTTP-only backends (`marquez-backend` and
+`marquez-web-backend`), while the client-facing `marquez` and `marquez-web` Kubernetes Services route to the proxy.
+
+Producers address Marquez by its *fully-qualified* service name, `marquez.<namespace>.svc.cluster.local`, rather than
+the short name `marquez`: the certificate's subject alternative name (SAN) is the fully-qualified DNS name, so the short
+name would fail TLS hostname verification. Trino and Spark verify the certificate normally - both are JVM clients and
+already trust the secret operator's `tls` CA through their truststores. Airflow is the exception (see
+<<airflow-tls,below>>).
+
+*Trino* loads the bundled `openlineage` event listener through a small properties file. A `ConfigMap` supplies the
+file, `podOverrides` mounts it, and `configOverrides` registers it in `config.properties`:
+
+[source,properties]
+----
+event-listener.name=openlineage
+openlineage-event-listener.transport.type=HTTP
+openlineage-event-listener.transport.url=https://marquez.<namespace>.svc.cluster.local:5000
+openlineage-event-listener.transport.endpoint=/api/v1/lineage
+openlineage-event-listener.trino.uri=https://trino-coordinator:8443
+openlineage-event-listener.namespace=trino-openlineage-demo
+----
+
+`trino.uri` is Trino's own serving address; it names the *dataset* namespace, so pointing it at the same
+`trino-coordinator:8443` that Airflow uses lets both producers report the same tables under one namespace.
+`namespace` sets an explicit, colon-free *job* namespace - without it Marquez cannot parse the node ID of a
+Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[Trino OpenLineage event
+listener docs{external-link-icon}^] for details.
+
+[#airflow-tls]
+*Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
+
+[source]
+----
+AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "https://marquez.<namespace>.svc.cluster.local:5000", "endpoint": "api/v1/lineage", "verify": false}'
+AIRFLOW__OPENLINEAGE__NAMESPACE="airflow-openlineage-demo"
+----
+
+The transport `type` is `http` (the name of the OpenLineage HTTP transport), but the `url` is `https`, so events are
+still sent over TLS. Note `"verify": false`: *Airflow does not verify the TLS certificate - neither the CA nor the
+hostname - of its Marquez connection, nor of its Trino connection* (`AIRFLOW_CONN_TRINO_DEFAULT` likewise sets
+`verify: false`).
+
+This is a limitation of the OpenLineage *Python* client: its `verify` option is a boolean only - it cannot be pointed at
+a custom CA file - so the only way to make it trust the self-signed `tls` CA would be the process-wide
+`REQUESTS_CA_BUNDLE` environment variable. That variable applies to *every* HTTP client in the Airflow process and
+overrides an explicit `verify: false`, which would then force certificate verification onto the DAG's Trino connection.
+That verification fails, because the connection uses the short host name `trino-coordinator` while the certificate's SAN
+only contains the fully-qualified service name. Disabling verification for Airflow's two connections keeps the events
+flowing over HTTPS while avoiding this clash; Trino and Spark, as JVM clients, still verify normally.
+
+See the {airflow-openlineage-docs}[Airflow OpenLineage provider docs{external-link-icon}^] for details.
+
+*Spark* loads the `openlineage-spark` listener and points it at Marquez purely through `sparkConf` on the
+`SparkApplication` (plus the package on the classpath via `deps.packages`):
+
+[source,properties]
+----
+spark.extraListeners=io.openlineage.spark.agent.OpenLineageSparkListener
+spark.openlineage.transport.type=http
+spark.openlineage.transport.url=https://marquez.<namespace>.svc.cluster.local:5000
+spark.openlineage.namespace=spark-openlineage-demo
+spark.app.name=orders-by-nation
+# parent* are injected at task runtime by the Airflow operator (see below) so they carry the
+# current run's identity - they link the Spark run to its Airflow task:
+spark.openlineage.parentJobNamespace=airflow-openlineage-demo
+spark.openlineage.parentJobName=openlineage_demo.spark_orders_by_nation
+spark.openlineage.parentRunId=<this Airflow task's OpenLineage run id>
+----
+
+See the {spark-openlineage-docs}[OpenLineage Spark integration docs{external-link-icon}^] for details.
+
+[NOTE]
+====
+The Stackable `SparkKubernetesOperator`/`Sensor` are not bundled in the Airflow image, so the demo DAG inlines a small
+in-cluster implementation. It does three things worth calling out, each a lever for cleaner lineage:
+
+* It creates the `SparkApplication` *and waits for it in the same task* (no separate sensor task, so no extra empty
+  "monitor" job in the graph).
+* It sets `spark.openlineage.parentJobNamespace/parentJobName/parentRunId` from the running task's OpenLineage identity
+  (via the provider's `lineage_run_id`/`lineage_job_name` macros). This makes the Spark run report the Airflow task as
+  its *root*, so the real Spark job is reachable from the DAG in Marquez.
+* It implements `get_openlineage_facets_on_complete` to declare the Spark step's input (`customer_orders`) and output
+  (`orders_by_nation`) under the same dataset identities Airflow uses for the Trino tables. Airflow cannot introspect
+  the out-of-process Spark job, so this explicit declaration is what draws the edge into the ELT graph.
+====
+
+=== Getting clean, connected lineage
+
+Enabling the listeners is only half the story - a few extra choices make the graph readable and connected. The demo
+applies them so it can double as a reference:
+
+[cols="1,2"]
+|===
+| Lever | Effect
+
+| `spark.openlineage.parent*` (from the Airflow task's run id)
+| Links the Spark run to its Airflow task (the Spark run's `root` becomes the task), so the orchestrated Spark job is
+  reachable from the DAG rather than floating in its own namespace.
+
+| `get_openlineage_facets_on_complete` on the Spark operator
+| Declares the Spark step's datasets under the Trino tables' identities, joining Spark to the ELT graph in the Airflow
+  namespace.
+
+| `CREATE OR REPLACE TABLE` (one statement per task, not `DROP` + `CREATE`)
+| One SQL statement per task means one lineage-bearing job, instead of an extra empty job for the throwaway `DROP`.
+
+| One operator that submits *and* waits
+| Avoids a second, dataset-less sensor task appearing as an empty node.
+
+| `spark.app.name` as a Spark *config* (not only `SparkSession.builder.appName`)
+| The listener reads the app name at `SparkContext` start; setting it in config gives the Spark jobs a stable name.
+|===
+
+[NOTE]
+====
+Some rough edges remain and are *inherent to today's OpenLineage integrations*, not misconfiguration:
+
+* Airflow's SQL provider emits an empty *task* job plus a `.query.N` sub-job that carries the datasets - the datasets
+  live on the sub-job.
+* `openlineage-spark` (in k8s cluster mode) still names its internal application-root job `unknown` and leaves
+  `spark_applicationDetails.applicationName` null, even with `spark.app.name` set.
+* The DAG-level `openlineage_demo` job and the `create_schema` (DDL) job have no datasets by nature.
+
+These do not affect the correctness of the data flow; they are visible artifacts of how the current integrations model
+jobs.
+====
+
+== List deployed Stackable services
+
+To list the installed Stackable services run the following command:
+
+[source,console]
+----
+$ stackablectl stacklet list --namespace openlineage_demo
+
+┌─────────┬─────────┬───────────────────┬──────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME    ┆ NAMESPACE         ┆ ENDPOINTS                                  ┆ CONDITIONS                      │
+╞═════════╪═════════╪═══════════════════╪══════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow ┆ openlineage-demo  ┆ webserver-http   http://172.19.0.3:31483   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino   ┆ trino   ┆ openlineage-demo  ┆ coordinator-https https://172.19.0.5:31087 ┆ Available, Reconciling, Running │
+└─────────┴─────────┴───────────────────┴──────────────────────────────────────────┴─────────────────────────────────┘
+----
+
+The `hive` metastore also appears as a stacklet.
+
+include::partial$instance-hint.adoc[]
+
+[NOTE]
+====
+Marquez, Garage and the Spark job are not shown by `stackablectl stacklet list`: Marquez and Garage are not SDP products,
+and the Spark job runs as a short-lived `SparkApplication` submitted by the Airflow DAG rather than a long-running
+stacklet.
+====
+
+== Verify the demo worked
+
+The demo automatically triggers the `openlineage_demo` DAG once during installation, so a completed run
+and its lineage should already be present. You can confirm the full flow - Airflow orchestrating, Trino
+executing, and Marquez collecting the lineage - across three UIs.
+
+=== Airflow: the DAG tasks ran
+
+Open the Airflow web UI using the `webserver-http` endpoint from the `stackablectl stacklet list` output
+above, and log in with the username `admin` and the password `adminadmin`.
+
+Under *Dags* -> `openlineage_demo` -> *Task Instances* you should see the four tasks of the pipeline -
+`create_schema`, `load_customers`, `load_orders` and `customer_orders` - all in the `success` state:
+
+image::openlineage/airflow.png[Airflow Task Instances view showing the four openlineage_demo tasks in the success state]
+
+Each task is a `SQLExecuteQueryOperator` that submits a statement to Trino.
+
+=== Trino: the queries finished
+
+Open the Trino web UI using the `coordinator-https` endpoint from the `stackablectl stacklet list`
+output, and log in with the username `admin` and the password `adminadmin`.
+
+The *Query Details* page lists the statements Airflow submitted - the `CREATE SCHEMA`, `DROP TABLE` and
+`CREATE TABLE ... AS SELECT` statements that build the `memory.demo.*` tables from the `tpch.tiny.*`
+source - all in the `FINISHED` state. Their *Source* is `airflow`, confirming they originated from the
+DAG rather than an interactive session:
+
+image::openlineage/trino-queries.png[Trino Query Details page showing the finished CREATE TABLE queries submitted by Airflow]
+
+=== Marquez: the lineage was collected
+
+Marquez does not have an external listener. Forward its web UI to your machine:
+
+[source,console]
+----
+$ kubectl -n openlineage-demo port-forward svc/marquez-web 3000:3000
+----
+
+Then open http://localhost:3000 in your browser.
+
+The landing page lists the OpenLineage *Jobs* that Trino and Airflow reported, together with the event,
+dataset and source counts. You should see the `openlineage_demo` DAG job and the per-query jobs such as
+`openlineage_demo.customer_orders.query.*`, all *COMPLETED*:
+
+image::openlineage/marquez.png[Marquez home page listing the collected OpenLineage jobs as COMPLETED]
+
+Selecting a job opens its details. For example, `openlineage_demo.load_orders.query.2` shows the exact
+`CREATE TABLE memory.demo.orders AS SELECT ...` statement along with its OpenLineage *job* and *run*
+facets rendered as JSON - including the `sql` facet, the `AIRFLOW` integration, and the `externalQuery`
+facet that links back to the originating Trino query ID:
+
+image::openlineage/job-details-customer-orders-2.png[Marquez job details for load_orders showing the SQL statement and OpenLineage facets as JSON]
+
+== Explore the lineage in Marquez
+
+With the Marquez UI still open at http://localhost:3000, use the namespace selector at the top to switch
+between the namespaces that produced the lineage:
+
+* `trino-openlineage-demo` - the Trino query jobs (one per executed statement), set via
+  `openlineage-event-listener.namespace`, and
+* `trino://trino-coordinator:8443` - the datasets (`tpch.tiny.*` and `memory.demo.*`), named after the Trino
+  coordinator's address. Both the Trino event listener and the Airflow SQL operator report the tables under
+  this shared namespace, and
+* `airflow-openlineage-demo` - the `openlineage_demo` DAG and its tasks.
+
+Selecting the `memory.demo.customer_orders` dataset and expanding upstream shows the full graph back to
+`tpch.tiny.customer` and `tpch.tiny.orders`, including column-level lineage for the individual queries:
+
+image::openlineage/customer-orders-2.png[Marquez lineage graph tracing memory.demo.customer_orders upstream through the jobs to tpch.tiny.customer and tpch.tiny.orders]
+
+[NOTE]
+====
+Trino and Airflow report lineage independently but, because `trino.uri` matches the address Airflow uses for its
+Trino connection, both name the tables under the same `trino://trino-coordinator:8443` namespace. Their lineage
+therefore converges on one shared set of dataset nodes: Trino contributes column-level detail per query, while
+Airflow contributes the task/DAG structure around the same tables.
+====
+
+== Summary
+
+This demo showed that Trino, Airflow and Spark can all emit OpenLineage data to Marquez with only a small amount of
+configuration and no changes to the SDP operators or CRDs, and that the Airflow orchestrator can tie a Trino ELT and a
+Spark job - sharing an Iceberg lakehouse - into a single connected lineage graph. It serves as a validation of the
+approach ahead of adding first-class OpenLineage support to the platform.
+
+== Where to go from here
+
+* Trigger the `openlineage_demo` DAG again from the Airflow UI and watch new runs appear in Marquez.
+* Query the Spark output from Trino: `SELECT * FROM lakehouse.demo.orders_by_nation ORDER BY total_spent DESC` (use
+  `stackablectl stacklet list` to find the coordinator endpoint) and see the query show up as additional lineage.
+* Read more about {openlineage}[OpenLineage{external-link-icon}^] and {marquez}[Marquez{external-link-icon}^].
