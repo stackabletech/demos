@@ -3,7 +3,7 @@ name: Pre-Release Demo Nightly Testing
 about: |
   This template can be used to track the testing of nightly demos from scratch
   leading up to the next Stackable release.
-title: "chore(tracking): Test demos on nightly versions for YY.M.X"
+title: "tracking: Test demos on nightly versions for YY.M.X"
 labels: ['epic']
 assignees: ''
 ---

@@ -43,7 +43,7 @@ This demo will
 
 You can see the deployed products and their relationship in the following diagram:
 
-image::logging/overview.png[]
+image::logging/overview.drawio.png[]
 
 
 == List the deployed Stackable services

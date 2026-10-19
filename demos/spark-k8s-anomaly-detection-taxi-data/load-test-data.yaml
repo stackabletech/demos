@@ -8,36 +8,67 @@ spec:
     spec:
       containers:
         - name: load-ny-taxi-data
-          image: "bitnamilegacy/minio:2024-debian-12"
-          # yamllint disable-line rule:line-length
+          image: docker.io/rclone/rclone:1.75.1
           command:
-            - "bash"
-            - "-ce"
+            - /bin/sh
+            - -euo
+            - pipefail
+            - -c
             - |
-              cd /tmp
+              # This job needs both the public CAs to download the datasets over
+              # HTTPS, and the secret-operator CA to verify Garage.
+              cat /etc/ssl/certs/ca-certificates.crt /stackable/tls/ca.crt > /tmp/ca-bundle.crt
+
+              BASE=https://repo.stackable.tech/repository/misc/ny-taxi-data
+
+              # The "prediction" bucket this demo writes its results to is
+              # created by the Garage init job, along with "demo".
               for month in 2020-09 2020-10 2020-11 2020-12; do
-                curl -O https://repo.stackable.tech/repository/misc/ny-taxi-data/fhvhv_tripdata_$month.parquet
-                mc alias set minio https://minio.{{ NAMESPACE }}.svc.cluster.local:9000/ $(cat /minio-s3-credentials/accessKey) $(cat /minio-s3-credentials/secretKey)
-                mc cp fhvhv_tripdata_$month.parquet minio/demo/ny-taxi-data/raw/
-                mc mb --ignore-existing minio/prediction;
+                file="fhvhv_tripdata_$month.parquet"
+                # copyurl streams the download straight into S3, no temp file
+                rclone copyurl "$BASE/$file" ":s3:demo/ny-taxi-data/raw/$file"
               done
+          env:
+            - name: RCLONE_CONFIG
+              value: /dev/null
+            - name: RCLONE_S3_PROVIDER
+              value: Other
+            - name: RCLONE_S3_ENDPOINT
+              value: https://garage.{{ NAMESPACE }}.svc.cluster.local:9000
+            # Garage rejects requests signed for a different region.
+            - name: RCLONE_S3_REGION
+              value: region-1
+            # Garage only serves path style, not virtual-hosted style.
+            - name: RCLONE_S3_FORCE_PATH_STYLE
+              value: "true"
+            - name: RCLONE_CA_CERT
+              value: /tmp/ca-bundle.crt
+            # Buckets are created by the Garage init job. Without this rclone
+            # creates a missing bucket on the fly, which turns a typo into a
+            # silent success instead of an error.
+            - name: RCLONE_S3_NO_CHECK_BUCKET
+              value: "true"
+            - name: RCLONE_S3_ACCESS_KEY_ID
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  key: accessKey
+            - name: RCLONE_S3_SECRET_ACCESS_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: s3-credentials
+                  key: secretKey
           volumeMounts:
-            - name: minio-s3-credentials
-              mountPath: /minio-s3-credentials
             - name: tls
-              mountPath: /.mc/certs/CAs
+              mountPath: /stackable/tls
       volumes:
-        - name: minio-s3-credentials
-          secret:
-            secretName: minio-s3-credentials
         - name: tls
           ephemeral:
             volumeClaimTemplate:
               metadata:
                 annotations:
                   secrets.stackable.tech/class: tls
-                  secrets.stackable.tech/scope: |-
-                    service=minio
+                  secrets.stackable.tech/provision-parts: public
               spec:
                 storageClassName: secrets.stackable.tech
                 accessModes:

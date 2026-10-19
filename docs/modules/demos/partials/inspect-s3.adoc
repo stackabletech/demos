@@ -1,0 +1,61 @@
+Garage has no web interface, so the buckets are inspected with an S3 client.
+
+Read the endpoint and credentials out of the cluster:
+
+[source,console]
+----
+$ KUBECTL_NAMESPACE="default" # or whichever you set when running stackablectl demo install
+$ export S3_ENDPOINT="https://$(kubectl -n "$KUBECTL_NAMESPACE" get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'):$(kubectl -n "$KUBECTL_NAMESPACE" get service garage -o jsonpath='{.spec.ports[0].nodePort}')"
+$ export S3_ACCESS_KEY="$(kubectl -n "$KUBECTL_NAMESPACE" get secret s3-credentials -o jsonpath='{.data.accessKey}' | base64 -d)"
+$ export S3_SECRET_KEY="$(kubectl -n "$KUBECTL_NAMESPACE" get secret s3-credentials -o jsonpath='{.data.secretKey}' | base64 -d)"
+$ export S3_REGION=region-1
+----
+
+The region is not optional.
+Garage rejects any request signed for a different region than the one it is configured with, and most clients fall back to an AWS region when none is set.
+
+The certificate is issued by the Stackable secret-operator, whose CA your machine does not trust, so the commands below skip certificate verification.
+
+[tabs]
+====
+AWS CLI::
++
+--
+[source,console]
+----
+$ export AWS_ENDPOINT_URL="$S3_ENDPOINT"
+$ export AWS_ACCESS_KEY_ID="$S3_ACCESS_KEY"
+$ export AWS_SECRET_ACCESS_KEY="$S3_SECRET_KEY"
+$ export AWS_DEFAULT_REGION="$S3_REGION"
+$ aws configure set default.s3.addressing_style path
+----
+
+The commands below are written for `rclone`.
+The `aws` equivalents are `aws s3 ls` to list buckets and `aws s3 ls s3://<bucket>/ --recursive --human-readable` to list objects, both with `--no-verify-ssl`.
+--
+
+rclone::
++
+--
+`rclone` needs no installation, it runs straight from a container image:
+
+[source,console]
+----
+$ rclone() {
+    docker run --rm -i --network host \
+      -e RCLONE_S3_PROVIDER=Other \
+      -e RCLONE_S3_ENDPOINT="$S3_ENDPOINT" \
+      -e RCLONE_S3_REGION="$S3_REGION" \
+      -e RCLONE_S3_ACCESS_KEY_ID="$S3_ACCESS_KEY" \
+      -e RCLONE_S3_SECRET_ACCESS_KEY="$S3_SECRET_KEY" \
+      -e RCLONE_S3_FORCE_PATH_STYLE=true \
+      -e RCLONE_NO_CHECK_CERTIFICATE=true \
+      rclone/rclone:1.75.1 "$@"
+  }
+----
+
+`--network host` is there for anyone trying the demos out on a local cluster, where the endpoint is only reachable from the host itself.
+
+In the commands below, `lsd` lists buckets, `lsf` lists names only, and `lsl` adds sizes and modification times.
+--
+====

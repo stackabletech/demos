@@ -46,7 +46,7 @@ if [[ "$CURRENT_BRANCH" == release-* ]]; then
   STACKABLE_RELEASE="${CURRENT_BRANCH#release-}"
   MESSAGE="Update stackableRelease to $STACKABLE_RELEASE"
   echo "$MESSAGE"
-  # NOTE (@NickLarsenNZ): find is not required for such a trivial case, but it is done for consitency
+  # NOTE (@NickLarsenNZ): find is not required for such a trivial case, but it is done for consistency
   find stacks/stacks-v2.yaml \
     -exec grep --color=always -l stackableRelease {} \; \
     -exec sed -i -E "s#(stackableRelease:\s+)(\S+)#\1${STACKABLE_RELEASE}#" {} \; \
@@ -80,7 +80,7 @@ echo "$MESSAGE"
 # shellcheck disable=SC2016 # We intentionally don't want to expand the variable.
 find demos stacks -type f \
   -exec grep --color=always -l githubusercontent {} \; \
-  -exec sed -i -E 's#(stackabletech/demos)/main/#\1/\${UPDATE_BRANCH_REF}/#' {} \; \
+  -exec sed -i -E 's#(stackabletech/demos)/(refs/heads/)?main/#\1/\${UPDATE_BRANCH_REF}/#' {} \; \
 | prepend "\t"
 
 # Now, for all modified files, we can use envsubst

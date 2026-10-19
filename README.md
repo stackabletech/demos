@@ -12,12 +12,12 @@
 
 A demo is an end-to-end demonstration of the usage of the Stackable data platform. It is tied to a specific stack of the
 Stackable data platform, which will provide the required products for the demo. The list of demos can be browsed either
-via our documentation page [here][demo-overview] or with the `demo list` command of our `stackablectl` tool. More
-information about this command can be found [here][demo-cmd].
+via our [documentation page][demo-overview] or with the `demo list` command of our `stackablectl` tool. More
+information about this command can be found in our [stackablectl demo documentation][demo-cmd] page.
 
-A stack is a collection of ready-to-use Stackable data products as well as required third-party services like Postgresql
-or MinIO. It is tied to a specific release of the Stackable data platform, which will provide the required operators for
-the stack. Stacks can be listed using the `stack list` command, see [here][stack-cmd] for more information.
+A stack is a collection of ready-to-use Stackable data products as well as required third-party services like PostgreSQL
+or Garage. It is tied to a specific release of the Stackable data platform, which will provide the required operators for
+the stack. Stacks can be listed using the `stack list` command, see our [stackablectl stack documentation][stack-cmd] page for more information.
 
 [stack-cmd]: https://docs.stackable.tech/management/stable/stackablectl/commands/stack
 [demo-cmd]: https://docs.stackable.tech/management/stable/stackablectl/commands/demo

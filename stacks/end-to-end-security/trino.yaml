@@ -57,7 +57,7 @@ metadata:
   name: trino
 spec:
   image:
-    productVersion: "481"
+    productVersion: "483"
   clusterConfig:
     tls:
       serverSecretClass: tls

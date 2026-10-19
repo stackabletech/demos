@@ -6,6 +6,7 @@ metadata:
 spec:
   template:
     spec:
+      serviceAccountName: demo-serviceaccount
       containers:
         - name: start-users-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
@@ -42,11 +43,11 @@ spec:
                 --password "richard.roe" \
                 --role "User"
           volumeMounts:
-            - name: airflow-credentials
-              mountPath: /airflow-credentials
+            - name: airflow-admin-credentials
+              mountPath: /airflow-admin-credentials
       volumes:
-        - name: airflow-credentials
+        - name: airflow-admin-credentials
           secret:
-            secretName: airflow-credentials
+            secretName: airflow-admin-credentials
       restartPolicy: OnFailure
   backoffLimit: 20 # give some time for the Airflow cluster to be available
