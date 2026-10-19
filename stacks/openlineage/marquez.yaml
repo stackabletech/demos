@@ -565,14 +565,14 @@ spec:
 #
 # TLS termination for Marquez. Marquez's API (Dropwizard) and web UI (Node) do not serve HTTPS in
 # this demo, so a single nginx reverse-proxy terminates TLS in front of both, using a PEM cert from
-# the secret-operator `tls` SecretClass (the same CA that signs MinIO and Trino). The proxy owns the
+# the secret-operator `tls` SecretClass (the same CA that signs Garage and Trino). The proxy owns the
 # `marquez` (API) and `marquez-web` (UI) Service names/ports that clients use; the upstream Marquez
 # containers are unchanged and stay on the internal *-backend Services over plaintext HTTP.
 #
 #   producers -> https://marquez.<ns>.svc.cluster.local:5000 -> nginx -> http://marquez-backend:5000
 #   browsers  -> https://<node>:<NodePort>                    -> nginx -> http://marquez-web-backend:3000
 # (Producers use the FQDN, not the short name `marquez`: the cert SAN is the full service DNS name,
-#  so TLS hostname verification only passes on the FQDN - as with the minio S3Connection.)
+#  so TLS hostname verification only passes on the FQDN - as with the garage S3Connection.)
 # =============================================================================================
 ---
 apiVersion: v1

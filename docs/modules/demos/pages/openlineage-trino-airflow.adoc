@@ -10,7 +10,7 @@
 This demo shows how three Stackable Data Platform (SDP) products - Apache Trino, Apache Airflow and Apache Spark - can
 emit {openlineage}[OpenLineage{external-link-icon}^] events with a single configuration toggle each, and how those events
 come together in {marquez}[Marquez{external-link-icon}^], the OpenLineage reference metadata server and UI. Trino and
-Spark share an Apache Iceberg lakehouse on MinIO (S3), so a table written by Trino and read by Spark links the two
+Spark share an Apache Iceberg lakehouse on Garage (S3), so a table written by Trino and read by Spark links the two
 engines' lineage into one graph.
 
 Install this demo on an existing Kubernetes cluster:
@@ -52,7 +52,7 @@ This demo will
    DAG and task runs - including the datasets they read and write - are reported as lineage.
 ** *Spark*: A distributed data-processing engine. The `openlineage-spark` listener is enabled via `sparkConf` so that
    the Spark job's reads and writes are reported as lineage.
-** *Hive metastore* + *MinIO* (S3): back the shared Apache Iceberg `lakehouse` catalog that Trino and Spark both use.
+** *Hive metastore* + *Garage* (S3): back the shared Apache Iceberg `lakehouse` catalog that Trino and Spark both use.
 ** *PostgreSQL*: Metadata databases for Airflow and the Hive metastore.
 ** *Marquez*: The OpenLineage reference server + web UI (with its own PostgreSQL), used here as the consuming
    application that collects and visualizes the lineage. Marquez is only part of this demo, not an SDP product.
@@ -254,7 +254,7 @@ include::partial$instance-hint.adoc[]
 
 [NOTE]
 ====
-Marquez, MinIO and the Spark job are not shown by `stackablectl stacklet list`: Marquez and MinIO are not SDP products,
+Marquez, Garage and the Spark job are not shown by `stackablectl stacklet list`: Marquez and Garage are not SDP products,
 and the Spark job runs as a short-lived `SparkApplication` submitted by the Airflow DAG rather than a long-running
 stacklet.
 ====

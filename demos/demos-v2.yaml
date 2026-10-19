@@ -326,7 +326,8 @@ demos:
       - marquez
       - data-lineage
       - iceberg
-      - minio
+      - garage
+      - s3
     manifests:
       - plainYaml: demos/openlineage-trino-airflow/rbac.yaml
       - plainYaml: demos/openlineage-trino-airflow/enable-and-run-dag.yaml
@@ -334,4 +335,4 @@ demos:
     resourceRequests:
       cpu: 10500m
       memory: 22Gi
-      pvc: 40Gi # 10Gi MinIO + 3x8Gi PostgreSQL; data is tiny (tpch.tiny)
+      pvc: 40Gi # 10Gi Garage + 3x8Gi PostgreSQL; data is tiny (tpch.tiny)

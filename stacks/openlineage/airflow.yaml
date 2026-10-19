@@ -1,8 +1,8 @@
 # Airflow with the native OpenLineage provider enabled.
 #
-# As with Trino, OpenLineage is switched on here *without* any operator/CRD changes - purely via
-# `envOverrides`. The Airflow OpenLineage provider (`apache-airflow-providers-openlineage`) activates
-# automatically once `AIRFLOW__OPENLINEAGE__TRANSPORT` is set. Because the demo DAG uses the Trino
+# OpenLineage is switched on via `spec.clusterConfig.lineage`: the operator derives the OpenLineage
+# transport env vars from it and the Airflow OpenLineage provider
+# (`apache-airflow-providers-openlineage`) activates automatically. Because the demo DAG uses the Trino
 # provider's SQL operator, Airflow also reports dataset-level lineage, which shows up in Marquez next
 # to the query lineage emitted by Trino itself.
 #
@@ -19,10 +19,32 @@ metadata:
   name: airflow
 spec:
   image:
-    productVersion: 3.2.2
+    productVersion: 3.3.1
     pullPolicy: IfNotPresent
   clusterConfig:
     loadExamples: false
+    # Marquez is reached over HTTPS (TLS terminated by the marquez-tls-proxy nginx in front of the API
+    # - see marquez.yaml). Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN
+    # is the full service DNS name (marquez.<ns>.svc.cluster.local), matching how the S3Connection
+    # uses garage.<ns>.svc.cluster.local.
+    #
+    # Server verification is disabled, deliberately - same as AIRFLOW_CONN_TRINO_DEFAULT below. The
+    # OpenLineage *Python* client's transport `verify` is bool-only (no CA-path option), so trusting
+    # the self-signed `tls` CA (`caCert.secretClass`) makes the operator set the global
+    # REQUESTS_CA_BUNDLE env var. `requests` applies that to *every* connection, which breaks this
+    # DAG's Trino connection (self-signed, short hostname). So we accept unverified TLS for Airflow's
+    # lineage push (events still travel over HTTPS). The Java producers (Trino, Spark) DO verify
+    # properly via the JVM truststore - no such limitation.
+    lineage:
+      connection:
+        inline:
+          http:
+            host: marquez.{{ NAMESPACE }}.svc.cluster.local
+            port: 5000
+            tls:
+              verification:
+                none: {}
+      namespace: airflow-openlineage-demo
     credentialsSecretName: airflow-credentials
     # The airflow-operator 'dev' schema moved the metadata DB connection out of the credentials
     # Secret into its own block. Points at the postgresql-airflow chart deployed by this stack.
@@ -56,21 +78,6 @@ spec:
           limit: 3Gi
     envOverrides: &envOverrides
       AIRFLOW__CORE__DAGS_FOLDER: "/dags"
-      # Point the OpenLineage provider at Marquez over HTTPS (TLS terminated by the marquez-tls-proxy
-      # nginx in front of the API - see marquez.yaml). Use the FQDN, not the short name `marquez`:
-      # the secret-operator cert's SAN is the full service DNS name (marquez.<ns>.svc.cluster.local),
-      # matching how the S3Connection uses minio.{{ NAMESPACE }}.svc.cluster.local.
-      #
-      # `verify` is false here, deliberately - same as AIRFLOW_CONN_TRINO_DEFAULT below. The
-      # OpenLineage *Python* client's transport `verify` is bool-only (no CA-path option), so the
-      # only way to trust the self-signed `tls` CA would be the global REQUESTS_CA_BUNDLE env var.
-      # But `requests` applies REQUESTS_CA_BUNDLE to *every* connection and it overrides even an
-      # explicit `verify: false` (per-request verify defaults to None, so the env CA bundle wins over
-      # the session setting) - which breaks this DAG's Trino connection (self-signed, short hostname).
-      # So we accept unverified TLS for Airflow's lineage push (events still travel over HTTPS). The
-      # Java producers (Trino, Spark) DO verify properly via the JVM truststore - no such limitation.
-      AIRFLOW__OPENLINEAGE__TRANSPORT: '{"type": "http", "url": "https://marquez.{{ NAMESPACE }}.svc.cluster.local:5000", "endpoint": "api/v1/lineage", "verify": false}'
-      AIRFLOW__OPENLINEAGE__NAMESPACE: "airflow-openlineage-demo"
       # Trino connection used by the demo DAG. TLS verification is disabled because Trino uses an
       # auto-generated (self-signed) CA in this demo; the password matches the `trino-users` Secret.
       AIRFLOW_CONN_TRINO_DEFAULT: '{"conn_type": "trino", "host": "trino-coordinator", "port": 8443, "login": "admin", "password": "{{ trinoAdminPassword }}", "extra": {"protocol": "https", "verify": false}}'
@@ -119,7 +126,7 @@ data:
         tpch.tiny.nation  ──(Trino)─> lakehouse.demo.nation ───────────┘
 
     The Trino steps read from the built-in `tpch` catalog and write Iceberg tables into the
-    `lakehouse` catalog (shared hive-iceberg metastore + MinIO). The final step submits a Spark job
+    `lakehouse` catalog (shared hive-iceberg metastore + Garage). The final step submits a Spark job
     that JOINS `lakehouse.demo.customer_orders` with the `lakehouse.demo.nation` dimension and writes
     `lakehouse.demo.orders_by_nation` into the *same* Iceberg catalog. The two-input Spark join is
     reported by OpenLineage as a fan-in lineage node (both source tables feed the output).
@@ -290,7 +297,7 @@ data:
             conn_id="trino_default",
             # s3a:// (not s3://) so the location scheme matches what the Spark S3A client uses when it
             # reads the table back - avoids a Trino-writes-s3:// / Spark-reads-s3a:// mismatch.
-            # `demo` is the bucket the standalone MinIO template creates.
+            # `demo` is the bucket the garage-init-buckets Job creates (see garageBuckets).
             sql="CREATE SCHEMA IF NOT EXISTS lakehouse.demo WITH (location = 's3a://demo/lakehouse')",
         )
 
@@ -392,13 +399,13 @@ data:
       # OpenLineage; the backend connection is defined inline (host/port/tls). Setting
       # `tls.verification.server` makes the operator emit an https:// transport URL. The `tls`
       # SecretClass CA is already trusted by the Spark JVM truststore (the operator wires it in for the
-      # S3/MinIO connection, and the same CA signs Marquez's cert), so HTTPS to Marquez just works.
+      # S3/Garage connection, and the same CA signs Marquez's cert), so HTTPS to Marquez just works.
       #
       # The connection could instead `reference:` a standalone `OpenLineageConnection` resource, but
       # that CRD is not installed by the Spark operator, so this demo inlines the connection.
       #
       # Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service
-      # DNS name (marquez.<ns>.svc.cluster.local), matching how the S3Connection uses minio.<ns>....
+      # DNS name (marquez.<ns>.svc.cluster.local), matching how the S3Connection uses garage.<ns>....
       openLineage:
         connection:
           inline:
@@ -421,7 +428,7 @@ data:
         packages:
           - org.apache.iceberg:iceberg-spark-runtime-4.0_2.13:1.11.0
       s3connection:
-        reference: minio
+        reference: garage
       sparkConf:
         # Kept for the Spark UI / general naming. The OpenLineage job name is pinned via
         # spec.openLineage.appName above (the timing-independent fix for the intermittent "unknown"
