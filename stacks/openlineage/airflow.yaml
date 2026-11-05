@@ -211,7 +211,7 @@ data:
         #
         # Marquez draws only job<->dataset edges (never job->job parent edges), so the parent facet buys
         # no visible edge anyway. Airflow<->Spark is stitched via shared DATASET identities instead, in
-        # get_openlineage_facets_on_complete (KNOB #2). The SparkApplication's `spec.openLineage.appName`
+        # get_openlineage_facets_on_complete (KNOB #2). The SparkApplication's `spec.lineage.appName`
         # still pins a stable, non-`unknown` job name.
 
         def execute(self, context: "Context"):
@@ -396,33 +396,34 @@ data:
       mainApplicationFile: local:///stackable/spark/jobs/orders-by-nation.py
       # OpenLineage lineage emission, wired by the Spark operator. Replaces the hand-written
       # spark.openlineage.* sparkConf keys and the OL --packages entry below. Adding the block enables
-      # OpenLineage; the backend connection is defined inline (host/port/tls). Setting
-      # `tls.verification.server` makes the operator emit an https:// transport URL. The `tls`
-      # SecretClass CA is already trusted by the Spark JVM truststore (the operator wires it in for the
-      # S3/Garage connection, and the same CA signs Marquez's cert), so HTTPS to Marquez just works.
+      # OpenLineage; the backend connection is defined inline (an `http` transport with host/port/tls).
+      # Setting `tls.verification.server` makes the operator emit an https:// transport URL and add the
+      # referenced SecretClass CA to the driver's truststore (here the `tls` CA, which also signs
+      # Marquez's cert), so HTTPS to Marquez just works.
       #
-      # The connection could instead `reference:` a standalone `OpenLineageConnection` resource, but
-      # that CRD is not installed by the Spark operator, so this demo inlines the connection.
+      # The connection could instead `reference:` a standalone `OpenLineageConnection` resource; it is
+      # inlined here to keep the demo self-contained.
       #
       # Use the FQDN, not the short name `marquez`: the secret-operator cert's SAN is the full service
       # DNS name (marquez.<ns>.svc.cluster.local), matching how the S3Connection uses garage.<ns>....
-      openLineage:
+      lineage:
         connection:
           inline:
-            host: marquez.{{ NAMESPACE }}.svc.cluster.local
-            port: 5000
-            tls:
-              verification:
-                server:
-                  caCert:
-                    secretClass: tls
+            http:
+              host: marquez.{{ NAMESPACE }}.svc.cluster.local
+              port: 5000
+              tls:
+                verification:
+                  server:
+                    caCert:
+                      secretClass: tls
         # Carried over from the dropped spark.openlineage.{namespace,appName} keys to keep the demo's
         # lineage identity. appName is the timing-independent fix for the intermittent "unknown" job name.
         namespace: spark-openlineage-demo
         appName: orders-by-nation
       deps:
         # The OpenLineage jar is no longer declared here: it ships in the Spark image and is wired in
-        # by the operator via spec.openLineage (above). Iceberg stays on --packages - the operator
+        # by the operator via spec.lineage (above). Iceberg stays on --packages - the operator
         # references OpenLineage via spark.jars, which shares Iceberg's (child) classloader, so
         # OpenLineage's connector probe still succeeds.
         packages:
@@ -431,7 +432,7 @@ data:
         reference: garage
       sparkConf:
         # Kept for the Spark UI / general naming. The OpenLineage job name is pinned via
-        # spec.openLineage.appName above (the timing-independent fix for the intermittent "unknown"
+        # spec.lineage.appName above (the timing-independent fix for the intermittent "unknown"
         # job name), so this no longer carries lineage duty.
         spark.app.name: orders-by-nation
         # --- Iceberg catalog `lakehouse` on the shared hive-iceberg metastore ---
@@ -440,7 +441,7 @@ data:
         spark.sql.catalog.lakehouse.type: hive
         spark.sql.catalog.lakehouse.uri: thrift://hive-iceberg-metastore:9083
         # NB: the OpenLineage listener, HTTP transport, namespace and appName are all injected by the
-        # operator from spec.openLineage above - no spark.openlineage.* keys are hand-written here
+        # operator from spec.lineage above - no spark.openlineage.* keys are hand-written here
         # anymore. spark.openlineage.parent* remains deliberately unset (it triggers a Marquez
         # job-rename that splits the Spark app node).
       volumes:

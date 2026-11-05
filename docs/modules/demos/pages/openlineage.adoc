@@ -48,10 +48,11 @@ This demo will
 * Spin up the following products
 ** *Trino*: A fast distributed SQL query engine. Its built-in `openlineage` event listener is enabled through the
    `spec.clusterConfig.lineage` field of the `TrinoCluster`, so that every query emits table- and column-level lineage.
-** *Airflow*: A workflow orchestrator. The native `apache-airflow-providers-openlineage` provider is enabled so that
-   DAG and task runs - including the datasets they read and write - are reported as lineage.
-** *Spark*: A distributed data-processing engine. The `openlineage-spark` listener is enabled via `sparkConf` so that
-   the Spark job's reads and writes are reported as lineage.
+** *Airflow*: A workflow orchestrator. The native `apache-airflow-providers-openlineage` provider is enabled through the
+   `spec.clusterConfig.lineage` field of the `AirflowCluster`, so that DAG and task runs - including the datasets they
+   read and write - are reported as lineage.
+** *Spark*: A distributed data-processing engine. The `openlineage-spark` listener is enabled through the `spec.lineage`
+   field of the `SparkApplication`, so that the Spark job's reads and writes are reported as lineage.
 ** *Hive metastore* + *Garage* (S3): back the shared Apache Iceberg `lakehouse` catalog that Trino and Spark both use.
 ** *PostgreSQL*: Metadata databases for Airflow and the Hive metastore.
 ** *Marquez*: The OpenLineage reference server + web UI (with its own PostgreSQL), used here as the consuming
@@ -96,12 +97,14 @@ producer's perspective on the same pipeline. The connected end-to-end flow is th
 
 == How OpenLineage is enabled
 
-Each product is enabled with a small amount of configuration:
+Each product is enabled with a `lineage` block in its custom resource, which requires an operator version that supports
+it:
 
-* *Trino* uses the native `spec.clusterConfig.lineage` field of the `TrinoCluster`. This requires a Trino operator
-  version that supports it.
-* *Airflow* and *Spark* use the existing SDP override mechanisms (`envOverrides` and `sparkConf`) - there is no
-  dedicated OpenLineage field for them.
+* *Trino*: `spec.clusterConfig.lineage` on the `TrinoCluster`.
+* *Airflow*: `spec.clusterConfig.lineage` on the `AirflowCluster`.
+* *Spark*: `spec.lineage` on the `SparkApplication`.
+
+See the xref:home:concepts:observability/openlineage.adoc[data lineage concept page] for how these fit together.
 
 [#transport-security]
 === Transport security (HTTPS)
@@ -114,8 +117,8 @@ deployed in front of them and terminates TLS, using a certificate issued by the 
 
 Producers address Marquez by its *fully-qualified* service name, `marquez.<namespace>.svc.cluster.local`, rather than
 the short name `marquez`: the certificate's subject alternative name (SAN) is the fully-qualified DNS name, so the short
-name would fail TLS hostname verification. Trino and Spark verify the certificate normally. Trino's operator imports the
-`tls` `SecretClass` CA into the coordinator's truststore (see below); Spark, a JVM client, already trusts that CA. Airflow is the exception (see
+name would fail TLS hostname verification. Trino and Spark verify the certificate normally: their operators import the
+`tls` `SecretClass` CA into the truststore of the JVM that emits the events (see below). Airflow is the exception (see
 <<airflow-tls,below>>).
 
 *Trino* ships the `openlineage` event listener as a core plugin. It is enabled with the `lineage` block in the
@@ -148,61 +151,76 @@ Trino query job (its ID starts with a digit). See the {trino-openlineage-docs}[T
 listener docs{external-link-icon}^] for details on the underlying listener.
 
 [#airflow-tls]
-*Airflow* only needs the provider pointed at Marquez, which is done with `envOverrides`:
+*Airflow* is pointed at Marquez with the `lineage` block of the `AirflowCluster`:
 
-[source]
+[source,yaml]
 ----
-AIRFLOW__OPENLINEAGE__TRANSPORT='{"type": "http", "url": "https://marquez.<namespace>.svc.cluster.local:5000", "endpoint": "api/v1/lineage", "verify": false}'
-AIRFLOW__OPENLINEAGE__NAMESPACE="airflow-openlineage-demo"
+spec:
+  clusterConfig:
+    lineage:
+      connection:
+        inline:
+          http:
+            host: marquez.<namespace>.svc.cluster.local
+            port: 5000
+            tls:
+              verification:
+                none: {}
+      namespace: airflow-openlineage-demo
 ----
 
-The transport `type` is `http` (the name of the OpenLineage HTTP transport), but the `url` is `https`, so events are
-still sent over TLS. Note `"verify": false`: *Airflow does not verify the TLS certificate - neither the CA nor the
-hostname - of its Marquez connection, nor of its Trino connection* (`AIRFLOW_CONN_TRINO_DEFAULT` likewise sets
-`verify: false`).
+The `http` transport sends events over HTTPS because a `tls` block is present. Note `verification: none`: *Airflow does
+not verify the TLS certificate - neither the CA nor the hostname - of its Marquez connection, nor of its Trino
+connection* (`AIRFLOW_CONN_TRINO_DEFAULT`, set through `envOverrides`, likewise sets `verify: false`).
 
 This is a limitation of the OpenLineage *Python* client: its `verify` option is a boolean only - it cannot be pointed at
-a custom CA file - so the only way to make it trust the self-signed `tls` CA would be the process-wide
-`REQUESTS_CA_BUNDLE` environment variable. That variable applies to *every* HTTP client in the Airflow process and
-overrides an explicit `verify: false`, which would then force certificate verification onto the DAG's Trino connection.
-That verification fails, because the connection uses the short host name `trino-coordinator` while the certificate's SAN
-only contains the fully-qualified service name. Disabling verification for Airflow's two connections keeps the events
-flowing over HTTPS while avoiding this clash; Trino and Spark, as JVM clients, still verify normally.
+a custom CA file. When a `caCert` `SecretClass` is configured instead, the operator makes the client trust the CA through
+the process-wide `REQUESTS_CA_BUNDLE` environment variable. That variable applies to *every* HTTP client in the Airflow
+process, replaces the default CA bundle and overrides an explicit `verify: false`, which would then force certificate
+verification onto the DAG's Trino connection. That verification fails, because the connection uses the short host name
+`trino-coordinator` while the certificate's SAN only contains the fully-qualified service name. Disabling verification for
+Airflow's two connections keeps the events flowing over HTTPS while avoiding this clash; Trino and Spark, as JVM clients,
+still verify normally.
 
 See the {airflow-openlineage-docs}[Airflow OpenLineage provider docs{external-link-icon}^] for details.
 
-*Spark* loads the `openlineage-spark` listener and points it at Marquez purely through `sparkConf` on the
-`SparkApplication` (plus the package on the classpath via `deps.packages`):
+*Spark* loads the `openlineage-spark` listener and points it at Marquez with the `lineage` block of the
+`SparkApplication`. The operator adds the listener, the OpenLineage jar that ships in the Spark image and the HTTP
+transport settings, and imports the `tls` `SecretClass` CA into the driver's truststore:
 
-[source,properties]
+[source,yaml]
 ----
-spark.extraListeners=io.openlineage.spark.agent.OpenLineageSparkListener
-spark.openlineage.transport.type=http
-spark.openlineage.transport.url=https://marquez.<namespace>.svc.cluster.local:5000
-spark.openlineage.namespace=spark-openlineage-demo
-spark.app.name=orders-by-nation
-# parent* are injected at task runtime by the Airflow operator (see below) so they carry the
-# current run's identity - they link the Spark run to its Airflow task:
-spark.openlineage.parentJobNamespace=airflow-openlineage-demo
-spark.openlineage.parentJobName=openlineage_demo.spark_orders_by_nation
-spark.openlineage.parentRunId=<this Airflow task's OpenLineage run id>
+spec:
+  lineage:
+    connection:
+      inline:
+        http:
+          host: marquez.<namespace>.svc.cluster.local
+          port: 5000
+          tls:
+            verification:
+              server:
+                caCert:
+                  secretClass: tls
+    namespace: spark-openlineage-demo
+    appName: orders-by-nation
 ----
+
+`appName` pins a stable OpenLineage job name, so that every run (the `SparkApplication` name is timestamped per DAG run)
+belongs to the same job.
 
 See the {spark-openlineage-docs}[OpenLineage Spark integration docs{external-link-icon}^] for details.
 
 [NOTE]
 ====
 The Stackable `SparkKubernetesOperator`/`Sensor` are not bundled in the Airflow image, so the demo DAG inlines a small
-in-cluster implementation. It does three things worth calling out, each a lever for cleaner lineage:
+in-cluster implementation. It does two things worth calling out, each a lever for cleaner lineage:
 
 * It creates the `SparkApplication` *and waits for it in the same task* (no separate sensor task, so no extra empty
   "monitor" job in the graph).
-* It sets `spark.openlineage.parentJobNamespace/parentJobName/parentRunId` from the running task's OpenLineage identity
-  (via the provider's `lineage_run_id`/`lineage_job_name` macros). This makes the Spark run report the Airflow task as
-  its *root*, so the real Spark job is reachable from the DAG in Marquez.
-* It implements `get_openlineage_facets_on_complete` to declare the Spark step's input (`customer_orders`) and output
-  (`orders_by_nation`) under the same dataset identities Airflow uses for the Trino tables. Airflow cannot introspect
-  the out-of-process Spark job, so this explicit declaration is what draws the edge into the ELT graph.
+* It implements `get_openlineage_facets_on_complete` to declare the Spark step's inputs (`customer_orders`, `nation`)
+  and output (`orders_by_nation`) under the same dataset identities Airflow uses for the Trino tables. Airflow cannot
+  introspect the out-of-process Spark job, so this explicit declaration is what draws the edge into the ELT graph.
 ====
 
 === Getting clean, connected lineage
@@ -214,9 +232,10 @@ applies them so it can double as a reference:
 |===
 | Lever | Effect
 
-| `spark.openlineage.parent*` (from the Airflow task's run id)
-| Links the Spark run to its Airflow task (the Spark run's `root` becomes the task), so the orchestrated Spark job is
-  reachable from the DAG rather than floating in its own namespace.
+| Not setting `spark.openlineage.parent*`
+| Marquez renames a job that carries a parent facet to `<parentJobName>.<jobName>` unless the name already starts with
+  the parent. The Spark application job does not, so the one run would split into two nodes. The demo therefore links
+  Airflow and Spark through shared *dataset* identities instead.
 
 | `get_openlineage_facets_on_complete` on the Spark operator
 | Declares the Spark step's datasets under the Trino tables' identities, joining Spark to the ELT graph in the Airflow
@@ -228,8 +247,9 @@ applies them so it can double as a reference:
 | One operator that submits *and* waits
 | Avoids a second, dataset-less sensor task appearing as an empty node.
 
-| `spark.app.name` as a Spark *config* (not only `SparkSession.builder.appName`)
-| The listener reads the app name at `SparkContext` start; setting it in config gives the Spark jobs a stable name.
+| `lineage.appName` on the `SparkApplication`
+| Pins a stable OpenLineage job name. Without it the name falls back to `spark.app.name` and finally to the (per-run)
+  resource name.
 |===
 
 [NOTE]
