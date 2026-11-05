@@ -1,6 +1,9 @@
 ---
-# Allow the enable-and-run Job (running under the namespace's default ServiceAccount) to wait for the
-# Airflow StatefulSets to become ready via `kubectl rollout status`.
+# Grants two things to every ServiceAccount in the namespace (see the ClusterRoleBinding below):
+#   * the enable-and-run Job waits for the Airflow StatefulSets via `kubectl rollout status`
+#     (pods + statefulsets get/list/watch), and
+#   * the Airflow DAG's inlined SparkKubernetesOperator/Sensor creates and polls the SparkApplication
+#     (sparkapplications create/get/list/watch).
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
@@ -22,6 +25,15 @@ rules:
       - get
       - list
       - watch
+  - apiGroups:
+      - spark.stackable.tech
+    resources:
+      - sparkapplications
+    verbs:
+      - get
+      - list
+      - watch
+      - create
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRoleBinding

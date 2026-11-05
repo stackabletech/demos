@@ -6,6 +6,10 @@
 #   * `podOverrides` mounts the `event-listener.properties` file (from the ConfigMap below).
 # The `openlineage` event listener plugin itself ships in the Trino distribution since Trino 450.
 #
+# Trino here has two catalogs: `tpch` as the read-only source, and an Iceberg `lakehouse` catalog
+# (on the shared hive-iceberg metastore + MinIO) that the demo DAG writes its ELT output into and
+# that Spark later reads/extends - giving cross-engine lineage over shared Iceberg tables.
+#
 # For now, on K8s 1.35, TrinoCatalogs need to be deployed before the TrinoCluster.
 # See: https://github.com/stackabletech/trino-operator/issues/854
 ---
@@ -19,16 +23,22 @@ spec:
   connector:
     tpch: {}
 ---
+# Iceberg catalog backed by the shared `hive-iceberg` metastore and the MinIO `demo` bucket.
+# The demo DAG writes its ELT output here as Iceberg tables; the Spark job then reads one of them and
+# writes a derived table back - both engines pointing at this same catalog + metastore + bucket.
 apiVersion: trino.stackable.tech/v1alpha1
 kind: TrinoCatalog
 metadata:
-  name: memory
+  name: lakehouse
   labels:
     trino: trino
 spec:
   connector:
-    generic:
-      connectorName: memory
+    iceberg:
+      metastore:
+        configMap: hive-iceberg
+      s3:
+        reference: minio
 ---
 apiVersion: v1
 kind: ConfigMap
