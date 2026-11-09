@@ -8,7 +8,7 @@ repo:
 # To find the latest version:
 # helm repo add grafana-community https://grafana-community.github.io/helm-charts --force-update
 # helm search repo grafana/loki
-version: 18.4.2 # appVersion: 3.7.3
+version: 21.0.0 # appVersion: 3.7.9
 options:
   deploymentMode: SingleBinary
   singleBinary:
@@ -35,8 +35,6 @@ options:
   compactor:
     replicas: 0
   indexGateway:
-    replicas: 0
-  bloomCompactor:
     replicas: 0
   bloomGateway:
     replicas: 0
