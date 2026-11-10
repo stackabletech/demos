@@ -7,7 +7,7 @@ Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
-$ stackablectl demo install logging
+$ stackablectl demo install logging -n logging
 ----
 
 [#system-requirements]
@@ -52,17 +52,17 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list -n logging
 ┌───────────────────────┬───────────────────────┬───────────┬────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
 │ PRODUCT               ┆ NAME                  ┆ NAMESPACE ┆ ENDPOINTS                                                                          ┆ CONDITIONS                      │
 ╞═══════════════════════╪═══════════════════════╪═══════════╪════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ opensearch            ┆ opensearch            ┆ default   ┆ -http               http://opensearch.default.svc.cluster.local:9200               ┆ Available, Reconciling, Running │
-│                       ┆                       ┆           ┆ nodes-default-http  http://opensearch-nodes-default.default.svc.cluster.local:9200 ┆                                 │
+│ opensearch            ┆ opensearch            ┆ logging   ┆ -http               http://opensearch.logging.svc.cluster.local:9200               ┆ Available, Reconciling, Running │
+│                       ┆                       ┆           ┆ nodes-default-http  http://opensearch-nodes-default.logging.svc.cluster.local:9200 ┆                                 │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper             ┆ simple-zk             ┆ default   ┆ server-zk           simple-zk-server.default.svc.cluster.local:2282                ┆ Available, Reconciling, Running │
+│ zookeeper             ┆ simple-zk             ┆ logging   ┆ server-zk           simple-zk-server.logging.svc.cluster.local:2282                ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opensearch-dashboards ┆ opensearch-dashboards ┆ default   ┆ http                http://172.18.0.2:30595                                        ┆                                 │
-│                       ┆                       ┆           ┆ metrics             172.18.0.2:31767                                               ┆                                 │
+│ opensearch-dashboards ┆ opensearch-dashboards ┆ logging   ┆ http                http://172.18.0.2:30206                                        ┆                                 │
+│                       ┆                       ┆           ┆ metrics             172.18.0.2:31173                                               ┆                                 │
 └───────────────────────┴───────────────────────┴───────────┴────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
