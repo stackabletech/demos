@@ -248,17 +248,11 @@ You can find this in the JupyterHub UI at http://<ip>:31095/hub/admin e.g http:/
 
 image::jupyterhub-keycloak/admin-tab.png[]
 
-You can inspect the S3 buckets by using stackable stacklet list to return the Minio endpoint and logging in there with `admin/adminadmin`:
+You can inspect the S3 buckets by port-forwarding the MinIO console and logging in at http://localhost:9001 with `admin/adminadmin`:
 
 [source,console]
 ----
-$ stackablectl stacklet list
-
-┌─────────┬───────────────┬───────────┬───────────────────────────────┬────────────┐
-│ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                     ┆ CONDITIONS │
-╞═════════╪═══════════════╪═══════════╪═══════════════════════════════╪════════════╡
-│ minio   ┆ minio-console ┆ default   ┆ http  http://172.19.0.5:32470 ┆            │
-└─────────┴───────────────┴───────────┴───────────────────────────────┴────────────┘
+$ kubectl port-forward service/minio 9001:9001
 ----
 
 image::jupyterhub-keycloak/s3-buckets.png[]

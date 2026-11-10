@@ -2,11 +2,11 @@
 releaseName: minio
 name: minio
 repo:
-  name: minio
-  url: https://charts.min.io/
-version: 5.4.0 # appVersion: RELEASE.2024-12-18T13-15-44Z
+  name: bitnami
+  url: https://charts.bitnami.com/bitnami/
+version: 12.6.4 # appVersion: 2023.5.18
 options:
-  additionalLabels:
+  commonLabels:
     stackable.tech/vendor: Stackable
     stackable.tech/stack: "{{ STACK }}"
     # The following is a Jinja2 template directive, not a regular comment.
@@ -14,29 +14,23 @@ options:
     # {% if DEMO is defined %}
     stackable.tech/demo: "{{ DEMO }}"
     # {% endif %}
-  podLabels:
-    stackable.tech/vendor: Stackable
-    stackable.tech/stack: "{{ STACK }}"
-    # The following is a Jinja2 template directive, not a regular comment.
-    # The `#` prefix is required to prevent YAML parsing errors, but Jinja2 still processes it.
-    # {% if DEMO is defined %}
-    stackable.tech/demo: "{{ DEMO }}"
-    # {% endif %}
-  rootUser: admin
-  rootPassword: "{{ minioAdminPassword }}"
+  global:
+    security:
+      allowInsecureImages: true
+  image:
+    repository: bitnamilegacy/minio
+  clientImage:
+    repository: bitnamilegacy/minio-client
   mode: standalone
+  auth:
+    rootUser: admin
+    rootPassword: "{{ minioAdminPassword }}"
+  defaultBuckets: demo:public
   persistence:
     size: 10Gi
-  buckets:
-    - name: demo
-      policy: public
   resources:
     requests:
       cpu: 1
       memory: 2Gi
   service:
     type: NodePort
-    nodePort: null
-  consoleService:
-    type: NodePort
-    nodePort: null

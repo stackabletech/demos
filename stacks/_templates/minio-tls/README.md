@@ -14,3 +14,10 @@ customizations on top.
 ```yaml
 helm template minio minio/minio -f values.yaml > rendered-chart.yaml
 ```
+
+MinIO no longer publishes the images referenced by the upstream chart.
+After rendering, replace both the `minio` and `mc` images with `bitnamilegacy/minio:2024-debian-12`
+(it contains both binaries) and adjust the image-specific paths:
+
+- `/usr/bin/docker-entrypoint.sh minio server` -> `exec minio server`
+- `/usr/bin/mc` -> `mc`

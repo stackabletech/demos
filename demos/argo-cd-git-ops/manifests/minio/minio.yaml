@@ -25,7 +25,7 @@ data:
     #!/bin/sh
     set -e # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
-    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    MC="mc --insecure --config-dir ${MC_CONFIG_DIR}"
 
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
@@ -135,7 +135,7 @@ data:
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
-    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    MC="mc --insecure --config-dir ${MC_CONFIG_DIR}"
 
     # AccessKey and secretkey credentials file are added to prevent shell execution errors caused by special characters.
     # Special characters for example : ',",<,>,{,}
@@ -179,11 +179,11 @@ data:
     createUser() {
       POLICY=$1
       #check accessKey_and_secretKey_tmp file
-      if [[ ! -f $MINIO_ACCESSKEY_SECRETKEY_TMP ]];then
+      if [ ! -f $MINIO_ACCESSKEY_SECRETKEY_TMP ];then
         echo "credentials file does not exist"
         return 1
       fi
-      if [[ $(cat $MINIO_ACCESSKEY_SECRETKEY_TMP|wc -l) -ne 2 ]];then
+      if [ $(cat $MINIO_ACCESSKEY_SECRETKEY_TMP|wc -l) -ne 2 ];then
         echo "credentials file is invalid"
         rm -f $MINIO_ACCESSKEY_SECRETKEY_TMP
         return 1
@@ -223,7 +223,7 @@ data:
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
-    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    MC="mc --insecure --config-dir ${MC_CONFIG_DIR}"
 
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
@@ -284,7 +284,7 @@ data:
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
-    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    MC="mc --insecure --config-dir ${MC_CONFIG_DIR}"
 
     # AccessKey and secretkey credentials file are added to prevent shell execution errors caused by special characters.
     # Special characters for example : ',",<,>,{,}
@@ -329,11 +329,11 @@ data:
       USER=$1
       FILENAME=$2
       #check accessKey_and_secretKey_tmp file
-      if [[ ! -f $MINIO_ACCESSKEY_SECRETKEY_TMP ]];then
+      if [ ! -f $MINIO_ACCESSKEY_SECRETKEY_TMP ];then
         echo "credentials file does not exist"
         return 1
       fi
-      if [[ $(cat $MINIO_ACCESSKEY_SECRETKEY_TMP|wc -l) -ne 2 ]];then
+      if [ $(cat $MINIO_ACCESSKEY_SECRETKEY_TMP|wc -l) -ne 2 ];then
         echo "credentials file is invalid"
         rm -f $MINIO_ACCESSKEY_SECRETKEY_TMP
         return 1
@@ -363,7 +363,7 @@ data:
     #!/bin/sh
     set -e ; # Have script exit in the event of a failed command.
     MC_CONFIG_DIR="/etc/minio/mc/"
-    MC="/usr/bin/mc --insecure --config-dir ${MC_CONFIG_DIR}"
+    MC="mc --insecure --config-dir ${MC_CONFIG_DIR}"
 
     # connectToMinio
     # Use a check-sleep-check loop to wait for MinIO service to be available
@@ -513,7 +513,7 @@ spec:
       serviceAccountName: minio-sa
       containers:
         - name: minio
-          image: "quay.io/minio/minio:RELEASE.2024-12-18T13-15-44Z"
+          image: "bitnamilegacy/minio:2024-debian-12"
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
@@ -524,7 +524,7 @@ spec:
               cp -v /etc/minio/original_certs/tls.crt /etc/minio/certs/public.crt
               cp -v /etc/minio/original_certs/tls.key /etc/minio/certs/private.key
 
-              /usr/bin/docker-entrypoint.sh minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001
+              exec minio server /export -S /etc/minio/certs/ --address :9000 --console-address :9001
           volumeMounts:
             - name: minio-user
               mountPath: "/tmp/credentials"
@@ -643,7 +643,7 @@ spec:
       serviceAccountName: minio-sa
       containers:
         - name: minio-make-bucket
-          image: "quay.io/minio/mc:RELEASE.2024-11-21T17-21-54Z"
+          image: "bitnamilegacy/minio:2024-debian-12"
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
@@ -674,7 +674,7 @@ spec:
             requests:
               memory: 128Mi
         - name: minio-make-user
-          image: "quay.io/minio/mc:RELEASE.2024-11-21T17-21-54Z"
+          image: "bitnamilegacy/minio:2024-debian-12"
           imagePullPolicy: IfNotPresent
           command:
             - "/bin/sh"
