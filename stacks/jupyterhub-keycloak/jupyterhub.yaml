@@ -8,7 +8,7 @@ repo:
 # Special care should be taken during testing when this version was bumped.
 # There might be cases where this needs to be dropped back, because the chart
 # is not compatible with other components of the stack/images used.
-version: 4.4.0 # appVersion: 5.5.0
+version: 4.4.5 # appVersion: 5.5.5
 options:
   hub:
     config:
@@ -86,7 +86,7 @@ options:
           owner_reference = make_owner_reference(
             pod["metadata"]["name"], pod["metadata"]["uid"]
           )
-          service_manifest = spawner.get_service_manifest(owner_reference)
+          service_manifest = spawner.get_service_manifest(owner_reference, spawner.port)
 
           service_manifest.spec.type = "ClusterIP"
           service_manifest.spec.clusterIP = "None" # Headless Services is all we need
