@@ -86,7 +86,7 @@ options:
           owner_reference = make_owner_reference(
             pod["metadata"]["name"], pod["metadata"]["uid"]
           )
-          service_manifest = spawner.get_service_manifest(owner_reference)
+          service_manifest = spawner.get_service_manifest(owner_reference, spawner.port)
 
           service_manifest.spec.type = "ClusterIP"
           service_manifest.spec.clusterIP = "None" # Headless Services is all we need
