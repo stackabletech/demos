@@ -5,8 +5,7 @@ metadata:
   name: hive-iceberg
 spec:
   image:
-    # Cannot upgrade to 4.0.1 because we run into github.com/apache/iceberg/issues/12878
-    productVersion: 4.0.0
+    productVersion: 4.2.1
   clusterConfig:
     authorization:
       opa:
