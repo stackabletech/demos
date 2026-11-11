@@ -30,7 +30,7 @@ Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
-$ stackablectl demo install end-to-end-security
+$ stackablectl demo install end-to-end-security -n end-to-end-security
 ----
 
 [WARNING]
@@ -146,28 +146,30 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
-┌───────────┬──────────────┬───────────┬──────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME         ┆ NAMESPACE ┆ ENDPOINTS                                                                                ┆ CONDITIONS                      │
-╞═══════════╪══════════════╪═══════════╪══════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ hdfs      ┆ hdfs         ┆ default   ┆ datanode-default-0-listener-data   172.18.0.2:31942                                      ┆ Available, Reconciling, Running │
-│           ┆              ┆           ┆ datanode-default-0-listener-https  https://172.18.0.2:32525                              ┆                                 │
-│           ┆              ┆           ┆ datanode-default-0-listener-ipc    172.18.0.2:32319                                      ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-https           https://172.18.0.2:30658                              ┆                                 │
-│           ┆              ┆           ┆ namenode-default-0-rpc             172.18.0.2:31140                                      ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-https           https://172.18.0.2:31719                              ┆                                 │
-│           ┆              ┆           ┆ namenode-default-1-rpc             172.18.0.2:30396                                      ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive      ┆ hive-iceberg ┆ default   ┆ metastore-hive                     hive-iceberg-metastore.default.svc.cluster.local:9083 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa       ┆ opa          ┆ default   ┆                                                                                          ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset     ┆ default   ┆ node-http                          http://172.18.0.2:32116                               ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino     ┆ trino        ┆ default   ┆ coordinator-https                  https://172.18.0.2:31154                              ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper    ┆ default   ┆ server-zk                          zookeeper-server.default.svc.cluster.local:2282       ┆ Available, Reconciling, Running │
-└───────────┴──────────────┴───────────┴──────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+$ stackablectl stacklet list -n end-to-end-security
+┌───────────┬──────────────┬─────────────────────┬───────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   ┆ NAME         ┆ NAMESPACE           ┆ ENDPOINTS                                                         ┆ CONDITIONS                      │
+╞═══════════╪══════════════╪═════════════════════╪═══════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ hdfs      ┆ hdfs         ┆ end-to-end-security ┆ datanode-default-0-listener-data   172.18.0.2:30621               ┆ Available, Reconciling, Running │
+│           ┆              ┆                     ┆ datanode-default-0-listener-https  https://172.18.0.2:30345       ┆                                 │
+│           ┆              ┆                     ┆ datanode-default-0-listener-ipc    172.18.0.2:31276               ┆                                 │
+│           ┆              ┆                     ┆ namenode-default-0-https           https://172.18.0.2:30147       ┆                                 │
+│           ┆              ┆                     ┆ namenode-default-0-rpc             172.18.0.2:30969               ┆                                 │
+│           ┆              ┆                     ┆ namenode-default-1-https           https://172.18.0.2:30266       ┆                                 │
+│           ┆              ┆                     ┆ namenode-default-1-rpc             172.18.0.2:30576               ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive      ┆ hive-iceberg ┆ end-to-end-security ┆ metastore-hive                                                    ┆ Available, Reconciling, Running │
+│           ┆              ┆                     ┆ hive-iceberg-metastore.end-to-end-security.svc.cluster.local:9083 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa       ┆ opa          ┆ end-to-end-security ┆                                                                   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset     ┆ end-to-end-security ┆ node-http                          http://172.18.0.2:31671        ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino     ┆ trino        ┆ end-to-end-security ┆ coordinator-https                  https://172.18.0.2:30288       ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper    ┆ end-to-end-security ┆ server-zk                                                         ┆ Available, Reconciling, Running │
+│           ┆              ┆                     ┆ zookeeper-server.end-to-end-security.svc.cluster.local:2282       ┆                                 │
+└───────────┴──────────────┴─────────────────────┴───────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -288,7 +290,7 @@ To connect to the deployed Keycloak instance use a port-forward on the `keycloak
 
 [source,console]
 ----
-$ kubectl port-forward service/keycloak 8443:8443
+$ kubectl port-forward -n end-to-end-security service/keycloak 8443:8443
 ----
 
 And then open the url https://localhost:8443 to access the Keycloak UI. You can login using the credentials `admin` for username and `adminadmin` for password.
