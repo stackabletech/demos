@@ -7,7 +7,7 @@ Install this demo on an existing Kubernetes cluster:
 
 [source,console]
 ----
-$ stackablectl demo install signal-processing
+$ stackablectl demo install signal-processing -n signal-processing
 ----
 
 WARNING: This demo should not be run alongside other demos.
@@ -52,7 +52,7 @@ JupyterHub will create a Pod for each active user. In order to reach the Jupyter
 
 [source,console]
 ----
-$ kubectl port-forward service/proxy-public 8000:http
+$ kubectl port-forward -n signal-processing service/proxy-public 8000:http
 ----
 
 Now access the JupyterHub web interface via http://localhost:8000.
@@ -122,15 +122,15 @@ Grafana can be reached by first looking up the service endpoint:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list -n signal-processing
 
-┌─────────┬─────────┬───────────┬──────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT ┆ NAME    ┆ NAMESPACE ┆ ENDPOINTS                            ┆ CONDITIONS                      │
-╞═════════╪═════════╪═══════════╪══════════════════════════════════════╪═════════════════════════════════╡
-│ nifi    ┆ nifi    ┆ default   ┆ node-https  https://172.18.0.2:30774 ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ grafana ┆ grafana ┆ default   ┆ service     172.18.0.2:30900         ┆                                 │
-└─────────┴─────────┴───────────┴──────────────────────────────────────┴─────────────────────────────────┘
+┌─────────┬─────────┬───────────────────┬──────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT ┆ NAME    ┆ NAMESPACE         ┆ ENDPOINTS                            ┆ CONDITIONS                      │
+╞═════════╪═════════╪═══════════════════╪══════════════════════════════════════╪═════════════════════════════════╡
+│ nifi    ┆ nifi    ┆ signal-processing ┆ node-https  https://172.18.0.2:32556 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ grafana ┆ grafana ┆ signal-processing ┆ service     172.18.0.2:31457         ┆                                 │
+└─────────┴─────────┴───────────────────┴──────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 Log in to Grafana with username `admin` and password `adminadmin` and navigate to the dashboards.
