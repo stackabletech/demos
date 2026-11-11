@@ -50,5 +50,3 @@ options:
     # Use the ServiceAccount of OpenSearch because its permissions are already configured to work on
     # OpenShift.
     name: opensearch-serviceaccount
-config:
-  opensearch_security.multitenancy.enabled: false

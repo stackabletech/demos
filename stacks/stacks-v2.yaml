@@ -82,8 +82,10 @@ stacks:
       - opensearch-dashboards
       - vector
     manifests:
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/truststore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator-discovery.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/opensearch.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/setup-opensearch.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/opensearch-dashboards.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/logging/setup-opensearch-dashboards.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/vector-aggregator.yaml
@@ -155,6 +157,7 @@ stacks:
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/garage.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-airflow.yaml
       - helmChart: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/postgresql-hive-iceberg.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/_templates/truststore.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/kafka.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/s3-connection.yaml
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/airflow/hive-metastores.yaml
