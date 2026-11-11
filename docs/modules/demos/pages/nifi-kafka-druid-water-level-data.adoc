@@ -587,6 +587,16 @@ One prefix corresponds to one segment, which contains all the measurements of a 
 If nothing is listed, Druid still needs to save its data from memory to the deep storage.
 After waiting for roughly an hour, the data should show up.
 
+If you don't want to wait, you can make Druid publish the data to the deep storage right away:
+
+. Open the Druid web interface (the endpoint `router-https` from your `stackablectl stacklet list` command output).
+. Click on `Supervisors` at the top.
+. Open the actions menu of the `measurements` supervisor and click on `Suspend`.
+  The running ingestion task stops reading from Kafka, publishes its segments to S3 and finishes.
+. Run the `rclone lsf` command for `measurements` from above again.
+  The prefixes should show up after a short while.
+. Open the actions menu of the supervisor again and click on `Resume` to continue the ingestion.
+
 Opening up a prefix for a specific day shows the file containing that day's data:
 
 [source,console]

@@ -379,6 +379,16 @@ Druid saved roughly 201.5 MiB of data across 73 prefixes.
 If nothing is listed, Druid has not flushed its data from memory to the deep storage yet.
 After waiting for roughly an hour, the data should show up.
 
+If you don't want to wait, you can make Druid publish the data to the deep storage right away:
+
+. Open the Druid web interface (the endpoint `router-https` from your `stackablectl stacklet list` command output).
+. Click on `Supervisors` at the top.
+. Open the actions menu of the `earthquakes` supervisor and click on `Suspend`.
+  The running ingestion task stops reading from Kafka, publishes its segments to S3 and finishes.
+. Run the `rclone lsf` command from above again.
+  The prefixes should show up after a short while.
+. Open the actions menu of the supervisor again and click on `Resume` to continue the ingestion.
+
 Opening up a prefix for a specific year shows the file containing the data of that year:
 
 [source,console]
