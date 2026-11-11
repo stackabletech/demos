@@ -194,7 +194,6 @@ stacks:
       - hive
       - trino
       - opa
-      - zookeeper
       - kafka
       - nifi
       - superset
