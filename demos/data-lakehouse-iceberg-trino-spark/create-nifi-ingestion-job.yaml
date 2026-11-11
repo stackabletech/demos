@@ -8,7 +8,7 @@ spec:
     spec:
       serviceAccountName: demo-serviceaccount
       initContainers:
-        - name: wait-for-kafka
+        - name: wait-for-resources
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
           command:
             - bash
@@ -16,10 +16,11 @@ spec:
             - pipefail
             - -c
             - |
-              echo 'Waiting for all nifi nodes to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/instance=nifi,app.kubernetes.io/name=nifi -n {{ NAMESPACE }}
-              echo 'Waiting for all kafka brokers to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/instance=kafka,app.kubernetes.io/name=kafka -n {{ NAMESPACE }}
+              echo 'Waiting for the nifi cluster to be available'
+              kubectl wait --for=condition=available --timeout=30m nificlusters.nifi.stackable.tech/nifi -n {{ NAMESPACE }}
+              # The NiFi flow can only publish once the topics exist, as Kafka doesn't auto-create them
+              echo 'Waiting for the kafka topics to be created'
+              kubectl wait --for=condition=complete --timeout=30m job/create-kafka-topics -n {{ NAMESPACE }}
       containers:
         - name: create-nifi-ingestion-job
           image: oci.stackable.tech/sdp/testing-tools/nifi:0.3.0-stackable0.0.0-dev

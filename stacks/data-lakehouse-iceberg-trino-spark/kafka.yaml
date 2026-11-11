@@ -9,7 +9,20 @@ spec:
   clusterConfig:
     authentication:
       - authenticationClass: kafka-client-tls
+    managementAccess:
+      enabled: true
+      authentication:
+        userProvided: # TODO: Switch to automatic once supported
+          tls:
+            secretClassName: tls
   controllers:
+    configOverrides:
+      controller.properties: &sharedProperties
+        # We want to create the Topics using the KafkaTopic CRD
+        auto.create.topics.enable: "false"
+        num.partitions: "32"
+        log.segment.bytes: "50000000" # 50 MB
+        log.retention.bytes: "2000000000" # 2 GB. Should keep between 2.0 and 2.5GB
     roleGroups:
       default:
         replicas: 1
@@ -26,14 +39,11 @@ spec:
           max: "3"
         memory:
           limit: 2Gi
+    configOverrides:
+      broker.properties: *sharedProperties
     roleGroups:
       default:
         replicas: 5
-        configOverrides:
-          broker.properties:
-            num.partitions: "27"
-            log.segment.bytes: "50000000" # 50 MB
-            log.retention.bytes: "2000000000" # 2 GB. Should keep between 2.0 and 2.5GB
 ---
 apiVersion: authentication.stackable.tech/v1alpha1
 kind: AuthenticationClass
