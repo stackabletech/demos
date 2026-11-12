@@ -2,7 +2,7 @@
 # topic among the brokers that are running when the topic is created. If the topics are created before all brokers are
 # up, some brokers end up without any partitions.
 #
-# This is a known issue for kafka-operator, we will document this (TODO link to docs PR) .
+# This is a known issue for kafka-operator and was documented in https://github.com/stackabletech/kafka-operator/pull/1057.
 ---
 apiVersion: batch/v1
 kind: Job
