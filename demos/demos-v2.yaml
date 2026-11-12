@@ -26,8 +26,7 @@ demos:
       # products
       ################################
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/airflow.yaml
-    supportedNamespaces:
-      - argo-cd
+    supportedNamespaces: []
     resourceRequests:
       cpu: 15000m
       memory: 15Gi

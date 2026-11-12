@@ -26,8 +26,7 @@ stacks:
       # applicationset - operators
       ################################
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/stacks/argo-cd-git-ops/applicationsets/stackable-operators.yaml
-    supportedNamespaces:
-      - argo-cd
+    supportedNamespaces: []
     resourceRequests:
       memory: 5000Mi
       cpu: 5000m

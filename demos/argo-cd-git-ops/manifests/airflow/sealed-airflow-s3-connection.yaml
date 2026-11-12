@@ -1,0 +1,19 @@
+---
+apiVersion: bitnami.com/v1alpha1
+kind: SealedSecret
+metadata:
+  creationTimestamp: null
+  name: airflow-s3-connection
+  namespace: stackable-airflow
+spec:
+  encryptedData:
+    airflow-s3-connection: AgCiOpa8CqtPyxatxCRHubdWYJGlrSPpstbD8wSgDkZFqFSaw+5bpKRFs0+CAnbq5ziCW4j3mSd/YMhaamqSCkQ/VWDH24VBSzlX/5tBcWNk93mMAtlZkBn2z1Uv8wMwX4sbdgdPnF9BzaelF24CBUpHTzBsFzPegBwRwAD4fqRA2jFueTSGfpIct+zLgUlAlUxn3UySSowE/12SCY+kkM/JLmF5jNLHwP54EIc8eBw0qVk9LF9zRrrhUeK9K7DZTmZO4wdaGBrQJgOteycMaMP0vRVvxK1+/MLURX5nVpvjKGWQdN8qtLA/5xezH2IUzhZgyn6iXJukvll+63RG1jnpDJAmYJtqktNz9fc/Y6lpn612a821zzS6DQS8dwqLbARhDROuAMcTiP3L2XAR48vR6ZJQoxPkGxkUWfUMOPFKIC5JeYQ5WQcQf74BRPYh5n497jif6PTabFPTCoIngodNGUd7dN0C4Si8XpUMXu8tMWFhzv4UeMaOw218oqGXuu2RTqYyJ2lsGM3poNBIX3GDSLOTBB9tblhmENX3yFs1SBj7g7j4Z8trFPj1ylM2UQsizI/rh+8165sGRJlHvHr7DwdHihLzLVUdKsPfwjiAWP0OU4ao/kzuzEI0gerpxltAp2Yix9o8KfzDj+xOG9GTDclhGc13DhTZMHjLSHZ1YCaR68JtCqceHGdG5OIjTVbHbfDU9VNLeabuQM7Ph2Q4tApAj+In5GFjArK4BK/2qaxoPY5+kc04DR1vWq/Ku3OUUMwBLvioFsWbtGRchs3LZceQTBHHiRNch4cct2oAn2AtQbvTjiFJC32zxfGpxV2Xx+NVuKs8OxM42UECa604zxs/0oOPKYoZBC6qbeQQS/uPh0ECJPfuKXU5QtYL6EIqteVDbPKX0HyQQK+D6TW0Y6aJ2iE=
+  template:
+    metadata:
+      creationTimestamp: null
+      name: airflow-s3-connection
+      namespace: stackable-airflow
+      labels:
+        stackable.tech/vendor: Stackable
+        stackable.tech/demo: argo-cd-git-ops
+    type: Opaque

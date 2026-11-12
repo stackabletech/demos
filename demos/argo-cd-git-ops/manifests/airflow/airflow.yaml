@@ -31,13 +31,15 @@ spec:
         gitFolder: "demos/argo-cd-git-ops/dags"
         depth: 2
     volumes:
-      - name: minio-tls
+      # Only the CA is needed, to verify the Garage S3 endpoint.
+      - name: s3-tls
         ephemeral:
           volumeClaimTemplate:
             metadata:
               annotations:
                 secrets.stackable.tech/class: tls
                 secrets.stackable.tech/scope: pod
+                secrets.stackable.tech/provision-parts: public
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -46,19 +48,22 @@ spec:
                   storage: "1"
               storageClassName: secrets.stackable.tech
     volumeMounts:
-      - name: minio-tls
-        mountPath: /stackable/minio-tls
+      - name: s3-tls
+        mountPath: /stackable/s3-tls
   webservers:
     roleConfig:
       listenerClass: external-stable
     envOverrides: &envOverrides
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       # Via sealed secrets and pod overrides, just kept for reference here
-      # AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
-      AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
+      # AIRFLOW_CONN_S3: "aws://GK31c0ffee31c0ffee31c0ffee:<secretKey>@/?endpoint_url=https%3A%2F%2Fgarage.garage.svc.cluster.local%3A9000"
+      AWS_CA_BUNDLE: "/stackable/s3-tls/ca.crt"
+      # boto3 has no region here otherwise, and Garage rejects requests signed
+      # for a different region than the one it is configured with.
+      AWS_DEFAULT_REGION: region-1
       AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
       AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
-      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: s3
       # 20 seconds to reload the DAGS folder (default: 300)
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "20"
     podOverrides: &podOverrides
@@ -66,11 +71,11 @@ spec:
         containers:
           - name: airflow
             env:
-              - name: AIRFLOW_CONN_MINIO
+              - name: AIRFLOW_CONN_S3
                 valueFrom:
                   secretKeyRef:
-                    name: airflow-minio-connection
-                    key: airflow-minio-connection
+                    name: airflow-s3-connection
+                    key: airflow-s3-connection
           - name: git-sync-0
             resources:
               limits:
@@ -107,11 +112,11 @@ spec:
         containers:
           - name: base
             env:
-              - name: AIRFLOW_CONN_MINIO
+              - name: AIRFLOW_CONN_S3
                 valueFrom:
                   secretKeyRef:
-                    name: airflow-minio-connection
-                    key: airflow-minio-connection
+                    name: airflow-s3-connection
+                    key: airflow-s3-connection
         initContainers:
           - name: git-sync-0-init
             resources:

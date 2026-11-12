@@ -2,13 +2,13 @@
 apiVersion: argoproj.io/v1alpha1
 kind: AppProject
 metadata:
-  name: minio
+  name: garage
 spec:
-  description: Project to manage Minio
+  description: Project to manage Garage
   sourceRepos:
     - "*"
   destinations:
-    - namespace: minio
+    - namespace: garage
       server: https://kubernetes.default.svc
   clusterResourceWhitelist:
     - group: "*"
