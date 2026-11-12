@@ -61,6 +61,7 @@ GitHub handle next to the demo to indicate a particular demo was picked up for t
 - [ ] [logging](https://docs.stackable.tech/home/nightly/demos/logging)
 - [ ] [nifi-kafka-druid-earthquake-data](https://docs.stackable.tech/home/nightly/demos/nifi-kafka-druid-earthquake-data)
 - [ ] [nifi-kafka-druid-water-level-data](https://docs.stackable.tech/home/nightly/demos/nifi-kafka-druid-water-level-data)
+- [ ] [opensearch-rag](https://docs.stackable.tech/home/nightly/demos/opensearch-rag)
 - [ ] [signal-processing](https://docs.stackable.tech/home/nightly/demos/signal-processing)
 - [ ] [spark-k8s-anomaly-detection-taxi-data](https://docs.stackable.tech/home/nightly/demos/spark-k8s-anomaly-detection-taxi-data)
 - [ ] [trino-iceberg](https://docs.stackable.tech/home/nightly/demos/trino-iceberg)
