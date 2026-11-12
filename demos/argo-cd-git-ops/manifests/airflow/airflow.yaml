@@ -147,3 +147,11 @@ spec:
     roleGroups:
       default:
         replicas: 1
+  # Without this role the DAG processor runs in the scheduler container, and the
+  # two together exceed the scheduler's memory limit.
+  dagProcessors:
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
+    roleGroups:
+      default:
+        replicas: 1
