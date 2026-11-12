@@ -88,14 +88,14 @@ Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.
 image::airflow-scheduled-job/airflow_1.png[]
 
 Log in with the username `admin` and password `adminadmin`.
-Click on 'DAGs' in the left margin and you will see an overview showing the DAGs mounted during the demo
-setup (`date_demo` and `sparkapp_dag`).
+Click on 'DAGs' in the left margin and you will see an overview showing the DAGs mounted during the demo setup.
 
 image::airflow-scheduled-job/airflow_2.png[]
 
 There are two things to notice here.
-All DAGs but one (the one demonstrating a deferrable operator) have been enabled, as shown by the slider on the far right of the screen for each DAG
+All DAGs but two - `core_deferrable_sleep_demo` (which demonstrates a deferrable operator) and `run_dbt` - have been enabled, as shown by the slider on the far right of the screen for each DAG
 (DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for this demo).
+Set the filter from `Enabled` to `All` to see the disabled DAGs as well.
 Secondly, the `date_demo` job has been busy, with several runs already logged:
 
 image::airflow-scheduled-job/airflow_3.png[]
@@ -106,10 +106,10 @@ Clicking on the DAG name and then on `Runs` will display the individual job runs
 
 image::airflow-scheduled-job/airflow_5.png[]
 
-The `demo_date` job is running every minute.
+The `date_demo` job is running every minute.
 With Airflow, DAGs can be started manually or scheduled to run when certain conditions are fulfilled - in this case, the DAG has been set up to run using a cron table, which is part of the DAG definition.
 
-=== `demo_date` DAG
+=== `date_demo` DAG
 
 Let's drill down a bit deeper into this DAG.
 At the top under the DAG name there is some scheduling information, which tells us that this job will run every minute continuously:
