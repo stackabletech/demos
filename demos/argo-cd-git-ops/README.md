@@ -99,3 +99,13 @@ stringData:
 ```
 
 TODO: We should probably create a script that seals all secrets and puts them in the respective stack / demo folders
+
+## git-sync only fetches the DAG folder
+
+A full clone of this repository needs several times the default memory of the git-sync containers.
+git-sync therefore does a sparse partial clone of `dags/` only: `gitSyncConf` in `manifests/airflow/airflow.yaml`, with the sparse checkout file in `manifests/airflow/git-sync-sparse-checkout.yaml`.
+
+- If the DAGs move, update both `gitFolder` in `airflow.yaml` and the sparse checkout file.
+- git documents sparse checkout as experimental, so a newer git in the Airflow image may change how it behaves.
+  A breaking change fails silently: git-sync reports no errors, but the DAG folder is missing and Airflow shows no DAGs.
+  The fallback is a full clone, described in the comment above `gitSyncConf` in `airflow.yaml`: drop the sparse checkout configuration and give each git-sync container 512Mi of memory.

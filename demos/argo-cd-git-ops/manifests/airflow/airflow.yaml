@@ -24,13 +24,40 @@ spec:
     # In terms of forking the repository, this should not be a problem since the DAGs are the same.
     # You can still change this locally and point to the fork in case of any changes to DAGs.
     #
-    # TODO(@maltesander): In a Stackable release, this branch should point to the release-YY.MM branch!
+    # The `release-ref` marker lets .scripts/update_refs.sh point this branch at
+    # the release branch when one is cut.
     dagsGitSync:
       - repo: https://github.com/stackabletech/demos/
-        branch: main
+        branch: main  # release-ref: branch
         gitFolder: "demos/argo-cd-git-ops/dags"
-        depth: 2
+        depth: 1
+        # Fetch and check out only the DAG folder (see git-sync-sparse-checkout.yaml).
+        # A full clone of this repository needs several times the git-sync
+        # containers' default memory, a sparse partial clone needs a fraction of it.
+        #
+        # git documents sparse checkout as experimental, so its behaviour may
+        # change with the git version in a future Airflow image. If it breaks, it
+        # does so silently: git-sync succeeds, but the DAG folder is missing and
+        # Airflow shows no DAGs. The fallback is a full clone: remove gitSyncConf,
+        # the git-sync-sparse volume and its mount, and git-sync-sparse-checkout.yaml,
+        # and give the git-sync containers (git-sync-0 and git-sync-0-init, in the
+        # podOverrides of every role including kubernetesExecutors) 512Mi of memory:
+        #
+        #   - name: git-sync-0
+        #     resources:
+        #       limits:
+        #         memory: "512Mi"
+        #       requests:
+        #         memory: "512Mi"
+        gitSyncConf:
+          --filter: blob:none
+          --sparse-checkout-file: /stackable/git-sync-sparse/sparse-checkout
     volumes:
+      # Mounted into the git-sync containers as well, which is how they find
+      # the sparse checkout file.
+      - name: git-sync-sparse
+        configMap:
+          name: git-sync-sparse-checkout
       # Only the CA is needed, to verify the Garage S3 endpoint.
       - name: s3-tls
         ephemeral:
@@ -48,6 +75,8 @@ spec:
                   storage: "1"
               storageClassName: secrets.stackable.tech
     volumeMounts:
+      - name: git-sync-sparse
+        mountPath: /stackable/git-sync-sparse
       - name: s3-tls
         mountPath: /stackable/s3-tls
   webservers:
@@ -76,19 +105,6 @@ spec:
                   secretKeyRef:
                     name: airflow-s3-connection
                     key: airflow-s3-connection
-          - name: git-sync-0
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
-        initContainers:
-          - name: git-sync-0-init
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
     config:
       gracefulShutdownTimeout: 30s
       resources:
@@ -117,13 +133,6 @@ spec:
                   secretKeyRef:
                     name: airflow-s3-connection
                     key: airflow-s3-connection
-        initContainers:
-          - name: git-sync-0-init
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides

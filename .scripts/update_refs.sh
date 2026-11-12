@@ -65,6 +65,17 @@ if [[ "$CURRENT_BRANCH" == release-* ]]; then
   | prepend "\t"
   maybe_commit "chore(release): $MESSAGE"
 
+  # Replace 0.0.0-dev on lines marked `# release-ref: version`. These are
+  # versions that don't follow the `stackable0.0.0-dev` image tag pattern above,
+  # e.g. the operator version Argo CD installs in the argo-cd-git-ops stack.
+  MESSAGE="Update marked release versions to ${STACKABLE_RELEASE}.0"
+  echo "$MESSAGE"
+  find demos stacks -type f \
+    -exec grep --color=always -lE '0\.0\.0-dev\s+# release-ref: version' {} \; \
+    -exec sed -i -E "s#0\.0\.0-dev(\s+\# release-ref: version)#${STACKABLE_RELEASE}.0\1#" {} \; \
+  | prepend "\t"
+  maybe_commit "chore(release): $MESSAGE"
+
   # Look for remaining references
   echo "Checking files with older stackable release references which will be assumed to be intentional."
   grep --color=always -ronE "stackable24\.3(\.[0-9]+)" | prepend "\t"
@@ -73,7 +84,7 @@ else
   >&2 echo "WARNING: doesn't look like a release branch. Will not update stackableRelease versions in stacks and image references."
 fi
 
-MESSAGE="Replace githubusercontent references main->${CURRENT_BRANCH}"
+MESSAGE="Replace main branch references with ${CURRENT_BRANCH}"
 echo "$MESSAGE"
 # Search for githubusercontent urls and replace the branch reference with a placeholder variable
 # This is done just in case the branch has special regex characters (like `/`).
@@ -81,6 +92,14 @@ echo "$MESSAGE"
 find demos stacks -type f \
   -exec grep --color=always -l githubusercontent {} \; \
   -exec sed -i -E 's#(stackabletech/demos)/(refs/heads/)?main/#\1/\${UPDATE_BRANCH_REF}/#' {} \; \
+| prepend "\t"
+
+# Same for git refs that are not githubusercontent URLs, e.g. branches Argo CD
+# or git-sync pull from at runtime. These lines are marked `# release-ref: branch`.
+# shellcheck disable=SC2016 # We intentionally don't want to expand the variable.
+find demos stacks -type f \
+  -exec grep --color=always -lE 'main\s+# release-ref: branch' {} \; \
+  -exec sed -i -E 's#main(\s+\# release-ref: branch)#${UPDATE_BRANCH_REF}\1#' {} \; \
 | prepend "\t"
 
 # Now, for all modified files, we can use envsubst
@@ -91,3 +110,12 @@ for MODIFIED_FILE in $(git diff --name-only); do
   mv "$MODIFIED_FILE.replacements" "$MODIFIED_FILE"
 done
 maybe_commit "chore(release): $MESSAGE"
+
+# A marked line that still points at main or 0.0.0-dev would leave a release
+# depending on main at runtime, so treat it as an error.
+if [[ "$CURRENT_BRANCH" == release-* ]]; then
+  if grep -rnE '(main|0\.0\.0-dev)\s+# release-ref:' demos stacks; then
+    >&2 echo "The lines above are marked as release references but were not updated. Exiting."
+    exit 3
+  fi
+fi

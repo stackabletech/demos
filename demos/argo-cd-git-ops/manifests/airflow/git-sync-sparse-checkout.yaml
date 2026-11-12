@@ -1,0 +1,26 @@
+---
+# Limits what git-sync checks out of this repository to the DAG folder. Used
+# together with `--filter: blob:none` in airflow.yaml, so git-sync also only
+# downloads the files it checks out.
+#
+# The git-sync image enables sparse checkout in cone mode, which requires every
+# parent directory to be listed in this form. A single `/path/to/dags/` line
+# checks out nothing but the top-level files.
+#
+# If the DAGs are moved, update both this file and `gitFolder` in airflow.yaml.
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: git-sync-sparse-checkout
+  labels:
+    stackable.tech/vendor: Stackable
+    stackable.tech/demo: argo-cd-git-ops
+data:
+  sparse-checkout: |
+    /*
+    !/*/
+    /demos/
+    !/demos/*/
+    /demos/argo-cd-git-ops/
+    !/demos/argo-cd-git-ops/*/
+    /demos/argo-cd-git-ops/dags/
