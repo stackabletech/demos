@@ -5,13 +5,14 @@ Install this demo on an existing Kubernetes cluster:
 
 [NOTE]
 ====
-The namespace `airflow-demo` will be assumed in this guide.
+The namespace `airflow-scheduled-job` will be assumed in this guide.
+This is the default namespace used by `stackablectl` for this demo, so the `-n` argument can be omitted.
 It will be created if it doesn't exist.
 ====
 
 [source,console]
 ----
-$ stackablectl demo install airflow-scheduled-job -n airflow-demo
+$ stackablectl demo install airflow-scheduled-job -n airflow-scheduled-job
 ----
 
 [WARNING]
@@ -57,25 +58,25 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list -n airflow-demo
+$ stackablectl stacklet list -n airflow-scheduled-job
 
-┌─────────┬───────────────┬───────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                                 ┆ CONDITIONS                      │
-╞═════════╪═══════════════╪═══════════╪═══════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ airflow ┆ airflow       ┆ default   ┆ webserver-http                              http://172.19.0.3:31483                                       ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ hive    ┆ hive-iceberg  ┆ default   ┆ metastore-hive                              hive-iceberg-metastore.default.svc.cluster.local:9083         ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka   ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls                                                                ┆ Available, Reconciling, Running │
-│         ┆               ┆           ┆ kafka-broker-default-0-listener-broker.default.svc.cluster.local:9093                                     ┆                                 │
-│         ┆               ┆           ┆ broker-default-0-listener-broker-metrics                                                                  ┆                                 │
-│         ┆               ┆           ┆ kafka-broker-default-0-listener-broker.default.svc.cluster.local:9606                                     ┆                                 │
-│         ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.default.svc.cluster.local:9093 ┆                                 │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opa     ┆ opa           ┆ default   ┆                                                                                                           ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ trino   ┆ trino         ┆ default   ┆ coordinator-https                           https://172.19.0.5:31087                                      ┆ Available, Reconciling, Running │
-└─────────┴───────────────┴───────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌─────────┬──────────────┬───────────────────────┬─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT │ NAME         │ NAMESPACE             │ ENDPOINTS                                                                                                               │ CONDITIONS                      │
+╞═════════╪══════════════╪═══════════════════════╪═════════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ airflow ┆ airflow      ┆ airflow-scheduled-job ┆ webserver-http                              http://172.19.0.3:31483                                                     ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ hive    ┆ hive-iceberg ┆ airflow-scheduled-job ┆ metastore-hive                              hive-iceberg-metastore.airflow-scheduled-job.svc.cluster.local:9083         ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka   ┆ kafka        ┆ airflow-scheduled-job ┆ broker-default-0-listener-broker-kafka-tls                                                                              ┆ Available, Reconciling, Running │
+│         ┆              ┆                       ┆ kafka-broker-default-0-listener-broker.airflow-scheduled-job.svc.cluster.local:9093                                     ┆                                 │
+│         ┆              ┆                       ┆ broker-default-0-listener-broker-metrics                                                                                ┆                                 │
+│         ┆              ┆                       ┆ kafka-broker-default-0-listener-broker.airflow-scheduled-job.svc.cluster.local:9606                                     ┆                                 │
+│         ┆              ┆                       ┆ broker-default-bootstrap-kafka-tls          kafka-broker-default-bootstrap.airflow-scheduled-job.svc.cluster.local:9093 ┆                                 │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ opa     ┆ opa          ┆ airflow-scheduled-job ┆                                                                                                                         ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ trino   ┆ trino        ┆ airflow-scheduled-job ┆ coordinator-https                           https://172.19.0.5:31087                                                    ┆ Available, Reconciling, Running │
+└─────────┴──────────────┴───────────────────────┴─────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -87,14 +88,14 @@ Open the `airflow` endpoint `webserver-airflow` in your browser (`http://172.19.
 image::airflow-scheduled-job/airflow_1.png[]
 
 Log in with the username `admin` and password `adminadmin`.
-Click on 'DAGs' in the left margin and you will see an overview showing the DAGs mounted during the demo
-setup (`date_demo` and `sparkapp_dag`).
+Click on 'DAGs' in the left margin and you will see an overview showing the DAGs mounted during the demo setup.
 
 image::airflow-scheduled-job/airflow_2.png[]
 
 There are two things to notice here.
-All DAGs but one (the one demonstrating a deferrable operator) have been enabled, as shown by the slider on the far right of the screen for each DAG
+All DAGs but two - `core_deferrable_sleep_demo` (which demonstrates a deferrable operator) and `run_dbt` - have been enabled, as shown by the slider on the far right of the screen for each DAG
 (DAGs are all `paused` initially and can be activated manually in the UI or via a REST call, as done in the setup for this demo).
+Set the filter from `Enabled` to `All` to see the disabled DAGs as well.
 Secondly, the `date_demo` job has been busy, with several runs already logged:
 
 image::airflow-scheduled-job/airflow_3.png[]
@@ -105,10 +106,10 @@ Clicking on the DAG name and then on `Runs` will display the individual job runs
 
 image::airflow-scheduled-job/airflow_5.png[]
 
-The `demo_date` job is running every minute.
+The `date_demo` job is running every minute.
 With Airflow, DAGs can be started manually or scheduled to run when certain conditions are fulfilled - in this case, the DAG has been set up to run using a cron table, which is part of the DAG definition.
 
-=== `demo_date` DAG
+=== `date_demo` DAG
 
 Let's drill down a bit deeper into this DAG.
 At the top under the DAG name there is some scheduling information, which tells us that this job will run every minute continuously:
@@ -173,7 +174,7 @@ We can use the kafka-producer script bundled with Kafka to write to this topic (
 
 [source,bash]
 ----
-kubectl exec -n airflow-demo kafka-broker-default-0 -c kafka -- bash -c \
+kubectl exec -n airflow-scheduled-job kafka-broker-default-0 -c kafka -- bash -c \
 'echo "Hello World at: $(date)" | /stackable/kafka/bin/kafka-console-producer.sh \
   --bootstrap-server $BOOTSTRAP_SERVER \
   --topic test-topic \
@@ -185,7 +186,7 @@ You can do this by either displaying the pod logs directly (e.g. if you are usin
 
 [source,bash]
 ----
-kubectl logs -n airflow-demo airflow-triggerer-default-0 --tail=30
+kubectl logs -n airflow-scheduled-job airflow-triggerer-default-0 --tail=30
 ----
 
 The logs show that our message was detected, triggering the job:
@@ -314,7 +315,7 @@ The patch can be applied like this:
 
 [source,console]
 ----
-kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-demo
+kubectl patch airflowcluster airflow --type="merge" --patch-file stacks/airflow/patch_airflow.yaml -n airflow-scheduled-job
 ----
 
 Wait for Airflow to come back up, and you should now see the generated DAGs.
