@@ -1,0 +1,58 @@
+# We can't simply create the KafkaTopic objects here (or in the stack), as Kafka only distributes the partitions of a
+# topic among the brokers that are running when the topic is created. If the topics are created before all brokers are
+# up, some brokers end up without any partitions.
+#
+# This is a known issue for kafka-operator and was documented in https://github.com/stackabletech/kafka-operator/pull/1057.
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: create-kafka-topics
+spec:
+  template:
+    spec:
+      serviceAccountName: demo-serviceaccount
+      containers:
+        - name: create-kafka-topics
+          image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              echo 'Waiting for the kafka cluster to be available'
+              kubectl wait --for=condition=available --timeout=30m kafkaclusters.kafka.stackable.tech/kafka -n {{ NAMESPACE }}
+              echo 'Creating kafka topics'
+              kubectl apply -f /tmp/manifest/kafka-topics.yaml -n {{ NAMESPACE }}
+              echo 'Waiting for all kafka topics to be ready'
+              kubectl wait --for=condition=ready --timeout=30m -f /tmp/manifest/kafka-topics.yaml -n {{ NAMESPACE }}
+          volumeMounts:
+            - name: manifest
+              mountPath: /tmp/manifest
+      volumes:
+        - name: manifest
+          configMap:
+            name: create-kafka-topics-manifest
+      restartPolicy: OnFailure
+  backoffLimit: 50
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: create-kafka-topics-manifest
+data:
+  kafka-topics.yaml: |
+    # TODO: Switch to KafkaTopicTemplate (or however it's called) once it's supported
+    # {% for topic in ["shared_bikes_bike_status", "water_levels_measurements", "shared_bikes_station_status", "water_levels_stations", "shared_bikes_station_information"] %}
+    ---
+    apiVersion: kafka.stackable.tech/v1alpha1
+    kind: KafkaTopic
+    metadata:
+      name: {{ topic | replace(from="_", to="-") }}
+    spec:
+      clusterRef:
+        name: kafka
+      topicName: {{ topic }}
+      deletionPolicy: Delete
+    # {% endfor %}

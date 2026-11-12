@@ -1,6 +1,5 @@
-# We can't simply create the SparkApplication object here as we have to wait for Kafka to be ready because
-# * We currently don't restart failed Spark applications (see https://github.com/stackabletech/spark-k8s-operator/issues/157)
-# * We currently auto-create topics and we need all the brokers to be available so that the topic is distributed among all the brokers
+# We can't simply create the SparkApplication object here as we have to wait for the Kafka topics to be ready because
+# we currently don't restart failed Spark applications (see https://github.com/stackabletech/spark-k8s-operator/issues/157)
 ---
 apiVersion: batch/v1
 kind: Job
@@ -21,75 +20,9 @@ spec:
             - |
               echo 'Waiting for Garage to be ready'
               kubectl wait --for=condition=ready --timeout=30m pod -l app=garage -n {{ NAMESPACE }}
-              echo 'Waiting for all kafka brokers to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=kafka,app.kubernetes.io/instance=kafka -n {{ NAMESPACE }}
-              echo 'Waiting for all nifi instances to be ready'
-              kubectl wait --for=condition=ready --timeout=30m pod -l app.kubernetes.io/name=nifi,app.kubernetes.io/instance=nifi -n {{ NAMESPACE }}
-        - name: wait-for-kafka-topics
-          image: oci.stackable.tech/sdp/kafka:4.3.1-stackable0.0.0-dev
-          command:
-            - bash
-            - -euo
-            - pipefail
-            - -c
-            - |
-              #!/usr/bin/bash
-              #
-              # Wait for Kafka topics created by the Nifi workflows to be ready.
-              # Also wait for all topic partitions to have a leader.
-              # This is required for the Spark streaming job to be able to read from the topics.
-              # Without this check, the Spark job might hang indefinitely without processing any events.
-
-              BROKER="${BROKER:-kafka-broker-default-0-listener-broker:9093}"
-
-              log() {
-                level="$1"
-                shift
-                echo "[$level] $*"
-              }
-
-              check_leaders() {
-                local topic=$1
-                local failed=0
-
-                log INFO "Starting leader check on Kafka broker: $BROKER for topic: $topic"
-                metadata=$(kcat -b "$BROKER" -X security.protocol=SSL -X ssl.key.location=/stackable/tls-kcat/tls.key -X ssl.certificate.location=/stackable/tls-kcat/tls.crt -X ssl.ca.location=/stackable/tls-kcat/ca.crt -L -t "$topic" 2>/dev/null)
-
-                if [[ -z "$metadata" ]]; then
-                  log ERROR "Failed to retrieve metadata for topic: $topic"
-                  return 1
-                fi
-
-                log DEBUG "Metadata for $topic:"
-                echo "$metadata"
-
-                if echo "$metadata" | grep -q 'leader: -1'; then
-                  log ERROR "Found 'leader: -1' in topic '$topic'; topic not ready yet!"
-                  return 1
-                fi
-
-                if echo "$metadata" | grep -q 'Broker: Leader not available'; then
-                  log ERROR "Topic '$topic' not available yet"
-                  return 1
-                fi
-
-                log INFO "Check topic '$topic' was successful"
-                return 0
-              }
-
-              for topic in "shared_bikes_bike_status" "shared_bikes_station_status" "shared_bikes_station_information" "water_levels_measurements" "water_levels_stations"
-              do
-                result=$(check_leaders "$topic")
-                echo "$result"
-                if [ "$result" == "1" ]
-                then
-                  exit 1
-                fi
-              done
-              exit 0
-          volumeMounts:
-            - name: tls-kcat
-              mountPath: /stackable/tls-kcat
+              # Without the topics, the Spark job might hang indefinitely without processing any events
+              echo 'Waiting for the kafka topics to be created'
+              kubectl wait --for=condition=complete --timeout=30m job/create-kafka-topics -n {{ NAMESPACE }}
       containers:
         - name: create-spark-ingestion-job
           image: oci.stackable.tech/sdp/tools:1.0.0-stackable0.0.0-dev
@@ -107,26 +40,7 @@ spec:
         - name: manifest
           configMap:
             name: create-spark-ingestion-job-manifest
-        - name: tls-kcat
-          ephemeral:
-            volumeClaimTemplate:
-              metadata:
-                annotations:
-                  secrets.stackable.tech/backend.autotls.cert.lifetime: "1d"
-                  secrets.stackable.tech/class: "tls"
-                  secrets.stackable.tech/format: "tls-pem"
-                  secrets.stackable.tech/scope: "pod"
-              spec:
-                accessModes:
-                  - ReadWriteOnce
-                resources:
-                  requests:
-                    storage: "1"
-                storageClassName: secrets.stackable.tech
-                volumeMode: Filesystem
       restartPolicy: OnFailure
-      securityContext:
-        fsGroup: 1000
   backoffLimit: 50
 ---
 apiVersion: v1
@@ -145,13 +59,13 @@ data:
         stackable.tech/demo: {{ DEMO }}
     spec:
       sparkImage:
-        # Iceberg 1.11.0 only supports Spark 4.1.x
+        # Iceberg 1.12.0 only supports Spark 4.1.x
         productVersion: 4.1.3
       mode: cluster
       mainApplicationFile: local:///stackable/spark/jobs/spark-ingest-into-lakehouse.py
       deps:
         packages:
-          - org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.11.0
+          - org.apache.iceberg:iceberg-spark-runtime-4.1_2.13:1.12.0
           - org.apache.spark:spark-sql-kafka-0-10_2.13:4.1.2
       s3connection:
         reference: garage
