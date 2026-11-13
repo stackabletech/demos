@@ -73,38 +73,30 @@ include::partial$instance-hint.adoc[]
 
 == Inspect the log data
 
-You can have a look at the log data within the OpenSearch Dashboards web interface by running
-`stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
-http://172.18.0.2:30595.
+You can have a look at the log data within the OpenSearch Dashboards web interface by running `stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column.
+In this case, it is http://172.18.0.2:30595.
 
 image::logging/login.png[]
 
 Log in with the username `admin` and password `adminadmin`.
 
-NOTE: On first login, you will be presented with some options. Feel free to bypass them to get to the logs.
+NOTE: On first login, you will be presented with some options.
+Feel free to bypass them to get to the logs.
 
 OpenSearch Dashboards opens the view _Logs_ which shows the most interesting fields of the recent log data.
 If you do not see anything, increase the search window to greater than _Last 15 minutes_.
 
-NOTE: If you click _Discover_ in the menu on the left, then a new search is started instead. Open the view _Logs_ again
-with _Open_ in the upper right corner.
+NOTE: If you click _Discover_ in the menu on the left, then a new search is started instead.
+Open the view _Logs_ again with _Open_ in the upper right corner.
 
 image::logging/logs.png[]
 
-From here you can inspect the logs. You can select fields on the left side to limit the view to interesting information.
+From here you can inspect the logs.
+You can select fields on the left side to limit the view to interesting information.
 
 [#data-stream]
 == Log data stream
 
-Vector writes all log data into the single {opensearch-data-streams}[data stream] `logs-generic-default`. The data
-stream is created on the first write because the index template `logs` matches its name and contains a `data_stream`
-section. The ISM policy `logs` rolls the backing indices of the data stream over once a day and deletes them after a
-week.
-
-You can list the data stream and the documents it contains as follows:
-
-[source,console]
-----
-$ kubectl exec -n logging opensearch-nodes-default-0 -- \
-    curl -sk -u admin:adminadmin "https://localhost:9200/_data_stream/logs-generic-default?pretty"
-----
+Vector writes all log data into the single {opensearch-data-streams}[data stream] `logs-generic-default`.
+The data stream is created on the first write because the index template `logs` matches its name and contains a `data_stream` section.
+The ISM policy `logs` rolls the backing indices of the data stream over once a day and deletes them after a week.
