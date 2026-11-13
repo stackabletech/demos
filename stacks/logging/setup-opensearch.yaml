@@ -40,7 +40,8 @@ spec:
                   local status
 
                   # Truncate the file so that a failed request cannot show the response of the
-                  # previous one.
+                  # previous one, see
+                  # https://stackoverflow.com/questions/13575477/unix-shell-script-to-truncate-a-large-file
                   : > /tmp/response.json
 
                   status=$(curl \
