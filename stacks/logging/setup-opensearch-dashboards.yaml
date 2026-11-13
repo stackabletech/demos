@@ -6,6 +6,9 @@ metadata:
 spec:
   template:
     spec:
+      # Use the ServiceAccount of OpenSearch because its permissions are already configured to work
+      # on OpenShift.
+      serviceAccountName: opensearch-serviceaccount
       containers:
         - name: setup-opensearch-dashboards
           image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
@@ -15,6 +18,9 @@ spec:
                 secretKeyRef:
                   name: opensearch-user
                   key: password
+          volumeMounts:
+            - name: saved-objects
+              mountPath: /tmp/saved-objects
           command:
             - bash
             - -euo
@@ -22,38 +28,72 @@ spec:
             - -c
             - |
               #!/bin/bash
-              curl \
+              # OpenSearch Dashboards answers requests before all plugins are initialized. The
+              # import below then fails with the status code 415 (Unsupported Media Type) which
+              # curl does not retry, so wait for the status to become green first.
+              for _ in $(seq 120); do
+                  response=$(curl \
+                      --silent \
+                      --show-error \
+                      --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
+                      "http://opensearch-dashboards:5601/api/status") || true
+                  state=$(jq -r '.status.overall.state' <<< "$response" 2> /dev/null) || true
+
+                  if [[ "$state" == "green" ]]; then
+                      break
+                  fi
+
+                  echo "Waiting for OpenSearch Dashboards to be ready: ${response:0:200}"
+                  sleep 5
+              done
+
+              [[ "$state" == "green" ]]
+
+              response=$(curl \
+                  --silent \
+                  --show-error \
                   --retry-connrefused \
                   --retry 120 \
                   --retry-delay 5 \
-                  --header "Content-Type:application/json" \
+                  --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
                   --header "osd-xsrf:true" \
-                  --data '{
-                            "attributes": {
-                              "title": "vector-*",
-                              "timeFieldName": "timestamp"
-                              }
-                          }' \
-                  "http://admin:${OPEN_SEARCH_ADMIN_PASSWORD}@opensearch-dashboards:5601/api/saved_objects/index-pattern/vector-*"
+                  --form file=@/tmp/saved-objects/saved-objects.ndjson \
+                  "http://opensearch-dashboards:5601/api/saved_objects/_import?overwrite=true")
+
+              echo "$response"
+
+              # The endpoint returns the status code 200 even if objects could not be imported.
+              [[ "$(jq -r '.success' <<< "$response")" == "true" ]]
+
+              # Select the index pattern in Discover by default and open the view `Logs` when
+              # OpenSearch Dashboards is opened. Clicking `Discover` in the menu still starts a new
+              # search, because OpenSearch Dashboards has no setting for a default saved search.
               curl \
-                  --header "Content-Type:application/json" \
+                  --fail \
+                  --silent \
+                  --show-error \
+                  --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
                   --header "osd-xsrf:true" \
-                  --data '{
-                            "attributes": {
-                              "title":"Logs",
-                              "columns": ["pod", "container", "logger", "level", "message"],
-                              "kibanaSavedObjectMeta": {
-                                "searchSourceJSON": "{\"indexRefName\": \"kibanaSavedObjectMeta.searchSourceJSON.index\"}"
-                              }
-                            },
-                            "references": [
-                              {
-                                "id": "vector-*",
-                                "name": "kibanaSavedObjectMeta.searchSourceJSON.index",
-                                "type": "index-pattern"
-                              }
-                            ]
-                          }' \
-                  http://admin:${OPEN_SEARCH_ADMIN_PASSWORD}@opensearch-dashboards:5601/api/saved_objects/search/logs
+                  --json '{"changes":{"defaultIndex":"logs-*","defaultRoute":"/app/discover#/view/logs"}}' \
+                  --output /dev/null \
+                  "http://opensearch-dashboards:5601/api/opensearch-dashboards/settings"
       restartPolicy: OnFailure
+      volumes:
+        - name: saved-objects
+          configMap:
+            name: setup-opensearch-dashboards-saved-objects
   backoffLimit: 50
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: setup-opensearch-dashboards-saved-objects
+data:
+  # The index pattern `logs-*` and the saved search `Logs` were created in the user interface and
+  # exported with `POST /api/saved_objects/_export`. The generated IDs were replaced with stable
+  # ones. The cached field list of the index pattern must be kept because Discover resolves the
+  # time field `@timestamp` in it and fails with
+  # "Could not locate that index-pattern-field (id: @timestamp)" if it is missing.
+  saved-objects.ndjson: |
+    {"id":"logs-*","type":"index-pattern","migrationVersion":{"index-pattern":"7.6.0"},"attributes":{"title":"logs-*","timeFieldName":"@timestamp","fields":"[{\"count\":0,\"name\":\"@timestamp\",\"type\":\"date\",\"esTypes\":[\"date\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"_id\",\"type\":\"string\",\"esTypes\":[\"_id\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_index\",\"type\":\"string\",\"esTypes\":[\"_index\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_score\",\"type\":\"number\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_source\",\"type\":\"_source\",\"esTypes\":[\"_source\"],\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"_type\",\"type\":\"string\",\"scripted\":false,\"searchable\":false,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"arch\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"arch.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"arch\"}}},{\"count\":3,\"name\":\"cluster\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"component_id\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"component_id.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"component_id\"}}},{\"count\":0,\"name\":\"component_kind\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"component_kind.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"component_kind\"}}},{\"count\":0,\"name\":\"component_type\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"component_type.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"component_type\"}}},{\"count\":1,\"name\":\"container\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"data_stream.dataset\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"data_stream.namespace\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"data_stream.type\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"debug\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"debug.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"debug\"}}},{\"count\":0,\"name\":\"error\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"error.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"error\"}}},{\"count\":0,\"name\":\"errors\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"exclude\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"exclude.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"exclude\"}}},{\"count\":0,\"name\":\"file\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"include\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"include.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"include\"}}},{\"count\":1,\"name\":\"level\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"logger\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":1,\"name\":\"message\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"msg\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"msg.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"msg\"}}},{\"count\":1,\"name\":\"namespace\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"paths\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"paths.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"paths\"}}},{\"count\":1,\"name\":\"pod\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"processed_file\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"processed_file.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"processed_file\"}}},{\"count\":0,\"name\":\"revision\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"revision.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"revision\"}}},{\"count\":2,\"name\":\"role\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":2,\"name\":\"roleGroup\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"source_type\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"source_type.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"source_type\"}}},{\"count\":0,\"name\":\"thread\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true},{\"count\":0,\"name\":\"vector.component_id\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"vector.component_id.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"vector.component_id\"}}},{\"count\":0,\"name\":\"vector.component_kind\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"vector.component_kind.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"vector.component_kind\"}}},{\"count\":0,\"name\":\"vector.component_type\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"vector.component_type.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"vector.component_type\"}}},{\"count\":0,\"name\":\"version\",\"type\":\"string\",\"esTypes\":[\"text\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":false,\"readFromDocValues\":false},{\"count\":0,\"name\":\"version.keyword\",\"type\":\"string\",\"esTypes\":[\"keyword\"],\"scripted\":false,\"searchable\":true,\"aggregatable\":true,\"readFromDocValues\":true,\"subType\":{\"multi\":{\"parent\":\"version\"}}}]"},"references":[]}
+    {"id":"logs","type":"search","migrationVersion":{"search":"7.9.3"},"attributes":{"columns":["level","cluster","pod","container","logger","message"],"description":"","hits":0,"kibanaSavedObjectMeta":{"searchSourceJSON":"{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"highlightAll\":true,\"version\":true,\"filter\":[],\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.index\"}"},"sort":[],"title":"Logs","version":1},"references":[{"id":"logs-*","name":"kibanaSavedObjectMeta.searchSourceJSON.index","type":"index-pattern"}]}

@@ -2,6 +2,7 @@
 :description: Deploy a logging stack with OpenSearch, Vector, and Zookeeper for log data analysis using OpenSearch Dashboards in Kubernetes.
 
 :k8s-cpu: https://kubernetes.io/docs/tasks/debug/debug-cluster/resource-metrics-pipeline/#cpu
+:opensearch-data-streams: https://docs.opensearch.org/latest/im-plugin/data-streams/
 
 Install this demo on an existing Kubernetes cluster:
 
@@ -39,7 +40,9 @@ This demo will
 ** *OpenSearch*: A data store and search engine. This demo uses it to store and index the log data.
 ** *OpenSearch Dashboards*: A visualization and user interface. This demo uses it to make the log data easily accessible
    to the user.
-* Create a view in OpenSearch Dashboards to conveniently browse the log data.
+* Create an index template and an Index State Management (ISM) policy in OpenSearch so that the log data are stored in
+  a data stream which is rolled over and deleted automatically.
+* Create an index pattern and a view in OpenSearch Dashboards to conveniently browse the log data.
 
 You can see the deployed products and their relationship in the following diagram:
 
@@ -61,8 +64,8 @@ $ stackablectl stacklet list -n logging
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
 │ zookeeper             ┆ simple-zk             ┆ logging   ┆ server-zk           simple-zk-server.logging.svc.cluster.local:2282                ┆ Available, Reconciling, Running │
 ├╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ opensearch-dashboards ┆ opensearch-dashboards ┆ logging   ┆ http                http://172.18.0.2:30206                                        ┆                                 │
-│                       ┆                       ┆           ┆ metrics             172.18.0.2:31173                                               ┆                                 │
+│ opensearch-dashboards ┆ opensearch-dashboards ┆ logging   ┆ http                http://10.104.213.49:31655                                     ┆                                 │
+│                       ┆                       ┆           ┆ metrics             10.104.213.49:30865                                            ┆                                 │
 └───────────────────────┴───────────────────────┴───────────┴────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
@@ -70,19 +73,36 @@ include::partial$instance-hint.adoc[]
 
 == Inspect the log data
 
-You can have a look at the log data within the OpenSearch Dashboards web interface by running
-`stackablectl stacklet list` and opening the URL in the opensearch-dashboard entry's info column. In this case, it is
-http://172.18.0.2:30595.
+You can have a look at the log data within the OpenSearch Dashboards web interface by running `stackablectl stacklet list -n logging` and opening the HTTP URL in the opensearch-dashboards entry's ENDPOINTS column.
+In this case, it is http://10.104.213.49:31655.
 
 image::logging/login.png[]
 
 Log in with the username `admin` and password `adminadmin`.
 
-NOTE: On first login, you will be presented with some options. Feel free to bypass them to get to the logs.
+[NOTE]
+====
+On first login, you will be presented with some options.
+Feel free to bypass them to get to the logs.
+====
 
-Click _Discover_ in the menu on the left to view the recent logs.
+OpenSearch Dashboards opens the view _Logs_ which shows the most interesting fields of the recent log data.
 If you do not see anything, increase the search window to greater than _Last 15 minutes_.
+
+[NOTE]
+====
+If you click _Discover_ in the menu on the left, then a new search is started instead.
+Open the view _Logs_ again with _Open_ in the upper right corner.
+====
 
 image::logging/logs.png[]
 
-From here you can inspect the logs. You can select fields on the left side to limit the view to interesting information.
+From here you can inspect the logs.
+You can select fields on the left side to limit the view to interesting information.
+
+[#data-stream]
+== Log data stream
+
+Vector writes all log data into the single {opensearch-data-streams}[data stream] `logs-generic-default`.
+The data stream is created on the first write because the index template `logs` matches its name and contains a `data_stream` section.
+The ISM policy `logs` rolls the backing indices of the data stream over once a day and deletes them after a week.

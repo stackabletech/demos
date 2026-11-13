@@ -1,0 +1,163 @@
+---
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: setup-opensearch
+spec:
+  template:
+    spec:
+      # Use the ServiceAccount of OpenSearch because its permissions are already configured to work
+      # on OpenShift.
+      serviceAccountName: opensearch-serviceaccount
+      containers:
+        - name: setup-opensearch
+          image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+          env:
+            - name: OPENSEARCH_HOSTS
+              valueFrom:
+                configMapKeyRef:
+                  name: opensearch
+                  key: OPENSEARCH_HOSTS
+            - name: OPEN_SEARCH_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: opensearch-user
+                  key: password
+          volumeMounts:
+            - name: tls
+              mountPath: /certs
+          command:
+            - bash
+            - -euo
+            - pipefail
+            - -c
+            - |
+              #!/bin/bash
+              opensearch_api() {
+                  local method="$1"
+                  local path="$2"
+                  local data="$3"
+                  local status
+
+                  # Truncate the file so that a failed request cannot show the response of the
+                  # previous one, see
+                  # https://stackoverflow.com/questions/13575477/unix-shell-script-to-truncate-a-large-file
+                  : > /tmp/response.json
+
+                  status=$(curl \
+                      --silent \
+                      --show-error \
+                      --retry-connrefused \
+                      --retry 120 \
+                      --retry-delay 5 \
+                      --cacert /certs/ca.crt \
+                      --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
+                      --request "$method" \
+                      --json "$data" \
+                      --output /tmp/response.json \
+                      --write-out '%{http_code}' \
+                      "${OPENSEARCH_HOSTS}${path}") || true
+
+                  echo "$method $path -> $status"
+                  cat /tmp/response.json
+                  echo
+
+                  # A conflict (409) means that the object already exists which is fine if this job
+                  # is retried.
+                  [[ "$status" =~ ^2 || "$status" == 409 ]]
+              }
+
+              # The backing indices of a data stream are not rolled over automatically. Without
+              # this Index State Management policy, all log documents would end up in the first
+              # backing index. The policy is applied when a backing index is created, so it must
+              # exist before the first log data are written.
+              opensearch_api PUT /_plugins/_ism/policies/logs '{
+                "policy": {
+                  "description": "Roll the backing indices of the log data streams over daily and delete them after a week",
+                  "default_state": "hot",
+                  "ism_template": [
+                    {
+                      "index_patterns": ["logs-*-*"],
+                      "priority": 200
+                    }
+                  ],
+                  "states": [
+                    {
+                      "name": "hot",
+                      "actions": [
+                        {
+                          "rollover": {
+                            "min_index_age": "1d",
+                            "min_primary_shard_size": "10gb"
+                          }
+                        }
+                      ],
+                      "transitions": [
+                        {
+                          "state_name": "delete",
+                          "conditions": {
+                            "min_index_age": "7d"
+                          }
+                        }
+                      ]
+                    },
+                    {
+                      "name": "delete",
+                      "actions": [
+                        {
+                          "delete": {}
+                        }
+                      ],
+                      "transitions": []
+                    }
+                  ]
+                }
+              }'
+
+              # Vector creates the data streams on the first write, but only if a matching index
+              # template with a `data_stream` section exists. Otherwise OpenSearch creates plain
+              # indices instead, so this template must exist before the Vector aggregator is
+              # installed.
+              # The fields are the ones which the Vector agents of the Stackable operators send to
+              # the aggregator. Vector renames `timestamp` to `@timestamp` in data stream mode.
+              opensearch_api PUT /_index_template/logs '{
+                "index_patterns": ["logs-*-*"],
+                "data_stream": {},
+                "priority": 200,
+                "template": {
+                  "settings": {
+                    "index.number_of_shards": 1,
+                    "index.number_of_replicas": 0
+                  },
+                  "mappings": {
+                    "properties": {
+                      "@timestamp": { "type": "date" },
+                      "message": { "type": "text" },
+                      "level": { "type": "keyword" },
+                      "logger": { "type": "keyword" },
+                      "thread": { "type": "keyword" },
+                      "pod": { "type": "keyword" },
+                      "container": { "type": "keyword" },
+                      "namespace": { "type": "keyword" },
+                      "cluster": { "type": "keyword" },
+                      "role": { "type": "keyword" },
+                      "roleGroup": { "type": "keyword" },
+                      "file": { "type": "keyword" },
+                      "errors": { "type": "keyword" },
+                      "data_stream": {
+                        "properties": {
+                          "type": { "type": "keyword" },
+                          "dataset": { "type": "keyword" },
+                          "namespace": { "type": "keyword" }
+                        }
+                      }
+                    }
+                  }
+                }
+              }'
+      restartPolicy: OnFailure
+      volumes:
+        - name: tls
+          configMap:
+            name: truststore-pem
+  backoffLimit: 50
