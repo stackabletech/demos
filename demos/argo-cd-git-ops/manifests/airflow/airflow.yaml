@@ -51,6 +51,7 @@ spec:
         #         memory: "512Mi"
         gitSyncConf:
           --filter: blob:none
+          # See the mounted ConfigMap: git-sync-sparse-checkout
           --sparse-checkout-file: /stackable/git-sync-sparse/sparse-checkout
     volumes:
       # Mounted into the git-sync containers as well, which is how they find
