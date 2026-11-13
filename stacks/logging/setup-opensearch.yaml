@@ -39,6 +39,10 @@ spec:
                   local data="$3"
                   local status
 
+                  # Truncate the file so that a failed request cannot show the response of the
+                  # previous one.
+                  : > /tmp/response.json
+
                   status=$(curl \
                       --silent \
                       --show-error \
@@ -51,7 +55,7 @@ spec:
                       --json "$data" \
                       --output /tmp/response.json \
                       --write-out '%{http_code}' \
-                      "${OPENSEARCH_HOSTS}${path}")
+                      "${OPENSEARCH_HOSTS}${path}") || true
 
                   echo "$method $path -> $status"
                   cat /tmp/response.json

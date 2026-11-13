@@ -87,17 +87,28 @@ options:
         - -c
         - |
           #!/bin/bash
-          until curl \
-              --fail \
-              --silent \
-              --show-error \
-              --cacert /certs/ca.crt \
-              --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
-              --output /dev/null \
-              "${OPENSEARCH_HOSTS}/_index_template/logs"; do
+          # The loop is bounded so that the pod ends up in CrashLoopBackOff if the job
+          # `setup-opensearch` failed permanently. Otherwise this pod would wait forever and the
+          # log events of all products would be dropped silently.
+          for _ in $(seq 120); do
+              if curl \
+                  --fail \
+                  --silent \
+                  --show-error \
+                  --cacert /certs/ca.crt \
+                  --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
+                  --output /dev/null \
+                  "${OPENSEARCH_HOSTS}/_index_template/logs"; then
+                  exit 0
+              fi
+
               echo 'Waiting for the index template "logs" to be created...'
               sleep 5
           done
+
+          echo 'The index template "logs" was not created within 10 minutes.'
+          echo 'Check the logs of the job "setup-opensearch".'
+          exit 1
   env:
     - name: OPEN_SEARCH_ADMIN_PASSWORD
       valueFrom:
