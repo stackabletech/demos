@@ -29,18 +29,12 @@ spec:
             - |
               #!/bin/bash
               # OpenSearch Dashboards answers requests before all plugins are initialized. The
-              # import below then fails with the status code 415 (Unsupported Media Type) because
-              # the route which accepts the multipart upload does not exist yet. Such a response is
-              # not retried by curl, so wait for the status to become green first. The loop is
-              # bounded and the response is logged so that a permanent error, like a wrong
-              # password, fails the job instead of waiting forever.
+              # import below then fails with the status code 415 (Unsupported Media Type) which
+              # curl does not retry, so wait for the status to become green first.
               for _ in $(seq 120); do
                   response=$(curl \
                       --silent \
                       --show-error \
-                      --retry-connrefused \
-                      --retry 120 \
-                      --retry-delay 5 \
                       --user "admin:${OPEN_SEARCH_ADMIN_PASSWORD}" \
                       "http://opensearch-dashboards:5601/api/status") || true
                   state=$(jq -r '.status.overall.state' <<< "$response" 2> /dev/null) || true

@@ -88,8 +88,7 @@ options:
         - |
           #!/bin/bash
           # The loop is bounded so that the pod ends up in CrashLoopBackOff if the job
-          # `setup-opensearch` failed permanently. Otherwise this pod would wait forever and the
-          # log events of all products would be dropped silently.
+          # `setup-opensearch` failed permanently, instead of dropping all log events silently.
           for _ in $(seq 120); do
               if curl \
                   --fail \
