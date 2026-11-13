@@ -59,13 +59,13 @@ WARNING: This demo should not be run alongside other demos.
 
 This demo can be installed on an existing Kubernetes cluster in two ways:
 
-### 1. Exploration - interact with the ArgoCD, Airflow and Minio web UI
+### 1. Exploration - interact with the ArgoCD and Airflow web UI
 
-The "easy" way. Checkout the ArgoCD, Airflow and Minio web UI, start DAGs and explore logs.
+The "easy" way. Checkout the ArgoCD and Airflow web UI, start DAGs and explore the logs stored in S3.
 
 [source,console]
 ----
-$ stackablectl demo install argo-cd-git-ops --namespace argo-cd
+$ stackablectl demo install argo-cd-git-ops --namespace argo-cd-git-ops
 ----
 
 ### 2. GitOps - interact with a Git repository to apply changes made in code into the cluster
@@ -78,11 +78,13 @@ This is explained in more detail in the section <<interact-with-git-repository,H
 
 [source,console]
 ----
-stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
+stackablectl demo install argo-cd-git-ops --namespace argo-cd-git-ops --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
 ----
 
-NOTE: ArgoCD will be deployed in the `argo-cd` namespace by `stackablectl`.
-ArgoCD itself will create other namespaces for the deployed products.
+NOTE: ArgoCD will be deployed by default in the `argo-cd-git-ops` namespace by `stackablectl`, but this can be changed with the `--namespace` argument.
+The namespaces for the operators (`stackable-operators`) and project components (`stackable-airflow`, `garage`, `sealed-secrets`) are fixed.
+
+ArgoCD itself will create these other namespaces for the deployed products.
 
 == Sealed Secrets
 
@@ -101,7 +103,7 @@ After bootstrapping ArgoCD via `stackablectl`, once the pods are ready, you can 
 
 [source,console]
 ----
-kubectl --namespace argo-cd port-forward service/argocd-server 8443:https
+kubectl --namespace argo-cd-git-ops port-forward service/argocd-server 8443:https
 ----
 
 In your browser, go to `https://localhost:8443` and login with username `admin` and password `adminadmin`.
@@ -283,32 +285,50 @@ image::argo-cd-git-ops/airflow-dag-overview.png[]
 === Inspect a DAG run
 
 A single DAG run can be selected by clicking on one of the green squares next to `run_every_minute` on the left.
-More information is displayed here, and the DAG logs written by the Kubernetes Executor to S3/Minio can be selected in the `Logs` tab.
+More information is displayed here, and the DAG logs written by the Kubernetes Executor to S3 (Garage) can be selected in the `Logs` tab.
 
 image::argo-cd-git-ops/airflow-dag-run-logs.png[]
 
 In the logs, the output of the DAG is printed under a line containing `Output:`, the timestamp of the DAG run.
 
-== Minio
+== S3 storage (Garage)
 
 Since the Airflow Kubernetes Executor will be deleted after its run, the logs are written to an S3 bucket.
 When accessing the logs via the Airflow webserver, the logs are fetched from S3 instead of the (already deleted) executor pods.
-The Minio / S3 instance can be accessed via port-forward:
+
+The S3 storage is provided by https://garagehq.deuxfleurs.fr/[Garage], deployed by ArgoCD into the `garage` namespace.
+Garage has no web interface, so the bucket is inspected with an S3 client.
+Its credentials are synced from Git as a sealed secret and unsealed into the `s3-credentials` Secret:
 
 [source,console]
 ----
-kubectl --namespace minio port-forward service/minio-console 9001:9001
+$ export S3_ENDPOINT="https://$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'):$(kubectl --namespace garage get service garage -o jsonpath='{.spec.ports[0].nodePort}')"
+$ export S3_ACCESS_KEY="$(kubectl --namespace garage get secret s3-credentials -o jsonpath='{.data.accessKey}' | base64 -d)"
+$ export S3_SECRET_KEY="$(kubectl --namespace garage get secret s3-credentials -o jsonpath='{.data.secretKey}' | base64 -d)"
 ----
 
-Minio then is reachable via `https://localhost:9001` with username `admin` and password `adminadmin`.
-After the successful Airflow DAG run, logs should be stored in `demo/airflow-task-logs`.
+`rclone` needs no installation, it runs straight from a container image.
+The region is not optional: Garage rejects any request signed for a different region than `region-1`.
+The certificate is issued by the Stackable secret-operator, whose CA your machine does not trust, so certificate verification is skipped.
 
-NOTE: There will be an initial warning from the browser, stating that the site is insecure due to self-signed certificates.
-This can be ignored in this case.
+[source,console]
+----
+$ rclone() {
+    docker run --rm -i --network host \
+      -e RCLONE_S3_PROVIDER=Other \
+      -e RCLONE_S3_ENDPOINT="$S3_ENDPOINT" \
+      -e RCLONE_S3_REGION=region-1 \
+      -e RCLONE_S3_ACCESS_KEY_ID="$S3_ACCESS_KEY" \
+      -e RCLONE_S3_SECRET_ACCESS_KEY="$S3_SECRET_KEY" \
+      -e RCLONE_S3_FORCE_PATH_STYLE=true \
+      -e RCLONE_NO_CHECK_CERTIFICATE=true \
+      rclone/rclone:1.75.1 "$@"
+  }
+$ rclone lsf --recursive :s3:demo/airflow-task-logs/
+----
 
-image::argo-cd-git-ops/minio-dag-run-logs.png[]
-
-The log files contained in the single folders are the same as the logs shown above in the Airflow web UI.
+After a successful Airflow DAG run, its logs are stored under `demo/airflow-task-logs/`.
+These are the same logs shown above in the Airflow web UI, and `rclone cat :s3:demo/airflow-task-logs/<path>` prints one of them.
 
 [#interact-with-git-repository]
 == How to interact with ArgoCD, Airflow and the Git repository
@@ -335,7 +355,7 @@ After forking and cloning a local copy, the `stackablectl` install command must 
 
 [source,console]
 ----
-stackablectl demo install argo-cd-git-ops --namespace argo-cd --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
+stackablectl demo install argo-cd-git-ops --namespace argo-cd-git-ops --parameters customGitUrl=<my-demo-fork-url> --parameters customGitBranch=<my-custom-branch-with-changes>
 ----
 
 == Making changes to the repository

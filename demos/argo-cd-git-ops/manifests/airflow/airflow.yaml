@@ -24,20 +24,50 @@ spec:
     # In terms of forking the repository, this should not be a problem since the DAGs are the same.
     # You can still change this locally and point to the fork in case of any changes to DAGs.
     #
-    # TODO(@maltesander): In a Stackable release, this branch should point to the release-YY.MM branch!
+    # The `release-ref` marker lets .scripts/update_refs.sh point this branch at
+    # the release branch when one is cut.
     dagsGitSync:
       - repo: https://github.com/stackabletech/demos/
-        branch: main
+        branch: main  # release-ref: branch
         gitFolder: "demos/argo-cd-git-ops/dags"
-        depth: 2
+        depth: 1
+        # Fetch and check out only the DAG folder (see git-sync-sparse-checkout.yaml).
+        # A full clone of this repository needs several times the git-sync
+        # containers' default memory, a sparse partial clone needs a fraction of it.
+        #
+        # git documents sparse checkout as experimental, so its behaviour may
+        # change with the git version in a future Airflow image. If it breaks, it
+        # does so silently: git-sync succeeds, but the DAG folder is missing and
+        # Airflow shows no DAGs. The fallback is a full clone: remove gitSyncConf,
+        # the git-sync-sparse volume and its mount, and git-sync-sparse-checkout.yaml,
+        # and give the git-sync containers (git-sync-0 and git-sync-0-init, in the
+        # podOverrides of every role including kubernetesExecutors) 512Mi of memory:
+        #
+        #   - name: git-sync-0
+        #     resources:
+        #       limits:
+        #         memory: "512Mi"
+        #       requests:
+        #         memory: "512Mi"
+        gitSyncConf:
+          --filter: blob:none
+          # See the mounted ConfigMap: git-sync-sparse-checkout
+          --sparse-checkout-file: /stackable/git-sync-sparse/sparse-checkout
     volumes:
-      - name: minio-tls
+      # Mounted into the git-sync containers as well, which is how they find
+      # the sparse checkout file.
+      - name: git-sync-sparse
+        configMap:
+          name: git-sync-sparse-checkout
+      # Only the CA is needed, to verify the Garage S3 endpoint.
+      - name: s3-tls
         ephemeral:
           volumeClaimTemplate:
             metadata:
               annotations:
                 secrets.stackable.tech/class: tls
                 secrets.stackable.tech/scope: pod
+                secrets.stackable.tech/provision-parts: public
             spec:
               accessModes:
                 - ReadWriteOnce
@@ -46,19 +76,24 @@ spec:
                   storage: "1"
               storageClassName: secrets.stackable.tech
     volumeMounts:
-      - name: minio-tls
-        mountPath: /stackable/minio-tls
+      - name: git-sync-sparse
+        mountPath: /stackable/git-sync-sparse
+      - name: s3-tls
+        mountPath: /stackable/s3-tls
   webservers:
     roleConfig:
       listenerClass: external-stable
     envOverrides: &envOverrides
       AIRFLOW_CONN_KUBERNETES_IN_CLUSTER: "kubernetes://?__extra__=%7B%22extra__kubernetes__in_cluster%22%3A+true%2C+%22extra__kubernetes__kube_config%22%3A+%22%22%2C+%22extra__kubernetes__kube_config_path%22%3A+%22%22%2C+%22extra__kubernetes__namespace%22%3A+%22%22%7D"
       # Via sealed secrets and pod overrides, just kept for reference here
-      # AIRFLOW_CONN_MINIO: "aws://admin:adminadmin@/?endpoint_url=https%3A%2F%2Fminio.minio.svc.cluster.local%3A9000"
-      AWS_CA_BUNDLE: "/stackable/minio-tls/ca.crt"
+      # AIRFLOW_CONN_S3: "aws://GK31c0ffee31c0ffee31c0ffee:<secretKey>@/?endpoint_url=https%3A%2F%2Fgarage.garage.svc.cluster.local%3A9000"
+      AWS_CA_BUNDLE: "/stackable/s3-tls/ca.crt"
+      # boto3 has no region here otherwise, and Garage rejects requests signed
+      # for a different region than the one it is configured with.
+      AWS_DEFAULT_REGION: region-1
       AIRFLOW__LOGGING__REMOTE_LOGGING: "True"
       AIRFLOW__LOGGING__REMOTE_BASE_LOG_FOLDER: s3://demo/airflow-task-logs/
-      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: minio
+      AIRFLOW__LOGGING__REMOTE_LOG_CONN_ID: s3
       # 20 seconds to reload the DAGS folder (default: 300)
       AIRFLOW__SCHEDULER__DAG_DIR_LIST_INTERVAL: "20"
     podOverrides: &podOverrides
@@ -66,24 +101,11 @@ spec:
         containers:
           - name: airflow
             env:
-              - name: AIRFLOW_CONN_MINIO
+              - name: AIRFLOW_CONN_S3
                 valueFrom:
                   secretKeyRef:
-                    name: airflow-minio-connection
-                    key: airflow-minio-connection
-          - name: git-sync-0
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
-        initContainers:
-          - name: git-sync-0-init
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
+                    name: airflow-s3-connection
+                    key: airflow-s3-connection
     config:
       gracefulShutdownTimeout: 30s
       resources:
@@ -107,18 +129,11 @@ spec:
         containers:
           - name: base
             env:
-              - name: AIRFLOW_CONN_MINIO
+              - name: AIRFLOW_CONN_S3
                 valueFrom:
                   secretKeyRef:
-                    name: airflow-minio-connection
-                    key: airflow-minio-connection
-        initContainers:
-          - name: git-sync-0-init
-            resources:
-              limits:
-                memory: "128Mi"
-              requests:
-                memory: "128Mi"
+                    name: airflow-s3-connection
+                    key: airflow-s3-connection
   schedulers:
     envOverrides: *envOverrides
     podOverrides: *podOverrides
@@ -130,6 +145,14 @@ spec:
           max: "1"
         memory:
           limit: 1Gi
+    roleGroups:
+      default:
+        replicas: 1
+  # Without this role the DAG processor runs in the scheduler container, and the
+  # two together exceed the scheduler's memory limit.
+  dagProcessors:
+    envOverrides: *envOverrides
+    podOverrides: *podOverrides
     roleGroups:
       default:
         replicas: 1

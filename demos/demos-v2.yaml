@@ -26,8 +26,7 @@ demos:
       # products
       ################################
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/airflow.yaml
-    supportedNamespaces:
-      - argo-cd
+    supportedNamespaces: []
     resourceRequests:
       cpu: 15000m
       memory: 15Gi
@@ -38,7 +37,7 @@ demos:
         default: https://github.com/stackabletech/demos/
       - name: customGitBranch
         description: The Branch in the Git repository (this can be adapted in case of forking the repository) to demonstrate syncing via Argo and Git.
-        default: main
+        default: main  # release-ref: branch
   airflow-scheduled-job:
     description: Activate a simple Airflow DAG to run continuously at a set interval
     stackableStack: airflow

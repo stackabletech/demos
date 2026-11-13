@@ -12,6 +12,8 @@ It provides the Sealed Secrets controller and a generated certificate that is au
 ```sh
 kubeseal -n stackable-airflow --format=yaml < airflow-admin-credentials.yaml > sealed-airflow-admin-credentials.yaml
 kubeseal -n stackable-airflow --format=yaml < airflow-postgresql-credentials.yaml > sealed-airflow-postgresql-credentials.yaml
+kubeseal -n stackable-airflow --format=yaml < airflow-s3-connection.yaml > sealed-airflow-s3-connection.yaml
+kubeseal -n garage --format=yaml < s3-credentials.yaml > sealed-s3-credentials.yaml
 ```
 
 For "offline" usage you can first fetch the CA from the `sealed-secrets-controller` and use that for encryption when the demo / stack is not available.
@@ -34,7 +36,7 @@ Kubernetes rejects them as invalid label values, which breaks unsealing — labe
 
 ## Plaintext secrets used in this demo
 
-The sealed secrets under `manifests/airflow/` were created from the following plaintext manifests.
+The sealed secrets under `manifests/airflow/` and `manifests/garage/` were created from the following plaintext manifests.
 These are demo-only credentials: the Sealed Secrets controller key for this stack is committed to this repository (`stacks/argo-cd-git-ops/secrets/sealed-secrets-key.yaml`), so the sealed secrets provide no confidentiality here — sealing only demonstrates the GitOps workflow.
 Never use this pattern for real credentials.
 
@@ -69,4 +71,41 @@ stringData:
   password: airflow
 ```
 
+`s3-credentials.yaml` (namespace `garage`). Garage requires the `GK<24 hex characters>` key id format and a 64 hex character secret, so these are not free form values:
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: s3-credentials
+type: Opaque
+stringData:
+  accessKey: GK31c0ffee31c0ffee31c0ffee
+  secretKey: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
+```
+
+`airflow-s3-connection.yaml` (must use the key pair from `s3-credentials.yaml`):
+
+```yaml
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: airflow-s3-connection
+type: Opaque
+stringData:
+  airflow-s3-connection: aws://GK31c0ffee31c0ffee31c0ffee:deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef@/?endpoint_url=https%3A%2F%2Fgarage.garage.svc.cluster.local%3A9000
+```
+
 TODO: We should probably create a script that seals all secrets and puts them in the respective stack / demo folders
+
+## git-sync only fetches the DAG folder
+
+A full clone of this repository needs several times the default memory of the git-sync containers.
+git-sync therefore does a sparse partial clone of `dags/` only: `gitSyncConf` in `manifests/airflow/airflow.yaml`, with the sparse checkout file in `manifests/airflow/git-sync-sparse-checkout.yaml`.
+
+- If the DAGs move, update both `gitFolder` in `airflow.yaml` and the sparse checkout file.
+- git documents sparse checkout as experimental, so a newer git in the Airflow image may change how it behaves.
+  A breaking change fails silently: git-sync reports no errors, but the DAG folder is missing and Airflow shows no DAGs.
+  The fallback is a full clone, described in the comment above `gitSyncConf` in `airflow.yaml`: drop the sparse checkout configuration and give each git-sync container 512Mi of memory.
