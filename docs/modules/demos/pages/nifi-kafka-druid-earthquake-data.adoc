@@ -10,9 +10,16 @@
 
 Install this demo on an existing Kubernetes cluster:
 
+[NOTE]
+====
+The namespace `nifi-kafka-druid-earthquake-data` will be assumed in this guide.
+This is the default namespace used by `stackablectl` for this demo, so the `-n` argument can be omitted.
+It will be created if it doesn't exist.
+====
+
 [source,console]
 ----
-$ stackablectl demo install nifi-kafka-druid-earthquake-data
+$ stackablectl demo install nifi-kafka-druid-earthquake-data -n nifi-kafka-druid-earthquake-data
 ----
 
 [#system-requirements]
@@ -54,25 +61,25 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list -n nifi-kafka-druid-earthquake-data
 
-┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                   ┆ CONDITIONS                      │
-╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ druid     ┆ druid         ┆ default   ┆ broker-https                                https://172.19.0.3:32293                        ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ coordinator-https                           https://172.19.0.4:31283                        ┆                                 │
-│           ┆               ┆           ┆ router-https                                https://172.19.0.3:32286                        ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.4:32321                                ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    172.19.0.4:30556                                ┆                                 │
-│           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          172.19.0.4:31352                                ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi          ┆ default   ┆ node-https                                  https://172.19.0.2:32348                        ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset      ┆ default   ┆ node-http                                   http://172.19.0.4:30769                         ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper     ┆ default   ┆ server-zk                                   zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
-└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────┬───────────┬──────────────────────────────────┬──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   │ NAME      │ NAMESPACE                        │ ENDPOINTS                                                                                                            │ CONDITIONS                      │
+╞═══════════╪═══════════╪══════════════════════════════════╪══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid     ┆ nifi-kafka-druid-earthquake-data ┆ broker-https                                https://172.19.0.3:32293                                                 ┆ Available, Reconciling, Running │
+│           ┆           ┆                                  ┆ coordinator-https                           https://172.19.0.4:31283                                                 ┆                                 │
+│           ┆           ┆                                  ┆ router-https                                https://172.19.0.3:32286                                                 ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka     ┆ nifi-kafka-druid-earthquake-data ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.4:32321                                                         ┆ Available, Reconciling, Running │
+│           ┆           ┆                                  ┆ broker-default-0-listener-broker-metrics    172.19.0.4:30556                                                         ┆                                 │
+│           ┆           ┆                                  ┆ broker-default-bootstrap-kafka-tls          172.19.0.4:31352                                                         ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi      ┆ nifi-kafka-druid-earthquake-data ┆ node-https                                  https://172.19.0.2:32348                                                 ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset  ┆ nifi-kafka-druid-earthquake-data ┆ node-http                                   http://172.19.0.4:30769                                                  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper ┆ nifi-kafka-druid-earthquake-data ┆ server-zk                                   zookeeper-server.nifi-kafka-druid-earthquake-data.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
+└───────────┴───────────┴──────────────────────────────────┴──────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 ----
 
 include::partial$instance-hint.adoc[]
@@ -97,12 +104,12 @@ You can execute a command on the Kafka broker to list the available topics as fo
 // However, the kcat-prober container has TLS certificates mounted, which can be used by kcat to connect to Kafka.
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-earthquake-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-topics.sh \
 --describe \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-earthquake-data.svc.cluster.local:9093 \
 --command-config /stackable/config/client.properties
-...
 Topic: earthquakes	TopicId: ND51v_XcQPK4Ilm7A35Pag	PartitionCount: 8	ReplicationFactor: 1	Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
 	Topic: earthquakes	Partition: 0	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
 	Topic: earthquakes	Partition: 1	Leader: 1243966388	Replicas: 1243966388	Isr: 1243966388	Elr: 	LastKnownElr:
@@ -120,10 +127,11 @@ parameter.
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-earthquake-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-console-consumer.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
---consumer.config /stackable/config/client.properties \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-earthquake-data.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
 --topic earthquakes \
 --offset earliest \
 --partition 0 \
@@ -164,23 +172,24 @@ If you are interested in how many records have been produced to the Kafka topic 
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-earthquake-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-get-offsets.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-earthquake-data.svc.cluster.local:9093 \
 --command-config /stackable/config/client.properties \
 --topic earthquakes
-...
-earthquakes:0:757379
-earthquakes:1:759282
-earthquakes:2:761924
-earthquakes:3:761339
-earthquakes:4:759059
-earthquakes:5:767695
-earthquakes:6:771457
-earthquakes:7:768301
+earthquakes:0:382154
+earthquakes:1:382497
+earthquakes:2:380081
+earthquakes:3:383763
+earthquakes:4:380450
+earthquakes:5:384584
+earthquakes:6:379054
+earthquakes:7:380635
 ----
 
-If you calculate `765,000` records * `8` partitions, you end up with ~ 6,120,000 records.
+Summing the offsets of all `8` partitions gives the total number of records produced, ~ 3,050,000 in this case.
+The demo ingests the complete earthquake catalogue once, so the offsets stop growing when the import has finished.
 
 == NiFi
 
@@ -394,6 +403,15 @@ Opening up a prefix for a specific year shows the file containing the data of th
 [source,console]
 ----
 $ rclone lsl :s3:demo/data/earthquakes
+----
+
+`size` totals the segments up, once the whole data set has been ingested:
+
+[source,console]
+----
+$ rclone size :s3:demo/data/earthquakes
+Total objects: 73
+Total size: 201.537 MiB (211326832 Byte)
 ----
 
 == Summary
