@@ -10,9 +10,16 @@
 
 Install this demo on an existing Kubernetes cluster:
 
+[NOTE]
+====
+The namespace `nifi-kafka-druid-water-level-data` will be assumed in this guide.
+This is the default namespace used by `stackablectl` for this demo, so the `-n` argument can be omitted.
+It will be created if it doesn't exist.
+====
+
 [source,console]
 ----
-$ stackablectl demo install nifi-kafka-druid-water-level-data
+$ stackablectl demo install nifi-kafka-druid-water-level-data -n nifi-kafka-druid-water-level-data
 ----
 
 [#system-requirements]
@@ -59,25 +66,25 @@ To list the installed Stackable services run the following command:
 
 [source,console]
 ----
-$ stackablectl stacklet list
+$ stackablectl stacklet list -n nifi-kafka-druid-water-level-data
 
-┌───────────┬───────────────┬───────────┬─────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
-│ PRODUCT   ┆ NAME          ┆ NAMESPACE ┆ ENDPOINTS                                                                                   ┆ CONDITIONS                      │
-╞═══════════╪═══════════════╪═══════════╪═════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
-│ druid     ┆ druid         ┆ default   ┆ broker-https                                https://172.19.0.3:32165                        ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ coordinator-https                           https://172.19.0.6:31287                        ┆                                 │
-│           ┆               ┆           ┆ router-https                                https://172.19.0.3:31965                        ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ kafka     ┆ kafka         ┆ default   ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.3:31041                                ┆ Available, Reconciling, Running │
-│           ┆               ┆           ┆ broker-default-0-listener-broker-metrics    172.19.0.3:31503                                ┆                                 │
-│           ┆               ┆           ┆ broker-default-bootstrap-kafka-tls          172.19.0.3:30793                                ┆                                 │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ nifi      ┆ nifi          ┆ default   ┆ node-https                                  https://172.19.0.6:32038                        ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ superset  ┆ superset      ┆ default   ┆ node-http                                   http://172.19.0.3:30435                         ┆ Available, Reconciling, Running │
-├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
-│ zookeeper ┆ zookeeper     ┆ default   ┆ server-zk                                   zookeeper-server.default.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
-└───────────┴───────────────┴───────────┴─────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
+┌───────────┬───────────┬───────────────────────────────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┬─────────────────────────────────┐
+│ PRODUCT   │ NAME      │ NAMESPACE                         │ ENDPOINTS                                                                                                             │ CONDITIONS                      │
+╞═══════════╪═══════════╪═══════════════════════════════════╪═══════════════════════════════════════════════════════════════════════════════════════════════════════════════════════╪═════════════════════════════════╡
+│ druid     ┆ druid     ┆ nifi-kafka-druid-water-level-data ┆ broker-https                                https://172.19.0.3:32165                                                  ┆ Available, Reconciling, Running │
+│           ┆           ┆                                   ┆ coordinator-https                           https://172.19.0.6:31287                                                  ┆                                 │
+│           ┆           ┆                                   ┆ router-https                                https://172.19.0.3:31965                                                  ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ kafka     ┆ kafka     ┆ nifi-kafka-druid-water-level-data ┆ broker-default-0-listener-broker-kafka-tls  172.19.0.3:31041                                                          ┆ Available, Reconciling, Running │
+│           ┆           ┆                                   ┆ broker-default-0-listener-broker-metrics    172.19.0.3:31503                                                          ┆                                 │
+│           ┆           ┆                                   ┆ broker-default-bootstrap-kafka-tls          172.19.0.3:30793                                                          ┆                                 │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ nifi      ┆ nifi      ┆ nifi-kafka-druid-water-level-data ┆ node-https                                  https://172.19.0.6:32038                                                  ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ superset  ┆ superset  ┆ nifi-kafka-druid-water-level-data ┆ node-http                                   http://172.19.0.3:30435                                                   ┆ Available, Reconciling, Running │
+├╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┼╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌╌┤
+│ zookeeper ┆ zookeeper ┆ nifi-kafka-druid-water-level-data ┆ server-zk                                   zookeeper-server.nifi-kafka-druid-water-level-data.svc.cluster.local:2282 ┆ Available, Reconciling, Running │
+└───────────┴───────────┴───────────────────────────────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┴─────────────────────────────────┘
 
 ----
 
@@ -102,12 +109,12 @@ You can execute a command on the Kafka broker to list the available topics as fo
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-water-level-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-topics.sh \
 --describe \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-water-level-data.svc.cluster.local:9093 \
 --command-config /stackable/config/client.properties
-...
 Topic: measurements     TopicId: w9qYb3GaTvCMZj4G8pkPPQ PartitionCount: 8       ReplicationFactor: 1    Configs: min.insync.replicas=1,segment.bytes=100000000,retention.bytes=900000000
         Topic: measurements     Partition: 0    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
         Topic: measurements     Partition: 1    Leader: 1243966388      Replicas: 1243966388    Isr: 1243966388 Elr:    LastKnownElr:
@@ -138,10 +145,11 @@ print via the `--max-messages` parameter.
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-water-level-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-console-consumer.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
---consumer.config /stackable/config/client.properties \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-water-level-data.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
 --topic stations \
 --offset earliest \
 --partition 0 \
@@ -184,10 +192,11 @@ Below is an example of the output of two records:
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-water-level-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-console-consumer.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
---consumer.config /stackable/config/client.properties \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-water-level-data.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
 --topic measurements \
 --offset earliest \
 --partition 0 \
@@ -255,12 +264,12 @@ It prints the current offset for each partition, which tells you how many record
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-water-level-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-get-offsets.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-water-level-data.svc.cluster.local:9093 \
 --command-config /stackable/config/client.properties \
 --topic measurements
-...
 measurements:0:1366665
 measurements:1:1364930
 measurements:2:1395607
@@ -278,15 +287,15 @@ To inspect the last produced records, use the following command. Here, we consum
 
 [source,console]
 ----
-$ kubectl exec kafka-broker-default-0 -c kafka -- \
+$ kubectl exec -n nifi-kafka-druid-water-level-data kafka-broker-default-0 -c kafka -- \
+env KAFKA_LOG4J_OPTS=-Dlog4j2.configurationFile=/stackable/kafka/config/tools-log4j2.yaml \
 /stackable/kafka/bin/kafka-console-consumer.sh \
---bootstrap-server kafka-broker-default-headless.default.svc.cluster.local:9093 \
---consumer.config /stackable/config/client.properties \
+--bootstrap-server kafka-broker-default-headless.nifi-kafka-druid-water-level-data.svc.cluster.local:9093 \
+--command-config /stackable/config/client.properties \
 --topic measurements \
 --offset latest \
 --partition 0 \
 --max-messages 3
-...
 {"timestamp":"2025-10-21T11:00:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
 {"timestamp":"2025-10-21T11:15:00+02:00","value":369.54,"station_uuid":"5cdc6555-87d7-4fcd-834d-cbbe24c9d08b"}
 {"timestamp":"2025-10-21T11:00:00+02:00","value":8.0,"station_uuid":"7deedc21-2878-40cc-ab47-f6da0d9002f1"}
@@ -602,6 +611,13 @@ Opening up a prefix for a specific day shows the file containing that day's data
 [source,console]
 ----
 $ rclone lsl :s3:demo/data/measurements
+----
+
+`size` totals the segments up:
+
+[source,console]
+----
+$ rclone size :s3:demo/data/measurements
 ----
 
 == Summary

@@ -31,7 +31,7 @@ spec:
                   name: region-1
                 accessStyle: Path
                 credentials:
-                  secretClass: druid-s3-credentials
+                  secretClass: s3-credentials
                 tls:
                   verification:
                     server:
@@ -44,6 +44,11 @@ spec:
     configOverrides: &configOverrides
       runtime.properties:
         druid.server.http.enforceStrictSNIHostChecking: "false"
+        # Druid grants the bucket owner full control on every pushed segment,
+        # which means a GetBucketAcl call. Garage returns no owner in that
+        # response, so S3DataSegmentPusher dies with a NullPointerException and
+        # no segment ever reaches deep storage.
+        druid.storage.disableAcl: "true"
     roleGroups:
       default:
         replicas: 1
@@ -101,7 +106,7 @@ spec:
 apiVersion: secrets.stackable.tech/v1alpha1
 kind: SecretClass
 metadata:
-  name: druid-s3-credentials
+  name: s3-credentials
 spec:
   backend:
     k8sSearch:
@@ -111,9 +116,9 @@ spec:
 apiVersion: v1
 kind: Secret
 metadata:
-  name: druid-s3-credentials
+  name: s3-credentials
   labels:
-    secrets.stackable.tech/class: druid-s3-credentials
+    secrets.stackable.tech/class: s3-credentials
 stringData:
   accessKey: GK31c0ffee31c0ffee31c0ffee
   secretKey: deadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeefdeadbeef
