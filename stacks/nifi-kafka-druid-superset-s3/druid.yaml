@@ -44,6 +44,11 @@ spec:
     configOverrides: &configOverrides
       runtime.properties:
         druid.server.http.enforceStrictSNIHostChecking: "false"
+        # Druid grants the bucket owner full control on every pushed segment,
+        # which means a GetBucketAcl call. Garage returns no owner in that
+        # response, so S3DataSegmentPusher dies with a NullPointerException and
+        # no segment ever reaches deep storage.
+        druid.storage.disableAcl: "true"
     roleGroups:
       default:
         replicas: 1
