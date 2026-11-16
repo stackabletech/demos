@@ -31,7 +31,7 @@ spec:
                   name: region-1
                 accessStyle: Path
                 credentials:
-                   secretClass: s3-credentials
+                  secretClass: s3-credentials
                 tls:
                   verification:
                     server:
