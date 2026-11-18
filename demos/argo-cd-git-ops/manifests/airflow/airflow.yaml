@@ -28,7 +28,7 @@ spec:
     # the release branch when one is cut.
     dagsGitSync:
       - repo: https://github.com/stackabletech/demos/
-        branch: main  # release-ref: branch
+        branch: release-26.11  # release-ref: branch
         gitFolder: "demos/argo-cd-git-ops/dags"
         depth: 1
         # Fetch and check out only the DAG folder (see git-sync-sparse-checkout.yaml).
