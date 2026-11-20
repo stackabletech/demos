@@ -28,7 +28,7 @@ spec:
               kubectl wait --for=condition=Ready pod/nifi-node-default-0 --timeout=30m -n {{ NAMESPACE }}
       containers:
         - name: create-nifi-ingestion-job
-          image: oci.stackable.tech/sdp/testing-tools/nifi:0.3.0-stackable26.11.0
+          image: oci.stackable.tech/sdp/testing-tools/nifi:0.4.0-stackable26.11.0
           command:
             - bash
             - -euo
