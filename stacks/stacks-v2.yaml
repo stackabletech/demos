@@ -104,7 +104,7 @@ stacks:
         default: 3.8.0
       - name: stackableReleaseVersion
         description: The Stackable release to be used for the OpenSearch Dashboards image tag
-        default: 0.0.0-dev
+        default: 26.11.0
   observability:
     description: >-
       An observability stack with auto-injection of the opentelemetry-collector sidecar to receive traces/logs/metrics via OTLP, and send them to Jaeger/Tempo/Loki.
@@ -696,7 +696,7 @@ stacks:
         default: 3.8.0
       - name: stackableReleaseVersion
         description: The Stackable release to be used for the OpenSearch Dashboards image tag
-        default: 0.0.0-dev
+        default: 26.11.0
       - name: jupyterLabToken
         description: Token for JupyterLab UI access
         default: adminadmin
