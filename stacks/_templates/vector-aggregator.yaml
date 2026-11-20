@@ -65,7 +65,7 @@ options:
     # If Vector wrote log events before this index template existed, then OpenSearch would
     # create plain indices instead of data streams.
     - name: wait-for-index-template
-      image: oci.stackable.tech/sdp/testing-tools:0.3.0-stackable0.0.0-dev
+      image: oci.stackable.tech/sdp/testing-tools:0.4.0-stackable0.0.0-dev
       env:
         - name: OPENSEARCH_HOSTS
           valueFrom:
