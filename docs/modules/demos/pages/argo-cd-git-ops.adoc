@@ -302,7 +302,10 @@ Its credentials are synced from Git as a sealed secret and unsealed into the `s3
 
 [source,console]
 ----
-$ export S3_ENDPOINT="https://$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}'):$(kubectl --namespace garage get service garage -o jsonpath='{.spec.ports[0].nodePort}')"
+$ NODE_IP="$(kubectl get nodes -o jsonpath='{.items[0].status.addresses[?(@.type=="InternalIP")].address}' | cut -d' ' -f1)" # a dual-stack node reports several
+$ case "$NODE_IP" in *:*) NODE_IP="[$NODE_IP]";; esac # an IPv6 address needs brackets in a URL
+$ NODE_PORT="$(kubectl --namespace garage get service garage -o jsonpath='{.spec.ports[0].nodePort}')"
+$ export S3_ENDPOINT="https://$NODE_IP:$NODE_PORT"
 $ export S3_ACCESS_KEY="$(kubectl --namespace garage get secret s3-credentials -o jsonpath='{.data.accessKey}' | base64 -d)"
 $ export S3_SECRET_KEY="$(kubectl --namespace garage get secret s3-credentials -o jsonpath='{.data.secretKey}' | base64 -d)"
 ----
