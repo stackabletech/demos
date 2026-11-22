@@ -16,12 +16,12 @@ demos:
       # projects
       ################################
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/projects/airflow.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/projects/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/projects/garage.yaml
       ################################
       # prerequisites
       ################################
       - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/airflow-postgres.yaml
-      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/minio.yaml
+      - plainYaml: https://raw.githubusercontent.com/stackabletech/demos/main/demos/argo-cd-git-ops/applications/garage.yaml
       ################################
       # products
       ################################
