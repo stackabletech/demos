@@ -106,7 +106,7 @@ data:
         files={
             'file': '/tmp/flow/IngestDataLakeIcebergTrinoSpark.json'
         },
-        auth_settings=['tokenAuth'])
+        auth_settings=['bearerAuth'])
 
     # Scheduling the `Kafka3ConnectionService` fails, if it is started before `StandardRestrictedSSLContextService`, since it depends on it
     # To work around this, we try to schedule the controllers multiple times
