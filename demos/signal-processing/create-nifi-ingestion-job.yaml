@@ -119,7 +119,7 @@ data:
         files={
             'file': filename
         },
-        auth_settings=['tokenAuth'])
+        auth_settings=['bearerAuth'])
 
     # Update the controller services with the correct password
     for controller in list_all_controllers(pg_id):
