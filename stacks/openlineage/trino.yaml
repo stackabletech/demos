@@ -1,0 +1,122 @@
+# Trino with the OpenLineage event listener enabled via the operator's native
+# `spec.clusterConfig.lineage` field (no configOverrides/podOverrides needed). The operator renders
+# `event-listener.properties` on the coordinator and wires up the TLS trust for the backend.
+# The `openlineage` event listener plugin itself ships in the Trino distribution since Trino 450.
+#
+# Trino here has two catalogs: `tpch` as the read-only source, and an Iceberg `lakehouse` catalog
+# (on the shared hive-iceberg metastore + Garage) that the demo DAG writes its ELT output into and
+# that Spark later reads/extends - giving cross-engine lineage over shared Iceberg tables.
+#
+# For now, on K8s 1.35, TrinoCatalogs need to be deployed before the TrinoCluster.
+# See: https://github.com/stackabletech/trino-operator/issues/854
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: tpch
+  labels:
+    trino: trino
+spec:
+  connector:
+    tpch: {}
+---
+# Iceberg catalog backed by the shared `hive-iceberg` metastore and the Garage `demo` bucket.
+# The demo DAG writes its ELT output here as Iceberg tables; the Spark job then reads one of them and
+# writes a derived table back - both engines pointing at this same catalog + metastore + bucket.
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCatalog
+metadata:
+  name: lakehouse
+  labels:
+    trino: trino
+spec:
+  connector:
+    iceberg:
+      metastore:
+        configMap: hive-iceberg
+      s3:
+        reference: garage
+---
+apiVersion: trino.stackable.tech/v1alpha1
+kind: TrinoCluster
+metadata:
+  name: trino
+spec:
+  image:
+    productVersion: "481"
+    pullPolicy: IfNotPresent
+  clusterConfig:
+    catalogLabelSelector:
+      matchLabels:
+        trino: trino
+    authentication:
+      - authenticationClass: trino-users
+    lineage:
+      connection:
+        inline:
+          http:
+            # Events are pushed to Marquez over TLS (terminated by the marquez-tls-proxy nginx in
+            # front of the API - see stacks/openlineage/marquez.yaml). Use the FQDN, not the short
+            # name `marquez`: the secret-operator cert's SAN is the full service DNS name, so TLS
+            # hostname verification only passes on the FQDN.
+            host: marquez.{{ NAMESPACE }}.svc.cluster.local
+            port: 5000
+            tls:
+              verification:
+                server:
+                  caCert:
+                    # The `tls` SecretClass CA also signs Marquez's certificate.
+                    secretClass: tls
+      # Explicit, colon-free job namespace. Without it Marquez's NodeId parser cannot split job
+      # NodeIds when the namespace looks like a URI (Trino query IDs start with a digit, so the
+      # `:<queryId>` delimiter is mistaken for a `host:port` colon) and 500s when a job is opened.
+      namespace: trino-openlineage-demo
+      # `datasetNamespaceUri` is left at its default, the coordinator Service address
+      # (`https://trino-coordinator:8443`), which is the same dataset namespace Airflow reports
+      # for its Trino connection, so both producers attach to one shared set of dataset nodes.
+    tls:
+      # Static (password) authentication requires TLS. `tls` is the SecretClass that
+      # secret-operator ships out of the box, so nothing extra needs to be defined here.
+      serverSecretClass: tls
+  coordinators:
+    roleConfig:
+      listenerClass: external-stable
+    config:
+      resources:
+        cpu:
+          min: "500m"
+          max: "2"
+        memory:
+          limit: "4Gi"
+    roleGroups:
+      default:
+        replicas: 1
+  workers:
+    config:
+      resources:
+        cpu:
+          min: "1"
+          max: "4"
+        memory:
+          limit: "4Gi"
+    roleGroups:
+      default:
+        replicas: 1
+---
+apiVersion: authentication.stackable.tech/v1alpha1
+kind: AuthenticationClass
+metadata:
+  name: trino-users
+spec:
+  provider:
+    static:
+      userCredentialsSecret:
+        name: trino-users
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: trino-users
+type: kubernetes.io/opaque
+stringData:
+  admin: "{{ trinoAdminPassword }}"

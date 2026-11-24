@@ -706,3 +706,60 @@ stacks:
       - name: branch
         description: Git branch to download demo files from
         default: main
+  openlineage:
+    description: >-
+      Stack for the OpenLineage demo: Trino, Airflow and Spark emitting OpenLineage events to Marquez,
+      with a shared Iceberg lakehouse on Garage tying the Trino and Spark lineage together
+    stackableRelease: dev
+    stackableOperators:
+      - commons
+      - listener
+      - secret
+      - hive
+      - trino
+      - spark-k8s
+      - airflow
+    labels:
+      - trino
+      - airflow
+      - spark
+      - openlineage
+      - marquez
+      - data-lineage
+      - iceberg
+      - garage
+      - s3
+    manifests:
+      - helmChart: stacks/_templates/postgresql-airflow.yaml
+      # Metadata DB for the hive-iceberg metastore.
+      - helmChart: stacks/_templates/postgresql-hive-iceberg.yaml
+      # Garage (S3, TLS via nginx sidecar) holding the `demo` bucket that Trino and Spark share. This
+      # demo only writes kilobyte-scale tpch.tiny data, so the 10Gi default is plenty.
+      - plainYaml: stacks/_templates/garage.yaml
+      - plainYaml: stacks/openlineage/s3-connection.yaml
+      - plainYaml: stacks/openlineage/hive-metastore.yaml
+      # Marquez publishes no Helm repo/OCI chart, so its chart is vendored as rendered plain YAML.
+      # See the header of stacks/openlineage/marquez.yaml for provenance and how to regenerate.
+      - plainYaml: stacks/openlineage/marquez.yaml
+      - plainYaml: stacks/openlineage/trino.yaml
+      # PySpark job script the Airflow DAG submits as a SparkApplication.
+      - plainYaml: stacks/openlineage/spark.yaml
+      - plainYaml: stacks/openlineage/airflow.yaml
+    supportedNamespaces: []
+    resourceRequests:
+      cpu: 10600m # ~8.5 cores steady (Trino, Airflow roles, Hive, Garage, Marquez) + ~2 for the Spark job + 100m nginx TLS proxy
+      memory: 22656Mi # measured ~18Gi steady + ~4Gi while the Spark driver/executor run + 64Mi nginx TLS proxy
+      pvc: 40Gi # 10Gi Garage + 3x8Gi PostgreSQL (airflow, hive-iceberg, marquez)
+    parameters:
+      - name: trinoAdminPassword
+        description: Password of the Trino admin user
+        default: adminadmin
+      - name: airflowAdminPassword
+        description: Password of the Airflow admin user
+        default: adminadmin
+      - name: garageBuckets
+        description: Space separated list of S3 buckets to create in Garage
+        default: demo
+      - name: garageStorageSize
+        description: Size of the PersistentVolumeClaim backing the Garage object data
+        default: 10Gi
